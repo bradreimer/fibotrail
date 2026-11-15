@@ -38,7 +38,7 @@
     <path d="M536 292H640" marker-end="url(#arch-arrow)"/>
   </g>
   <text x="176" y="124" text-anchor="middle" font-size="11.5" fill="#4A5A5E">HTTPS</text>
-  <text x="596" y="124" text-anchor="middle" font-size="11" fill="#4A5A5E">read-only key</text>
+  <text x="597" y="124" text-anchor="middle" font-size="11.5" fill="#4A5A5E">read-only key</text>
   <text x="216" y="284" font-size="11.5" fill="#4A5A5E">Database and thumbnails</text>
   <text x="216" y="300" font-size="11.5" fill="#4A5A5E">live in the /data volume</text>
 </svg>
