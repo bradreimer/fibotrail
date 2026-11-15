@@ -68,7 +68,7 @@ permissions:
 | `asset.read` | Search your photos for capture time, place, and GPS |
 | `asset.view` | Fetch thumbnails to show in the app |
 | `asset.statistics` | Read the total photo count, for scan progress |
-| `album.read` (optional) | Not used by version 0.1. You can leave it out |
+| `album.read` | Not used by version 0.1. Later versions read albums, so add it now to avoid making a new key |
 
 No write permission is needed, and Fibotrail never asks for one. It makes exactly four requests to
 Immich: `GET /api/server/version`, `POST /api/search/metadata`, `GET /api/assets/statistics`, and
