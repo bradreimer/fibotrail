@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 
-import { apiGet, type GetResponse } from './client';
+import { ApiError, apiGet, type GetResponse } from './client';
 import type { paths } from './schema';
 
 interface Loaded<T> {
@@ -8,6 +8,8 @@ interface Loaded<T> {
   data: T | null;
   /** Why the request failed, in plain words. */
   error: string | null;
+  /** The status of a failed answer, such as 404, or 0 when the server couldn't be reached. */
+  errorStatus: number | null;
   loading: boolean;
   /** Asks again. A screen calls this from its Try again button. */
   reload: () => void;
@@ -22,10 +24,11 @@ export function useApi<P extends keyof paths & string>(
   actualPath?: string,
   refreshKey?: unknown,
 ): Loaded<GetResponse<P>> {
-  const [state, setState] = useState<{ data: GetResponse<P> | null; error: string | null }>({
-    data: null,
-    error: null,
-  });
+  const [state, setState] = useState<{
+    data: GetResponse<P> | null;
+    error: string | null;
+    errorStatus: number | null;
+  }>({ data: null, error: null, errorStatus: null });
   const [loadedFor, setLoadedFor] = useState<string | null>(null);
   const [attempt, setAttempt] = useState(0);
   const address = path === null ? null : (actualPath ?? path);
@@ -36,7 +39,7 @@ export function useApi<P extends keyof paths & string>(
     apiGet(address as P)
       .then((data) => {
         if (current) {
-          setState({ data, error: null });
+          setState({ data, error: null, errorStatus: null });
           setLoadedFor(address);
         }
       })
@@ -45,6 +48,7 @@ export function useApi<P extends keyof paths & string>(
           setState({
             data: null,
             error: error instanceof Error ? error.message : 'Something went wrong. Try again.',
+            errorStatus: error instanceof ApiError ? error.status : null,
           });
           setLoadedFor(address);
         }
@@ -64,6 +68,7 @@ export function useApi<P extends keyof paths & string>(
   return {
     data: fresh ? state.data : null,
     error: fresh ? state.error : null,
+    errorStatus: fresh ? state.errorStatus : null,
     loading: address !== null && !fresh,
     reload,
   };

@@ -61,6 +61,8 @@ function loadCountries(): Promise<GeoJSON.FeatureCollection> {
 }
 
 function markerElement(marker: MapMarker, onSelect?: (id: string) => void): HTMLElement {
+  // Only a stop opens its photos. Home and the start of a route are marks, not controls.
+  if (marker.kind !== 'stop') onSelect = undefined;
   const element = document.createElement(onSelect ? 'button' : 'div');
   element.className = `map-marker map-marker--${marker.kind}`;
   element.setAttribute('aria-label', marker.label);
@@ -156,6 +158,8 @@ export default function MapView({
     shown.current = markers.map((marker) => {
       const draggable = marker.id === draggableId;
       const added = new Marker({
+        // A pin stands above its place, so the gold start dot under it stays visible.
+        anchor: marker.kind === 'stop' ? 'bottom' : 'center',
         element: markerElement(
           marker,
           onSelect ? (id) => handlers.current.onSelect?.(id) : undefined,

@@ -53,10 +53,12 @@ At 600 px and wider, the map sits beside the timeline in two columns.
 - Each stop has a 21 px Sunset Coral pin that shows its photo count.
 - Tapping a pin opens a sheet with that stop's photos and its place name.
 - A caption says "Photo route: lines connect the places where you took photos."
-- The base map follows the base map decision in the
-  [roadmap](../roadmap.md#decisions-the-mvp-still-needs). On a phone, the map opens full screen
-  when tapped.
-- A text alternative lists the stops in order, with their place names and photo counts.
+- The base map is the bundled outline of
+  [ADR-009](../adr/ADR-009-a-bundled-natural-earth-base-map.md). A **Full screen** button opens
+  the map over the whole screen, inside the safe areas, and **Close map** returns.
+- A pin stands above its place, so the gold dot of the first stop shows under its pin.
+- A text alternative, **Stops in order**, lists the stops with their place names and photo
+  counts. Each entry opens the same sheet as its pin.
 
 ### Stat tiles
 
@@ -68,8 +70,11 @@ At 600 px and wider, the map sits beside the timeline in two columns.
 | Distance | Sum of the straight lines between consecutive stops, in kilometers |
 | Farthest from home | Greatest distance from home to a stop, in kilometers |
 
-- Each tile shows the number in Fraunces with tabular figures, a label in Inter at 13 px, and an
-  icon.
+- Each tile shows the number in Fraunces at 34 px with tabular figures, a label in Inter at
+  13 px, and an icon. The unit "km" is set at 16 px after the number. The 55 px size of the
+  design document doesn't fit a value such as "4,208 km" in a tile on an iPad, so every width uses
+  34 px.
+- A distance under 10 km has one decimal, such as "4.2 km". Larger ones are whole numbers.
 - When a trip has photos with no position, a line under the tiles gives the count, such as "42
   photos have no location."
 
@@ -78,7 +83,8 @@ At 600 px and wider, the map sits beside the timeline in two columns.
 - Photos are grouped by the local day they were taken, in time order.
 - Each day has a heading with the day number, the date, and the main place, such as "Day 3 · Wed,
   Mar 17 · Orlando".
-- Photos sit in even rows that keep each photo's proportions.
+- Photos sit in even rows that keep each photo's proportions. Every photo in a row has the same
+  height, 110 px, and the row fills its width.
 - Thumbnails load through the thumbnail proxy as they come within one screen of view.
 - Each photo has alt text built from its date and place.
 - A video shows its still frame with a play mark and its length.
@@ -89,7 +95,8 @@ At 600 px and wider, the map sits beside the timeline in two columns.
 - A swipe left or right, or an arrow key, moves to the next or previous photo of the trip.
 - A swipe down, the **Close** button, or the Escape key returns to the page at the same position.
 - The viewer shows the date, the time, the place name, and a small map with a pin when the photo
-  has a position.
+  has a position. The time is the local time where the photo was taken.
+- **Previous** and **Next** buttons do the same as a swipe, and the viewer shows "2 of 500".
 - **Open in Immich** opens the photo in Immich in a new tab. The address is
   `IMMICH_EXTERNAL_URL` followed by `/photos/` and the asset ID. The path was confirmed against
   Immich 3.4.1. See
@@ -100,7 +107,9 @@ At 600 px and wider, the map sits beside the timeline in two columns.
 
 ### Edits
 
-- **Rename** changes the trip name. **Change cover** picks a cover from the trip's photos.
+- **Rename** changes the trip name. **Change cover** picks a cover from the trip's photos. Both
+  are in one sheet, opened by **Rename or change cover** in the header.
+- Renaming a suggested trip doesn't add it. Its status stays as it was.
 - Both are saved as decisions and survive a rescan, per
   [ADR-002](../adr/ADR-002-decisions-are-stored-separately-from-detected-data.md).
 

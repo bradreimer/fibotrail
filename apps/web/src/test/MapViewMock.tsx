@@ -20,7 +20,7 @@ export default function MapViewMock({
           type="button"
           data-kind={marker.kind}
           data-position={`${marker.latitude},${marker.longitude}`}
-          onClick={() => onSelect?.(marker.id)}
+          onClick={() => marker.kind === 'stop' && onSelect?.(marker.id)}
         >
           {marker.label}
         </button>

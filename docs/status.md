@@ -2,10 +2,10 @@
 
 ## Current milestone
 
-MVP step 3c, the trips. Steps 2a, 2b, 3a, and 3b (the skeleton, the scanner, the detector, and
-the inbox) are built. **The gate of step 3a isn't met.** The replay test hasn't run on the real library, because
-it needs a scan of that library and a list of known trips. The inbox and the trip screens are being
-built before the gate, at the maintainer's request to complete every work item. See
+MVP step 3d, the release. Every work item of the MVP is built: steps 2a, 2b, 3a, 3b, and 3c.
+**Two gates aren't met yet.** The gate of step 3a, the replay test on the real library, hasn't
+run. Every UI work item still needs the ADR-007 run-through on a real iPhone. Both need the
+maintainer's library and phone, and are listed under Next. See
 [roadmap.md](roadmap.md#mvp-version-01).
 
 ## Completed
@@ -47,6 +47,10 @@ built before the gate, at the maintainer's request to complete every work item. 
 - [#10](https://github.com/bradreimer/fibotrail/issues/10) The trip library. A grid of trip
   cards with a cover photo, the name, the dates, the day count, and the main destination, newest
   first, in 1, 2, or 3 columns by width, with the loading, empty, and error states.
+- [#11](https://github.com/bradreimer/fibotrail/issues/11) The trip page. The header, the
+  route map with pins and the stop sheet, the five stat tiles, the photo timeline by local day,
+  the photo viewer with swipe, arrow keys, and **Open in Immich**, and **Rename or change
+  cover**.
 
 ## In progress
 
@@ -57,9 +61,13 @@ Nothing is in progress.
 The MVP plan is in [roadmap.md](roadmap.md#mvp-version-01). Its seven specs are in
 [specs/](specs/README.md), with work items [#5](https://github.com/bradreimer/fibotrail/issues/5) through [#11](https://github.com/bradreimer/fibotrail/issues/11).
 
-- Run through the ADR-007 table on a real iPhone, with the app installed to the home screen. The
-  app shell was checked in a desktop browser at phone and iPad sizes only, so this check is still
-  open for [#6](https://github.com/bradreimer/fibotrail/issues/6).
+- Run through the ADR-007 table on a real iPhone, with the app installed to the home screen. Every
+  screen was checked in a desktop browser at phone and iPad sizes only, with made-up touch events
+  for the swipes. This check is still open for
+  [#6](https://github.com/bradreimer/fibotrail/issues/6),
+  [#9](https://github.com/bradreimer/fibotrail/issues/9),
+  [#10](https://github.com/bradreimer/fibotrail/issues/10), and
+  [#11](https://github.com/bradreimer/fibotrail/issues/11).
 - Scan the real library once. The scanner was tested against a stand-in for Immich that answers
   in the shapes the spike recorded, and never against a real Immich server. The criteria "a full
   scan of the maintainer's library finishes" and "the Immich access log shows only requests on

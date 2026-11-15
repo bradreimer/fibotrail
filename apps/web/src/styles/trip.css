@@ -1,0 +1,320 @@
+/* The trip page: header, route map, stat tiles, the photo timeline, and the photo viewer. */
+.trip-page {
+  display: grid;
+  gap: var(--fibo-space-5);
+}
+
+.trip-page__header {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--fibo-radius);
+  background: var(--fibo-mist);
+}
+
+.trip-page__cover {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+}
+
+.trip-page__title {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  padding: var(--fibo-space-6) var(--fibo-space-5) var(--fibo-space-4);
+  background: linear-gradient(to top, var(--fibo-scrim-strong), transparent);
+  color: var(--fibo-on-ocean);
+}
+
+.trip-page__name {
+  font-size: var(--fibo-text-h2);
+}
+
+.trip-page__line {
+  font-variant-numeric: tabular-nums;
+}
+
+.trip-page__edit {
+  position: absolute;
+  top: var(--fibo-space-3);
+  right: var(--fibo-space-3);
+  background: var(--fibo-paper);
+}
+
+.trip-page__body {
+  display: grid;
+  gap: var(--fibo-space-5);
+}
+
+/* At 600 px and wider, the map sits beside the timeline. */
+.app[data-nav='rail'] .trip-page__body,
+.app[data-nav='sidebar'] .trip-page__body {
+  grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+  align-items: start;
+}
+
+.app[data-nav='rail'] .trip-page__map,
+.app[data-nav='sidebar'] .trip-page__map {
+  position: sticky;
+  top: 0;
+}
+
+.trip-page__map {
+  display: grid;
+  gap: var(--fibo-space-3);
+}
+
+.trip-map {
+  position: relative;
+}
+
+.trip-map__toggle {
+  position: absolute;
+  top: var(--fibo-space-3);
+  right: var(--fibo-space-3);
+  background: var(--fibo-paper);
+  color: var(--fibo-teal);
+}
+
+/* Full screen: the map fills the screen inside the safe areas. */
+.trip-map--open {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom)
+    env(safe-area-inset-left);
+  background: var(--fibo-paper);
+}
+
+.trip-map--open .map-frame {
+  height: 100%;
+  aspect-ratio: auto;
+  border-radius: 0;
+}
+
+.trip-map--open .trip-map__toggle {
+  top: calc(env(safe-area-inset-top) + var(--fibo-space-4));
+}
+
+.trip-page__stops summary {
+  display: flex;
+  align-items: center;
+  min-height: var(--fibo-tap);
+  color: var(--fibo-teal);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.trip-page__stops ol {
+  margin: 0;
+  padding-left: var(--fibo-space-5);
+}
+
+.button--link {
+  min-height: var(--fibo-tap);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--fibo-teal);
+  font: inherit;
+  text-align: left;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(calc(var(--fibo-space-7) * 2), 1fr));
+  gap: var(--fibo-space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.stat {
+  display: grid;
+  gap: var(--fibo-space-1);
+  padding: var(--fibo-space-4);
+  border: var(--fibo-border) solid var(--fibo-mist);
+  border-radius: var(--fibo-radius);
+}
+
+.stat__icon {
+  width: var(--fibo-space-5);
+  height: var(--fibo-space-5);
+  color: var(--fibo-teal);
+}
+
+.stat__value {
+  font-family: var(--fibo-font-display);
+  font-size: var(--fibo-text-h2);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+
+.stat__unit {
+  font-family: var(--fibo-font-body);
+  font-size: var(--fibo-text-body);
+}
+
+.stat__label {
+  color: var(--fibo-ink-muted);
+  font-size: var(--fibo-text-caption);
+}
+
+.trip-page__timeline {
+  display: grid;
+  gap: var(--fibo-space-5);
+}
+
+.trip-day {
+  display: grid;
+  gap: var(--fibo-space-3);
+}
+
+.trip-day__heading {
+  font-family: var(--fibo-font-body);
+  font-size: var(--fibo-text-body);
+  font-weight: 700;
+}
+
+/* Even rows: every photo has the same height and keeps its own proportions. */
+.photo-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--fibo-space-1);
+}
+
+.photo-tile {
+  position: relative;
+  flex: 1 0 auto;
+  min-width: var(--fibo-tap);
+  height: calc(var(--fibo-space-7) * 2);
+  max-width: 100%;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  border-radius: var(--fibo-space-2);
+  background: var(--fibo-mist);
+  cursor: pointer;
+}
+
+.photo-tile__image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.photo-tile__video {
+  position: absolute;
+  right: var(--fibo-space-2);
+  bottom: var(--fibo-space-2);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--fibo-space-1);
+  padding: var(--fibo-space-1) var(--fibo-space-2);
+  border-radius: var(--fibo-space-3);
+  background: var(--fibo-scrim-strong);
+  color: var(--fibo-on-ocean);
+  font-size: var(--fibo-text-caption);
+  font-variant-numeric: tabular-nums;
+}
+
+.photo-tile__play {
+  width: var(--fibo-space-4);
+  height: var(--fibo-space-4);
+}
+
+/* The photo viewer fills the screen, inside the safe areas. */
+.viewer {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom)
+    env(safe-area-inset-left);
+  background: var(--fibo-ink);
+  color: var(--fibo-paper);
+  animation: screen-in var(--fibo-dur-base) ease-out;
+}
+
+.viewer__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--fibo-space-3);
+  padding: var(--fibo-space-3);
+}
+
+.viewer__nav {
+  display: flex;
+  gap: var(--fibo-space-2);
+}
+
+.viewer__button {
+  min-width: var(--fibo-tap);
+  min-height: var(--fibo-tap);
+  padding: 0 var(--fibo-space-4);
+  border: var(--fibo-border) solid currentColor;
+  border-radius: var(--fibo-radius);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.viewer__button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.viewer__count {
+  font-variant-numeric: tabular-nums;
+}
+
+.viewer__stage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+  overflow: hidden;
+  touch-action: none;
+}
+
+.viewer__image {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.viewer__details {
+  display: grid;
+  gap: var(--fibo-space-2);
+  justify-items: start;
+  padding: var(--fibo-space-4) var(--fibo-space-5) var(--fibo-space-5);
+}
+
+.viewer__time {
+  font-weight: 600;
+}
+
+.viewer__map {
+  width: calc(var(--fibo-space-7) * 4);
+  max-width: 100%;
+}
+
+.viewer .button--secondary {
+  border-color: var(--fibo-paper);
+  color: var(--fibo-paper);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .viewer {
+    animation: none;
+  }
+}
