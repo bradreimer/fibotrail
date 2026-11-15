@@ -106,3 +106,121 @@ public sealed class ScanRun
     /// <summary>Why the scan failed, in plain words.</summary>
     public string? Message { get; set; }
 }
+
+public enum TripStatus
+{
+    /// <summary>Detected, and waiting for you in the inbox.</summary>
+    Suggested,
+
+    /// <summary>You chose Add trip. The trip is in your library.</summary>
+    Added,
+
+    /// <summary>You chose Not a trip. It stays hidden, however many photos it gains.</summary>
+    Ignored,
+
+    /// <summary>You chose Later. It stays in the inbox, and it's left out of the badge count.</summary>
+    Later,
+}
+
+public enum TripConfidence
+{
+    Low,
+    Medium,
+    High,
+}
+
+/// <summary>
+/// A trip that detection found. Everything here except <see cref="Status"/>, <see cref="Name"/>,
+/// and <see cref="CoverPhotoId"/> is detected data, rebuilt by every detection run. Those three
+/// are copies of your decision, kept here so that a list of trips needs one table. See ADR-002.
+/// </summary>
+public sealed class Trip
+{
+    public int Id { get; set; }
+
+    /// <summary>A hash of the start date and the main place. It lets a rescan recognize the trip.</summary>
+    public required string Fingerprint { get; set; }
+
+    public TripStatus Status { get; set; }
+
+    /// <summary>The name you gave the trip, or the suggested name.</summary>
+    public required string Name { get; set; }
+
+    /// <summary>The name detection suggests, such as "Orlando, March 2027".</summary>
+    public required string SuggestedName { get; set; }
+
+    /// <summary>The cover you chose, or the suggested cover.</summary>
+    public required string CoverPhotoId { get; set; }
+
+    public required string SuggestedCoverPhotoId { get; set; }
+
+    /// <summary>The city with the most photos, or the state or country when no city is known.</summary>
+    public string? MainPlace { get; set; }
+
+    public string? Country { get; set; }
+
+    /// <summary>The local day of the first photo away from home.</summary>
+    public DateOnly StartDate { get; set; }
+
+    public DateOnly EndDate { get; set; }
+
+    public int Days { get; set; }
+
+    public int PhotoCount { get; set; }
+
+    /// <summary>The stops in the order of the route, as JSON. See <see cref="Trips.StoredStop"/>.</summary>
+    public required string StopsJson { get; set; }
+
+    public double DistanceKm { get; set; }
+
+    public double FarthestFromHomeKm { get; set; }
+
+    public TripConfidence Confidence { get; set; }
+
+    public List<TripPhoto> Photos { get; } = [];
+}
+
+/// <summary>One photo of a trip.</summary>
+public sealed class TripPhoto
+{
+    public int TripId { get; set; }
+
+    public required string PhotoId { get; set; }
+
+    /// <summary>The stop where the photo was taken. Null for a photo with no position.</summary>
+    public int? StopIndex { get; set; }
+}
+
+/// <summary>
+/// What you decided about a trip. Detection never changes or deletes a row here, except to follow
+/// a trip whose fingerprint changed. The dates let a decision find its trip again when that happens.
+/// </summary>
+public sealed class Decision
+{
+    public int Id { get; set; }
+
+    public required string Fingerprint { get; set; }
+
+    /// <summary>Added, Ignored, or Later. Null when you only renamed the trip or chose a cover.</summary>
+    public TripStatus? Status { get; set; }
+
+    /// <summary>The name you gave the trip.</summary>
+    public string? Name { get; set; }
+
+    /// <summary>The cover photo you chose.</summary>
+    public string? CoverPhotoId { get; set; }
+
+    public DateOnly StartDate { get; set; }
+
+    public DateOnly EndDate { get; set; }
+
+    public DateTime DecidedAt { get; set; }
+}
+
+/// <summary>One setting, such as the home location.</summary>
+public sealed class Setting
+{
+    public required string Key { get; set; }
+
+    public required string Value { get; set; }
+}

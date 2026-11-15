@@ -1,7 +1,11 @@
+import { useState } from 'react';
+
 import { useScan, type ScanStatus } from '../api/scan';
 import { useSession } from '../api/session';
 import { useApi } from '../api/useApi';
+import { HomeSetup, type SetHomeResponse } from '../home/HomeSetup';
 import { Skeleton } from '../states/Skeleton';
+import { foundText } from './InboxScreen';
 
 const count = new Intl.NumberFormat('en-US');
 const dateTime = new Intl.DateTimeFormat('en-US', { dateStyle: 'medium', timeStyle: 'short' });
@@ -26,6 +30,9 @@ export function SettingsScreen() {
   const session = useSession();
   const scan = useScan();
   const immich = useApi('/api/immich');
+  const home = useApi('/api/home', undefined, scan.status?.state);
+  const [changingHome, setChangingHome] = useState(false);
+  const [homeResult, setHomeResult] = useState<SetHomeResponse | null>(null);
 
   return (
     <div className="settings">
@@ -82,6 +89,48 @@ export function SettingsScreen() {
         {scan.startProblem && <p role="alert">{scan.startProblem}</p>}
         <p className="settings__hint">
           The first scan reads your whole library. Later scans read only what changed.
+        </p>
+      </section>
+
+      <section className="settings__section" aria-labelledby="settings-home">
+        <h2 className="state__title" id="settings-home">
+          Home location
+        </h2>
+        {home.loading && !home.data && <Skeleton count={1} label="Loading your home location" />}
+        {home.error && <p role="alert">{home.error}</p>}
+        {home.data && !changingHome && (
+          <>
+            <p>
+              {home.data.confirmed
+                ? `Home is ${home.data.confirmed.name}.`
+                : home.data.photoCount === 0
+                  ? 'Fibotrail suggests a home location after the first scan.'
+                  : 'No home location is confirmed yet.'}
+            </p>
+            {homeResult && <p role="status">{foundText(homeResult)}</p>}
+            {home.data.photoCount > 0 && (
+              <button
+                type="button"
+                className="button button--secondary"
+                onClick={() => setChangingHome(true)}
+              >
+                {home.data.confirmed ? 'Change' : 'Choose a home location'}
+              </button>
+            )}
+          </>
+        )}
+        {changingHome && (
+          <HomeSetup
+            onConfirmed={(result) => {
+              setHomeResult(result);
+              setChangingHome(false);
+              home.reload();
+            }}
+          />
+        )}
+        <p className="settings__hint">
+          Fibotrail finds trips by how far from home your photos were taken. A new home location
+          looks for every trip again, and your choices stay.
         </p>
       </section>
 

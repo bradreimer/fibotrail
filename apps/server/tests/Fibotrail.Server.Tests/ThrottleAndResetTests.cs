@@ -97,23 +97,6 @@ public class ResetPasswordTests
 {
     private const string NewPassword = "a brand new password";
 
-    private sealed class ScriptedConsole(params string?[] answers) : IConsoleIo
-    {
-        private readonly Queue<string?> _answers = new(answers);
-
-        public List<string> Prompts { get; } = [];
-
-        public List<string> Lines { get; } = [];
-
-        public void WriteLine(string text) => Lines.Add(text);
-
-        public string? ReadSecret(string prompt)
-        {
-            Prompts.Add(prompt);
-            return _answers.Count > 0 ? _answers.Dequeue() : null;
-        }
-    }
-
     /// <summary>Runs the command the way the image does: in its own scope, against the same database file.</summary>
     private static async Task<int> RunAsync(TestApp app, ScriptedConsole console, params string[] arguments)
     {

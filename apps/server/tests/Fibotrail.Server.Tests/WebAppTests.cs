@@ -76,6 +76,23 @@ public class WebAppTests
     }
 
     [Fact]
+    public async Task The_files_of_the_web_app_are_sent_compressed_and_api_answers_are_not()
+    {
+        await using var app = await TestApp.StartAsync();
+        var browser = await app.SignedInBrowserAsync();
+        using var script = new HttpRequestMessage(HttpMethod.Get, "/assets/app-abc123.js");
+        script.Headers.AcceptEncoding.ParseAdd("br");
+        using var session = new HttpRequestMessage(HttpMethod.Get, "/api/session");
+        session.Headers.AcceptEncoding.ParseAdd("br");
+
+        var compressed = await browser.SendAsync(script);
+        var plain = await browser.SendAsync(session);
+
+        Assert.Equal(["br"], compressed.Content.Headers.ContentEncoding);
+        Assert.Empty(plain.Content.Headers.ContentEncoding);
+    }
+
+    [Fact]
     public async Task The_session_route_gives_the_web_app_a_token_that_sign_out_accepts()
     {
         await using var app = await TestApp.StartAsync();

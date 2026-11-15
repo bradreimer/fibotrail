@@ -5,12 +5,14 @@ using Fibotrail.Server.Auth;
 using Fibotrail.Immich;
 using Fibotrail.Server.Data;
 using Fibotrail.Server.Immich;
+using Fibotrail.Server.Trips;
 using Fibotrail.Server.Web;
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -33,6 +35,7 @@ public static partial class ServerApp
         services.AddDbContext<FibotrailDbContext>(options => options.UseSqlite(settings.ConnectionString));
         services.AddScoped<AuthService>();
         services.AddScoped<SignInThrottle>();
+        services.AddScoped<HomeLocation>();
     }
 
     public static WebApplication Create(WebApplicationBuilder builder, ServerSettings settings, Argon2Cost? cost = null)
@@ -47,6 +50,10 @@ public static partial class ServerApp
         services.AddSingleton<ScanService>();
         services.AddScoped<ImmichConnection>();
         services.AddScoped<ThumbnailStore>();
+        services.AddScoped<DetectionService>();
+
+        // When a scan completes, trip detection runs.
+        services.AddScoped<IScanCompletedHandler>(provider => provider.GetRequiredService<DetectionService>());
 
         // Enums travel as words, such as "running", so the web app's types name each value.
         // Numbers travel as numbers only, so the types say "number" and not "number or string".
@@ -54,6 +61,13 @@ public static partial class ServerApp
         {
             options.SerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
             options.SerializerOptions.NumberHandling = JsonNumberHandling.Strict;
+        });
+
+        // The files of the web app are sent compressed. The map outlines shrink from 756 KB to about 200 KB.
+        services.AddResponseCompression(options =>
+        {
+            options.EnableForHttps = true;
+            options.MimeTypes = [.. ResponseCompressionDefaults.MimeTypes, "image/svg+xml", "application/manifest+json"];
         });
 
         // The keys that protect the anti-forgery cookie live in /data, the one writable folder.
@@ -109,6 +123,11 @@ public static partial class ServerApp
 
         app.UseForwardedHeaders();
         app.Use(SecurityHeaders);
+        // API answers aren't compressed. They're small, and a compressed answer that holds a secret
+        // next to text an attacker chose can leak the secret through its length.
+        app.UseWhen(
+            context => !context.Request.Path.StartsWithSegments("/api"),
+            branch => branch.UseResponseCompression());
         app.UseStaticFiles(new StaticFileOptions { OnPrepareResponse = WebApp.SetCacheHeaders });
         app.UseAuthentication();
         app.UseAuthorization();
@@ -281,6 +300,7 @@ public static partial class ServerApp
             .WithName("GetSession");
 
         api.MapImmichRoutes();
+        api.MapHomeRoutes();
 
         app.MapOpenApi();
 

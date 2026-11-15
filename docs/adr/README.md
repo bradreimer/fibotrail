@@ -55,3 +55,5 @@ What becomes easier, what becomes harder, and what must stay true?
 | [ADR-006](ADR-006-one-container-on-the-immich-network.md) | One container on the Immich network | Accepted |
 | [ADR-007](ADR-007-native-ios-feel-through-a-progressive-web-app.md) | Native iOS feel through a progressive web app | Accepted |
 | [ADR-008](ADR-008-a-generated-immich-client-limited-to-allowed-reads.md) | A generated Immich client, limited to allowed reads and tested with recorded responses | Accepted |
+| [ADR-009](ADR-009-a-bundled-natural-earth-base-map.md) | A bundled Natural Earth outline is the base map | Accepted |
+| [ADR-010](ADR-010-stops-and-routes-are-stored-with-the-trip.md) | Stops and routes are stored with the trip, and decisions carry their dates | Accepted |
