@@ -36,14 +36,24 @@ behave like an app, so that browsing my trips feels as comfortable as a native i
 - The UI is a TypeScript, React, and Vite project in `apps/web`, per
   [ADR-004](../adr/ADR-004-technology-stack.md). The server serves the built files.
 - The TypeScript types for the API are generated from the OpenAPI document that the server
-  produces.
+  produces. The document is kept in `apps/web/src/api/openapi.json`. A server test fails when it
+  differs from what the server produces, and a UI check fails when the types differ from it.
+- Every address that isn't a file, an API route, or a sign-in route gets the page of the web app,
+  and needs a session like any other route.
+- The setup and sign-in screens aren't part of the web app. The server sends them as plain HTML,
+  per the [first run and sign-in spec](first-run-and-sign-in.md), so they work before a session
+  exists and without script.
 
 ### Installation
 
 - The app has a web app manifest with the name "Fibotrail", standalone display mode, the brand
   colors, and icons for the iPhone and iPad home screens.
+- iOS shows a launch image in the brand colors while the app opens. Each iPhone and iPad screen
+  size needs its own image, and `apps/web/splash-screens.json` lists the sizes that have one. A
+  device that isn't listed opens with a blank screen for a moment.
 - A service worker caches the app shell, so the first screen appears without waiting for the
-  network.
+  network. It never caches an API answer, a photo, or the sign-in screen. Files with a hash in
+  their names are kept by the browser for a year, and the page itself is checked on each visit.
 - In Safari on an iPhone or iPad, when the app isn't installed, a hint explains **Add to Home
   Screen**. It shows once, and you can dismiss it.
 
@@ -61,13 +71,18 @@ behave like an app, so that browsing my trips feels as comfortable as a native i
 - The active item is Trail Teal with a Golden Gold marker. Each item has an icon and a label.
 - Going back returns to the previous screen at the scroll position you left.
 - The MVP Settings screen shows the Immich connection status, the home location, the **Scan now**
-  button, and **Sign out**. Other specs define each of these.
+  button, and **Sign out**. Other specs define each of these, and each appears on the screen when
+  its spec is built. **Sign out** is there from the start.
+- The header is Deep Ocean in light and dark mode, so the white status bar text of an installed
+  app stays readable.
 
 ### Look
 
 - The design tokens from the
   [design and branding document](../knowledge/design-and-branding.md#design-tokens) live in one
-  CSS file. Colors, spacing, radius, and durations come only from tokens.
+  CSS file, `apps/web/src/styles/tokens.css`. Colors, spacing, radius, type sizes, and durations
+  come only from tokens. A test fails when another style sheet holds a color or a length of its
+  own.
 - The app follows the system light and dark setting by swapping token values.
 - Fraunces and Inter are served from the container.
 - Screen changes take 377 ms, and small transitions take 233 ms. With the system reduce-motion

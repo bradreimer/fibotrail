@@ -1,0 +1,205 @@
+/*
+ * The frame around every screen. The layout follows data-nav, which useNavigationMode sets from
+ * the window width: "tabs" under 600 px, "rail" from 600 px, and "sidebar" from 1024 px.
+ */
+.app {
+  display: grid;
+  height: 100%;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  grid-template-areas: 'header' 'banner' 'main' 'nav';
+}
+
+.app[data-nav='rail'],
+.app[data-nav='sidebar'] {
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-rows: auto auto minmax(0, 1fr);
+  grid-template-areas: 'nav header' 'nav banner' 'nav main';
+}
+
+.app__header {
+  grid-area: header;
+  display: flex;
+  align-items: center;
+  min-height: var(--fibo-tap);
+  padding: calc(env(safe-area-inset-top) + var(--fibo-space-3))
+    calc(env(safe-area-inset-right) + var(--fibo-space-5)) var(--fibo-space-3)
+    calc(env(safe-area-inset-left) + var(--fibo-space-5));
+  background: var(--fibo-ocean);
+  color: var(--fibo-on-ocean);
+}
+
+.app[data-nav='rail'] .app__header,
+.app[data-nav='sidebar'] .app__header {
+  padding-left: var(--fibo-space-5);
+}
+
+.app__title {
+  font-size: var(--fibo-text-h3);
+}
+
+.app__banner {
+  grid-area: banner;
+}
+
+/* The one area that scrolls. */
+.app__main {
+  grid-area: main;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  padding: var(--fibo-space-5) calc(env(safe-area-inset-right) + var(--fibo-space-5))
+    var(--fibo-space-5) calc(env(safe-area-inset-left) + var(--fibo-space-5));
+}
+
+.app[data-nav='rail'] .app__main,
+.app[data-nav='sidebar'] .app__main {
+  padding-left: var(--fibo-space-5);
+  padding-bottom: calc(env(safe-area-inset-bottom) + var(--fibo-space-5));
+}
+
+.screen {
+  animation: screen-in var(--fibo-dur-page) ease-out;
+}
+
+@keyframes screen-in {
+  from {
+    opacity: 0;
+    transform: translateY(var(--fibo-shift));
+  }
+}
+
+/* Navigation: a bottom tab bar, or a sidebar on the left. */
+.nav {
+  grid-area: nav;
+  background: var(--fibo-paper);
+  border-top: var(--fibo-border) solid var(--fibo-mist);
+  padding: 0 env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
+.nav__list {
+  display: flex;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.nav__item {
+  flex: 1;
+}
+
+.nav__link {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--fibo-space-1);
+  min-width: var(--fibo-tap);
+  min-height: calc(var(--fibo-tap) + var(--fibo-space-3));
+  padding: var(--fibo-space-2) var(--fibo-space-3);
+  color: var(--fibo-ink-muted);
+  font-size: var(--fibo-text-caption);
+  font-weight: 500;
+  text-decoration: none;
+  transition: color var(--fibo-dur-base) ease-out;
+}
+
+.nav__icon {
+  width: var(--fibo-space-5);
+  height: var(--fibo-space-5);
+  flex: none;
+}
+
+/* The active item is Trail Teal with a Golden Gold marker. */
+.nav__link[aria-current='page'] {
+  color: var(--fibo-teal);
+  font-weight: 700;
+}
+
+.nav__link[aria-current='page']::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 25%;
+  right: 25%;
+  height: var(--fibo-marker);
+  border-radius: var(--fibo-marker);
+  background: var(--fibo-gold);
+}
+
+.app[data-nav='rail'] .nav,
+.app[data-nav='sidebar'] .nav {
+  border-top: 0;
+  border-right: var(--fibo-border) solid var(--fibo-mist);
+  padding: calc(env(safe-area-inset-top) + var(--fibo-space-4)) 0 env(safe-area-inset-bottom)
+    env(safe-area-inset-left);
+  overflow-y: auto;
+}
+
+.app[data-nav='rail'] .nav__list,
+.app[data-nav='sidebar'] .nav__list {
+  flex-direction: column;
+  gap: var(--fibo-space-2);
+}
+
+.app[data-nav='rail'] .nav__link,
+.app[data-nav='sidebar'] .nav__link {
+  min-height: var(--fibo-tap);
+  padding: var(--fibo-space-3) var(--fibo-space-5);
+}
+
+.app[data-nav='sidebar'] .nav__link {
+  flex-direction: row;
+  justify-content: flex-start;
+  gap: var(--fibo-space-4);
+  min-width: calc(var(--fibo-space-7) * 4);
+  font-size: var(--fibo-text-body);
+}
+
+.app[data-nav='rail'] .nav__link[aria-current='page']::before,
+.app[data-nav='sidebar'] .nav__link[aria-current='page']::before {
+  top: 25%;
+  bottom: 25%;
+  left: 0;
+  right: auto;
+  width: var(--fibo-marker);
+  height: auto;
+}
+
+/* The hint that explains Add to Home Screen. */
+.install-hint {
+  position: fixed;
+  left: calc(env(safe-area-inset-left) + var(--fibo-space-4));
+  right: calc(env(safe-area-inset-right) + var(--fibo-space-4));
+  bottom: calc(env(safe-area-inset-bottom) + var(--fibo-tap) + var(--fibo-space-6));
+  display: flex;
+  align-items: center;
+  gap: var(--fibo-space-4);
+  max-width: calc(var(--fibo-space-7) * 8);
+  margin: 0 auto;
+  padding: var(--fibo-space-4) var(--fibo-space-5);
+  border-radius: var(--fibo-radius);
+  background: var(--fibo-ocean);
+  color: var(--fibo-on-ocean);
+  box-shadow: 0 var(--fibo-space-3) var(--fibo-space-5) var(--fibo-scrim);
+  animation: screen-in var(--fibo-dur-base) ease-out;
+}
+
+.install-hint__text {
+  flex: 1;
+}
+
+.install-hint__close {
+  flex: none;
+  min-width: var(--fibo-tap);
+  min-height: var(--fibo-tap);
+  border: var(--fibo-border) solid var(--fibo-on-ocean);
+  border-radius: var(--fibo-radius);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}

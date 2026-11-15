@@ -166,7 +166,7 @@ public class SignInTests
         await using var app = await TestApp.StartAsync();
         var browser = await app.SignedInBrowserAsync();
         var token = browser.Cookies[SessionCookie.Name];
-        await browser.GetAsync("/");
+        await browser.GetAsync("/api/session", asPage: false);
 
         var response = await browser.PostAsync("/sign-out", []);
         var copied = app.NewBrowser();
@@ -216,7 +216,7 @@ public class SignInTests
     {
         await using var app = await TestApp.StartAsync();
         var browser = await app.SignedInBrowserAsync();
-        await browser.GetAsync("/");
+        await browser.GetAsync("/api/session", asPage: false);
         browser.ForgetCsrfToken();
 
         var signOut = await browser.PostAsync("/sign-out", []);

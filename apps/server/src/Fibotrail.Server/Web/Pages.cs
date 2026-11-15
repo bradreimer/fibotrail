@@ -3,8 +3,8 @@ using System.Text.Encodings.Web;
 namespace Fibotrail.Server.Web;
 
 /// <summary>
-/// The setup and sign-in screens, as plain HTML with no script. They work before the web app in
-/// apps/web exists, and the web app can replace them later.
+/// The setup and sign-in screens, as plain HTML with no script. They're served before a session
+/// exists, so they don't depend on the web app in apps/web.
 /// </summary>
 public static class Pages
 {
@@ -54,15 +54,11 @@ public static class Pages
         </details>
         """);
 
-    public static string Home(string csrfField) => Layout(
+    public static string NotBuilt() => Layout(
         "Fibotrail",
-        $"""
-        <h1>You're signed in</h1>
-        <p>Fibotrail is running. Your trips appear here once the app is installed in this container.</p>
-        <form method="post" action="/sign-out">
-          {csrfField}
-          <button type="submit" class="secondary">Sign out</button>
-        </form>
+        """
+        <h1>The app isn't built yet</h1>
+        <p>The server is running, but it has no web app to show. Run <code>npm run build</code> in <code>apps/web</code>, or use the Docker image, which includes it.</p>
         """);
 
     public static string Expired() => Layout(

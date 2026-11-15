@@ -1,0 +1,49 @@
+{
+  "openapi": "3.1.1",
+  "info": {
+    "title": "Fibotrail API",
+    "version": "v1"
+  },
+  "paths": {
+    "/api/session": {
+      "get": {
+        "tags": [
+          "Fibotrail"
+        ],
+        "operationId": "GetSession",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionInfo"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "SessionInfo": {
+        "required": [
+          "csrfToken"
+        ],
+        "type": "object",
+        "properties": {
+          "csrfToken": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Fibotrail"
+    }
+  ]
+}

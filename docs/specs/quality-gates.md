@@ -58,7 +58,13 @@ When `apps/web` exists, `./scripts/check.sh` must also run, through npm scripts 
 - `npm run format:check` for Prettier.
 - `npm run lint` for ESLint.
 - `npm run typecheck` for the TypeScript compiler.
+- `npm run api:check`, which fails when the generated API types differ from the OpenAPI document
+  in `apps/web/src/api/openapi.json`.
 - `npm test` for Vitest.
+- `npm run build`, so a change that breaks the production build fails before it merges.
+
+The script installs the UI packages with `npm ci` first, so the versions are the ones in
+`package-lock.json`.
 
 ### Tests for new functionality
 

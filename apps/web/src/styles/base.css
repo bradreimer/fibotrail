@@ -1,0 +1,131 @@
+/* Page-level rules, including the iOS behaviors from ADR-007. */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* On iOS, this font follows the text size chosen in Settings. The family is set on body. */
+@supports (font: -apple-system-body) {
+  html {
+    font: -apple-system-body;
+  }
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+/* The page never scrolls, so it can't bounce or pull to refresh. Content areas scroll. */
+html,
+body {
+  margin: 0;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+body {
+  position: fixed;
+  inset: 0;
+  background: var(--fibo-paper);
+  color: var(--fibo-ink);
+  font-family: var(--fibo-font-body);
+  font-size: var(--fibo-text-body);
+  line-height: 1.5;
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  font-family: var(--fibo-font-display);
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+h2 {
+  font-size: var(--fibo-text-h2);
+}
+
+h3 {
+  font-size: var(--fibo-text-h3);
+}
+
+p {
+  margin: 0;
+}
+
+a {
+  color: var(--fibo-teal);
+}
+
+/* Text in controls isn't selectable, and a long press shows no callout. */
+button,
+a,
+label,
+summary,
+nav,
+[role='tab'] {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* Inputs use at least 16 px, so Safari doesn't zoom the page on focus. */
+input,
+select,
+textarea {
+  font-family: inherit;
+  font-size: var(--fibo-text-input);
+}
+
+:focus-visible {
+  outline: var(--fibo-marker) solid var(--fibo-gold);
+  outline-offset: var(--fibo-space-1);
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--fibo-tap);
+  min-height: var(--fibo-tap);
+  padding: var(--fibo-space-3) var(--fibo-space-5);
+  border: var(--fibo-border) solid var(--fibo-teal);
+  border-radius: var(--fibo-radius);
+  background: var(--fibo-teal);
+  color: var(--fibo-on-teal);
+  font: inherit;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: opacity var(--fibo-dur-fast) ease-out;
+}
+
+.button:active {
+  opacity: 0.8;
+}
+
+.button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.button--secondary {
+  background: transparent;
+  color: var(--fibo-teal);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

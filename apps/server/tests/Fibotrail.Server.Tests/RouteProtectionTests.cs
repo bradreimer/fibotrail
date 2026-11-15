@@ -1,16 +1,24 @@
 using System.Net;
+using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Fibotrail.Server.Tests;
 
-public class RouteProtectionTests
+public partial class RouteProtectionTests
 {
+    /// <summary>
+    /// Every route with its methods. A parameter such as {id} is filled with "1", so the address
+    /// can be requested. The web app fallback has no method list, and has its own tests.
+    /// </summary>
     private static List<(string Method, string Path)> Routes(TestApp app) =>
         [.. app.App.Services.GetRequiredService<EndpointDataSource>().Endpoints
             .OfType<RouteEndpoint>()
-            .SelectMany(endpoint => endpoint.Metadata.GetMetadata<HttpMethodMetadata>()!.HttpMethods
-                .Select(method => (method, endpoint.RoutePattern.RawText!)))];
+            .SelectMany(endpoint => (endpoint.Metadata.GetMetadata<HttpMethodMetadata>()?.HttpMethods ?? [])
+                .Select(method => (method, RouteParameter().Replace(endpoint.RoutePattern.RawText!, "1"))))];
+
+    [GeneratedRegex(@"\{[^}]+\}")]
+    private static partial Regex RouteParameter();
 
     [Fact]
     public async Task Every_route_except_the_public_ones_answers_401_with_no_session()
@@ -21,7 +29,7 @@ public class RouteProtectionTests
 
         // The list must hold the routes this test is about, or the test proves nothing.
         Assert.Contains(("GET", "/api/session"), guarded);
-        Assert.Contains(("GET", "/"), guarded);
+        Assert.Contains(("GET", "/openapi/1.json"), guarded);
         Assert.Contains(("POST", "/sign-out"), guarded);
 
         foreach (var (method, path) in guarded)

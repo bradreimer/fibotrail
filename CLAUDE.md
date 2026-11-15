@@ -105,9 +105,12 @@ that came later wins.
 ./scripts/check.sh
 ```
 
-This runs `npm test`, which runs the organization tests. CI runs the same script on every pull
-request. When the first backend or UI code arrives, add the steps that
-[docs/specs/quality-gates.md](docs/specs/quality-gates.md) requires. A test fails until you do.
+This runs the organization tests, the .NET checks in `apps/server`, and the UI checks in
+`apps/web`, as [docs/specs/quality-gates.md](docs/specs/quality-gates.md) requires. CI runs the
+same script on every pull request.
+
+After you change an API route, update the OpenAPI document and the TypeScript types. The steps
+are in [docs/knowledge/web-app-development.md](docs/knowledge/web-app-development.md).
 
 ## Key docs map
 

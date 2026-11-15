@@ -54,6 +54,19 @@ public static partial class ServerApp
             options.Cookie.SameSite = SameSiteMode.Strict;
         });
 
+        // The OpenAPI document is the source of the TypeScript types in apps/web.
+        // It lists the JSON routes under /api only. The HTML screens aren't part of the API.
+        services.AddOpenApi(options =>
+        {
+            options.ShouldInclude = description => description.RelativePath?.StartsWith("api/", StringComparison.Ordinal) == true;
+            options.AddDocumentTransformer((document, _, _) =>
+            {
+                document.Info = new() { Title = "Fibotrail API", Version = "v1" };
+                document.Servers = [];
+                return Task.CompletedTask;
+            });
+        });
+
         services.AddAuthentication(SessionAuthenticationHandler.SchemeName)
             .AddScheme<AuthenticationSchemeOptions, SessionAuthenticationHandler>(SessionAuthenticationHandler.SchemeName, null);
 
@@ -76,7 +89,7 @@ public static partial class ServerApp
 
         app.UseForwardedHeaders();
         app.Use(SecurityHeaders);
-        app.UseStaticFiles();
+        app.UseStaticFiles(new StaticFileOptions { OnPrepareResponse = WebApp.SetCacheHeaders });
         app.UseAuthentication();
         app.UseAuthorization();
         app.Use(RejectForgedRequests);
@@ -200,11 +213,19 @@ public static partial class ServerApp
             return Results.Redirect("/sign-in");
         });
 
-        // A placeholder until the web app in apps/web is served from here.
-        app.MapGet("/", (HttpContext context, IAntiforgery antiforgery) =>
-            Html(Pages.Home(CsrfField(context, antiforgery))));
+        var api = app.MapGroup("/api").WithTags("Fibotrail");
 
-        app.MapGet("/api/session", () => Results.Json(new { signedIn = true }));
+        api.MapGet("/session", (HttpContext context, IAntiforgery antiforgery) =>
+            TypedResults.Ok(new SessionInfo(antiforgery.GetAndStoreTokens(context).RequestToken ?? string.Empty)))
+            .WithName("GetSession");
+
+        app.MapOpenApi();
+
+        // Every other page address belongs to the web app, which does its own routing.
+        app.MapFallback("{*path:nonfile}", (HttpContext context, IWebHostEnvironment environment) =>
+            HttpMethods.IsGet(context.Request.Method) && !context.Request.Path.StartsWithSegments("/api")
+                ? WebApp.Shell(environment)
+                : Results.NotFound());
     }
 
     private static string CsrfField(HttpContext context, IAntiforgery antiforgery)
