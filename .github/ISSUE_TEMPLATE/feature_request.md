@@ -2,7 +2,9 @@
 name: Feature Request
 about: Propose a new capability or enhancement that isn't scoped yet
 title: "[Feature]: "
-labels: ["enhancement"]
+labels: enhancement
+assignees: ''
+
 ---
 
 ## Problem

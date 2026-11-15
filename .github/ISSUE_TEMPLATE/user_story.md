@@ -2,7 +2,9 @@
 name: User Story
 about: Scoped, implementation-ready user-facing capability
 title: "[Story]: "
-labels: ["user-story"]
+labels: user-story
+assignees: ''
+
 ---
 
 ## Related spec
