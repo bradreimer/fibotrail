@@ -51,6 +51,7 @@ public static partial class ServerApp
         services.AddScoped<ImmichConnection>();
         services.AddScoped<ThumbnailStore>();
         services.AddScoped<DetectionService>();
+        services.AddScoped<TripDecisions>();
 
         // When a scan completes, trip detection runs.
         services.AddScoped<IScanCompletedHandler>(provider => provider.GetRequiredService<DetectionService>());
@@ -301,6 +302,7 @@ public static partial class ServerApp
 
         api.MapImmichRoutes();
         api.MapHomeRoutes();
+        api.MapInboxRoutes();
 
         app.MapOpenApi();
 

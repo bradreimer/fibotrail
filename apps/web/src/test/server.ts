@@ -26,6 +26,8 @@ const DEFAULTS: Record<string, Answer> = {
     photoCount: 0,
   },
   'GET /api/home': { confirmed: null, suggestion: null, hasPositions: false, photoCount: 0 },
+  'GET /api/inbox': { suggestions: [], ignored: [], count: 0 },
+  'GET /api/inbox/count': { count: 0 },
   'GET /api/immich': { connected: true, version: '3.4.1', message: null, warning: null },
 };
 

@@ -33,6 +33,9 @@ As a person back from a vacation, I want to review each suggested trip and choos
 
 ### Inbox list
 
+- The Inbox screen has two tabs: **Suggestions** and **Ignored**.
+- Before a home location is confirmed, the Inbox shows the home location step of the
+  [trip detection spec](trip-detection.md) in place of the tabs.
 - The inbox lists suggestions with the status "suggested" first, then those with the status
   "later". Within each group, the newest trip comes first.
 - A badge on the Inbox destination shows the count of "suggested" items, such as "1 possible
@@ -46,12 +49,14 @@ As a person back from a vacation, I want to review each suggested trip and choos
 Each card shows:
 
 - A sentence in the voice of the design and branding document, such as "We found a possible trip:
-  Orlando, Mar 15–24. 312 photos."
+  Orlando, Mar 15–24, 2027. 312 photos." The year is always shown, because a library holds trips
+  from many years.
 - The main places: up to three city names, by photo count.
 - A confidence label with an icon and a word: High, Medium, or Low.
 - A strip of up to eight photos, spread evenly across the trip's days.
 - A small route preview: the stops and the lines between them, drawn with the trip page's map
-  styling. It doesn't pan or zoom.
+  styling. It doesn't pan or zoom. It's an SVG drawing with north at the top and no base map,
+  labeled "Photo route".
 - Three buttons: **Add trip** (primary), **Not a trip** (secondary), and **Later** (text).
 
 ### Actions
@@ -64,6 +69,11 @@ Each card shows:
 
 - Every action writes a row to the `decision` table by fingerprint, per
   [ADR-002](../adr/ADR-002-decisions-are-stored-separately-from-detected-data.md).
+- A name has 1 to 100 characters. A cover is one of the trip's photos.
+- When you add a trip with the suggested name or cover unchanged, the decision stores no name or
+  cover, so a later detection run can still improve the suggestion.
+- A card with the status "later" has no **Later** button.
+- A swipe counts when the card moves 96 pixels sideways. A mostly vertical move scrolls the list.
 - On touch screens, a swipe right on a card is **Add trip** and a swipe left is **Not a trip**.
   The buttons are always visible.
 - **Not a trip** is never red. Ignoring is a normal choice.
@@ -97,6 +107,7 @@ Each card shows:
 
 ## Open questions
 
-1. Does the route preview use the bundled outline map? It depends on the base map decision in the
-   [roadmap](../roadmap.md#decisions-the-mvp-still-needs). The recommendation there is a bundled
-   Natural Earth outline, which needs no outside request.
+None. The route preview doesn't use the bundled outline map of
+[ADR-009](../adr/ADR-009-a-bundled-natural-earth-base-map.md). A browser allows about 16 WebGL
+maps on one page, and the inbox can hold more suggestions than that, so the preview is an SVG
+drawing of the stops and the lines.

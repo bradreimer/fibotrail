@@ -116,10 +116,81 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/inbox": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["GetInbox"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/inbox/count": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["GetInboxCount"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/trips/{id}/photos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["GetTripPhotos"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/trips/{id}/decision": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["DecideTrip"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** @enum {unknown} */
+        DecisionAction: "add" | "ignore" | "later" | "restore";
+        DecisionRequest: {
+            action: components["schemas"]["DecisionAction"];
+            name?: null | string;
+            coverPhotoId?: null | string;
+        };
         HomeState: {
             confirmed: null | components["schemas"]["PlaceInfo"];
             suggestion: null | components["schemas"]["HomeSuggestionInfo"];
@@ -142,6 +213,21 @@ export interface components {
             message: null | string;
             warning: null | string;
         };
+        Inbox: {
+            suggestions: components["schemas"]["Suggestion"][];
+            ignored: components["schemas"]["Suggestion"][];
+            /** Format: int32 */
+            count: number;
+        };
+        InboxCount: {
+            /** Format: int32 */
+            count: number;
+        };
+        PhotoInfo: {
+            id: string;
+            alt: string;
+            isVideo: boolean;
+        };
         PlaceInfo: {
             /** Format: double */
             latitude: number;
@@ -151,6 +237,14 @@ export interface components {
         };
         ProblemDetail: {
             detail: string;
+        };
+        RoutePoint: {
+            /** Format: double */
+            latitude: number;
+            /** Format: double */
+            longitude: number;
+            /** Format: int32 */
+            photoCount: number;
         };
         ScanStatus: {
             state: components["schemas"]["ScanStatusState"];
@@ -182,6 +276,28 @@ export interface components {
             /** Format: int32 */
             newSuggestions: number;
         };
+        Suggestion: {
+            /** Format: int32 */
+            id: number;
+            status: components["schemas"]["TripStatus"];
+            name: string;
+            place: null | string;
+            places: string[];
+            /** Format: date */
+            startDate: string;
+            /** Format: date */
+            endDate: string;
+            /** Format: int32 */
+            photoCount: number;
+            confidence: components["schemas"]["TripConfidence"];
+            coverPhotoId: string;
+            strip: components["schemas"]["PhotoInfo"][];
+            route: components["schemas"]["RoutePoint"][];
+        };
+        /** @enum {unknown} */
+        TripConfidence: "low" | "medium" | "high";
+        /** @enum {unknown} */
+        TripStatus: "suggested" | "added" | "ignored" | "later";
     };
     responses: never;
     parameters: never;
@@ -392,6 +508,115 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["PlaceInfo"][];
                 };
+            };
+        };
+    };
+    GetInbox: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Inbox"];
+                };
+            };
+        };
+    };
+    GetInboxCount: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InboxCount"];
+                };
+            };
+        };
+    };
+    GetTripPhotos: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PhotoInfo"][];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    DecideTrip: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DecisionRequest"];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
