@@ -170,6 +170,14 @@ describe('checkIssueTemplate', () => {
     assert.deepEqual(checkIssueTemplate('feature_request.md', template('enhancement', sections)), []);
   });
 
+  it('accepts labels as written by the GitHub template editor', () => {
+    const sections = ['Problem', 'Proposed solution', 'Related spec'];
+    const edited = template('enhancement', sections).replace('["enhancement"]', 'enhancement');
+    assert.deepEqual(checkIssueTemplate('feature_request.md', edited), []);
+    const partial = edited.replace('labels: enhancement', 'labels: enhancement-later');
+    assert.match(checkIssueTemplate('feature_request.md', partial).join(), /labels must include/);
+  });
+
   it('rejects a wrong label, a missing section, and an unknown template', () => {
     assert.match(
       checkIssueTemplate('feature_request.md', template('bug', ['Problem'])).join(),

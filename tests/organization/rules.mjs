@@ -268,7 +268,13 @@ export function checkIssueTemplate(fileName, markdown) {
       problems.push(`front matter needs "${key}"`);
     }
   }
-  if (!frontMatter[1].includes(`"${rule.label}"`)) {
+  // GitHub's template editor writes `labels: bug`. A hand-written list is `labels: ["bug"]`.
+  const labelsLine = frontMatter[1].match(/^labels:(.*)$/m);
+  const labels = (labelsLine ? labelsLine[1] : '')
+    .replace(/[[\]"']/g, '')
+    .split(',')
+    .map((label) => label.trim());
+  if (!labels.includes(rule.label)) {
     problems.push(`front matter labels must include "${rule.label}"`);
   }
   const found = headings(markdown, 2);
