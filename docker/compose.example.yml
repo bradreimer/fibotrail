@@ -1,0 +1,43 @@
+# Runs Fibotrail next to an existing Immich setup.
+#
+# 1. Copy .env.example to .env at the repository root, and fill in IMMICH_API_KEY.
+# 2. Set the network name at the bottom to the network your Immich containers use.
+#    "docker network ls" lists them.
+# 3. Run: docker compose -f docker/compose.example.yml up -d
+#
+# Fibotrail is then at http://<host>:11235. Sign-in needs HTTPS, so point your reverse proxy at
+# that address. On the host itself, http://localhost:11235 also works.
+
+services:
+  fibotrail:
+    image: ghcr.io/bradreimer/fibotrail:latest
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: fibotrail
+    restart: unless-stopped
+    env_file: ../.env
+    ports:
+      # Host port 11235, container port 8080. Change the first number to move Fibotrail.
+      - "11235:8080"
+    volumes:
+      # Everything Fibotrail stores. To back it up, copy this volume.
+      - fibotrail-data:/data
+    networks:
+      - immich
+    # The container runs as a non-root user and can write only to /data and a small /tmp.
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+
+networks:
+  immich:
+    external: true
+    name: immich_default
+
+volumes:
+  fibotrail-data:

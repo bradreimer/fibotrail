@@ -19,7 +19,11 @@ MVP step 2a, the skeleton. The gate of step 1, "Immich fields confirmed", is met
 
 ## In progress
 
-Nothing yet.
+- [#5](https://github.com/bradreimer/fibotrail/issues/5) First run and sign-in. The .NET
+  solution, the SQLite database, Argon2id password setup, sessions, the sign-in delay,
+  `fibotrail reset-password`, the Dockerfile, and an example compose file are built and tested.
+  The setup and sign-in screens are plain HTML for now. The web app in `apps/web`, story
+  [#6](https://github.com/bradreimer/fibotrail/issues/6), replaces them.
 
 ## Next
 

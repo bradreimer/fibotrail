@@ -1,0 +1,179 @@
+using Fibotrail.Server.Cli;
+using Microsoft.AspNetCore.TestHost;
+using Fibotrail.Server.Data;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+
+namespace Fibotrail.Server.Tests;
+
+public class ServerSettingsTests
+{
+    private static IConfiguration Configuration(params (string Name, string? Value)[] values) =>
+        new ConfigurationBuilder()
+            .AddInMemoryCollection(values.ToDictionary(pair => pair.Name, pair => pair.Value))
+            .Build();
+
+    [Fact]
+    public void Complete_settings_load()
+    {
+        var (settings, problems) = ServerSettings.Load(
+            Configuration(("IMMICH_URL", "http://immich_server:2283"), ("IMMICH_API_KEY", "abc")),
+            requireImmich: true);
+
+        Assert.Empty(problems);
+        Assert.Equal(new Uri("http://immich_server:2283"), settings!.ImmichUrl);
+        Assert.Equal("/data", settings.DataDirectory);
+        Assert.Equal("/data/fibotrail.db", settings.DatabasePath);
+    }
+
+    [Theory]
+    [InlineData("IMMICH_URL")]
+    [InlineData("IMMICH_API_KEY")]
+    public void A_missing_required_variable_is_named(string missing)
+    {
+        var values = new[] { ("IMMICH_URL", "http://immich_server:2283"), ("IMMICH_API_KEY", "abc") }
+            .Where(pair => pair.Item1 != missing)
+            .Select(pair => (pair.Item1, (string?)pair.Item2))
+            .ToArray();
+
+        var (settings, problems) = ServerSettings.Load(Configuration(values), requireImmich: true);
+
+        Assert.Null(settings);
+        Assert.Contains(missing, Assert.Single(problems), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void An_empty_key_counts_as_missing()
+    {
+        var (settings, problems) = ServerSettings.Load(
+            Configuration(("IMMICH_URL", "http://immich_server:2283"), ("IMMICH_API_KEY", " ")),
+            requireImmich: true);
+
+        Assert.Null(settings);
+        Assert.Contains("IMMICH_API_KEY", Assert.Single(problems), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void An_address_that_is_not_a_web_address_is_named()
+    {
+        var (settings, problems) = ServerSettings.Load(
+            Configuration(("IMMICH_URL", "immich_server"), ("IMMICH_API_KEY", "abc")),
+            requireImmich: true);
+
+        Assert.Null(settings);
+        Assert.Contains("IMMICH_URL", Assert.Single(problems), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void The_reset_command_does_not_need_the_immich_variables()
+    {
+        var (settings, problems) = ServerSettings.Load(Configuration(("FIBOTRAIL_DATA_DIR", "/tmp/x")), requireImmich: false);
+
+        Assert.Empty(problems);
+        Assert.Equal("/tmp/x", settings!.DataDirectory);
+    }
+
+    [Fact]
+    public void The_text_form_of_the_settings_leaves_out_the_key()
+    {
+        var settings = new ServerSettings("/data", new Uri("http://immich_server:2283"), "secret-key-value");
+
+        Assert.DoesNotContain("secret-key-value", settings.ToString(), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task The_server_exits_and_names_the_variable_when_the_key_is_missing()
+    {
+        using var error = new StringWriter();
+
+        var exitCode = await EntryPoint.RunAsync([], error, configuration =>
+        {
+            configuration.Sources.Clear();
+            configuration.AddInMemoryCollection(new Dictionary<string, string?> { ["IMMICH_URL"] = "http://immich_server:2283" });
+        });
+
+        Assert.Equal(1, exitCode);
+        Assert.Contains("IMMICH_API_KEY", error.ToString(), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task An_unknown_command_is_refused()
+    {
+        using var error = new StringWriter();
+
+        var exitCode = await EntryPoint.RunAsync(["make-coffee"], error);
+
+        Assert.Equal(2, exitCode);
+        Assert.Contains("make-coffee", error.ToString(), StringComparison.Ordinal);
+    }
+}
+
+public class DatabaseTests
+{
+    [Fact]
+    public async Task The_database_is_one_file_in_the_data_folder_in_wal_mode()
+    {
+        await using var app = await TestApp.StartAsync();
+
+        var mode = await app.WithDbAsync(db => db.Database.SqlQueryRaw<string>("PRAGMA journal_mode").ToListAsync());
+
+        Assert.True(File.Exists(app.Settings.DatabasePath));
+        Assert.Equal("wal", Assert.Single(mode));
+    }
+
+    [Fact]
+    public async Task A_new_or_current_database_needs_no_copy()
+    {
+        await using var app = await TestApp.StartAsync();
+
+        var copy = await app.WithDbAsync(db => DatabaseStartup.PrepareAsync(db, app.Settings, app.Time));
+
+        Assert.Null(copy);
+        Assert.Empty(Directory.GetFiles(app.Settings.DataDirectory, "fibotrail-backup-*"));
+    }
+
+    [Fact]
+    public async Task A_copy_is_saved_before_a_migration_changes_an_existing_database()
+    {
+        await using var app = await TestApp.StartAsync();
+        await app.SignedInBrowserAsync();
+
+        // Make the database look like one from an older version: it has a migration history, and
+        // the newest migration isn't in it.
+        var copy = await app.WithDbAsync(async db =>
+        {
+            await db.Database.ExecuteSqlRawAsync(
+                "UPDATE __EFMigrationsHistory SET MigrationId = '00000000000000_Older'");
+            return await DatabaseStartup.SaveCopyIfMigrationPendingAsync(db, app.Settings, app.Time);
+        });
+
+        Assert.NotNull(copy);
+        Assert.Equal(Path.Combine(app.Settings.DataDirectory, "fibotrail-backup-20261115T120000Z.db"), copy);
+        var options = new DbContextOptionsBuilder<FibotrailDbContext>().UseSqlite($"Data Source={copy};Pooling=False").Options;
+        await using var copied = new FibotrailDbContext(options);
+        Assert.Equal(1, await copied.Credentials.CountAsync());
+    }
+}
+
+public class HealthCheckTests
+{
+    [Fact]
+    public async Task Healthz_answers_200_with_no_session()
+    {
+        await using var app = await TestApp.StartAsync();
+
+        var response = await app.NewBrowser().GetAsync("/healthz", asPage: false);
+
+        Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task The_healthcheck_command_reports_a_healthy_and_an_unhealthy_server()
+    {
+        await using var app = await TestApp.StartAsync();
+        using var client = app.App.GetTestClient();
+
+        Assert.Equal(0, await HealthCheckCommand.RunAsync(client, new Uri("http://localhost/healthz")));
+        Assert.Equal(1, await HealthCheckCommand.RunAsync(client, new Uri("http://localhost/no-such-route")));
+    }
+}
