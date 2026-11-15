@@ -39,10 +39,15 @@ on first run, so that my travel history is running next to Immich and only I can
   and holds the ASP.NET Core runtime only, per [ADR-004](../adr/ADR-004-technology-stack.md).
 - The container runs as a non-root user with a read-only root file system. `/data` is the one
   writable volume.
-- The server listens on port 8080 and serves the built UI and the API from the same origin.
+- Inside the container, the server listens on port 8080 and serves the built UI and the API from
+  the same origin.
 - `GET /healthz` returns 200 when the server is up and the database opens. It needs no session.
 - `docker/` holds the Dockerfile and an example compose file that joins the Immich network and
   loads `.env`.
+- The example compose file publishes the container's port 8080 on host port 11235, as
+  `11235:8080`. With the default setup, Fibotrail is at `http://<host>:11235`. The host port is
+  yours to change in the compose file. The Docker health check runs inside the container and
+  uses port 8080.
 
 ### Configuration
 
@@ -92,7 +97,8 @@ on first run, so that my travel history is running next to Immich and only I can
 
 ## Acceptance criteria
 
-- `docker compose up` with a filled-in `.env` starts one container, and `/healthz` returns 200.
+- `docker compose up` with a filled-in `.env` starts one container, and
+  `http://localhost:11235/healthz` returns 200 on the host.
 - With `IMMICH_API_KEY` removed from `.env`, the container exits and the log names
   `IMMICH_API_KEY`.
 - On a new `/data` volume, the first visit shows the setup screen. After setup, a visit with no
