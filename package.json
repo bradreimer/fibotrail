@@ -1,0 +1,14 @@
+{
+  "name": "fibotrail",
+  "version": "0.0.0",
+  "private": true,
+  "description": "A self-hosted travel journal that turns your Immich photo library into trips, maps, and collections.",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "test": "node --test --test-reporter=spec \"tests/**/*.test.mjs\""
+  }
+}
