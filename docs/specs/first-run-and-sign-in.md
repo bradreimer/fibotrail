@@ -47,7 +47,8 @@ on first run, so that my travel history is running next to Immich and only I can
 - The example compose file publishes the container's port 8080 on host port 11235, as
   `11235:8080`. With the default setup, Fibotrail is at `http://<host>:11235`. The host port is
   yours to change in the compose file. The Docker health check runs inside the container and
-  uses port 8080.
+  uses port 8080. The image has no curl or wget, so the check is the server's own
+  `fibotrail healthcheck` command, which requests `/healthz` and exits 0 on success.
 
 ### Configuration
 
@@ -75,6 +76,11 @@ on first run, so that my travel history is running next to Immich and only I can
 
 - When a password is stored and you have no session, every page leads to the sign-in screen.
 - A session is an HttpOnly, Secure, SameSite=Lax cookie. It lasts 30 days from its last use.
+- A browser keeps a Secure cookie only over HTTPS, or on `localhost`. When the setup or sign-in
+  screen is opened over plain HTTP at any other address, it says "Sign-in needs HTTPS. Open
+  Fibotrail through your reverse proxy, at an address that starts with https://."
+- The server believes the `X-Forwarded-For` and `X-Forwarded-Proto` headers only from a proxy on
+  a private network, so the sign-in delay counts the browser's address and not the proxy's.
 - Every request that changes state is protected against cross-site request forgery.
 - After 5 failed sign-in attempts from one address in 15 minutes, each further attempt waits 30
   seconds before it's answered.

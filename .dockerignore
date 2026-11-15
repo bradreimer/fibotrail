@@ -1,0 +1,10 @@
+# Keep the build context small, and keep secrets out of it.
+.env
+.git
+.github
+**/bin
+**/obj
+**/node_modules
+docs
+tests
+apps/server/tests

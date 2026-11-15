@@ -1,0 +1,234 @@
+using System.Net;
+using Fibotrail.Server.Auth;
+using Fibotrail.Server.Data;
+using Fibotrail.Server.Web;
+using Microsoft.AspNetCore.Antiforgery;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+
+namespace Fibotrail.Server;
+
+/// <summary>Builds the web server: services, the request pipeline, and the routes.</summary>
+public static partial class ServerApp
+{
+    /// <summary>The routes that need no session. Static files are also public.</summary>
+    public static readonly IReadOnlyList<string> PublicRoutes = ["/healthz", "/setup", "/sign-in"];
+
+    private static readonly string[] PrivateNetworks = ["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16", "fc00::/7"];
+
+    public static void AddFibotrailCore(this IServiceCollection services, ServerSettings settings, Argon2Cost? cost = null)
+    {
+        services.TryAddSingleton(settings);
+        services.TryAddSingleton(TimeProvider.System);
+        services.TryAddSingleton(new PasswordHasher(cost ?? Argon2Cost.Default));
+        services.TryAddSingleton<ISignInDelay, SignInDelay>();
+        services.AddDbContext<FibotrailDbContext>(options => options.UseSqlite(settings.ConnectionString));
+        services.AddScoped<AuthService>();
+        services.AddScoped<SignInThrottle>();
+    }
+
+    public static WebApplication Create(WebApplicationBuilder builder, ServerSettings settings, Argon2Cost? cost = null)
+    {
+        var services = builder.Services;
+        services.AddFibotrailCore(settings, cost);
+
+        // The keys that protect the anti-forgery cookie live in /data, the one writable folder.
+        services.AddDataProtection()
+            .SetApplicationName("Fibotrail")
+            .PersistKeysToFileSystem(new DirectoryInfo(settings.KeysDirectory));
+
+        services.AddAntiforgery(options =>
+        {
+            options.FormFieldName = "csrf";
+            options.HeaderName = "X-CSRF-Token";
+            options.Cookie.Name = "fibotrail_csrf";
+            options.Cookie.HttpOnly = true;
+
+            // The session cookie is always Secure. This one follows the request, so that over plain
+            // HTTP the sign-in screen still loads and can say that sign-in needs HTTPS.
+            options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+            options.Cookie.SameSite = SameSiteMode.Strict;
+        });
+
+        services.AddAuthentication(SessionAuthenticationHandler.SchemeName)
+            .AddScheme<AuthenticationSchemeOptions, SessionAuthenticationHandler>(SessionAuthenticationHandler.SchemeName, null);
+
+        // Every route needs a session unless it says otherwise.
+        services.AddAuthorizationBuilder()
+            .SetFallbackPolicy(new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build());
+
+        // The reverse proxy tells the server the browser's address and whether it used HTTPS.
+        // Only a proxy on the same machine or on a private network is believed.
+        services.Configure<ForwardedHeadersOptions>(options =>
+        {
+            options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+            foreach (var network in PrivateNetworks)
+            {
+                options.KnownIPNetworks.Add(System.Net.IPNetwork.Parse(network));
+            }
+        });
+
+        var app = builder.Build();
+
+        app.UseForwardedHeaders();
+        app.Use(SecurityHeaders);
+        app.UseStaticFiles();
+        app.UseAuthentication();
+        app.UseAuthorization();
+        app.Use(RejectForgedRequests);
+
+        MapRoutes(app);
+        return app;
+    }
+
+    public static async Task PrepareDatabaseAsync(WebApplication app)
+    {
+        await using var scope = app.Services.CreateAsyncScope();
+        var db = scope.ServiceProvider.GetRequiredService<FibotrailDbContext>();
+        var settings = scope.ServiceProvider.GetRequiredService<ServerSettings>();
+        var time = scope.ServiceProvider.GetRequiredService<TimeProvider>();
+        var backup = await DatabaseStartup.PrepareAsync(db, settings, time);
+        if (backup is not null)
+        {
+            LogBackup(app.Logger, backup);
+        }
+    }
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Saved a copy of the database at {Path} before updating it.")]
+    private static partial void LogBackup(ILogger logger, string path);
+
+    private static Task SecurityHeaders(HttpContext context, RequestDelegate next)
+    {
+        var headers = context.Response.Headers;
+        headers.ContentSecurityPolicy = "default-src 'self'; frame-ancestors 'none'; form-action 'self'; base-uri 'none'";
+        headers.XContentTypeOptions = "nosniff";
+        headers["Referrer-Policy"] = "no-referrer";
+        return next(context);
+    }
+
+    /// <summary>Every request that changes state must carry a valid anti-forgery token.</summary>
+    private static async Task RejectForgedRequests(HttpContext context, RequestDelegate next)
+    {
+        var method = context.Request.Method;
+        var readsOnly = HttpMethods.IsGet(method) || HttpMethods.IsHead(method)
+            || HttpMethods.IsOptions(method) || HttpMethods.IsTrace(method);
+        if (!readsOnly && context.GetEndpoint() is not null)
+        {
+            var antiforgery = context.RequestServices.GetRequiredService<IAntiforgery>();
+            if (!await antiforgery.IsRequestValidAsync(context))
+            {
+                context.Response.StatusCode = StatusCodes.Status400BadRequest;
+                await WriteHtmlAsync(context.Response, Pages.Expired());
+                return;
+            }
+        }
+
+        await next(context);
+    }
+
+    private static void MapRoutes(WebApplication app)
+    {
+        app.MapGet("/healthz", async (FibotrailDbContext db, CancellationToken cancellationToken) =>
+            await db.Database.CanConnectAsync(cancellationToken)
+                ? Results.Text("ok")
+                : Results.Text("The database didn't open.", statusCode: StatusCodes.Status503ServiceUnavailable))
+            .AllowAnonymous();
+
+        app.MapGet("/setup", async (HttpContext context, AuthService auth, IAntiforgery antiforgery) =>
+            await auth.IsPasswordSetAsync(context.RequestAborted)
+                ? Results.Redirect("/sign-in")
+                : Html(Pages.Setup(CsrfField(context, antiforgery), null, IsInsecure(context.Request))))
+            .AllowAnonymous();
+
+        app.MapPost("/setup", async (HttpContext context, AuthService auth, IAntiforgery antiforgery) =>
+        {
+            var form = await context.Request.ReadFormAsync(context.RequestAborted);
+            var change = await auth.SetUpAsync(form["password"], form["confirmation"], context.RequestAborted);
+            switch (change.Outcome)
+            {
+                case SetupOutcome.AlreadySetUp:
+                    // The setup route stops working once a password is stored.
+                    return Results.NotFound();
+                case SetupOutcome.Rejected:
+                    return Html(
+                        Pages.Setup(CsrfField(context, antiforgery), change.Problem, IsInsecure(context.Request)),
+                        StatusCodes.Status400BadRequest);
+                default:
+                    SessionCookie.Write(context.Response, await auth.CreateSessionAsync(context.RequestAborted));
+                    return Results.Redirect("/");
+            }
+        }).AllowAnonymous();
+
+        app.MapGet("/sign-in", async (HttpContext context, AuthService auth, IAntiforgery antiforgery) =>
+            await auth.IsPasswordSetAsync(context.RequestAborted)
+                ? Html(Pages.SignIn(CsrfField(context, antiforgery), null, IsInsecure(context.Request)))
+                : Results.Redirect("/setup"))
+            .AllowAnonymous();
+
+        app.MapPost("/sign-in", async (HttpContext context, AuthService auth, SignInThrottle throttle, IAntiforgery antiforgery) =>
+        {
+            if (!await auth.IsPasswordSetAsync(context.RequestAborted))
+            {
+                return Results.Redirect("/setup");
+            }
+
+            var address = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+            await throttle.WaitIfNeededAsync(address, context.RequestAborted);
+
+            var form = await context.Request.ReadFormAsync(context.RequestAborted);
+            if (!await auth.VerifyPasswordAsync(form["password"], context.RequestAborted))
+            {
+                await throttle.RecordFailureAsync(address, context.RequestAborted);
+                return Html(
+                    Pages.SignIn(CsrfField(context, antiforgery), Pages.WrongPassword, IsInsecure(context.Request)),
+                    StatusCodes.Status401Unauthorized);
+            }
+
+            await throttle.ClearAsync(address, context.RequestAborted);
+            SessionCookie.Write(context.Response, await auth.CreateSessionAsync(context.RequestAborted));
+            return Results.Redirect("/");
+        }).AllowAnonymous();
+
+        app.MapPost("/sign-out", async (HttpContext context, AuthService auth) =>
+        {
+            await auth.EndSessionAsync(context.Request.Cookies[SessionCookie.Name], context.RequestAborted);
+            SessionCookie.Clear(context.Response);
+            return Results.Redirect("/sign-in");
+        });
+
+        // A placeholder until the web app in apps/web is served from here.
+        app.MapGet("/", (HttpContext context, IAntiforgery antiforgery) =>
+            Html(Pages.Home(CsrfField(context, antiforgery))));
+
+        app.MapGet("/api/session", () => Results.Json(new { signedIn = true }));
+    }
+
+    private static string CsrfField(HttpContext context, IAntiforgery antiforgery)
+    {
+        var tokens = antiforgery.GetAndStoreTokens(context);
+        var value = System.Text.Encodings.Web.HtmlEncoder.Default.Encode(tokens.RequestToken ?? string.Empty);
+        return $"<input type=\"hidden\" name=\"{tokens.FormFieldName}\" value=\"{value}\">";
+    }
+
+    /// <summary>
+    /// True when the browser won't keep the Secure session cookie: the request isn't HTTPS and
+    /// isn't to this machine. The screen then says so.
+    /// </summary>
+    private static bool IsInsecure(HttpRequest request) =>
+        !request.IsHttps
+        && !string.Equals(request.Host.Host, "localhost", StringComparison.OrdinalIgnoreCase)
+        && !(IPAddress.TryParse(request.Host.Host, out var address) && IPAddress.IsLoopback(address));
+
+    private static IResult Html(string html, int statusCode = StatusCodes.Status200OK) =>
+        Results.Content(html, "text/html; charset=utf-8", statusCode: statusCode);
+
+    private static Task WriteHtmlAsync(HttpResponse response, string html)
+    {
+        response.ContentType = "text/html; charset=utf-8";
+        return response.WriteAsync(html);
+    }
+}
