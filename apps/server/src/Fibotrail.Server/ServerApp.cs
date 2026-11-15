@@ -303,6 +303,7 @@ public static partial class ServerApp
         api.MapImmichRoutes();
         api.MapHomeRoutes();
         api.MapInboxRoutes();
+        api.MapTripRoutes();
 
         app.MapOpenApi();
 

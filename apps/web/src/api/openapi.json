@@ -352,6 +352,29 @@
           }
         }
       }
+    },
+    "/api/trips": {
+      "get": {
+        "tags": [
+          "Fibotrail"
+        ],
+        "operationId": "GetTrips",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TripSummary"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -780,6 +803,48 @@
           "ignored",
           "later"
         ]
+      },
+      "TripSummary": {
+        "required": [
+          "id",
+          "name",
+          "startDate",
+          "endDate",
+          "days",
+          "place",
+          "coverPhotoId"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "name": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "days": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "place": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "coverPhotoId": {
+            "type": "string"
+          }
+        }
       }
     }
   },

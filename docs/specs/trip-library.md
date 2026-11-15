@@ -45,6 +45,8 @@ and place, so that I can pick one to relive.
 - The card has a 13 px corner radius and no shadow.
 - The whole card is one tap target. Tapping it opens the [trip page](trip-page.md).
 - The cover photo's alt text is the trip name and dates.
+- A screen reader reads the card once, as one label: the name, then the line, such as "Disney
+  with the kids, Mar 15–24, 2027 · 10 days · Orlando".
 - When a cover photo can't load, the card shows a Mist background with the spiral mark.
 
 ### Layout
@@ -56,6 +58,9 @@ and place, so that I can pick one to relive.
 | 1024 px and up | 3 |
 
 - Cover photos load through the thumbnail proxy as their cards come within one screen of view.
+  The browser's own lazy loading does this, so the exact distance is the browser's choice.
+- The column count follows the navigation of the [app shell](app-shell.md), which changes at the
+  same widths.
 - Going back from a trip page returns to the scroll position you left.
 
 ### States
@@ -64,7 +69,7 @@ and place, so that I can pick one to relive.
 | --- | --- |
 | Loading | Skeleton cards in the final layout |
 | Empty, with suggestions waiting | "No trips yet. You have 3 possible trips to review." and a link to the inbox |
-| Empty, with nothing waiting | "No trips yet. Fibotrail is still scanning your library." while a scan runs, or **Scan now** when none runs |
+| Empty, with nothing waiting | "No trips yet. Fibotrail is still scanning your library." while a scan runs, or "No trips yet. Scan your library, and Fibotrail suggests the trips it finds." with **Scan now** when none runs |
 | Error | A plain explanation and **Try again** |
 
 ## Acceptance criteria

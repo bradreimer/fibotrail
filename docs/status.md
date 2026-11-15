@@ -44,6 +44,9 @@ built before the gate, at the maintainer's request to complete every work item. 
   a photo strip and a route preview, **Add trip** with a sheet for the name and the cover,
   **Not a trip**, **Later**, swipe on touch screens, the **Ignored** tab with **Restore**, and
   the badge on the Inbox destination.
+- [#10](https://github.com/bradreimer/fibotrail/issues/10) The trip library. A grid of trip
+  cards with a cover photo, the name, the dates, the day count, and the main destination, newest
+  first, in 1, 2, or 3 columns by width, with the loading, empty, and error states.
 
 ## In progress
 
