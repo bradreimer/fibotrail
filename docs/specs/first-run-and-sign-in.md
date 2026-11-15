@@ -20,6 +20,7 @@ on first run, so that my travel history is running next to Immich and only I can
   `docker compose up`.
 - A missing setting stops the app with a message that names it.
 - One password protects everything except the health check.
+- A forgotten password is fixed from the host in one command, with no email and no data loss.
 
 ## Non-goals
 
@@ -77,6 +78,18 @@ on first run, so that my travel history is running next to Immich and only I can
 - Every route needs a session, except `/healthz`, the setup and sign-in routes, and the static
   files of the UI.
 
+### Password reset
+
+- The image provides a `fibotrail reset-password` command. You run it on the host with
+  `docker exec -it fibotrail fibotrail reset-password`.
+- The command asks for the new password twice and doesn't show what you type. It never takes the
+  password as an argument, so the password doesn't land in the shell history.
+- The same 12-character rule applies. The new password is stored as an Argon2id hash.
+- The command ends every session and clears the sign-in delay.
+- It works while the server runs, and the server needs no restart.
+- It changes nothing but the password and the sessions. Trips and decisions are untouched.
+- The sign-in screen has a **Forgot your password?** link that shows the command.
+
 ## Acceptance criteria
 
 - `docker compose up` with a filled-in `.env` starts one container, and `/healthz` returns 200.
@@ -86,12 +99,13 @@ on first run, so that my travel history is running next to Immich and only I can
   session shows the sign-in screen.
 - A request to an API route with no session returns 401.
 - A sixth failed sign-in attempt within 15 minutes takes at least 30 seconds to answer.
+- After `fibotrail reset-password`, the old password fails, the new one works, and a browser
+  that was signed in is asked to sign in again.
+- The reset command with an 11-character password changes nothing and says why.
 - The database file holds no plain-text password, and no log line holds the Immich key.
 - `./scripts/check.sh` runs the .NET steps from the [quality gates spec](quality-gates.md) and
   passes.
 
 ## Open questions
 
-1. How do you reset a forgotten password? The recommendation is a command run inside the
-   container, such as `docker exec fibotrail fibotrail reset-password`, because it needs access to
-   the host and no email. It isn't part of the MVP unless you want it.
+None.

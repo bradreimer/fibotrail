@@ -55,7 +55,9 @@ behave like an app, so that browsing my trips feels as comfortable as a native i
 | 600 to 1023 px | Left sidebar that collapses to icons | Two columns where a screen defines them |
 | 1024 px and up | Left sidebar with labels | List on the left, detail on the right |
 
-- The MVP destinations are Trips, Inbox, and Settings. See open question 1.
+- The MVP destinations are Trips, Inbox, and Settings, per ADR-007. The four destinations of the
+  design document (Trips, Map, Collections, and Stats) replace them when the Map screen ships, and
+  Inbox and Settings move to the top bar.
 - The active item is Trail Teal with a Golden Gold marker. Each item has an icon and a label.
 - Going back returns to the previous screen at the scroll position you left.
 - The MVP Settings screen shows the Immich connection status, the home location, the **Scan now**
@@ -111,8 +113,4 @@ Shared components provide the four states, and every screen uses them.
 
 ## Open questions
 
-1. Which tabs does the MVP show? ADR-007 and the design document describe four: Trips, Map,
-   Collections, and Stats. Three of those screens don't exist in the MVP. The recommendation is to
-   show Trips, Inbox, and Settings now, and move to the four-tab layout when the Map screen ships.
-   The alternative is four tabs from the start, with a "Coming later" message on three of them.
-   Choosing the recommendation needs a note in ADR-007.
+None.

@@ -28,7 +28,7 @@ them.
 - Scheduled scans. The MVP scans when you select **Scan now**.
 - Trip detection. See [trip-detection.md](trip-detection.md).
 - A settings screen for the Immich address or key. Both come from `.env`.
-- Copies of original photos or videos.
+- Copies of original photos or videos, and video playback. A video plays in Immich.
 
 ## Requirements
 
@@ -63,6 +63,9 @@ them.
 
 ### Scanner
 
+- The scanner reads image assets and video assets. In the MVP specs, "photo" means either one. A
+  video has a capture time and a position like an image, and it counts toward a trip the same way.
+- The `photo` table also stores whether the asset is a video.
 - A scan pages through `POST /api/search/metadata` with `withExif` set to true.
 - For each asset, the `photo` table stores the Immich asset ID, the local capture time, latitude,
   longitude, city, state, country, and Immich's updated time. Nothing else is stored.
@@ -93,7 +96,8 @@ them.
 
 - The browser requests images from Fibotrail, and Fibotrail fetches them from
   `GET /api/assets/{id}/thumbnail` on `IMMICH_URL`.
-- The proxy serves two sizes: a thumbnail for grids and a preview for the photo viewer.
+- The proxy serves two sizes: a thumbnail for grids and a preview for the photo viewer. For a
+  video, both are still frames.
 - The proxy serves only asset IDs that are in the `photo` table, and only to a signed-in session.
 - Fetched images are cached in `/data`. The cache can be deleted at any time and refills on
   demand.
@@ -109,15 +113,14 @@ them.
 - The Immich access log for a full scan shows only requests on the allowed list.
 - The key appears in no log line, no API response, and no file served to the browser.
 - A thumbnail request for an ID that isn't in the `photo` table returns 404.
+- A video taken away from home counts toward the minimum photos of a trip.
 
 ## Open questions
 
-The spike, roadmap step 1, answers the first three.
+The spike, [#12](https://github.com/bradreimer/fibotrail/issues/12), answers all three.
 
 1. Which fields hold the local capture time and its time zone?
 2. Which request parameter returns only assets changed since a given time, and what page size
    works well?
 3. How does a scan learn that a photo was deleted from Immich? The recommendation is a full pass
    that compares IDs, run from a **Rebuild from Immich** button, after the MVP.
-4. Do videos count? The recommendation is yes, because a video has a time and a place like a
-   photo, and the trip page shows its thumbnail.

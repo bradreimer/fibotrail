@@ -81,6 +81,7 @@ At 600 px and wider, the map sits beside the timeline in two columns.
 - Photos sit in even rows that keep each photo's proportions.
 - Thumbnails load through the thumbnail proxy as they come within one screen of view.
 - Each photo has alt text built from its date and place.
+- A video shows its still frame with a play mark and its length.
 
 ### Photo viewer
 
@@ -92,6 +93,8 @@ At 600 px and wider, the map sits beside the timeline in two columns.
 - **Open in Immich** opens the photo in Immich in a new tab. The address is
   `IMMICH_EXTERNAL_URL` followed by `/photos/` and the asset ID.
 - When `IMMICH_EXTERNAL_URL` is empty, **Open in Immich** isn't shown.
+- For a video, the viewer shows the still frame, and the link reads **Play in Immich**. Fibotrail
+  doesn't play video itself.
 
 ### Edits
 
@@ -119,6 +122,7 @@ At 600 px and wider, the map sits beside the timeline in two columns.
 - With `IMMICH_EXTERNAL_URL=https://photos.example.com`, the link for asset `abc` is
   `https://photos.example.com/photos/abc`.
 - With `IMMICH_EXTERNAL_URL` empty, the viewer shows no **Open in Immich** link.
+- A video shows a play mark in the timeline, and the viewer offers **Play in Immich**.
 - After a rename and a rescan, the page shows the new name.
 - With the default base map, the browser's network log shows no request to a host other than
   Fibotrail.
@@ -126,10 +130,7 @@ At 600 px and wider, the map sits beside the timeline in two columns.
 
 ## Open questions
 
-1. Is `/photos/{id}` the right path for a photo in the Immich web app? The spike, roadmap step 1,
+1. Is `/photos/{id}` the right path for a photo in the Immich web app? The spike, [#12](https://github.com/bradreimer/fibotrail/issues/12),
    confirms it against the tested Immich version.
 2. Kilometers or miles? The MVP shows kilometers. A unit setting is a later addition if you want
    one.
-3. How do videos appear in the timeline? If videos are scanned (see
-   [immich-scanning.md](immich-scanning.md)), the recommendation is a thumbnail with a play mark
-   that opens the video in Immich.
