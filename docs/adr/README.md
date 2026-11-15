@@ -50,4 +50,7 @@ What becomes easier, what becomes harder, and what must stay true?
 | [ADR-001](ADR-001-immich-is-read-only.md) | Immich is read-only, and Fibotrail keeps its own database | Accepted |
 | [ADR-002](ADR-002-decisions-are-stored-separately-from-detected-data.md) | Decisions are stored separately from detected data | Accepted |
 | [ADR-003](ADR-003-collections-are-data-files.md) | Collections are data files | Accepted |
-| [ADR-004](ADR-004-technology-stack.md) | Technology stack | Proposed |
+| [ADR-004](ADR-004-technology-stack.md) | C# backend and TypeScript web UI | Accepted |
+| [ADR-005](ADR-005-secrets-come-from-the-environment.md) | Secrets come from the environment, starting with `.env` | Accepted |
+| [ADR-006](ADR-006-one-container-on-the-immich-network.md) | One container on the Immich network | Accepted |
+| [ADR-007](ADR-007-native-ios-feel-through-a-progressive-web-app.md) | Native iOS feel through a progressive web app | Accepted |

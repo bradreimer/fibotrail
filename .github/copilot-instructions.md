@@ -2,6 +2,14 @@
 
 [CLAUDE.md](../CLAUDE.md) is the full guide. This file repeats the rules that matter most.
 
+## Project guidelines
+
+- Follow the seven guidelines in `docs/guidelines.md`.
+- State intention and methodology plainly in every document and design.
+- Backend code is C# on .NET in `apps/server`. UI code is TypeScript in `apps/web`.
+- Secrets come from environment variables, loaded from `.env`. Never commit a secret.
+- New functionality needs a unit test, and every check-in passes formatting and linting.
+
 ## Development workflow
 
 - Follow spec-driven, work-item-driven development.

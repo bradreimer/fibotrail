@@ -1,5 +1,8 @@
 # Development workflow
 
+This document describes the steps from an idea to a release. The rules behind the steps are in
+[guidelines.md](guidelines.md).
+
 ## Flow
 
 Idea → spec → work item → implementation → tests → documentation update → commit → release
@@ -37,11 +40,14 @@ Reference the work item in the commit body, for example `Closes #123`.
 
 ## Testing
 
-Before you commit:
+New functionality comes with a unit test, and every check-in passes the formatting and linting
+checks. Before you commit:
 
 ```bash
 ./scripts/check.sh
 ```
+
+The checks are defined in [specs/quality-gates.md](specs/quality-gates.md).
 
 ## Releases
 

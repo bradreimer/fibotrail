@@ -2,11 +2,13 @@
 // The rules are specified in docs/specs/project-organization.md.
 
 import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
 import path from 'node:path';
 import { describe, it } from 'node:test';
 
-import { entries, exists, files, filesIn, foldersIn, read } from './repo.mjs';
+import { entries, exists, files, filesIn, foldersIn, read, root } from './repo.mjs';
 import {
+  APPS_ENTRIES,
   DOCS_ENTRIES,
   INSTRUCTION_MENTIONS,
   ISSUE_TEMPLATES,
@@ -15,7 +17,10 @@ import {
   adrStatus,
   checkAdr,
   checkAdrNumbering,
+  checkCheckScript,
   checkEntries,
+  checkEnvExample,
+  checkGuidelines,
   checkImageName,
   checkIndex,
   checkIssueTemplate,
@@ -23,6 +28,8 @@ import {
   checkMentions,
   checkSpec,
   checkStatus,
+  checkTestProjects,
+  checkTextFormat,
   isRelativeLink,
   linkTargets,
 } from './rules.mjs';
@@ -40,6 +47,49 @@ function documentsIn(folder) {
 describe('repository root', () => {
   it('holds only the allowed files and folders', () => {
     assertNoProblems(checkEntries(entries(''), ROOT_REQUIRED, ROOT_OPTIONAL, 'repository root'));
+  });
+});
+
+describe('apps folder', () => {
+  it('holds only the server and the web app', () => {
+    assertNoProblems(checkEntries(entries('apps'), [], APPS_ENTRIES, 'apps'));
+  });
+
+  it('has a test project for every C# project', () => {
+    assertNoProblems(
+      checkTestProjects(foldersIn('apps/server/src'), foldersIn('apps/server/tests')),
+    );
+  });
+});
+
+describe('secrets', () => {
+  it('.env is not tracked, and Git ignores it', () => {
+    const tracked = files.filter((file) => /(^|\/)\.env(\.(?!example$)[^/]+)?$/.test(file));
+    assertNoProblems(tracked.map((file) => `${file}: never commit an env file that can hold secrets`));
+    const ignored = spawnSync('git', ['check-ignore', '-q', '.env'], { cwd: root });
+    assert.equal(ignored.status, 0, '.gitignore must ignore .env');
+  });
+
+  it('.env.example holds no secret values', () => {
+    assertNoProblems(checkEnvExample(read('.env.example')).map((p) => `.env.example: ${p}`));
+  });
+});
+
+describe('formatting', () => {
+  const TEXT = /\.(md|mjs|js|ts|tsx|json|yml|yaml|sh|cs|csproj|sln|props|css|html|svg|geojson|txt)$|(^|\/)\.[a-z.]+$|(^|\/)(LICENSE|Dockerfile)$/;
+
+  it('text files use LF, have no trailing spaces, and end with one newline', () => {
+    assertNoProblems(
+      files
+        .filter((file) => TEXT.test(file))
+        .flatMap((file) => checkTextFormat(read(file)).map((p) => `${file}: ${p}`)),
+    );
+  });
+});
+
+describe('guidelines', () => {
+  it('each state a rule, a method, and where it is enforced', () => {
+    assertNoProblems(checkGuidelines(read('docs/guidelines.md')).map((p) => `docs/guidelines.md: ${p}`));
   });
 });
 
@@ -201,7 +251,12 @@ describe('instructions', () => {
   }
 
   it('the check script runs the tests, and CI runs the check script', () => {
-    assert.match(read('scripts/check.sh'), /npm test/, 'scripts/check.sh must run "npm test"');
+    assertNoProblems(
+      checkCheckScript(read('scripts/check.sh'), {
+        hasServer: entries('apps').includes('server'),
+        hasWeb: entries('apps').includes('web'),
+      }).map((p) => `scripts/check.sh: ${p}`),
+    );
     assert.match(read('.github/workflows/ci.yml'), /scripts\/check\.sh/, 'CI must run scripts/check.sh');
     assert.match(read('package.json'), /"test":\s*"node --test/, 'package.json needs a test script');
   });

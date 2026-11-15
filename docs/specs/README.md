@@ -55,3 +55,4 @@ None.
 | Spec | Capability |
 | --- | --- |
 | [project-organization.md](project-organization.md) | Where every file belongs, and the tests that enforce it |
+| [quality-gates.md](quality-gates.md) | The checks every check-in must pass, and how they're run |

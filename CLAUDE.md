@@ -19,6 +19,25 @@ Immich → Scanner → Trip detector → Database → Web server → Phone or iP
 The full picture is in
 [docs/knowledge/design-and-branding.md](docs/knowledge/design-and-branding.md).
 
+## Project guidelines
+
+Seven guidelines apply to every change. The full text, with the method for each, is in
+[docs/guidelines.md](docs/guidelines.md).
+
+1. **Be plain.** Every document and design states its intention and its methodology. Name the
+   mechanism, use numbers, and say what isn't known yet.
+2. **Stay organized.** The project is always in a cleanly organized state. Stop and reorganize
+   when the layout stops fitting, as its own work item.
+3. **Protect secrets.** Secrets come from environment variables, starting with `.env`. Never
+   commit, log, or send a secret to the browser.
+4. **C# backend, TypeScript UI.** Backend functionality is .NET in `apps/server`. The UI is a
+   TypeScript web app in `apps/web`.
+5. **Docker next to Immich.** The app runs as one Docker container on the Immich network.
+6. **Native iOS feel.** On a phone, the app must feel like a native iOS app. Check UI changes
+   against the table in ADR-007.
+7. **Tested, formatted, linted.** New functionality comes with a unit test. Every check-in passes
+   `./scripts/check.sh`.
+
 ## Spec-driven, work-item-driven development
 
 This workflow is required. Follow it before you write code for any meaningful change:
@@ -52,8 +71,9 @@ Project organization is strict, and tests enforce it. The rules are in
 | Behavioral specs | `docs/specs/short-title.md` | Fixed sections, linked to a tracking issue, listed in the index |
 | Reference knowledge | `docs/knowledge/short-title.md` | Listed in the index; images in `docs/knowledge/images/` |
 | Planning and progress | `docs/roadmap.md` and `docs/status.md` | No other loose files in `docs/` |
-| Server and web apps | `apps/` | Per the repository layout in the design document |
-| Shared packages | `packages/` | Same |
+| Backend | `apps/server/` | A .NET solution; each project in `src/` has a test project in `tests/` |
+| Web UI | `apps/web/` | A TypeScript, React, and Vite project |
+| Secrets | `.env` (never committed) | `.env.example` lists the variables, with secret values empty |
 | Collection data | `collections/` | YAML files and GeoJSON boundaries |
 | Docker files | `docker/` | Dockerfile and example compose files |
 | Scripts | `scripts/` | Shell scripts for checks and maintenance |
@@ -69,8 +89,8 @@ that came later wins.
 ## Working conventions
 
 - Prefer small, composable changes over rewrites.
-- Keep the trip-detection rules as pure functions so they can be tested with plain data and no
-  running Immich.
+- Keep the trip-detection rules in their own C# project, as pure functions, so they can be tested
+  with plain data and no running Immich.
 - Never write to Immich. Never send photo data or location data to an outside service.
 - Your decisions (added, ignored, renamed, merged) are stored separately from detected data and
   always win. See
@@ -86,10 +106,12 @@ that came later wins.
 ```
 
 This runs `npm test`, which runs the organization tests. CI runs the same script on every pull
-request. When application code arrives, add its lint, build, and test steps to the same script.
+request. When the first backend or UI code arrives, add the steps that
+[docs/specs/quality-gates.md](docs/specs/quality-gates.md) requires. A test fails until you do.
 
 ## Key docs map
 
+- [docs/guidelines.md](docs/guidelines.md): the seven project guidelines.
 - [docs/README.md](docs/README.md): the map of the documentation.
 - [docs/knowledge/design-and-branding.md](docs/knowledge/design-and-branding.md): brand,
   experience, and architecture for version 1.

@@ -7,12 +7,15 @@ one home.
 docs/
   README.md                 this map
   development-workflow.md   how an idea becomes a release
+  guidelines.md             the seven rules every change follows
   roadmap.md                what's planned, by phase
   status.md                 what's done and what's next
   adr/                      decisions: why the architecture is the way it is
   specs/                    intent: what a capability must do
   knowledge/                reference: how things are and what we learned
 ```
+
+Start with [guidelines.md](guidelines.md). It states the rules that everything else follows.
 
 ## Which document do I need?
 

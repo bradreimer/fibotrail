@@ -11,6 +11,10 @@ want.
 
 For small fixes, documentation, and tests, open a pull request directly.
 
+## Project guidelines
+
+Seven guidelines apply to every change. Read [docs/guidelines.md](docs/guidelines.md) first.
+
 ## How work flows
 
 Idea → spec → work item → implementation → tests → documentation update → commit → release
@@ -36,7 +40,7 @@ rule only by updating the spec and the test together.
 
 ## Running the checks
 
-You need Node.js 22 or later. No dependencies need to be installed yet.
+You need Node.js 22 or later. The backend will also need the .NET SDK when its code arrives.
 
 ```bash
 ./scripts/check.sh
@@ -48,7 +52,8 @@ A good pull request:
 
 - Solves one problem.
 - Makes the smallest reasonable change.
-- Includes tests for new or changed behavior.
+- Includes a unit test for new or changed behavior.
+- Passes the formatting and linting checks.
 - Doesn't bundle in an unrelated refactor.
 
 ## Architecture principles
@@ -56,6 +61,9 @@ A good pull request:
 - **Immich stays untouched.** Fibotrail only reads from Immich.
 - **You decide.** Fibotrail suggests trips and places, and nothing is added until the user says
   yes. Decisions survive rescans.
+- **C# backend, TypeScript UI.** The backend is ASP.NET Core in `apps/server`, and the UI is a
+  React app in `apps/web`.
+- **Secrets come from the environment.** Copy `.env.example` to `.env`. Never commit `.env`.
 - **Private by default.** Don't add code that sends photos, locations, or metadata to an outside
   service. Don't store secrets in the repository.
 

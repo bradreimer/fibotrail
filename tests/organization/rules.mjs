@@ -3,6 +3,8 @@
 // The rules are specified in docs/specs/project-organization.md.
 
 export const ROOT_REQUIRED = [
+  '.editorconfig',
+  '.env.example',
   '.github',
   '.gitignore',
   'CLAUDE.md',
@@ -17,21 +19,20 @@ export const ROOT_REQUIRED = [
 
 export const ROOT_OPTIONAL = [
   '.dockerignore',
-  '.editorconfig',
-  '.env.example',
   '.nvmrc',
   'apps',
   'collections',
   'docker',
   'package-lock.json',
-  'packages',
-  'tsconfig.base.json',
 ];
+
+export const APPS_ENTRIES = ['server', 'web'];
 
 export const DOCS_ENTRIES = [
   'README.md',
   'adr',
   'development-workflow.md',
+  'guidelines.md',
   'knowledge',
   'roadmap.md',
   'specs',
@@ -85,6 +86,7 @@ export const INSTRUCTION_MENTIONS = [
   'docs/adr/',
   'docs/knowledge/',
   'docs/status.md',
+  'docs/guidelines.md',
   'GitHub Issues',
   'scripts/check.sh',
 ];
@@ -287,4 +289,91 @@ export function checkStatus(markdown) {
   return STATUS_SECTIONS.filter((section) => !found.includes(section)).map(
     (section) => `section "${section}" is missing`,
   );
+}
+
+export const GUIDELINE_COUNT = 7;
+export const GUIDELINE_PARTS = ['**Rule.**', '**Method.**', '**Enforced by.**'];
+
+/** Each guideline is a numbered section that states its rule, its method, and its enforcement. */
+export function checkGuidelines(markdown) {
+  const problems = [];
+  const sections = stripCodeBlocks(markdown).split(/^## /m).slice(1);
+  if (sections.length !== GUIDELINE_COUNT) {
+    problems.push(`expected ${GUIDELINE_COUNT} guidelines, found ${sections.length}`);
+  }
+  sections.forEach((section, index) => {
+    const title = section.split('\n')[0];
+    if (!title.startsWith(`${index + 1}. `)) {
+      problems.push(`guideline "${title}" must be numbered ${index + 1}`);
+    }
+    for (const part of GUIDELINE_PARTS) {
+      if (!section.includes(part)) problems.push(`guideline "${title}" must state ${part}`);
+    }
+  });
+  return problems;
+}
+
+const SECRET_NAME = /KEY|SECRET|TOKEN|PASSWORD/;
+
+/** .env.example lists NAME=value lines, and a secret variable has an empty value. */
+export function checkEnvExample(text) {
+  const problems = [];
+  for (const line of text.split('\n')) {
+    if (line.trim() === '' || line.startsWith('#')) continue;
+    const match = line.match(/^([A-Z][A-Z0-9_]*)=(.*)$/);
+    if (!match) {
+      problems.push(`"${line}" must look like NAME=value`);
+    } else if (SECRET_NAME.test(match[1]) && match[2] !== '') {
+      problems.push(`${match[1]} holds a secret, so its value must be empty`);
+    }
+  }
+  return problems;
+}
+
+/** Text files use LF line endings, have no trailing spaces, and end with exactly one newline. */
+export function checkTextFormat(text) {
+  const problems = [];
+  if (text.includes('\r')) problems.push('uses CRLF line endings, expected LF');
+  const lines = text.split('\n');
+  const trailing = lines.findIndex((line) => /[ \t]+\r?$/.test(line));
+  if (trailing !== -1) problems.push(`line ${trailing + 1} has trailing spaces`);
+  if (text !== '' && !text.endsWith('\n')) problems.push('must end with a newline');
+  if (text.endsWith('\n\n')) problems.push('must end with exactly one newline');
+  return problems;
+}
+
+export const SERVER_CHECKS = ['dotnet format --verify-no-changes', 'dotnet build', 'dotnet test'];
+export const WEB_CHECKS = [
+  'npm run format:check',
+  'npm run lint',
+  'npm run typecheck',
+  'npm test',
+];
+
+/** The check script runs the organization tests, plus the steps for each stack that exists. */
+export function checkCheckScript(script, { hasServer, hasWeb }) {
+  const problems = [];
+  const lines = script.split('\n').filter((line) => !line.trim().startsWith('#'));
+  const runs = (command) => lines.some((line) => line.includes(command));
+  if (!runs('npm test')) problems.push('must run "npm test"');
+  if (!runs('set -euo pipefail')) problems.push('must use "set -euo pipefail" so a failure stops it');
+  if (hasServer) {
+    for (const command of SERVER_CHECKS) {
+      if (!runs(command)) problems.push(`apps/server exists, so it must run "${command}"`);
+    }
+  }
+  if (hasWeb) {
+    if (!runs('apps/web')) problems.push('apps/web exists, so it must run the checks in apps/web');
+    for (const command of WEB_CHECKS.slice(0, 3)) {
+      if (!runs(command)) problems.push(`apps/web exists, so it must run "${command}"`);
+    }
+  }
+  return problems;
+}
+
+/** Every C# project in src has a test project of the same name with a .Tests suffix. */
+export function checkTestProjects(sourceProjects, testProjects) {
+  return sourceProjects
+    .filter((name) => !testProjects.includes(`${name}.Tests`))
+    .map((name) => `apps/server/src/${name} needs a test project at apps/server/tests/${name}.Tests`);
 }

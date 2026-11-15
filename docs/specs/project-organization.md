@@ -24,7 +24,8 @@ that the repository stays organized without me policing it.
 
 - Checking the quality of what a document says. Tests check structure, not judgment.
 - Checking GitHub Issues. Work items are tracked in GitHub, outside the repository.
-- Rules for the layout inside `apps/` and `packages/`. Those arrive with the code.
+- Rules for the layout inside `apps/server` and `apps/web`, beyond the test project rule in the
+  [quality gates spec](quality-gates.md). Those arrive with the code.
 
 ## Requirements
 
@@ -39,17 +40,26 @@ that the repository stays organized without me policing it.
 
 ### Repository root
 
-- Required: `.github/`, `docs/`, `scripts/`, `tests/`, `.gitignore`, `CLAUDE.md`,
-  `CONTRIBUTING.md`, `LICENSE`, `README.md`, and `package.json`.
-- Allowed when needed: `apps/`, `packages/`, `collections/`, `docker/`, `.dockerignore`,
-  `.editorconfig`, `.env.example`, `.nvmrc`, `package-lock.json`, and `tsconfig.base.json`.
+- Required: `.github/`, `docs/`, `scripts/`, `tests/`, `.editorconfig`, `.env.example`,
+  `.gitignore`, `CLAUDE.md`, `CONTRIBUTING.md`, `LICENSE`, `README.md`, and `package.json`.
+- Allowed when needed: `apps/`, `collections/`, `docker/`, `.dockerignore`, `.nvmrc`, and
+  `package-lock.json`.
 - Nothing else is tracked at the root.
+- `apps/` holds only `server` (the .NET solution) and `web` (the TypeScript UI).
+
+### Secrets
+
+- `.env` is never tracked, and `.gitignore` ignores it.
+- `.env.example` lists variables as `NAME=value` lines. A variable whose name contains `KEY`,
+  `SECRET`, `TOKEN`, or `PASSWORD` has an empty value.
 
 ### The docs folder
 
-- `docs/` holds exactly four files and three folders: `README.md`, `development-workflow.md`,
-  `roadmap.md`, `status.md`, `adr/`, `specs/`, and `knowledge/`.
+- `docs/` holds exactly five files and three folders: `README.md`, `development-workflow.md`,
+  `guidelines.md`, `roadmap.md`, `status.md`, `adr/`, `specs/`, and `knowledge/`.
 - `docs/status.md` has the sections Current milestone, Completed, In progress, and Next.
+- `docs/guidelines.md` has seven numbered guidelines. Each states its rule, its method, and
+  where it's enforced.
 
 ### ADRs
 
@@ -88,7 +98,8 @@ that the repository stays organized without me policing it.
 ### Instructions
 
 - `CLAUDE.md` and `.github/copilot-instructions.md` exist and name each home: `docs/specs/`,
-  `docs/adr/`, `docs/knowledge/`, `docs/status.md`, GitHub Issues, and `scripts/check.sh`.
+  `docs/adr/`, `docs/knowledge/`, `docs/status.md`, `docs/guidelines.md`, GitHub Issues, and
+  `scripts/check.sh`.
 - `scripts/check.sh` runs the tests, and the CI workflow runs `scripts/check.sh`.
 
 ### Tests

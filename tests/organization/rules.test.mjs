@@ -8,7 +8,10 @@ import {
   SPEC_SECTIONS,
   checkAdr,
   checkAdrNumbering,
+  checkCheckScript,
   checkEntries,
+  checkEnvExample,
+  checkGuidelines,
   checkImageName,
   checkIndex,
   checkIssueTemplate,
@@ -16,6 +19,8 @@ import {
   checkMentions,
   checkSpec,
   checkStatus,
+  checkTestProjects,
+  checkTextFormat,
   headings,
   isRelativeLink,
   linkTargets,
@@ -184,5 +189,83 @@ describe('checkMentions and checkStatus', () => {
   it('reports each missing status section', () => {
     const markdown = '# Status\n\n## Current milestone\n\n## Completed\n\n## Next\n';
     assert.deepEqual(checkStatus(markdown), ['section "In progress" is missing']);
+  });
+});
+
+describe('checkGuidelines', () => {
+  const guideline = (number, parts = ['**Rule.**', '**Method.**', '**Enforced by.**']) =>
+    `## ${number}. A guideline\n\n${parts.map((part) => `${part} Text.`).join('\n\n')}\n`;
+  const all = (count) => '# Guidelines\n\n' + Array.from({ length: count }, (_, i) => guideline(i + 1)).join('\n');
+
+  it('passes seven numbered guidelines that each state rule, method, and enforcement', () => {
+    assert.deepEqual(checkGuidelines(all(7)), []);
+  });
+
+  it('rejects a wrong count, a wrong number, and a missing part', () => {
+    assert.match(checkGuidelines(all(6)).join(), /expected 7 guidelines, found 6/);
+    assert.match(checkGuidelines(all(6) + '\n' + guideline(9)).join(), /must be numbered 7/);
+    assert.match(
+      checkGuidelines(all(6) + '\n' + guideline(7, ['**Rule.**'])).join(),
+      /must state \*\*Method\.\*\*/,
+    );
+  });
+});
+
+describe('checkEnvExample', () => {
+  it('passes plain settings and empty secrets', () => {
+    assert.deepEqual(checkEnvExample('# Note\nIMMICH_URL=http://immich:2283\n\nIMMICH_API_KEY=\n'), []);
+  });
+
+  it('rejects a secret with a value and a malformed line', () => {
+    assert.match(checkEnvExample('IMMICH_API_KEY=abc123\n').join(), /must be empty/);
+    assert.match(checkEnvExample('SESSION_SECRET=x\n').join(), /must be empty/);
+    assert.match(checkEnvExample('export FOO=bar\n').join(), /NAME=value/);
+  });
+});
+
+describe('checkTextFormat', () => {
+  it('passes clean text', () => {
+    assert.deepEqual(checkTextFormat('one\ntwo\n'), []);
+    assert.deepEqual(checkTextFormat(''), []);
+  });
+
+  it('rejects CRLF, trailing spaces, and a missing or doubled final newline', () => {
+    assert.match(checkTextFormat('one\r\ntwo\r\n').join(), /CRLF/);
+    assert.match(checkTextFormat('one\ntwo  \n').join(), /line 2 has trailing spaces/);
+    assert.match(checkTextFormat('one').join(), /must end with a newline/);
+    assert.match(checkTextFormat('one\n\n').join(), /exactly one newline/);
+  });
+});
+
+describe('checkCheckScript', () => {
+  const base = '#!/usr/bin/env bash\nset -euo pipefail\nnpm test\n';
+  const server = 'dotnet format --verify-no-changes\ndotnet build -warnaserror\ndotnet test\n';
+  const web = '(cd apps/web && npm run format:check && npm run lint && npm run typecheck && npm test)\n';
+
+  it('needs only the organization tests when no app exists', () => {
+    assert.deepEqual(checkCheckScript(base, { hasServer: false, hasWeb: false }), []);
+    assert.match(checkCheckScript('echo ok\n', { hasServer: false, hasWeb: false }).join(), /npm test/);
+  });
+
+  it('needs the .NET steps once apps/server exists', () => {
+    assert.equal(checkCheckScript(base, { hasServer: true, hasWeb: false }).length, 3);
+    assert.deepEqual(checkCheckScript(base + server, { hasServer: true, hasWeb: false }), []);
+  });
+
+  it('needs the UI steps once apps/web exists', () => {
+    assert.equal(checkCheckScript(base, { hasServer: false, hasWeb: true }).length, 4);
+    assert.deepEqual(checkCheckScript(base + web, { hasServer: false, hasWeb: true }), []);
+  });
+
+  it('ignores a step that is only mentioned in a comment', () => {
+    const commented = base + '# dotnet format --verify-no-changes\n# dotnet build\n# dotnet test\n';
+    assert.equal(checkCheckScript(commented, { hasServer: true, hasWeb: false }).length, 3);
+  });
+});
+
+describe('checkTestProjects', () => {
+  it('requires a .Tests project for each source project', () => {
+    assert.deepEqual(checkTestProjects(['Fibotrail.Core'], ['Fibotrail.Core.Tests']), []);
+    assert.equal(checkTestProjects(['Fibotrail.Core', 'Fibotrail.Api'], ['Fibotrail.Core.Tests']).length, 1);
   });
 });
