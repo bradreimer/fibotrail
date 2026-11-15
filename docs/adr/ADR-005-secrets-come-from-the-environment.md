@@ -32,7 +32,7 @@ The authentication policies are:
 
 | Credential | Policy |
 | --- | --- |
-| Immich API key | A dedicated key with read permissions only: `asset.read`, `asset.view`, and `album.read` |
+| Immich API key | A dedicated key with read permissions only: `asset.read`, `asset.view`, `album.read`, and `asset.statistics` |
 | Fibotrail password | Set on first run, stored only as an Argon2id hash in the database |
 | Session | HttpOnly, Secure, SameSite cookie, with protection against cross-site request forgery |
 | Sign-in attempts | Rate limited, with a lockout delay after repeated failures |

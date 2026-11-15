@@ -17,7 +17,7 @@ never edits, moves, or deletes your photos.
 Fibotrail only reads from Immich. It never writes to Immich.
 
 - Fibotrail uses a dedicated Immich API key that has read permissions only: `asset.read`,
-  `asset.view`, and `album.read`.
+  `asset.view`, `album.read`, and `asset.statistics`.
 - Everything Fibotrail creates lives in its own database in the `/data` volume: trips, places,
   visits, collections, decisions, and settings.
 - Fibotrail stores photo IDs, timestamps, coordinates, and place names. It doesn't copy original

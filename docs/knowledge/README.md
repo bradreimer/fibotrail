@@ -22,3 +22,4 @@ A knowledge document describes. It doesn't decide and it doesn't promise:
 | Document | What it covers | Source |
 | --- | --- | --- |
 | [design-and-branding.md](design-and-branding.md) | Brand, experience, and architecture for version 1 | Exported from the design document on 2026-11-15. ADR-004 and ADR-005 replace its stack table and its Docker secret setup |
+| [immich-api-findings.md](immich-api-findings.md) | What Immich returns for dates, positions, and place names, with made-up responses for tests | The spike, #12, run against Immich 3.4.1 on 2026-11-15 |
