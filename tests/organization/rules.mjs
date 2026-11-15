@@ -336,6 +336,39 @@ export function checkEnvExample(text) {
   return problems;
 }
 
+export const README_SECTIONS = [
+  'Install',
+  'Configuration',
+  'API key permissions',
+  'Backup',
+  'Privacy',
+  'Updating and resetting',
+];
+
+/**
+ * The README has the release sections in order, documents every variable in .env.example, and
+ * names every permission the .env.example comment lists.
+ */
+export function checkReadme(readme, envExample) {
+  const problems = [];
+  const found = headings(readme, 2).filter((title) => README_SECTIONS.includes(title));
+  if (!sameList(found, README_SECTIONS)) {
+    problems.push(`sections must include [${README_SECTIONS.join(', ')}] in that order, found [${found.join(', ')}]`);
+  }
+  const names = envExample
+    .split('\n')
+    .map((line) => line.match(/^#?\s*([A-Z][A-Z0-9_]*)=/)?.[1])
+    .filter(Boolean);
+  for (const name of names) {
+    if (!readme.includes(`\`${name}\``)) problems.push(`variable ${name} isn't documented`);
+  }
+  const permissions = envExample.match(/\b(?:asset|album)\.[a-z]+\b/g) ?? [];
+  for (const permission of new Set(permissions)) {
+    if (!readme.includes(`\`${permission}\``)) problems.push(`permission ${permission} isn't documented`);
+  }
+  return problems;
+}
+
 /** Text files use LF line endings, have no trailing spaces, and end with exactly one newline. */
 export function checkTextFormat(text) {
   const problems = [];

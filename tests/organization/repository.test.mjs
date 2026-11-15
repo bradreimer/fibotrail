@@ -26,6 +26,7 @@ import {
   checkIssueTemplate,
   checkKnowledgeName,
   checkMentions,
+  checkReadme,
   checkSpec,
   checkStatus,
   checkTestProjects,
@@ -72,6 +73,12 @@ describe('secrets', () => {
 
   it('.env.example holds no secret values', () => {
     assertNoProblems(checkEnvExample(read('.env.example')).map((p) => `.env.example: ${p}`));
+  });
+});
+
+describe('README', () => {
+  it('has the release sections and documents every variable and permission', () => {
+    assertNoProblems(checkReadme(read('README.md'), read('.env.example')).map((p) => `README.md: ${p}`));
   });
 });
 

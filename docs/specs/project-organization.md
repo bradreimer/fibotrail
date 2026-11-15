@@ -53,6 +53,13 @@ that the repository stays organized without me policing it.
 - `.env.example` lists variables as `NAME=value` lines. A variable whose name contains `KEY`,
   `SECRET`, `TOKEN`, or `PASSWORD` has an empty value.
 
+### The README
+
+- `README.md` has the level-2 sections Install, Configuration, API key permissions, Backup,
+  Privacy, and Updating and resetting, in that order.
+- It documents, in code format, every variable in `.env.example` (including commented ones) and
+  every Immich permission named there.
+
 ### The docs folder
 
 - `docs/` holds exactly five files and three folders: `README.md`, `development-workflow.md`,

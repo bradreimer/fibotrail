@@ -58,7 +58,11 @@ maintainer's library and phone, and are listed under Next. See
 
 ## In progress
 
-Nothing is in progress.
+- [#24](https://github.com/bradreimer/fibotrail/issues/24) The release, step 3d. The
+  [release spec](specs/release.md) and the README are written, and a test keeps the README's
+  sections, variables, and permissions in step with the code. The accessibility checks, the tag
+  workflow, and the license note are still open. The README's commands haven't been run against a
+  real Immich yet.
 
 ## Next
 

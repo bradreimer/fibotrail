@@ -17,6 +17,7 @@ import {
   checkIssueTemplate,
   checkKnowledgeName,
   checkMentions,
+  checkReadme,
   checkSpec,
   checkStatus,
   checkTestProjects,
@@ -275,5 +276,36 @@ describe('checkTestProjects', () => {
   it('requires a .Tests project for each source project', () => {
     assert.deepEqual(checkTestProjects(['Fibotrail.Core'], ['Fibotrail.Core.Tests']), []);
     assert.equal(checkTestProjects(['Fibotrail.Core', 'Fibotrail.Api'], ['Fibotrail.Core.Tests']).length, 1);
+  });
+});
+
+describe('checkReadme', () => {
+  const env = '# asset.read only\nIMMICH_URL=x\n# FIBOTRAIL_DATA_DIR=/data\n';
+  const readme = (titles, extra = '') =>
+    titles.map((title) => `## ${title}\n`).join('\n') + extra;
+  const all = [
+    'Install',
+    'Configuration',
+    'API key permissions',
+    'Backup',
+    'Privacy',
+    'Updating and resetting',
+  ];
+  const full = readme(all, '`IMMICH_URL` `FIBOTRAIL_DATA_DIR` `asset.read`');
+
+  it('passes a README with every section, variable, and permission', () => {
+    assert.deepEqual(checkReadme(full, env), []);
+  });
+
+  it('rejects a missing or misordered section', () => {
+    assert.match(checkReadme(readme(all.slice(1), '`IMMICH_URL` `FIBOTRAIL_DATA_DIR` `asset.read`'), env).join(), /sections must include/);
+    assert.match(checkReadme(readme([...all].reverse()), env).join(), /sections must include/);
+  });
+
+  it('rejects an undocumented variable or permission', () => {
+    const problems = checkReadme(readme(all), env).join();
+    assert.match(problems, /variable IMMICH_URL/);
+    assert.match(problems, /variable FIBOTRAIL_DATA_DIR/);
+    assert.match(problems, /permission asset\.read/);
   });
 });
