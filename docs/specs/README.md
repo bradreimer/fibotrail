@@ -56,3 +56,10 @@ None.
 | --- | --- |
 | [project-organization.md](project-organization.md) | Where every file belongs, and the tests that enforce it |
 | [quality-gates.md](quality-gates.md) | The checks every check-in must pass, and how they're run |
+| [first-run-and-sign-in.md](first-run-and-sign-in.md) | Starting the container, setting a password on first run, and signing in |
+| [app-shell.md](app-shell.md) | Home-screen installation, navigation, design tokens, and the four screen states |
+| [immich-scanning.md](immich-scanning.md) | Reading the Immich library with a read-only key, scan progress, and the thumbnail proxy |
+| [trip-detection.md](trip-detection.md) | The home location, the rules that turn photos into trips, and decisions that survive rescans |
+| [trip-inbox.md](trip-inbox.md) | Reviewing suggested trips with Add trip, Not a trip, and Later |
+| [trip-library.md](trip-library.md) | The grid of cards for the trips you've added |
+| [trip-page.md](trip-page.md) | One trip's route map, stat tiles, photo timeline, and photo viewer |

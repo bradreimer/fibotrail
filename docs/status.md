@@ -18,9 +18,11 @@ Nothing yet.
 
 ## Next
 
-The MVP plan is in [roadmap.md](roadmap.md#mvp-version-01). None of these has a work item yet.
+The MVP plan is in [roadmap.md](roadmap.md#mvp-version-01). Its seven specs are in
+[specs/](specs/README.md), with work items [#5](https://github.com/bradreimer/fibotrail/issues/5) through [#11](https://github.com/bradreimer/fibotrail/issues/11). None of the items
+below has a work item yet.
 
-- Write the specs for the MVP user stories, and open a work item for each.
+- Answer the open questions in the seven MVP specs.
 - Create a read-only Immich API key with `asset.read`, `asset.view`, and `album.read`.
 - Run the spike: export sample metadata and confirm the date, GPS, and place fields.
 - List five to ten known trips with rough dates, for the replay test.

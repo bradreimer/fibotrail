@@ -32,21 +32,21 @@ first. The life map, collections, and stats are rooms added later on the same fo
 
 ### User stories
 
-Each story becomes part of a spec in [specs/](specs/README.md), and each spec gets work items in
-[GitHub Issues](https://github.com/bradreimer/fibotrail/issues). None exists yet.
+Each story is covered by a spec in [specs/](specs/README.md), and each spec has a tracking issue.
+The spike, step 1, has no work item yet.
 
-| ID | As a user, I can… | Planned spec | Step |
+| ID | As a user, I can… | Spec and work item | Step |
 | --- | --- | --- | --- |
-| U1 | Run Fibotrail in Docker next to Immich and set a password on first run | `first-run-and-sign-in` | 2a |
-| U2 | Connect to Immich with a read-only API key, and my library is never changed | `immich-scanning` | 2b |
-| U3 | Confirm my home location so Fibotrail knows when I'm away | `trip-detection` | 3a |
-| U4 | Scan my library and see progress while the app stays usable | `immich-scanning` | 2b |
-| U5 | Review suggested trips in an inbox and choose **Add trip**, **Not a trip**, or **Later** | `trip-inbox` | 3b |
-| U6 | Trust that my choices survive every rescan | `trip-detection` and `trip-inbox` | 3a, 3b |
-| U7 | Browse my added trips as cards with a cover photo, dates, and place | `trip-library` | 3c |
-| U8 | Open a trip and see a route map, key numbers, and photos grouped by day | `trip-page` | 3c |
-| U9 | Tap a photo to view it and open the original in Immich | `trip-page` | 3c |
-| U10 | Do all of this comfortably on my phone or iPad | `app-shell` | 2a |
+| U1 | Run Fibotrail in Docker next to Immich and set a password on first run | [first-run-and-sign-in](specs/first-run-and-sign-in.md), [#5](https://github.com/bradreimer/fibotrail/issues/5) | 2a |
+| U2 | Connect to Immich with a read-only API key, and my library is never changed | [immich-scanning](specs/immich-scanning.md), [#7](https://github.com/bradreimer/fibotrail/issues/7) | 2b |
+| U3 | Confirm my home location so Fibotrail knows when I'm away | [trip-detection](specs/trip-detection.md), [#8](https://github.com/bradreimer/fibotrail/issues/8) | 3a |
+| U4 | Scan my library and see progress while the app stays usable | [immich-scanning](specs/immich-scanning.md), [#7](https://github.com/bradreimer/fibotrail/issues/7) | 2b |
+| U5 | Review suggested trips in an inbox and choose **Add trip**, **Not a trip**, or **Later** | [trip-inbox](specs/trip-inbox.md), [#9](https://github.com/bradreimer/fibotrail/issues/9) | 3b |
+| U6 | Trust that my choices survive every rescan | [trip-detection](specs/trip-detection.md), [#8](https://github.com/bradreimer/fibotrail/issues/8) and [trip-inbox](specs/trip-inbox.md), [#9](https://github.com/bradreimer/fibotrail/issues/9) | 3a, 3b |
+| U7 | Browse my added trips as cards with a cover photo, dates, and place | [trip-library](specs/trip-library.md), [#10](https://github.com/bradreimer/fibotrail/issues/10) | 3c |
+| U8 | Open a trip and see a route map, key numbers, and photos grouped by day | [trip-page](specs/trip-page.md), [#11](https://github.com/bradreimer/fibotrail/issues/11) | 3c |
+| U9 | Tap a photo to view it and open the original in Immich | [trip-page](specs/trip-page.md), [#11](https://github.com/bradreimer/fibotrail/issues/11) | 3c |
+| U10 | Do all of this comfortably on my phone or iPad | [app-shell](specs/app-shell.md), [#6](https://github.com/bradreimer/fibotrail/issues/6) | 2a |
 
 ### Steps
 
