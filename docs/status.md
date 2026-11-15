@@ -18,14 +18,15 @@ Nothing yet.
 
 ## Next
 
-These come from the next steps in the
-[design and branding document](knowledge/design-and-branding.md#risks-open-questions-and-next-steps).
-None has a work item yet.
+The MVP plan is in [roadmap.md](roadmap.md#mvp-version-01). None of these has a work item yet.
 
-- Answer the remaining open questions in the design and branding document. The server language
-  is settled: see [ADR-004](adr/ADR-004-technology-stack.md).
+- Write the specs for the MVP user stories, and open a work item for each.
 - Create a read-only Immich API key with `asset.read`, `asset.view`, and `album.read`.
-- Run the week-one spike: export sample metadata and confirm the date, GPS, and place fields.
+- Run the spike: export sample metadata and confirm the date, GPS, and place fields.
+- List five to ten known trips with rough dates, for the replay test.
+- Decide the base map source, and record it as an ADR.
+- Answer the remaining open questions in the
+  [design and branding document](knowledge/design-and-branding.md#risks-open-questions-and-next-steps).
+  The server language is settled: see [ADR-004](adr/ADR-004-technology-stack.md).
 - Produce the logo and icon files in SVG and PNG.
 - Check that the name is free on GHCR, Docker Hub, and the App Store.
-- Create the repository structure, CI, and the first Docker image.
