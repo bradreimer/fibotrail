@@ -2,7 +2,9 @@
 name: Bug Report
 about: Something isn't working as expected
 title: "[Bug]: "
-labels: ["bug"]
+labels: bug
+assignees: ''
+
 ---
 
 ## Related spec
