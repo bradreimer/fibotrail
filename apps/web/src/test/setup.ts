@@ -1,7 +1,10 @@
 import '@testing-library/jest-dom/vitest';
 
 import { cleanup } from '@testing-library/react';
-import { afterEach } from 'vitest';
+import { afterEach, vi } from 'vitest';
+
+// jsdom has no WebGL. Every test gets a stand-in for the map.
+vi.mock('../map/MapView', () => import('./MapViewMock'));
 
 afterEach(() => {
   cleanup();

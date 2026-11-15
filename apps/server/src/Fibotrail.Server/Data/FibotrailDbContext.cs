@@ -15,6 +15,14 @@ public sealed class FibotrailDbContext(DbContextOptions<FibotrailDbContext> opti
 
     public DbSet<ScanRun> ScanRuns => Set<ScanRun>();
 
+    public DbSet<Trip> Trips => Set<Trip>();
+
+    public DbSet<TripPhoto> TripPhotos => Set<TripPhoto>();
+
+    public DbSet<Decision> Decisions => Set<Decision>();
+
+    public DbSet<Setting> Settings => Set<Setting>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Credential>(entity =>
@@ -40,6 +48,35 @@ public sealed class FibotrailDbContext(DbContextOptions<FibotrailDbContext> opti
             entity.ToTable("photo");
             entity.HasIndex(photo => photo.LocalTime);
             entity.HasIndex(photo => photo.ImmichUpdatedAt);
+        });
+
+        modelBuilder.Entity<Trip>(entity =>
+        {
+            entity.ToTable("trip");
+            entity.HasIndex(trip => trip.Fingerprint).IsUnique();
+            entity.HasIndex(trip => new { trip.Status, trip.StartDate });
+            entity.Property(trip => trip.Status).HasConversion<string>();
+            entity.Property(trip => trip.Confidence).HasConversion<string>();
+            entity.HasMany(trip => trip.Photos).WithOne().HasForeignKey(photo => photo.TripId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<TripPhoto>(entity =>
+        {
+            entity.ToTable("trip_photo");
+            entity.HasKey(photo => new { photo.TripId, photo.PhotoId });
+        });
+
+        modelBuilder.Entity<Decision>(entity =>
+        {
+            entity.ToTable("decision");
+            entity.HasIndex(decision => decision.Fingerprint).IsUnique();
+            entity.Property(decision => decision.Status).HasConversion<string>();
+        });
+
+        modelBuilder.Entity<Setting>(entity =>
+        {
+            entity.ToTable("setting");
+            entity.HasKey(setting => setting.Key);
         });
 
         modelBuilder.Entity<ScanRun>(entity =>

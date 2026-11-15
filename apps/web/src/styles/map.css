@@ -1,0 +1,119 @@
+/* Maps: the frame, and the markers that sit on the base map. */
+.map-frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  overflow: hidden;
+  border: var(--fibo-border) solid var(--fibo-mist);
+  border-radius: var(--fibo-radius);
+  background: var(--fibo-mist);
+}
+
+/* MapLibre's own style sheet sets the position, so this rule names the frame to win over it. */
+.map-frame > .map-frame__loading,
+.map-frame > .map {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 0;
+}
+
+/* The gold dot of a route start and of home. */
+.map-marker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: var(--fibo-map-ring) solid var(--fibo-paper);
+  border-radius: 50%;
+  font: inherit;
+  font-size: var(--fibo-text-caption);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+
+.map-marker--home,
+.map-marker--start {
+  width: var(--fibo-space-5);
+  height: var(--fibo-space-5);
+  background: var(--fibo-gold);
+}
+
+/* The coral pin of a stop. The ring makes the tap target 44 points wide on a touch screen. */
+.map-marker--stop {
+  min-width: var(--fibo-space-5);
+  height: var(--fibo-space-5);
+  padding: 0 var(--fibo-space-2);
+  border-radius: var(--fibo-space-5);
+  background: var(--fibo-coral);
+  color: var(--fibo-on-coral);
+}
+
+button.map-marker::after {
+  content: '';
+  position: absolute;
+  width: var(--fibo-tap);
+  height: var(--fibo-tap);
+}
+
+.map-marker[aria-pressed='true'] {
+  outline: var(--fibo-marker) solid var(--fibo-gold);
+  outline-offset: var(--fibo-space-1);
+}
+
+.map-caption {
+  color: var(--fibo-ink-muted);
+  font-size: var(--fibo-text-caption);
+}
+
+/* The home location step. */
+.home-setup {
+  display: grid;
+  gap: var(--fibo-space-4);
+  max-width: calc(var(--fibo-space-7) * 10);
+}
+
+.home-setup__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--fibo-space-3);
+}
+
+.home-setup__search {
+  width: 100%;
+  min-height: var(--fibo-tap);
+  padding: var(--fibo-space-3) var(--fibo-space-4);
+  border: var(--fibo-border) solid var(--fibo-ink-muted);
+  border-radius: var(--fibo-radius);
+  background: transparent;
+  color: inherit;
+}
+
+.home-setup__places {
+  display: grid;
+  gap: var(--fibo-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.home-setup__place {
+  width: 100%;
+  min-height: var(--fibo-tap);
+  padding: var(--fibo-space-3) var(--fibo-space-4);
+  border: var(--fibo-border) solid var(--fibo-mist);
+  border-radius: var(--fibo-radius);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.home-setup__place[aria-pressed='true'] {
+  border-color: var(--fibo-teal);
+  color: var(--fibo-teal);
+  font-weight: 600;
+}

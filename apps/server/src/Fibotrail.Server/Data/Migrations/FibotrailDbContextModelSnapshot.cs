@@ -34,6 +34,42 @@ namespace Fibotrail.Server.Data.Migrations
                     b.ToTable("credential", (string)null);
                 });
 
+            modelBuilder.Entity("Fibotrail.Server.Data.Decision", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("CoverPhotoId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("DecidedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateOnly>("EndDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Fingerprint")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateOnly>("StartDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Status")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Fingerprint")
+                        .IsUnique();
+
+                    b.ToTable("decision", (string)null);
+                });
+
             modelBuilder.Entity("Fibotrail.Server.Data.Photo", b =>
                 {
                     b.Property<string>("Id")
@@ -138,6 +174,20 @@ namespace Fibotrail.Server.Data.Migrations
                     b.ToTable("session", (string)null);
                 });
 
+            modelBuilder.Entity("Fibotrail.Server.Data.Setting", b =>
+                {
+                    b.Property<string>("Key")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Value")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Key");
+
+                    b.ToTable("setting", (string)null);
+                });
+
             modelBuilder.Entity("Fibotrail.Server.Data.SignInFailure", b =>
                 {
                     b.Property<int>("Id")
@@ -156,6 +206,108 @@ namespace Fibotrail.Server.Data.Migrations
                     b.HasIndex("Address", "OccurredAt");
 
                     b.ToTable("sign_in_failure", (string)null);
+                });
+
+            modelBuilder.Entity("Fibotrail.Server.Data.Trip", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Confidence")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Country")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("CoverPhotoId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Days")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<double>("DistanceKm")
+                        .HasColumnType("REAL");
+
+                    b.Property<DateOnly>("EndDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<double>("FarthestFromHomeKm")
+                        .HasColumnType("REAL");
+
+                    b.Property<string>("Fingerprint")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("MainPlace")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("PhotoCount")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateOnly>("StartDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("StopsJson")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("SuggestedCoverPhotoId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("SuggestedName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Fingerprint")
+                        .IsUnique();
+
+                    b.HasIndex("Status", "StartDate");
+
+                    b.ToTable("trip", (string)null);
+                });
+
+            modelBuilder.Entity("Fibotrail.Server.Data.TripPhoto", b =>
+                {
+                    b.Property<int>("TripId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("PhotoId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("StopIndex")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("TripId", "PhotoId");
+
+                    b.ToTable("trip_photo", (string)null);
+                });
+
+            modelBuilder.Entity("Fibotrail.Server.Data.TripPhoto", b =>
+                {
+                    b.HasOne("Fibotrail.Server.Data.Trip", null)
+                        .WithMany("Photos")
+                        .HasForeignKey("TripId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Fibotrail.Server.Data.Trip", b =>
+                {
+                    b.Navigation("Photos");
                 });
 #pragma warning restore 612, 618
         }

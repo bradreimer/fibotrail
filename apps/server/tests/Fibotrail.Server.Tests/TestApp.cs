@@ -5,6 +5,7 @@ using System.Text.RegularExpressions;
 using Fibotrail.Immich;
 using Fibotrail.Immich.Tests;
 using Fibotrail.Server.Auth;
+using Fibotrail.Server.Cli;
 using Fibotrail.Server.Data;
 using Fibotrail.Server.Immich;
 using Microsoft.AspNetCore.Builder;
@@ -275,4 +276,22 @@ public sealed partial class Browser(HttpClient client)
 
     [GeneratedRegex("name=\"csrf\" value=\"([^\"]+)\"")]
     private static partial Regex CsrfField();
+}
+
+/// <summary>A terminal for tests: it answers prompts from a list and keeps what was written.</summary>
+public sealed class ScriptedConsole(params string?[] answers) : IConsoleIo
+{
+    private readonly Queue<string?> _answers = new(answers);
+
+    public List<string> Prompts { get; } = [];
+
+    public List<string> Lines { get; } = [];
+
+    public void WriteLine(string text) => Lines.Add(text);
+
+    public string? ReadSecret(string prompt)
+    {
+        Prompts.Add(prompt);
+        return _answers.Count > 0 ? _answers.Dequeue() : null;
+    }
 }

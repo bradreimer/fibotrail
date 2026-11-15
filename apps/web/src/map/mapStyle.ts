@@ -1,0 +1,104 @@
+import type { StyleSpecification } from 'maplibre-gl';
+
+/** The colors of the base map, read from the design tokens. */
+export interface MapColors {
+  water: string;
+  land: string;
+  border: string;
+  route: string;
+  routeOutline: string;
+}
+
+/** Reads the map colors from the tokens, so the map follows light and dark mode. */
+export function readMapColors(element: Element, dark: boolean): MapColors {
+  const style = getComputedStyle(element);
+  const token = (name: string) => style.getPropertyValue(name).trim();
+  // Light: pale Mist water and Paper land. Dark: Deep Ocean water and Night land.
+  return {
+    water: dark ? token('--fibo-ocean') : token('--fibo-mist'),
+    land: token('--fibo-paper'),
+    border: dark ? token('--fibo-mist') : token('--fibo-map-border'),
+    route: token('--fibo-teal'),
+    routeOutline: token('--fibo-paper'),
+  };
+}
+
+export const LAND_SOURCE = 'land';
+export const ROUTE_SOURCE = 'route';
+
+/**
+ * The quiet base map: country outlines from Natural Earth, and nothing else. It has no labels,
+ * so it needs no font files, and no tiles, so the browser asks no other host for anything. See
+ * ADR-009.
+ */
+export function baseMapStyle(colors: MapColors): StyleSpecification {
+  return {
+    version: 8,
+    sources: {
+      [LAND_SOURCE]: { type: 'geojson', data: { type: 'FeatureCollection', features: [] } },
+      [ROUTE_SOURCE]: { type: 'geojson', data: { type: 'FeatureCollection', features: [] } },
+    },
+    layers: [
+      { id: 'water', type: 'background', paint: { 'background-color': colors.water } },
+      { id: 'land', type: 'fill', source: LAND_SOURCE, paint: { 'fill-color': colors.land } },
+      {
+        id: 'borders',
+        type: 'line',
+        source: LAND_SOURCE,
+        paint: { 'line-color': colors.border, 'line-width': 1 },
+      },
+      {
+        id: 'route-outline',
+        type: 'line',
+        source: ROUTE_SOURCE,
+        layout: { 'line-cap': 'round', 'line-join': 'round' },
+        paint: { 'line-color': colors.routeOutline, 'line-width': 8 },
+      },
+      {
+        id: 'route',
+        type: 'line',
+        source: ROUTE_SOURCE,
+        layout: { 'line-cap': 'round', 'line-join': 'round' },
+        paint: { 'line-color': colors.route, 'line-width': 4 },
+      },
+    ],
+  };
+}
+
+/** A line through the points, in order, as GeoJSON. Fewer than two points give no line. */
+export function routeGeoJson(points: readonly Position[]): GeoJSON.FeatureCollection {
+  return {
+    type: 'FeatureCollection',
+    features:
+      points.length < 2
+        ? []
+        : [
+            {
+              type: 'Feature',
+              properties: {},
+              geometry: {
+                type: 'LineString',
+                coordinates: points.map((point) => [point.longitude, point.latitude]),
+              },
+            },
+          ],
+  };
+}
+
+export interface Position {
+  latitude: number;
+  longitude: number;
+}
+
+/** The box that holds every point, as west, south, east, north. Null with no points. */
+export function boundsOf(points: readonly Position[]): [number, number, number, number] | null {
+  if (points.length === 0) return null;
+  const latitudes = points.map((point) => point.latitude);
+  const longitudes = points.map((point) => point.longitude);
+  return [
+    Math.min(...longitudes),
+    Math.min(...latitudes),
+    Math.max(...longitudes),
+    Math.max(...latitudes),
+  ];
+}

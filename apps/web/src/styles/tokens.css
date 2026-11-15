@@ -19,6 +19,10 @@
   /* Text that sits on a fill. White on Teal is 6.9:1, and Paper on Ocean is 10.8:1. */
   --fibo-on-teal: #ffffff;
   --fibo-on-ocean: #f7f3ea;
+  /* Ink on Coral is 4.6:1. White on Coral is only 3.2:1. */
+  --fibo-on-coral: #1d2b2f;
+  --fibo-map-border: #c3cfcc;
+  --fibo-map-ring: 2px;
   --fibo-ink-muted: color-mix(in srgb, var(--fibo-ink) 75%, var(--fibo-paper));
   --fibo-scrim: color-mix(in srgb, var(--fibo-ocean) 60%, transparent);
 

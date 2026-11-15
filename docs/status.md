@@ -2,7 +2,10 @@
 
 ## Current milestone
 
-MVP step 3a, the detector. Steps 2a and 2b, the skeleton and the scanner, are built. See
+MVP step 3b, the inbox. Steps 2a, 2b, and 3a (the skeleton, the scanner, and the detector) are
+built. **The gate of step 3a isn't met.** The replay test hasn't run on the real library, because
+it needs a scan of that library and a list of known trips. The inbox is being built before the
+gate, at the maintainer's request to complete every work item. See
 [roadmap.md](roadmap.md#mvp-version-01).
 
 ## Completed
@@ -31,6 +34,12 @@ MVP step 3a, the detector. Steps 2a and 2b, the skeleton and the scanner, are bu
   its cursor and reads only changes after the first run, the `photo` and `scan_run` tables, the
   thumbnail proxy and its cache, **Scan now**, and the progress banner. See
   [ADR-008](adr/ADR-008-a-generated-immich-client-limited-to-allowed-reads.md).
+- [#8](https://github.com/bradreimer/fibotrail/issues/8) Trip detection. The rules as pure
+  functions in `Fibotrail.Detection`, the home location step with its map, the `trip`,
+  `trip_photo`, `decision`, and `setting` tables, reconciliation that keeps decisions across
+  rescans, and the `fibotrail replay` command. See
+  [ADR-009](adr/ADR-009-a-bundled-natural-earth-base-map.md) and
+  [ADR-010](adr/ADR-010-stops-and-routes-are-stored-with-the-trip.md).
 
 ## In progress
 
@@ -50,8 +59,11 @@ The MVP plan is in [roadmap.md](roadmap.md#mvp-version-01). Its seven specs are 
   the allowed list" are still open for [#7](https://github.com/bradreimer/fibotrail/issues/7).
 - Decide whether the generated Immich client needs a license note. See the last consequence in
   [ADR-008](adr/ADR-008-a-generated-immich-client-limited-to-allowed-reads.md).
-- List five to ten known trips with rough dates, for the replay test.
-- Decide the base map source, and record it as an ADR.
+- Run the replay test, which is the gate of step 3a. Put five to ten known trips in
+  `/data/known-trips.json`, scan the real library, confirm the home location, and run
+  `docker exec -it fibotrail fibotrail replay`. The format is in the
+  [trip detection spec](specs/trip-detection.md#replay-command). The detector was tested with
+  made-up photo sets only. The three open questions in that spec wait for this result.
 - Answer the remaining open questions in the
   [design and branding document](knowledge/design-and-branding.md#risks-open-questions-and-next-steps).
   The server language is settled: see [ADR-004](adr/ADR-004-technology-stack.md).

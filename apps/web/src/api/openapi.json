@@ -138,10 +138,164 @@
           }
         }
       }
+    },
+    "/api/home": {
+      "get": {
+        "tags": [
+          "Fibotrail"
+        ],
+        "operationId": "GetHome",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HomeState"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Fibotrail"
+        ],
+        "operationId": "SetHome",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetHomeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SetHomeResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/home/places": {
+      "get": {
+        "tags": [
+          "Fibotrail"
+        ],
+        "operationId": "SearchHomePlaces",
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PlaceInfo"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
     "schemas": {
+      "HomeState": {
+        "required": [
+          "confirmed",
+          "suggestion",
+          "hasPositions",
+          "photoCount"
+        ],
+        "type": "object",
+        "properties": {
+          "confirmed": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/PlaceInfo"
+              }
+            ]
+          },
+          "suggestion": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/HomeSuggestionInfo"
+              }
+            ]
+          },
+          "hasPositions": {
+            "type": "boolean"
+          },
+          "photoCount": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "HomeSuggestionInfo": {
+        "required": [
+          "latitude",
+          "longitude",
+          "name",
+          "days"
+        ],
+        "type": "object",
+        "properties": {
+          "latitude": {
+            "type": "number",
+            "format": "double"
+          },
+          "longitude": {
+            "type": "number",
+            "format": "double"
+          },
+          "name": {
+            "type": "string"
+          },
+          "days": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
       "ImmichStatus": {
         "required": [
           "connected",
@@ -171,6 +325,27 @@
               "null",
               "string"
             ]
+          }
+        }
+      },
+      "PlaceInfo": {
+        "required": [
+          "latitude",
+          "longitude",
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "latitude": {
+            "type": "number",
+            "format": "double"
+          },
+          "longitude": {
+            "type": "number",
+            "format": "double"
+          },
+          "name": {
+            "type": "string"
           }
         }
       },
@@ -245,6 +420,44 @@
         "properties": {
           "csrfToken": {
             "type": "string"
+          }
+        }
+      },
+      "SetHomeRequest": {
+        "required": [
+          "latitude",
+          "longitude"
+        ],
+        "type": "object",
+        "properties": {
+          "latitude": {
+            "type": "number",
+            "format": "double"
+          },
+          "longitude": {
+            "type": "number",
+            "format": "double"
+          }
+        }
+      },
+      "SetHomeResponse": {
+        "required": [
+          "home",
+          "trips",
+          "newSuggestions"
+        ],
+        "type": "object",
+        "properties": {
+          "home": {
+            "$ref": "#/components/schemas/PlaceInfo"
+          },
+          "trips": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "newSuggestions": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       }
