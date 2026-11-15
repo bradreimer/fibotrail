@@ -25,3 +25,4 @@ A knowledge document describes. It doesn't decide and it doesn't promise:
 | [immich-api-findings.md](immich-api-findings.md) | What Immich returns for dates, positions, and place names, with made-up responses for tests | The spike, #12, run against Immich 3.4.1 on 2026-11-15 |
 | [web-app-development.md](web-app-development.md) | How to run and change the web app, regenerate the API types, and redraw the icons | Written with the app shell, #6, on 2026-11-15 |
 | [accessibility-checklist.md](accessibility-checklist.md) | The accessibility checks that tests make, and the manual checks to run on an iPhone before a release | Written for the release, #24, on 2026-11-15. The tests are in `apps/web/src/accessibility/` |
+| [first-scan-and-replay-checklist.md](first-scan-and-replay-checklist.md) | The steps to scan the real library, prove Immich is only read, and run the replay test | Written for #7, #8, and #24 on 2026-11-15, from the specs. Not run yet |
