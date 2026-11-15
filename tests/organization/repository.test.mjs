@@ -27,6 +27,7 @@ import {
   checkKnowledgeName,
   checkMentions,
   checkReadme,
+  checkReleaseWorkflow,
   checkSpec,
   checkStatus,
   checkTestProjects,
@@ -79,6 +80,14 @@ describe('secrets', () => {
 describe('README', () => {
   it('has the release sections and documents every variable and permission', () => {
     assertNoProblems(checkReadme(read('README.md'), read('.env.example')).map((p) => `README.md: ${p}`));
+  });
+});
+
+describe('release workflow', () => {
+  it('publishes a version only from a checked tag', () => {
+    assertNoProblems(
+      checkReleaseWorkflow(read('.github/workflows/release.yml')).map((p) => `release.yml: ${p}`),
+    );
   });
 });
 

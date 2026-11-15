@@ -18,6 +18,7 @@ import {
   checkKnowledgeName,
   checkMentions,
   checkReadme,
+  checkReleaseWorkflow,
   checkSpec,
   checkStatus,
   checkTestProjects,
@@ -307,5 +308,31 @@ describe('checkReadme', () => {
     assert.match(problems, /variable IMMICH_URL/);
     assert.match(problems, /variable FIBOTRAIL_DATA_DIR/);
     assert.match(problems, /permission asset\.read/);
+  });
+});
+
+describe('checkReleaseWorkflow', () => {
+  const good = [
+    'on:\n  push:\n    tags: ["v*.*.*"]',
+    'git merge-base --is-ancestor "$GITHUB_SHA" origin/main',
+    'gh run list --workflow CI --commit "$SHA" \\\n  --status success',
+    'platforms: linux/amd64,linux/arm64',
+    'VERSION=${{ steps.version.outputs.version }}',
+    'tags: |\n  img:${{ steps.version.outputs.version }}\n  img:latest',
+  ].join('\n');
+
+  it('passes a workflow with every safeguard', () => {
+    assert.deepEqual(checkReleaseWorkflow(good), []);
+  });
+
+  it('names each missing safeguard', () => {
+    assert.match(checkReleaseWorkflow(good.replace('merge-base --is-ancestor', 'true')).join(), /on main/);
+    assert.match(checkReleaseWorkflow(good.replace('--status success', '')).join(), /CI passed/);
+    assert.match(checkReleaseWorkflow(good.replace(',linux/arm64', '')).join(), /arm64/);
+    assert.match(checkReleaseWorkflow(good.replace('img:latest', '')).join(), /latest/);
+  });
+
+  it('rejects a branch trigger', () => {
+    assert.match(checkReleaseWorkflow(good + '\n    branches: [main]').join(), /branches/);
   });
 });

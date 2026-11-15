@@ -64,7 +64,10 @@ maintainer's library and phone, and are listed under Next. See
   the focus ring), and they found two failures that are fixed: text on Coral was 4.4:1, and the
   Gold focus ring was 2:1 on Paper. The manual checklist is written in
   [accessibility-checklist.md](knowledge/accessibility-checklist.md) and hasn't been run. The tag
-  workflow and the license note are still open. The README's commands haven't been run against a
+  workflow is written (`.github/workflows/release.yml`): a `vX.Y.Z` tag on a `main` commit with a
+  passing CI run pushes `:X.Y.Z` and `:latest` for amd64 and arm64, and `/healthz` reports the
+  version. It hasn't run on GitHub, and the image build with the `VERSION` argument hasn't run
+  locally. The license note is still open. The README's commands haven't been run against a
   real Immich yet.
 
 ## Next

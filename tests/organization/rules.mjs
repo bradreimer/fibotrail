@@ -369,6 +369,25 @@ export function checkReadme(readme, envExample) {
   return problems;
 }
 
+/**
+ * The release workflow runs only for a version tag, refuses a commit that is off main or has no
+ * passing CI run, builds both platforms, and pushes the version and "latest".
+ */
+export function checkReleaseWorkflow(yaml) {
+  const required = [
+    [/tags:\s*\["v\*\.\*\.\*"\]/, 'must run only for tags that match v*.*.*'],
+    [/merge-base --is-ancestor/, 'must check that the tagged commit is on main'],
+    [/gh run list[\s\S]*--workflow CI[\s\S]*--status success/, 'must check that CI passed on the tagged commit'],
+    [/platforms: linux\/amd64,linux\/arm64/, 'must build amd64 and arm64'],
+    [/:\$\{\{ steps\.version\.outputs\.version \}\}/, 'must push the version tag'],
+    [/:latest/, 'must push latest'],
+    [/VERSION=\$\{\{ steps\.version\.outputs\.version \}\}/, 'must pass the version to the build'],
+  ];
+  const problems = required.filter(([pattern]) => !pattern.test(yaml)).map(([, text]) => text);
+  if (/branches:/.test(yaml)) problems.push('must not run for branches');
+  return problems;
+}
+
 /** Text files use LF line endings, have no trailing spaces, and end with exactly one newline. */
 export function checkTextFormat(text) {
   const problems = [];

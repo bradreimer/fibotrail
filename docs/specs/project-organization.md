@@ -60,6 +60,12 @@ that the repository stays organized without me policing it.
 - It documents, in code format, every variable in `.env.example` (including commented ones) and
   every Immich permission named there.
 
+### The release workflow
+
+- `.github/workflows/release.yml` runs only for tags that match `v*.*.*`. It checks that the
+  tagged commit is on `main` and has a passing CI run, builds amd64 and arm64, and pushes the
+  version and `latest`, with the version passed to the build.
+
 ### The docs folder
 
 - `docs/` holds exactly five files and three folders: `README.md`, `development-workflow.md`,

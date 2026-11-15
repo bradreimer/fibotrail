@@ -220,6 +220,7 @@ public class HealthCheckTests
         var response = await app.NewBrowser().GetAsync("/healthz", asPage: false);
 
         Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal("ok dev", await response.Content.ReadAsStringAsync());
     }
 
     [Fact]
