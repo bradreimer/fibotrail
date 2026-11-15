@@ -28,3 +28,21 @@ export function ScanBanner({ done, total }: ScanBannerProps) {
     </div>
   );
 }
+
+interface ScanFailedBannerProps {
+  /** Why the scan stopped, in plain words. */
+  message: string;
+  onRetry: () => void;
+}
+
+/** Shown in place of the progress when a scan stops. The scan resumes from where it was. */
+export function ScanFailedBanner({ message, onRetry }: ScanFailedBannerProps) {
+  return (
+    <div className="scan-banner scan-banner--failed" role="alert">
+      <span>{message}</span>
+      <button type="button" className="scan-banner__retry" onClick={onRetry}>
+        Try again
+      </button>
+    </div>
+  );
+}

@@ -1,6 +1,8 @@
 import { useEffect, useRef } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 
+import { useScan } from '../api/scan';
+import { ScanBanner, ScanFailedBanner } from '../states/ScanBanner';
 import { destinationFor } from './destinations';
 import { InstallHint } from './InstallHint';
 import { Navigation } from './Navigation';
@@ -14,6 +16,7 @@ import { useScrollMemory } from './useScrollMemory';
 export function AppShell() {
   const mode = useNavigationMode();
   const { pathname } = useLocation();
+  const scan = useScan();
   const main = useRef<HTMLElement>(null);
   useScrollMemory(main);
 
@@ -27,7 +30,14 @@ export function AppShell() {
       <header className="app__header">
         <h1 className="app__title">{title}</h1>
       </header>
-      <div className="app__banner" />
+      <div className="app__banner">
+        {scan.status?.state === 'running' && (
+          <ScanBanner done={scan.status.done} total={scan.status.total} />
+        )}
+        {scan.status?.state === 'failed' && scan.status.message && (
+          <ScanFailedBanner message={scan.status.message} onRetry={() => void scan.start()} />
+        )}
+      </div>
       <main className="app__main" ref={main} tabIndex={-1}>
         <div className="screen" key={pathname}>
           <Outlet />

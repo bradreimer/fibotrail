@@ -20,6 +20,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- The stand-in for Immich and its recorded responses are shared with the Immich client's tests. -->
+    <Compile Include="..\Fibotrail.Immich.Tests\FakeImmichServer.cs" Link="FakeImmichServer.cs" />
+    <EmbeddedResource Include="..\Fibotrail.Immich.Tests\Responses\*.json" Link="Responses\%(Filename)%(Extension)" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\src\Fibotrail.Server\Fibotrail.Server.csproj" />
   </ItemGroup>
 

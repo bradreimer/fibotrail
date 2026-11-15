@@ -1,0 +1,4 @@
+# Kiota writes the client in Generated. Analyzers and the formatter leave it alone.
+# To change it, run scripts/generate-immich-client.sh.
+[Generated/**.cs]
+generated_code = true

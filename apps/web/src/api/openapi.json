@@ -24,10 +24,219 @@
           }
         }
       }
+    },
+    "/api/immich": {
+      "get": {
+        "tags": [
+          "Fibotrail"
+        ],
+        "operationId": "GetImmichStatus",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImmichStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/scan": {
+      "get": {
+        "tags": [
+          "Fibotrail"
+        ],
+        "operationId": "GetScanStatus",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScanStatus"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Fibotrail"
+        ],
+        "operationId": "StartScan",
+        "responses": {
+          "202": {
+            "description": "Accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScanStatus"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/photos/{id}/thumbnail": {
+      "get": {
+        "tags": [
+          "Fibotrail"
+        ],
+        "operationId": "GetPhotoThumbnail",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/api/photos/{id}/preview": {
+      "get": {
+        "tags": [
+          "Fibotrail"
+        ],
+        "operationId": "GetPhotoPreview",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
     }
   },
   "components": {
     "schemas": {
+      "ImmichStatus": {
+        "required": [
+          "connected",
+          "version",
+          "message",
+          "warning"
+        ],
+        "type": "object",
+        "properties": {
+          "connected": {
+            "type": "boolean"
+          },
+          "version": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "message": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "warning": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "ProblemDetail": {
+        "required": [
+          "detail"
+        ],
+        "type": "object",
+        "properties": {
+          "detail": {
+            "type": "string"
+          }
+        }
+      },
+      "ScanStatus": {
+        "required": [
+          "state",
+          "done",
+          "total",
+          "message",
+          "finishedAt",
+          "photoCount"
+        ],
+        "type": "object",
+        "properties": {
+          "state": {
+            "$ref": "#/components/schemas/ScanStatusState"
+          },
+          "done": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int32"
+          },
+          "message": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "finishedAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "photoCount": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "ScanStatusState": {
+        "enum": [
+          "never",
+          "running",
+          "completed",
+          "failed"
+        ]
+      },
       "SessionInfo": {
         "required": [
           "csrfToken"

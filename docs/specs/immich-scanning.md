@@ -50,9 +50,13 @@ them.
 
 ### Client
 
-- The Immich client is C# code generated from Immich's OpenAPI file, in its own project.
+- The Immich client is C# code generated from Immich's OpenAPI file, in its own project,
+  `Fibotrail.Immich`. `scripts/generate-immich-client.sh` writes it.
 - The server calls only an allowed list of Immich endpoints: the server version, the metadata
   search, the asset statistics, and the asset thumbnail. A test fails if a call is made outside the list.
+- The generated client holds only the requests on the list, and a guard stops any other request
+  before it leaves, per
+  [ADR-008](../adr/ADR-008-a-generated-immich-client-limited-to-allowed-reads.md).
 - `POST /api/search/metadata` is a read. It's the only request that isn't a `GET`.
 - The field names and parameters below were confirmed against Immich 3.4.1. See
   [immich-api-findings.md](../knowledge/immich-api-findings.md).
@@ -66,7 +70,10 @@ them.
 - When the check fails, the message is "Can't reach Immich. Check `IMMICH_URL` and
   `IMMICH_API_KEY` in your `.env` file."
 - When the Immich version is outside the tested range, Settings shows a warning and scanning still
-  runs.
+  runs. The tested range is 3.4, the version of the spike.
+- A connection check isn't retried, so Settings gets its answer within two timeouts. When the
+  check fails, Settings offers **Check again**.
+- The result of the check at startup is written to the log. The server starts either way.
 
 ### Scanner
 
@@ -94,7 +101,9 @@ them.
 - An asset with no capture time is skipped. A position of exactly 0, 0 is stored as no position,
   so the photo can still join a trip by date.
 - After each page, the scanner saves its cursor and the count of photos seen to `scan_run`.
-- A scan that stops for any reason resumes from the saved cursor the next time it starts.
+- A scan that stops for any reason resumes from the saved cursor the next time it starts. A scan
+  that a restart interrupted starts again by itself when the server starts. A scan that failed
+  waits for **Try again** or **Scan now**.
 - After the first complete scan, a scan requests only assets added or changed since the last
   complete scan. It adds `updatedAt` with `gt` to the `filter`, set to the latest updated time in
   the `photo` table when that scan completed.
@@ -114,6 +123,9 @@ them.
   photos."
 - The total comes from `GET /api/assets/statistics`, read when the scan starts. The search
   response doesn't give the size of the library.
+- A scan of changes only has no total, because Immich doesn't say how many assets changed. Its
+  banner shows a count alone, such as "Scanning your library: 250 photos so far."
+- The banner asks the server for progress every 2 seconds while a scan runs.
 - No request uses `album.read` in the MVP. The key has it for later use.
 - The app stays usable during a scan. Screens show the data scanned so far.
 - Settings shows the time and result of the last scan.
@@ -125,8 +137,9 @@ them.
 - The proxy serves two sizes: a thumbnail for grids and a preview for the photo viewer, which are
   Immich's `size=thumbnail` and `size=preview`. For a video, both are still frames.
 - The proxy serves only asset IDs that are in the `photo` table, and only to a signed-in session.
-- Fetched images are cached in `/data`. The cache can be deleted at any time and refills on
-  demand.
+- Fetched images are cached in `/data/thumbnails`. The cache can be deleted at any time and
+  refills on demand.
+- The browser may keep an image for 7 days, in its private cache.
 
 ## Acceptance criteria
 

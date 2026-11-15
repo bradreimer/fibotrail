@@ -1,0 +1,13 @@
+{
+  "message": "Validation failed",
+  "errors": [
+    {
+      "origin": "number",
+      "code": "too_big",
+      "maximum": 1000,
+      "inclusive": true,
+      "path": ["size"],
+      "message": "Too big: expected number to be <=1000"
+    }
+  ]
+}

@@ -1,6 +1,10 @@
 using System.Net;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Fibotrail.Server.Auth;
+using Fibotrail.Immich;
 using Fibotrail.Server.Data;
+using Fibotrail.Server.Immich;
 using Fibotrail.Server.Web;
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Authentication;
@@ -35,6 +39,22 @@ public static partial class ServerApp
     {
         var services = builder.Services;
         services.AddFibotrailCore(settings, cost);
+
+        // Immich. A test registers its own options and a stand-in transport before this runs.
+        services.TryAddSingleton(new ImmichOptions(settings.ImmichUrl!, settings.ImmichApiKey!, settings.ImmichTimeout));
+        services.TryAddSingleton<IImmichClient>(provider =>
+            new ImmichClient(provider.GetRequiredService<ImmichOptions>(), provider.GetService<ImmichTransport>()?.Handler));
+        services.AddSingleton<ScanService>();
+        services.AddScoped<ImmichConnection>();
+        services.AddScoped<ThumbnailStore>();
+
+        // Enums travel as words, such as "running", so the web app's types name each value.
+        // Numbers travel as numbers only, so the types say "number" and not "number or string".
+        services.ConfigureHttpJsonOptions(options =>
+        {
+            options.SerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
+            options.SerializerOptions.NumberHandling = JsonNumberHandling.Strict;
+        });
 
         // The keys that protect the anti-forgery cookie live in /data, the one writable folder.
         services.AddDataProtection()
@@ -111,6 +131,39 @@ public static partial class ServerApp
         }
     }
 
+    /// <summary>
+    /// Checks the Immich connection and writes the result to the log, then continues a scan that
+    /// the last shutdown interrupted. The server starts either way: Settings shows the problem.
+    /// </summary>
+    public static async Task StartImmichAsync(WebApplication app)
+    {
+        ArgumentNullException.ThrowIfNull(app);
+        await using var scope = app.Services.CreateAsyncScope();
+        var status = await scope.ServiceProvider.GetRequiredService<ImmichConnection>().CheckAsync(CancellationToken.None);
+        if (status.Connected)
+        {
+            LogConnected(app.Logger, status.Version, status.Warning ?? "The version is one that Fibotrail was tested with.");
+        }
+        else
+        {
+            LogNotConnected(app.Logger, status.Message);
+        }
+
+        if (await app.Services.GetRequiredService<ScanService>().ResumeInterruptedAsync(CancellationToken.None))
+        {
+            LogResumed(app.Logger);
+        }
+    }
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Connected to Immich {Version}. {Note}")]
+    private static partial void LogConnected(ILogger logger, string? version, string note);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "{Message}")]
+    private static partial void LogNotConnected(ILogger logger, string? message);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Continuing the scan that was interrupted.")]
+    private static partial void LogResumed(ILogger logger);
+
     [LoggerMessage(Level = LogLevel.Information, Message = "Saved a copy of the database at {Path} before updating it.")]
     private static partial void LogBackup(ILogger logger, string path);
 
@@ -135,7 +188,15 @@ public static partial class ServerApp
             if (!await antiforgery.IsRequestValidAsync(context))
             {
                 context.Response.StatusCode = StatusCodes.Status400BadRequest;
-                await WriteHtmlAsync(context.Response, Pages.Expired());
+                if (context.Request.Path.StartsWithSegments("/api"))
+                {
+                    await context.Response.WriteAsJsonAsync(new ProblemDetail("This page is out of date. Reload it, then try again."));
+                }
+                else
+                {
+                    await WriteHtmlAsync(context.Response, Pages.Expired());
+                }
+
                 return;
             }
         }
@@ -218,6 +279,8 @@ public static partial class ServerApp
         api.MapGet("/session", (HttpContext context, IAntiforgery antiforgery) =>
             TypedResults.Ok(new SessionInfo(antiforgery.GetAndStoreTokens(context).RequestToken ?? string.Empty)))
             .WithName("GetSession");
+
+        api.MapImmichRoutes();
 
         app.MapOpenApi();
 

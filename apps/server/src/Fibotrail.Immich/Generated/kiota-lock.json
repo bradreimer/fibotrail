@@ -1,0 +1,40 @@
+{
+  "descriptionHash": "9062D9CC6FEB2E924B5D1461A2F62576DEFE6871A3B6FE0984AC28F18DCED573FD04B1DDB125B5FE7F66A85CC8FB7FE299382621A3E35DF6C0C9E1B12F96DC18",
+  "descriptionLocation": "https://raw.githubusercontent.com/immich-app/immich/v3.4.1/open-api/immich-openapi-specs.json",
+  "lockFileVersion": "1.0.0",
+  "kiotaVersion": "1.38.0",
+  "clientClassName": "ImmichApiClient",
+  "typeAccessModifier": "Public",
+  "clientNamespaceName": "Fibotrail.Immich.Generated",
+  "language": "CSharp",
+  "usesBackingStore": false,
+  "excludeBackwardCompatible": true,
+  "includeAdditionalData": true,
+  "disableSSLValidation": false,
+  "serializers": [
+    "Microsoft.Kiota.Serialization.Json.JsonSerializationWriterFactory",
+    "Microsoft.Kiota.Serialization.Text.TextSerializationWriterFactory",
+    "Microsoft.Kiota.Serialization.Form.FormSerializationWriterFactory",
+    "Microsoft.Kiota.Serialization.Multipart.MultipartSerializationWriterFactory"
+  ],
+  "deserializers": [
+    "Microsoft.Kiota.Serialization.Json.JsonParseNodeFactory",
+    "Microsoft.Kiota.Serialization.Text.TextParseNodeFactory",
+    "Microsoft.Kiota.Serialization.Form.FormParseNodeFactory"
+  ],
+  "structuredMimeTypes": [
+    "application/json",
+    "text/plain;q=0.9",
+    "application/x-www-form-urlencoded;q=0.2",
+    "multipart/form-data;q=0.1"
+  ],
+  "includePatterns": [
+    "/server/version#GET",
+    "/search/metadata#POST",
+    "/assets/statistics#GET",
+    "/assets/{id}/thumbnail#GET"
+  ],
+  "excludePatterns": [],
+  "disabledValidationRules": [],
+  "allowedExternalOrigins": []
+}
