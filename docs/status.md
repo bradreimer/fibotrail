@@ -2,10 +2,10 @@
 
 ## Current milestone
 
-MVP step 3b, the inbox. Steps 2a, 2b, and 3a (the skeleton, the scanner, and the detector) are
-built. **The gate of step 3a isn't met.** The replay test hasn't run on the real library, because
-it needs a scan of that library and a list of known trips. The inbox is being built before the
-gate, at the maintainer's request to complete every work item. See
+MVP step 3c, the trips. Steps 2a, 2b, 3a, and 3b (the skeleton, the scanner, the detector, and
+the inbox) are built. **The gate of step 3a isn't met.** The replay test hasn't run on the real library, because
+it needs a scan of that library and a list of known trips. The inbox and the trip screens are being
+built before the gate, at the maintainer's request to complete every work item. See
 [roadmap.md](roadmap.md#mvp-version-01).
 
 ## Completed
@@ -40,6 +40,10 @@ gate, at the maintainer's request to complete every work item. See
   rescans, and the `fibotrail replay` command. See
   [ADR-009](adr/ADR-009-a-bundled-natural-earth-base-map.md) and
   [ADR-010](adr/ADR-010-stops-and-routes-are-stored-with-the-trip.md).
+- [#9](https://github.com/bradreimer/fibotrail/issues/9) The trip inbox. Suggestion cards with
+  a photo strip and a route preview, **Add trip** with a sheet for the name and the cover,
+  **Not a trip**, **Later**, swipe on touch screens, the **Ignored** tab with **Restore**, and
+  the badge on the Inbox destination.
 
 ## In progress
 

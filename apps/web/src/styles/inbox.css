@@ -1,0 +1,279 @@
+/* The inbox: tabs, suggestion cards, the photo strip, the route preview, and the Add trip sheet. */
+.inbox {
+  display: grid;
+  gap: var(--fibo-space-5);
+  max-width: calc(var(--fibo-space-7) * 12);
+}
+
+.tabs {
+  display: flex;
+  gap: var(--fibo-space-3);
+  border-bottom: var(--fibo-border) solid var(--fibo-mist);
+}
+
+.tabs__tab {
+  min-width: var(--fibo-tap);
+  min-height: var(--fibo-tap);
+  padding: 0 var(--fibo-space-4);
+  border: 0;
+  border-bottom: var(--fibo-marker) solid transparent;
+  background: transparent;
+  color: var(--fibo-ink-muted);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.tabs__tab[aria-selected='true'] {
+  border-bottom-color: var(--fibo-gold);
+  color: var(--fibo-teal);
+}
+
+.inbox__list {
+  display: grid;
+  gap: var(--fibo-space-5);
+}
+
+.suggestion {
+  display: grid;
+  gap: var(--fibo-space-4);
+  padding: var(--fibo-space-5);
+  border: var(--fibo-border) solid var(--fibo-mist);
+  border-radius: var(--fibo-radius);
+  background: var(--fibo-paper);
+  /* A sideways swipe moves the card. An up or down swipe still scrolls the list. */
+  touch-action: pan-y;
+  transition: transform var(--fibo-dur-base) ease-out;
+}
+
+.suggestion__title {
+  font-size: var(--fibo-text-h3);
+}
+
+.suggestion__facts {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--fibo-space-2) var(--fibo-space-4);
+  color: var(--fibo-ink-muted);
+  font-size: var(--fibo-text-caption);
+}
+
+.suggestion__media {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--fibo-space-4);
+}
+
+.suggestion__route {
+  width: calc(var(--fibo-space-7) * 2);
+  margin: 0;
+  text-align: center;
+}
+
+.suggestion__actions,
+.sheet__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--fibo-space-3);
+}
+
+.button--text {
+  border-color: transparent;
+  background: transparent;
+  color: var(--fibo-teal);
+}
+
+.confidence {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--fibo-space-2);
+}
+
+.confidence__icon {
+  width: var(--fibo-space-4);
+  height: var(--fibo-space-4);
+}
+
+.confidence__bar {
+  fill: var(--fibo-mist);
+}
+
+.confidence__bar--on {
+  fill: var(--fibo-teal);
+}
+
+.photo-strip {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--fibo-space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.photo-strip__item {
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: var(--fibo-space-2);
+  background: var(--fibo-mist);
+}
+
+.photo-strip__photo {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.route-preview {
+  display: block;
+  width: 100%;
+  border-radius: var(--fibo-space-3);
+  background: var(--fibo-mist);
+}
+
+.route-preview__outline,
+.route-preview__line {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.route-preview__outline {
+  stroke: var(--fibo-paper);
+  stroke-width: 6;
+}
+
+.route-preview__line {
+  stroke: var(--fibo-teal);
+  stroke-width: 3;
+}
+
+.route-preview__stop {
+  fill: var(--fibo-coral);
+  stroke: var(--fibo-paper);
+  stroke-width: 2;
+}
+
+.route-preview__start {
+  fill: var(--fibo-gold);
+  stroke: var(--fibo-paper);
+  stroke-width: 2;
+}
+
+/* The sheet slides over the screen. Shadows appear only on dialogs and menus. */
+.sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: var(--fibo-scrim);
+}
+
+.sheet-backdrop__close {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: transparent;
+}
+
+.sheet {
+  position: relative;
+  display: grid;
+  gap: var(--fibo-space-4);
+  width: 100%;
+  max-width: calc(var(--fibo-space-7) * 10);
+  max-height: 90%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: var(--fibo-space-5) calc(env(safe-area-inset-right) + var(--fibo-space-5))
+    calc(env(safe-area-inset-bottom) + var(--fibo-space-5))
+    calc(env(safe-area-inset-left) + var(--fibo-space-5));
+  border-radius: var(--fibo-radius) var(--fibo-radius) 0 0;
+  background: var(--fibo-paper);
+  box-shadow: 0 0 var(--fibo-space-6) var(--fibo-scrim);
+  animation: screen-in var(--fibo-dur-base) ease-out;
+}
+
+.app[data-nav='rail'] .sheet-backdrop,
+.app[data-nav='sidebar'] .sheet-backdrop {
+  align-items: center;
+}
+
+.app[data-nav='rail'] .sheet,
+.app[data-nav='sidebar'] .sheet {
+  border-radius: var(--fibo-radius);
+}
+
+.cover-picker {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.cover-picker__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--fibo-space-7), 1fr));
+  gap: var(--fibo-space-2);
+  max-height: calc(var(--fibo-space-7) * 4);
+  margin-top: var(--fibo-space-3);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.cover-picker__photo {
+  aspect-ratio: 1;
+  min-width: var(--fibo-tap);
+  min-height: var(--fibo-tap);
+  padding: 0;
+  overflow: hidden;
+  border: var(--fibo-marker) solid transparent;
+  border-radius: var(--fibo-space-3);
+  background: var(--fibo-mist);
+  cursor: pointer;
+}
+
+.cover-picker__photo[aria-pressed='true'] {
+  border-color: var(--fibo-gold);
+}
+
+.cover-picker__photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* The count on the Inbox destination. */
+.nav__badge {
+  position: absolute;
+  top: var(--fibo-space-2);
+  left: 50%;
+  min-width: var(--fibo-space-5);
+  margin-left: var(--fibo-space-2);
+  padding: 0 var(--fibo-space-2);
+  border-radius: var(--fibo-space-5);
+  background: var(--fibo-coral);
+  color: var(--fibo-on-coral);
+  font-size: var(--fibo-text-caption);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: var(--fibo-space-5);
+  text-align: center;
+}
+
+.app[data-nav='sidebar'] .nav__badge {
+  position: static;
+  margin-left: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sheet {
+    animation: none;
+  }
+}

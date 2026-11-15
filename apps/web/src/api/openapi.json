@@ -228,10 +228,165 @@
           }
         }
       }
+    },
+    "/api/inbox": {
+      "get": {
+        "tags": [
+          "Fibotrail"
+        ],
+        "operationId": "GetInbox",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Inbox"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/inbox/count": {
+      "get": {
+        "tags": [
+          "Fibotrail"
+        ],
+        "operationId": "GetInboxCount",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InboxCount"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/trips/{id}/photos": {
+      "get": {
+        "tags": [
+          "Fibotrail"
+        ],
+        "operationId": "GetTripPhotos",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PhotoInfo"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/api/trips/{id}/decision": {
+      "post": {
+        "tags": [
+          "Fibotrail"
+        ],
+        "operationId": "DecideTrip",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DecisionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
     "schemas": {
+      "DecisionAction": {
+        "enum": [
+          "add",
+          "ignore",
+          "later",
+          "restore"
+        ]
+      },
+      "DecisionRequest": {
+        "required": [
+          "action"
+        ],
+        "type": "object",
+        "properties": {
+          "action": {
+            "$ref": "#/components/schemas/DecisionAction"
+          },
+          "name": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "coverPhotoId": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
       "HomeState": {
         "required": [
           "confirmed",
@@ -328,6 +483,63 @@
           }
         }
       },
+      "Inbox": {
+        "required": [
+          "suggestions",
+          "ignored",
+          "count"
+        ],
+        "type": "object",
+        "properties": {
+          "suggestions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Suggestion"
+            }
+          },
+          "ignored": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Suggestion"
+            }
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "InboxCount": {
+        "required": [
+          "count"
+        ],
+        "type": "object",
+        "properties": {
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "PhotoInfo": {
+        "required": [
+          "id",
+          "alt",
+          "isVideo"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "alt": {
+            "type": "string"
+          },
+          "isVideo": {
+            "type": "boolean"
+          }
+        }
+      },
       "PlaceInfo": {
         "required": [
           "latitude",
@@ -357,6 +569,28 @@
         "properties": {
           "detail": {
             "type": "string"
+          }
+        }
+      },
+      "RoutePoint": {
+        "required": [
+          "latitude",
+          "longitude",
+          "photoCount"
+        ],
+        "type": "object",
+        "properties": {
+          "latitude": {
+            "type": "number",
+            "format": "double"
+          },
+          "longitude": {
+            "type": "number",
+            "format": "double"
+          },
+          "photoCount": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },
@@ -460,6 +694,92 @@
             "format": "int32"
           }
         }
+      },
+      "Suggestion": {
+        "required": [
+          "id",
+          "status",
+          "name",
+          "place",
+          "places",
+          "startDate",
+          "endDate",
+          "photoCount",
+          "confidence",
+          "coverPhotoId",
+          "strip",
+          "route"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "status": {
+            "$ref": "#/components/schemas/TripStatus"
+          },
+          "name": {
+            "type": "string"
+          },
+          "place": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "places": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "photoCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "confidence": {
+            "$ref": "#/components/schemas/TripConfidence"
+          },
+          "coverPhotoId": {
+            "type": "string"
+          },
+          "strip": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PhotoInfo"
+            }
+          },
+          "route": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RoutePoint"
+            }
+          }
+        }
+      },
+      "TripConfidence": {
+        "enum": [
+          "low",
+          "medium",
+          "high"
+        ]
+      },
+      "TripStatus": {
+        "enum": [
+          "suggested",
+          "added",
+          "ignored",
+          "later"
+        ]
       }
     }
   },

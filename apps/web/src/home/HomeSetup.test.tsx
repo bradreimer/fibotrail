@@ -53,8 +53,16 @@ describe('the home location step', () => {
     expect(server.sent('PUT', '/api/home')).toHaveLength(0);
   });
 
-  it('saves the suggestion with Use this location, and says what was found', async () => {
-    const server = fakeServer({ 'GET /api/home': suggested, 'PUT /api/home': saved });
+  it('saves the suggestion with Use this location, and then shows the inbox', async () => {
+    const server = fakeServer({
+      'GET /api/home': suggested,
+      'PUT /api/home': () => {
+        // Detection ran on the server: home is confirmed, and the inbox has suggestions.
+        server.set('GET /api/home', { ...suggested, confirmed: vancouver });
+        server.set('GET /api/inbox/count', { count: 12 });
+        return saved;
+      },
+    });
     renderInbox();
     const use = await screen.findByRole('button', { name: 'Use this location' });
     await waitFor(() => expect(use).toBeEnabled());
@@ -64,10 +72,11 @@ describe('the home location step', () => {
     const sent = server.sent('PUT', '/api/home')[0]!;
     expect(sent.body).toEqual({ latitude: 49.25, longitude: -123.1 });
     expect(sent.headers['X-CSRF-Token']).toBe('token-1');
+    // The home step gives way to the inbox, and the badge shows what detection found.
+    expect(await screen.findByRole('tab', { name: 'Suggestions' })).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Where is home?' })).not.toBeInTheDocument();
     expect(
-      await screen.findByText(
-        'Home is Vancouver, British Columbia, Canada. We found 12 possible trips.',
-      ),
+      await screen.findByRole('link', { name: 'Inbox, 12 possible trips' }),
     ).toBeInTheDocument();
   });
 
@@ -152,7 +161,9 @@ describe('the home location step', () => {
   it('isn’t shown before the first scan', async () => {
     fakeServer();
     renderInbox();
-    expect(await screen.findByRole('heading', { name: 'No suggestions yet' })).toBeInTheDocument();
+    expect(
+      await screen.findByRole('heading', { name: 'No possible trips right now' }),
+    ).toBeInTheDocument();
     expect(screen.queryByRole('heading', { name: 'Where is home?' })).not.toBeInTheDocument();
   });
 });
