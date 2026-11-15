@@ -11,6 +11,10 @@ public sealed class FibotrailDbContext(DbContextOptions<FibotrailDbContext> opti
 
     public DbSet<SignInFailure> SignInFailures => Set<SignInFailure>();
 
+    public DbSet<Photo> Photos => Set<Photo>();
+
+    public DbSet<ScanRun> ScanRuns => Set<ScanRun>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Credential>(entity =>
@@ -29,6 +33,19 @@ public sealed class FibotrailDbContext(DbContextOptions<FibotrailDbContext> opti
         {
             entity.ToTable("sign_in_failure");
             entity.HasIndex(failure => new { failure.Address, failure.OccurredAt });
+        });
+
+        modelBuilder.Entity<Photo>(entity =>
+        {
+            entity.ToTable("photo");
+            entity.HasIndex(photo => photo.LocalTime);
+            entity.HasIndex(photo => photo.ImmichUpdatedAt);
+        });
+
+        modelBuilder.Entity<ScanRun>(entity =>
+        {
+            entity.ToTable("scan_run");
+            entity.Property(run => run.State).HasConversion<string>();
         });
     }
 }

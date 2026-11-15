@@ -1,9 +1,10 @@
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 import { App } from '../App';
+import { fakeServer } from '../test/server';
 import { installMatchMedia, resizeTo } from '../test/window';
 import { navigationModeForWidth } from './useNavigationMode';
 
@@ -16,10 +17,7 @@ function renderApp(path = '/') {
 }
 
 beforeEach(() => {
-  vi.stubGlobal(
-    'fetch',
-    vi.fn(async () => new Response(JSON.stringify({ csrfToken: 'token-1' }), { status: 200 })),
-  );
+  fakeServer();
 });
 
 describe('navigation by width', () => {

@@ -85,13 +85,13 @@ Each diamond is a gate. The next step starts only when its criterion is met.
 
 ### Decisions the MVP still needs
 
-Each one is recorded as an ADR when it's made.
+Each one is recorded as an ADR when it's made. How CI tests the Immich contract is decided: see
+[ADR-008](adr/ADR-008-a-generated-immich-client-limited-to-allowed-reads.md).
 
 | Decision | Recommendation | Needed by |
 | --- | --- | --- |
 | Base map source | Bundle a Natural Earth outline as the default, with an optional tile address in Settings. This keeps the "no outside calls" promise, and the life map can reuse it | 3b |
 | Where stops and routes are stored | Compute them when a trip is detected and store them with the trip, so the trip page doesn't recompute them | 3a |
-| How CI tests the Immich contract | Use recorded responses from the spike for the MVP, and add a test against a real Immich for version 1 | 2b |
 
 ### Definition of done for the MVP
 

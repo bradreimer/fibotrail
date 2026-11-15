@@ -2,8 +2,11 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using Fibotrail.Immich;
+using Fibotrail.Immich.Tests;
 using Fibotrail.Server.Auth;
 using Fibotrail.Server.Data;
+using Fibotrail.Server.Immich;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
@@ -44,8 +47,9 @@ public sealed class TestApp : IAsyncDisposable
     /// <summary>A cheap hash cost, so the tests are fast. Production uses <see cref="Argon2Cost.Default"/>.</summary>
     public static readonly Argon2Cost FastCost = new(64, 1, 1);
 
-    private TestApp(WebApplication app, ServerSettings settings, FakeTime time, FakeDelay delay)
+    private TestApp(WebApplication app, ServerSettings settings, FakeTime time, FakeDelay delay, FakeImmichServer immich)
     {
+        Immich = immich;
         App = app;
         Settings = settings;
         Time = time;
@@ -60,12 +64,29 @@ public sealed class TestApp : IAsyncDisposable
 
     public FakeDelay Delay { get; }
 
+    /// <summary>The stand-in for Immich. A test fills its library and reads the requests it got.</summary>
+    public FakeImmichServer Immich { get; }
+
+    public ScanService Scans => App.Services.GetRequiredService<ScanService>();
+
+    /// <summary>Runs one scan to its end, the way Scan now does.</summary>
+    public async Task ScanAsync()
+    {
+        Assert.True(Scans.TryStart(), "A scan was already running.");
+        await Scans.Current;
+    }
+
     public const string ShellHtml = "<!doctype html><title>Fibotrail</title><div id=\"root\"></div>";
 
-    public static async Task<TestApp> StartAsync()
+    /// <param name="folder">An existing data folder, to start the server again on the same data.</param>
+    /// <param name="immich">An existing stand-in for Immich, to keep its library across a restart.</param>
+    /// <param name="immichTimeout">How long one Immich request may take. Short, so a test of a hung Immich is fast.</param>
+    /// <param name="logging">Receives every log line, at every level.</param>
+    public static async Task<TestApp> StartAsync(string? folder = null, FakeImmichServer? immich = null, TimeSpan? immichTimeout = null, ILoggerProvider? logging = null)
     {
-        var folder = Directory.CreateTempSubdirectory("fibotrail-test-").FullName;
-        var settings = new ServerSettings(folder, new Uri("http://immich.invalid:2283"), "test-key-not-real");
+        folder ??= Directory.CreateTempSubdirectory("fibotrail-test-").FullName;
+        immich ??= new FakeImmichServer();
+        var settings = new ServerSettings(folder, new Uri("http://immich.invalid:2283"), FakeImmichServer.Key, new Uri("https://photos.example.com"));
         var time = new FakeTime();
         var delay = new FakeDelay();
 
@@ -79,13 +100,24 @@ public sealed class TestApp : IAsyncDisposable
         var builder = WebApplication.CreateBuilder(new WebApplicationOptions { EnvironmentName = "Testing", WebRootPath = webRoot });
         builder.WebHost.UseTestServer();
         builder.Logging.ClearProviders();
+        if (logging is not null)
+        {
+            builder.Logging.AddProvider(logging).SetMinimumLevel(LogLevel.Trace);
+        }
+
         builder.Services.AddSingleton<TimeProvider>(time);
         builder.Services.AddSingleton<ISignInDelay>(delay);
+        builder.Services.AddSingleton(new ImmichTransport(immich));
+        builder.Services.AddSingleton(new ImmichOptions(settings.ImmichUrl!, settings.ImmichApiKey!, immichTimeout ?? TimeSpan.FromSeconds(5))
+        {
+            // No test waits between tries.
+            RetryDelays = [TimeSpan.Zero, TimeSpan.Zero, TimeSpan.Zero],
+        });
 
         var app = ServerApp.Create(builder, settings, FastCost);
         await ServerApp.PrepareDatabaseAsync(app);
         await app.StartAsync();
-        return new TestApp(app, settings, time, delay);
+        return new TestApp(app, settings, time, delay, immich);
     }
 
     public Browser NewBrowser() => new(App.GetTestClient());
@@ -117,12 +149,21 @@ public sealed class TestApp : IAsyncDisposable
     public Task<T> WithDbAsync<T>(Func<FibotrailDbContext, Task<T>> work) =>
         WithServicesAsync(services => work(services.GetRequiredService<FibotrailDbContext>()));
 
-    public async ValueTask DisposeAsync()
+    /// <summary>Stops the server and keeps its data folder, as a container restart does.</summary>
+    public async Task StopAsync()
     {
         await App.StopAsync();
         await App.DisposeAsync();
         SqliteConnection.ClearAllPools();
-        Directory.Delete(Settings.DataDirectory, recursive: true);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await StopAsync();
+        if (Directory.Exists(Settings.DataDirectory))
+        {
+            Directory.Delete(Settings.DataDirectory, recursive: true);
+        }
     }
 }
 

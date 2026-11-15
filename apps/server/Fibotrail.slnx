@@ -1,8 +1,10 @@
 <Solution>
   <Folder Name="/src/">
+    <Project Path="src/Fibotrail.Immich/Fibotrail.Immich.csproj" />
     <Project Path="src/Fibotrail.Server/Fibotrail.Server.csproj" />
   </Folder>
   <Folder Name="/tests/">
+    <Project Path="tests/Fibotrail.Immich.Tests/Fibotrail.Immich.Tests.csproj" />
     <Project Path="tests/Fibotrail.Server.Tests/Fibotrail.Server.Tests.csproj" />
   </Folder>
 </Solution>

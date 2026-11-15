@@ -54,6 +54,61 @@ public class ServerSettingsTests
     }
 
     [Fact]
+    public void The_optional_immich_settings_have_defaults()
+    {
+        var (settings, _) = ServerSettings.Load(
+            Configuration(("IMMICH_URL", "http://immich_server:2283"), ("IMMICH_API_KEY", "abc")),
+            requireImmich: true);
+
+        Assert.Equal(TimeSpan.FromSeconds(30), settings!.ImmichTimeout);
+        Assert.Null(settings.ImmichExternalUrl);
+        Assert.Equal("/data/thumbnails", settings.ThumbnailDirectory);
+    }
+
+    [Fact]
+    public void The_optional_immich_settings_are_read()
+    {
+        var (settings, problems) = ServerSettings.Load(
+            Configuration(
+                ("IMMICH_URL", "http://immich_server:2283"),
+                ("IMMICH_API_KEY", "abc"),
+                ("IMMICH_EXTERNAL_URL", "https://photos.example.com"),
+                ("IMMICH_TIMEOUT_SECONDS", "120")),
+            requireImmich: true);
+
+        Assert.Empty(problems);
+        Assert.Equal(TimeSpan.FromSeconds(120), settings!.ImmichTimeout);
+        Assert.Equal(new Uri("https://photos.example.com"), settings.ImmichExternalUrl);
+    }
+
+    [Theory]
+    [InlineData("0")]
+    [InlineData("601")]
+    [InlineData("-5")]
+    [InlineData("1.5")]
+    [InlineData("thirty")]
+    public void A_timeout_that_isnt_a_whole_number_from_1_to_600_is_named(string value)
+    {
+        var (settings, problems) = ServerSettings.Load(
+            Configuration(("IMMICH_URL", "http://immich_server:2283"), ("IMMICH_API_KEY", "abc"), ("IMMICH_TIMEOUT_SECONDS", value)),
+            requireImmich: true);
+
+        Assert.Null(settings);
+        Assert.Contains("IMMICH_TIMEOUT_SECONDS", Assert.Single(problems), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void An_external_address_that_isnt_a_web_address_is_named()
+    {
+        var (settings, problems) = ServerSettings.Load(
+            Configuration(("IMMICH_URL", "http://immich_server:2283"), ("IMMICH_API_KEY", "abc"), ("IMMICH_EXTERNAL_URL", "photos")),
+            requireImmich: true);
+
+        Assert.Null(settings);
+        Assert.Contains("IMMICH_EXTERNAL_URL", Assert.Single(problems), StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void An_address_that_is_not_a_web_address_is_named()
     {
         var (settings, problems) = ServerSettings.Load(
@@ -143,7 +198,7 @@ public class DatabaseTests
         var copy = await app.WithDbAsync(async db =>
         {
             await db.Database.ExecuteSqlRawAsync(
-                "UPDATE __EFMigrationsHistory SET MigrationId = '00000000000000_Older'");
+                "DELETE FROM __EFMigrationsHistory WHERE MigrationId = (SELECT MAX(MigrationId) FROM __EFMigrationsHistory)");
             return await DatabaseStartup.SaveCopyIfMigrationPendingAsync(db, app.Settings, app.Time);
         });
 

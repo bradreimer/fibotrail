@@ -2,7 +2,7 @@
 
 ## Current milestone
 
-MVP step 2b, the scanner. Step 2a, the skeleton, is built. See
+MVP step 3a, the detector. Steps 2a and 2b, the skeleton and the scanner, are built. See
 [roadmap.md](roadmap.md#mvp-version-01).
 
 ## Completed
@@ -26,6 +26,11 @@ MVP step 2b, the scanner. Step 2a, the skeleton, is built. See
   service worker. The server serves the built app, and the Docker image includes it. The UI
   checks run in `./scripts/check.sh`. How to work on it is in
   [web-app-development.md](knowledge/web-app-development.md).
+- [#7](https://github.com/bradreimer/fibotrail/issues/7) Immich scanning. The generated Immich
+  client with its four allowed reads, the connection check, the paged scanner that resumes from
+  its cursor and reads only changes after the first run, the `photo` and `scan_run` tables, the
+  thumbnail proxy and its cache, **Scan now**, and the progress banner. See
+  [ADR-008](adr/ADR-008-a-generated-immich-client-limited-to-allowed-reads.md).
 
 ## In progress
 
@@ -39,6 +44,12 @@ The MVP plan is in [roadmap.md](roadmap.md#mvp-version-01). Its seven specs are 
 - Run through the ADR-007 table on a real iPhone, with the app installed to the home screen. The
   app shell was checked in a desktop browser at phone and iPad sizes only, so this check is still
   open for [#6](https://github.com/bradreimer/fibotrail/issues/6).
+- Scan the real library once. The scanner was tested against a stand-in for Immich that answers
+  in the shapes the spike recorded, and never against a real Immich server. The criteria "a full
+  scan of the maintainer's library finishes" and "the Immich access log shows only requests on
+  the allowed list" are still open for [#7](https://github.com/bradreimer/fibotrail/issues/7).
+- Decide whether the generated Immich client needs a license note. See the last consequence in
+  [ADR-008](adr/ADR-008-a-generated-immich-client-limited-to-allowed-reads.md).
 - List five to ten known trips with rough dates, for the replay test.
 - Decide the base map source, and record it as an ADR.
 - Answer the remaining open questions in the

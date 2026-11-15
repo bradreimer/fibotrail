@@ -7,14 +7,25 @@ public sealed class ServerSettings
 {
     public const string ImmichUrlVariable = "IMMICH_URL";
     public const string ImmichApiKeyVariable = "IMMICH_API_KEY";
+    public const string ImmichExternalUrlVariable = "IMMICH_EXTERNAL_URL";
+    public const string ImmichTimeoutVariable = "IMMICH_TIMEOUT_SECONDS";
     public const string DataDirectoryVariable = "FIBOTRAIL_DATA_DIR";
+    public const int DefaultImmichTimeoutSeconds = 30;
+    public const int MaxImmichTimeoutSeconds = 600;
     public const string DefaultDataDirectory = "/data";
 
-    public ServerSettings(string dataDirectory, Uri? immichUrl = null, string? immichApiKey = null)
+    public ServerSettings(
+        string dataDirectory,
+        Uri? immichUrl = null,
+        string? immichApiKey = null,
+        Uri? immichExternalUrl = null,
+        int immichTimeoutSeconds = DefaultImmichTimeoutSeconds)
     {
         DataDirectory = dataDirectory;
         ImmichUrl = immichUrl;
         ImmichApiKey = immichApiKey;
+        ImmichExternalUrl = immichExternalUrl;
+        ImmichTimeout = TimeSpan.FromSeconds(immichTimeoutSeconds);
     }
 
     /// <summary>The one writable folder. It holds the database and the cookie protection keys.</summary>
@@ -24,6 +35,15 @@ public sealed class ServerSettings
 
     /// <summary>A secret. Never log it and never send it to the browser.</summary>
     public string? ImmichApiKey { get; }
+
+    /// <summary>The address your browser uses for Immich. Only "Open in Immich" links use it.</summary>
+    public Uri? ImmichExternalUrl { get; }
+
+    /// <summary>How long one Immich request may take.</summary>
+    public TimeSpan ImmichTimeout { get; }
+
+    /// <summary>The cache of images fetched from Immich. It can be deleted at any time.</summary>
+    public string ThumbnailDirectory => Path.Combine(DataDirectory, "thumbnails");
 
     public string DatabasePath => Path.Combine(DataDirectory, "fibotrail.db");
 
@@ -70,8 +90,27 @@ public sealed class ServerSettings
             }
         }
 
+        Uri? externalUrl = null;
+        var external = configuration[ImmichExternalUrlVariable];
+        if (!string.IsNullOrWhiteSpace(external)
+            && (!Uri.TryCreate(external, UriKind.Absolute, out externalUrl)
+                || (externalUrl.Scheme != Uri.UriSchemeHttp && externalUrl.Scheme != Uri.UriSchemeHttps)))
+        {
+            problems.Add($"{ImmichExternalUrlVariable} isn't a web address. Use a value such as https://photos.example.com, or leave it empty.");
+        }
+
+        var timeoutSeconds = DefaultImmichTimeoutSeconds;
+        var timeout = configuration[ImmichTimeoutVariable];
+        if (!string.IsNullOrWhiteSpace(timeout)
+            && (!int.TryParse(timeout, System.Globalization.NumberStyles.None, System.Globalization.CultureInfo.InvariantCulture, out timeoutSeconds)
+                || timeoutSeconds < 1
+                || timeoutSeconds > MaxImmichTimeoutSeconds))
+        {
+            problems.Add($"{ImmichTimeoutVariable} must be a whole number from 1 to {MaxImmichTimeoutSeconds}. Use a value such as {DefaultImmichTimeoutSeconds}.");
+        }
+
         return problems.Count > 0
             ? (null, problems)
-            : (new ServerSettings(dataDirectory, immichUrl, immichApiKey), problems);
+            : (new ServerSettings(dataDirectory, immichUrl, immichApiKey, externalUrl, timeoutSeconds), problems);
     }
 }
