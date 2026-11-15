@@ -146,4 +146,7 @@ organization. See [CONTRIBUTING.md](CONTRIBUTING.md). Run the checks with `./scr
 
 ## License
 
-See [LICENSE](LICENSE).
+Fibotrail is MIT licensed. See [LICENSE](LICENSE). Immich is licensed under the AGPL-3.0. Fibotrail
+includes no Immich source code, but its generated client repeats names from Immich's API
+description. See
+[the notice](apps/server/src/Fibotrail.Immich/Generated/NOTICE.md).

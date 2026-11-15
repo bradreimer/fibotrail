@@ -67,7 +67,9 @@ maintainer's library and phone, and are listed under Next. See
   workflow is written (`.github/workflows/release.yml`): a `vX.Y.Z` tag on a `main` commit with a
   passing CI run pushes `:X.Y.Z` and `:latest` for amd64 and arm64, and `/healthz` reports the
   version. It hasn't run on GitHub, and the image build with the `VERSION` argument hasn't run
-  locally. The license note is still open. The README's commands haven't been run against a
+  locally. The generated client's license note is written
+  (ADR-008). The name `fibotrail` was checked on 2026-11-15: it's free on Docker Hub and the App
+  Store, and `ghcr.io/bradreimer/fibotrail` already pulls without signing in. The README's commands haven't been run against a
   real Immich yet.
 
 ## Next
@@ -86,8 +88,6 @@ The MVP plan is in [roadmap.md](roadmap.md#mvp-version-01). Its seven specs are 
   in the shapes the spike recorded, and never against a real Immich server. The criteria "a full
   scan of the maintainer's library finishes" and "the Immich access log shows only requests on
   the allowed list" are still open for [#7](https://github.com/bradreimer/fibotrail/issues/7).
-- Decide whether the generated Immich client needs a license note. See the last consequence in
-  [ADR-008](adr/ADR-008-a-generated-immich-client-limited-to-allowed-reads.md).
 - Run the replay test, which is the gate of step 3a. Put five to ten known trips in
   `/data/known-trips.json`, scan the real library, confirm the home location, and run
   `docker exec -it fibotrail fibotrail replay`. The format is in the
@@ -98,4 +98,3 @@ The MVP plan is in [roadmap.md](roadmap.md#mvp-version-01). Its seven specs are 
   The server language is settled: see [ADR-004](adr/ADR-004-technology-stack.md).
 - Review the app icon. The icon and launch images in `apps/web/public` are drawn from the logo
   construction by `npm run icons`. A designed logo can replace the drawing in that script.
-- Check that the name is free on GHCR, Docker Hub, and the App Store.
