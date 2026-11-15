@@ -196,6 +196,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/trips/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["GetTrip"];
+        put: operations["ChangeTrip"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -310,10 +326,81 @@ export interface components {
             strip: components["schemas"]["PhotoInfo"][];
             route: components["schemas"]["RoutePoint"][];
         };
+        TripChange: {
+            name?: null | string;
+            coverPhotoId?: null | string;
+        };
         /** @enum {unknown} */
         TripConfidence: "low" | "medium" | "high";
+        TripDay: {
+            /** Format: int32 */
+            number: number;
+            /** Format: date */
+            date: string;
+            place: null | string;
+            photos: components["schemas"]["TripPhotoInfo"][];
+        };
+        TripDetail: {
+            /** Format: int32 */
+            id: number;
+            status: components["schemas"]["TripStatus"];
+            name: string;
+            suggestedName: string;
+            place: null | string;
+            country: null | string;
+            /** Format: date */
+            startDate: string;
+            /** Format: date */
+            endDate: string;
+            coverPhotoId: string;
+            stats: components["schemas"]["TripStats"];
+            stops: components["schemas"]["TripStopInfo"][];
+            days: components["schemas"]["TripDay"][];
+        };
+        TripPhotoInfo: {
+            id: string;
+            alt: string;
+            /** Format: date-time */
+            localTime: string;
+            /** Format: double */
+            latitude: null | number;
+            /** Format: double */
+            longitude: null | number;
+            place: null | string;
+            /** Format: int32 */
+            stopIndex: null | number;
+            isVideo: boolean;
+            /** Format: int32 */
+            durationMs: null | number;
+            immichUrl: null | string;
+        };
+        TripStats: {
+            /** Format: int32 */
+            days: number;
+            /** Format: int32 */
+            photos: number;
+            /** Format: int32 */
+            stops: number;
+            /** Format: double */
+            distanceKm: number;
+            /** Format: double */
+            farthestFromHomeKm: number;
+            /** Format: int32 */
+            unplaced: number;
+        };
         /** @enum {unknown} */
         TripStatus: "suggested" | "added" | "ignored" | "later";
+        TripStopInfo: {
+            /** Format: int32 */
+            index: number;
+            /** Format: double */
+            latitude: number;
+            /** Format: double */
+            longitude: number;
+            place: null | string;
+            /** Format: int32 */
+            photoCount: number;
+        };
         TripSummary: {
             /** Format: int32 */
             id: number;
@@ -666,6 +753,75 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["TripSummary"][];
                 };
+            };
+        };
+    };
+    GetTrip: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TripDetail"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ChangeTrip: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TripChange"];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

@@ -7,6 +7,7 @@ import './styles/states.css';
 import './styles/map.css';
 import './styles/inbox.css';
 import './styles/trips.css';
+import './styles/trip.css';
 
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
