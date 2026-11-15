@@ -4,6 +4,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import { App } from '../App';
+import { expectNoAccessibilityProblems } from '../accessibility/accessibility';
 import type { components } from '../api/schema';
 import { fakeServer, status } from '../test/server';
 import { installMatchMedia } from '../test/window';
@@ -133,6 +134,7 @@ describe('the trip page', () => {
       'src',
       '/api/photos/a1/preview',
     );
+    expectNoAccessibilityProblems(container);
   });
 
   it('draws four pins and a gold start dot for four stops, with the route in order', async () => {
@@ -170,6 +172,7 @@ describe('the trip page', () => {
     expect(within(sheet).getByText('2 photos taken here.')).toBeInTheDocument();
     expect(within(sheet).getAllByRole('button', { name: /^Photo taken/ })).toHaveLength(2);
     expect(within(sheet).getByRole('button', { name: 'Close' })).toHaveFocus();
+    expectNoAccessibilityProblems();
     await userEvent.click(within(sheet).getByRole('button', { name: 'Close' }));
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
@@ -268,6 +271,7 @@ describe('the photo viewer', () => {
     expect(link).toHaveAttribute('target', '_blank');
     expect(link).toHaveAttribute('rel', 'noopener noreferrer');
     expect(within(viewer).getByRole('button', { name: 'Close' })).toHaveFocus();
+    expectNoAccessibilityProblems();
   });
 
   it('moves with the arrow keys and the buttons, and Escape returns to the page', async () => {

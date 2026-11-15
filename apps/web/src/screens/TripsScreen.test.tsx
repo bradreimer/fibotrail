@@ -4,6 +4,7 @@ import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import { App } from '../App';
+import { expectNoAccessibilityProblems } from '../accessibility/accessibility';
 import { fakeServer } from '../test/server';
 import { installMatchMedia, resizeTo } from '../test/window';
 import { tripLine, type TripSummary } from '../trips/TripCard';
@@ -73,6 +74,7 @@ describe('the trip library', () => {
     const cover = within(card).getByRole('img');
     expect(cover).toHaveAttribute('src', '/api/photos/c1/thumbnail');
     expect(cover).toHaveAttribute('alt', 'Disney with the kids, Mar 15–24, 2027');
+    expectNoAccessibilityProblems();
     expect(cover).toHaveAttribute('loading', 'lazy');
   });
 

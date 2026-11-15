@@ -84,9 +84,14 @@ textarea {
   font-size: var(--fibo-text-input);
 }
 
+/*
+ * The focus ring is two-tone: a Gold ring with an Ocean halo in the gap. Gold alone is 2:1 on
+ * Paper, so the pair carries the 3:1 that WCAG 2.2 asks for on any background.
+ */
 :focus-visible {
   outline: var(--fibo-marker) solid var(--fibo-gold);
   outline-offset: var(--fibo-space-1);
+  box-shadow: 0 0 0 var(--fibo-space-1) var(--fibo-ocean);
 }
 
 .button {

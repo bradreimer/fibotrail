@@ -4,6 +4,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import { App } from '../App';
+import { expectNoAccessibilityProblems } from '../accessibility/accessibility';
 import { suggestionSentence, SWIPE_DISTANCE, type Suggestion } from '../inbox/SuggestionCard';
 import { fakeServer, status } from '../test/server';
 import { installMatchMedia } from '../test/window';
@@ -132,6 +133,7 @@ describe('the suggestion card', () => {
     expect(photos[0]).toHaveAttribute('src', '/api/photos/p1-1/thumbnail');
     expect(photos[0]).toHaveAttribute('alt', 'Photo taken Mar 15, 2027 in Orlando');
     expect(view.getByRole('img', { name: 'Photo route with 2 stops' })).toBeInTheDocument();
+    expectNoAccessibilityProblems();
   });
 
   it('has Add trip as the primary button, and Not a trip as a secondary one that is never red', async () => {
@@ -221,6 +223,7 @@ describe('the three actions', () => {
     expect(
       await within(sheet).findByRole('button', { name: /^Use as cover: Photo taken Mar 15/ }),
     ).toHaveAttribute('aria-pressed', 'true');
+    expectNoAccessibilityProblems();
 
     await userEvent.clear(name);
     await userEvent.type(name, 'Disney with the kids');
