@@ -1,0 +1,75 @@
+/*
+ * The design tokens. Every color, space, radius, type size, and duration in the app comes from
+ * here. Dark mode and reduce motion swap the values, so no other file needs a media query for
+ * them. The source is docs/knowledge/design-and-branding.md.
+ */
+:root {
+  color-scheme: light dark;
+
+  /* Palette */
+  --fibo-paper: #f7f3ea;
+  --fibo-ink: #1d2b2f;
+  --fibo-teal: #146560;
+  --fibo-ocean: #0b3c49;
+  --fibo-gold: #e0a526;
+  --fibo-coral: #e4684a;
+  --fibo-meadow: #7bae7f;
+  --fibo-mist: #dde6e4;
+
+  /* Text that sits on a fill. White on Teal is 6.9:1, and Paper on Ocean is 10.8:1. */
+  --fibo-on-teal: #ffffff;
+  --fibo-on-ocean: #f7f3ea;
+  --fibo-ink-muted: color-mix(in srgb, var(--fibo-ink) 75%, var(--fibo-paper));
+  --fibo-scrim: color-mix(in srgb, var(--fibo-ocean) 60%, transparent);
+
+  /* Shape and space: Fibonacci numbers */
+  --fibo-radius: 13px;
+  --fibo-space-1: 3px;
+  --fibo-space-2: 5px;
+  --fibo-space-3: 8px;
+  --fibo-space-4: 13px;
+  --fibo-space-5: 21px;
+  --fibo-space-6: 34px;
+  --fibo-space-7: 55px;
+  --fibo-border: 1px;
+  --fibo-marker: 3px;
+  --fibo-tap: 44px;
+
+  /* Type. The sizes are in rem, so they follow the system text size. */
+  --fibo-font-display: 'Fraunces Variable', Georgia, serif;
+  --fibo-font-body: 'Inter Variable', system-ui, -apple-system, sans-serif;
+  --fibo-text-caption: 0.8125rem;
+  --fibo-text-body: 1rem;
+  --fibo-text-h3: 1.3125rem;
+  --fibo-text-h2: 2.125rem;
+  --fibo-text-hero: 3.4375rem;
+  --fibo-text-input: max(16px, 1rem);
+
+  /* Motion: Fibonacci milliseconds */
+  --fibo-dur-fast: 144ms;
+  --fibo-dur-base: 233ms;
+  --fibo-dur-page: 377ms;
+  --fibo-dur-signature: 610ms;
+  --fibo-shift: 13px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --fibo-paper: #0e1a1d;
+    --fibo-ink: #f7f3ea;
+    --fibo-teal: #4fb3ab;
+    --fibo-mist: #2a3b3f;
+    --fibo-on-teal: #0e1a1d;
+  }
+}
+
+/* With reduce motion on, every transition shows its final state at once. */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --fibo-dur-fast: 0ms;
+    --fibo-dur-base: 0ms;
+    --fibo-dur-page: 0ms;
+    --fibo-dur-signature: 0ms;
+    --fibo-shift: 0px;
+  }
+}

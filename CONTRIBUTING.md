@@ -40,7 +40,7 @@ rule only by updating the spec and the test together.
 
 ## Running the checks
 
-You need Node.js 22 or later. The backend will also need the .NET SDK when its code arrives.
+You need Node.js 22 or later and the .NET 10 SDK.
 
 ```bash
 ./scripts/check.sh

@@ -22,4 +22,23 @@ if [ -d apps/server ]; then
   )
 fi
 
+if [ -d apps/web ]; then
+  (
+    cd apps/web
+    echo "==> Web: install"
+    npm ci
+    echo "==> Web: formatting"
+    npm run format:check
+    echo "==> Web: lint"
+    npm run lint
+    echo "==> Web: types, and the API types match the OpenAPI document"
+    npm run typecheck
+    npm run api:check
+    echo "==> Web: tests"
+    npm test
+    echo "==> Web: build"
+    npm run build
+  )
+fi
+
 echo "==> All checks passed"

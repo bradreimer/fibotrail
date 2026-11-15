@@ -1,4 +1,6 @@
 using System.Net;
+using System.Net.Http.Json;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using Fibotrail.Server.Auth;
 using Fibotrail.Server.Data;
@@ -58,6 +60,8 @@ public sealed class TestApp : IAsyncDisposable
 
     public FakeDelay Delay { get; }
 
+    public const string ShellHtml = "<!doctype html><title>Fibotrail</title><div id=\"root\"></div>";
+
     public static async Task<TestApp> StartAsync()
     {
         var folder = Directory.CreateTempSubdirectory("fibotrail-test-").FullName;
@@ -65,7 +69,14 @@ public sealed class TestApp : IAsyncDisposable
         var time = new FakeTime();
         var delay = new FakeDelay();
 
-        var builder = WebApplication.CreateBuilder(new WebApplicationOptions { EnvironmentName = "Testing" });
+        // A stand-in for the built web app, so the tests don't need apps/web to be built.
+        var webRoot = Directory.CreateDirectory(Path.Combine(folder, "wwwroot")).FullName;
+        Directory.CreateDirectory(Path.Combine(webRoot, "assets"));
+        await File.WriteAllTextAsync(Path.Combine(webRoot, "index.html"), ShellHtml);
+        await File.WriteAllTextAsync(Path.Combine(webRoot, "assets", "app-abc123.js"), "// app");
+        await File.WriteAllTextAsync(Path.Combine(webRoot, "sw.js"), "// worker");
+
+        var builder = WebApplication.CreateBuilder(new WebApplicationOptions { EnvironmentName = "Testing", WebRootPath = webRoot });
         builder.WebHost.UseTestServer();
         builder.Logging.ClearProviders();
         builder.Services.AddSingleton<TimeProvider>(time);
@@ -154,6 +165,32 @@ public sealed partial class Browser(HttpClient client)
         return SendAsync(new HttpRequestMessage(HttpMethod.Post, path) { Content = new FormUrlEncodedContent(fields) });
     }
 
+    /// <summary>Reads an API route and returns its JSON answer.</summary>
+    public async Task<JsonElement> GetJsonAsync(string path)
+    {
+        var response = await GetAsync(path, asPage: false);
+        Assert.True(response.IsSuccessStatusCode, $"GET {path} answered {(int)response.StatusCode}.");
+        using var document = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+        return document.RootElement.Clone();
+    }
+
+    /// <summary>Sends a change to an API route the way the web app does, with the token in a header.</summary>
+    public Task<HttpResponseMessage> SendJsonAsync(HttpMethod method, string path, object? body = null)
+    {
+        var request = new HttpRequestMessage(method, path);
+        if (_csrfToken is not null)
+        {
+            request.Headers.Add("X-CSRF-Token", _csrfToken);
+        }
+
+        if (body is not null)
+        {
+            request.Content = JsonContent.Create(body);
+        }
+
+        return SendAsync(request);
+    }
+
     public async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request)
     {
         request.RequestUri = new Uri(new Uri("https://localhost"), request.RequestUri!.OriginalString);
@@ -184,6 +221,12 @@ public sealed partial class Browser(HttpClient client)
             {
                 _csrfToken = WebUtility.HtmlDecode(match.Groups[1].Value);
             }
+        }
+        else if (request.RequestUri.AbsolutePath == "/api/session" && response.IsSuccessStatusCode)
+        {
+            // The web app reads its token here, and so does this browser.
+            using var session = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+            _csrfToken = session.RootElement.GetProperty("csrfToken").GetString();
         }
 
         return response;

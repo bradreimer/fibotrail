@@ -5,6 +5,7 @@
 **/bin
 **/obj
 **/node_modules
+**/dist
 docs
 tests
 apps/server/tests
