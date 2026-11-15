@@ -29,6 +29,9 @@ them.
 - Trip detection. See [trip-detection.md](trip-detection.md).
 - A settings screen for the Immich address or key. Both come from `.env`.
 - Copies of original photos or videos, and video playback. A video plays in Immich.
+- Removing photos that were deleted from Immich for good. Immich doesn't report them, so this
+  needs a full pass that compares IDs. It arrives after the MVP, as a **Rebuild from Immich**
+  button.
 
 ## Requirements
 
@@ -37,7 +40,7 @@ them.
 | Variable | Required | Default | Purpose |
 | --- | --- | --- | --- |
 | `IMMICH_URL` | Yes | None | The address the container uses to reach Immich |
-| `IMMICH_API_KEY` | Yes | None | A key with `asset.read`, `asset.view`, and `album.read` only |
+| `IMMICH_API_KEY` | Yes | None | A key with `asset.read`, `asset.view`, `album.read`, and `asset.statistics` only |
 | `IMMICH_EXTERNAL_URL` | No | Empty | The address your browser uses to reach Immich, for **Open in Immich** links |
 | `IMMICH_TIMEOUT_SECONDS` | No | 30 | How long one Immich request may take |
 
@@ -49,13 +52,17 @@ them.
 
 - The Immich client is C# code generated from Immich's OpenAPI file, in its own project.
 - The server calls only an allowed list of Immich endpoints: the server version, the metadata
-  search, and the asset thumbnail. A test fails if a call is made outside the list.
+  search, the asset statistics, and the asset thumbnail. A test fails if a call is made outside the list.
 - `POST /api/search/metadata` is a read. It's the only request that isn't a `GET`.
+- The field names and parameters below were confirmed against Immich 3.4.1. See
+  [immich-api-findings.md](../knowledge/immich-api-findings.md).
 
 ### Connection check
 
 - The server checks the connection at startup and whenever Settings opens. Settings shows the
   result and the Immich version.
+- The check makes two requests: the server version, and a metadata search with `size` set to 1.
+  Immich answers the version request without a key, so only the search shows that the key works.
 - When the check fails, the message is "Can't reach Immich. Check `IMMICH_URL` and
   `IMMICH_API_KEY` in your `.env` file."
 - When the Immich version is outside the tested range, Settings shows a warning and scanning still
@@ -66,15 +73,31 @@ them.
 - The scanner reads image assets and video assets. In the MVP specs, "photo" means either one. A
   video has a capture time and a position like an image, and it counts toward a trip the same way.
 - The `photo` table also stores whether the asset is a video.
-- A scan pages through `POST /api/search/metadata` with `withExif` set to true.
-- For each asset, the `photo` table stores the Immich asset ID, the local capture time, latitude,
-  longitude, city, state, country, and Immich's updated time. Nothing else is stored.
+- A scan pages through `POST /api/search/metadata` with `withExif` set to true, `size` set to
+  1000, and a `filter` on `visibility` equal to `timeline`. The filter leaves out the hidden
+  video that holds the motion of a live photo, so a live photo counts once.
+- The cursor is the `nextCursor` value of the last page read. A null `nextCursor` ends the scan.
+- For each asset, the `photo` table stores these values. Nothing else is stored.
+
+  | Value | Immich field |
+  | --- | --- |
+  | Asset ID | `id` |
+  | Local capture time | `localDateTime`, read as a wall-clock time with no zone |
+  | Latitude and longitude | `exifInfo.latitude` and `exifInfo.longitude` |
+  | City, state, and country | `exifInfo.city`, `exifInfo.state`, and `exifInfo.country` |
+  | Immich's updated time | `updatedAt` |
+  | Whether it's a video | `type` equal to `VIDEO` |
+  | Length of a video, in milliseconds | `duration` |
+
+- Rows are keyed by asset ID. An asset that Immich returns again replaces its row.
+- An asset with `isTrashed` set to true isn't stored, and its row is removed if it has one.
 - An asset with no capture time is skipped. A position of exactly 0, 0 is stored as no position,
   so the photo can still join a trip by date.
 - After each page, the scanner saves its cursor and the count of photos seen to `scan_run`.
 - A scan that stops for any reason resumes from the saved cursor the next time it starts.
 - After the first complete scan, a scan requests only assets added or changed since the last
-  complete scan.
+  complete scan. It adds `updatedAt` with `gt` to the `filter`, set to the latest updated time in
+  the `photo` table when that scan completed.
 - One scan runs at a time. **Scan now** is disabled while a scan runs.
 - When a scan completes, trip detection runs.
 
@@ -89,6 +112,9 @@ them.
 
 - While a scan runs, the banner shows a count, such as "Scanning your library: 12,400 of 48,000
   photos."
+- The total comes from `GET /api/assets/statistics`, read when the scan starts. The search
+  response doesn't give the size of the library.
+- No request uses `album.read` in the MVP. The key has it for later use.
 - The app stays usable during a scan. Screens show the data scanned so far.
 - Settings shows the time and result of the last scan.
 
@@ -96,8 +122,8 @@ them.
 
 - The browser requests images from Fibotrail, and Fibotrail fetches them from
   `GET /api/assets/{id}/thumbnail` on `IMMICH_URL`.
-- The proxy serves two sizes: a thumbnail for grids and a preview for the photo viewer. For a
-  video, both are still frames.
+- The proxy serves two sizes: a thumbnail for grids and a preview for the photo viewer, which are
+  Immich's `size=thumbnail` and `size=preview`. For a video, both are still frames.
 - The proxy serves only asset IDs that are in the `photo` table, and only to a signed-in session.
 - Fetched images are cached in `/data`. The cache can be deleted at any time and refills on
   demand.
@@ -117,10 +143,4 @@ them.
 
 ## Open questions
 
-The spike, [#12](https://github.com/bradreimer/fibotrail/issues/12), answers all three.
-
-1. Which fields hold the local capture time and its time zone?
-2. Which request parameter returns only assets changed since a given time, and what page size
-   works well?
-3. How does a scan learn that a photo was deleted from Immich? The recommendation is a full pass
-   that compares IDs, run from a **Rebuild from Immich** button, after the MVP.
+None.

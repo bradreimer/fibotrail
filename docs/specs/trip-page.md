@@ -91,7 +91,9 @@ At 600 px and wider, the map sits beside the timeline in two columns.
 - The viewer shows the date, the time, the place name, and a small map with a pin when the photo
   has a position.
 - **Open in Immich** opens the photo in Immich in a new tab. The address is
-  `IMMICH_EXTERNAL_URL` followed by `/photos/` and the asset ID.
+  `IMMICH_EXTERNAL_URL` followed by `/photos/` and the asset ID. The path was confirmed against
+  Immich 3.4.1. See
+  [immich-api-findings.md](../knowledge/immich-api-findings.md#7-path-in-the-web-app).
 - When `IMMICH_EXTERNAL_URL` is empty, **Open in Immich** isn't shown.
 - For a video, the viewer shows the still frame, and the link reads **Play in Immich**. Fibotrail
   doesn't play video itself.
@@ -130,7 +132,5 @@ At 600 px and wider, the map sits beside the timeline in two columns.
 
 ## Open questions
 
-1. Is `/photos/{id}` the right path for a photo in the Immich web app? The spike, [#12](https://github.com/bradreimer/fibotrail/issues/12),
-   confirms it against the tested Immich version.
-2. Kilometers or miles? The MVP shows kilometers. A unit setting is a later addition if you want
+1. Kilometers or miles? The MVP shows kilometers. A unit setting is a later addition if you want
    one.

@@ -2,7 +2,8 @@
 
 ## Current milestone
 
-Phase 1, the spike. See [roadmap.md](roadmap.md).
+MVP step 2a, the skeleton. The gate of step 1, "Immich fields confirmed", is met. See
+[roadmap.md](roadmap.md#mvp-version-01).
 
 ## Completed
 
@@ -11,6 +12,10 @@ Phase 1, the spike. See [roadmap.md](roadmap.md).
   work item templates, ADRs, specs, knowledge, and the tests that enforce the layout.
 - [#3](https://github.com/bradreimer/fibotrail/issues/3) Project guidelines, the decisions on
   the stack, secrets, deployment, and the iOS experience, and the quality gates spec.
+- [#12](https://github.com/bradreimer/fibotrail/issues/12) The spike. The gate "Immich fields
+  confirmed" is met. The findings are in
+  [immich-api-findings.md](knowledge/immich-api-findings.md), from Immich 3.4.1 on 2026-11-15,
+  with a read-only key.
 
 ## In progress
 
@@ -21,9 +26,6 @@ Nothing yet.
 The MVP plan is in [roadmap.md](roadmap.md#mvp-version-01). Its seven specs are in
 [specs/](specs/README.md), with work items [#5](https://github.com/bradreimer/fibotrail/issues/5) through [#11](https://github.com/bradreimer/fibotrail/issues/11).
 
-- Run the spike, [#12](https://github.com/bradreimer/fibotrail/issues/12): export sample metadata and confirm the date, GPS, and place
-  fields.
-- For the spike, create a read-only Immich API key with `asset.read`, `asset.view`, and `album.read`.
 - List five to ten known trips with rough dates, for the replay test.
 - Decide the base map source, and record it as an ADR.
 - Answer the remaining open questions in the
