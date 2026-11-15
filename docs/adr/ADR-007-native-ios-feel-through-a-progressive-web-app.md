@@ -22,13 +22,17 @@ meet the following behaviors on an iPhone.
 | --- | --- |
 | Launch | Opens from a home screen icon in standalone mode, with no browser bars, and shows a splash screen in the brand colors |
 | Screen edges | Content respects the safe areas, so nothing sits under the notch, the Dynamic Island, or the home indicator |
-| Navigation | A bottom tab bar with four tabs, and a back gesture that returns to the previous screen with its scroll position kept |
+| Navigation | A bottom tab bar with one tab for each main destination, and a back gesture that returns to the previous screen with its scroll position kept |
 | Touch | Tap targets are at least 44 by 44 points, with no gray tap highlight and no 300 ms delay |
 | Scrolling | Only content areas scroll. The page itself doesn't bounce or pull to refresh, and headers and the tab bar stay fixed |
 | Text | Text isn't selectable in controls, and inputs use a font size of at least 16 px so the page doesn't zoom on focus |
 | Motion | Screen changes use the durations in the design document, and respect the reduce-motion setting |
 | Appearance | Follows the system light and dark setting, and the status bar matches the screen behind it |
 | Speed | The app shell loads from a service worker cache, so the first screen appears without waiting for the network |
+
+The MVP has three tabs: Trips, Inbox, and Settings. When the Map screen ships, the tab bar moves to
+the four destinations of the design document (Trips, Map, Collections, and Stats), and Inbox and
+Settings move to the top bar. A tab never leads to a screen that doesn't exist yet.
 
 The check for this decision is a manual run-through on a real iPhone, installed to the home
 screen, for every work item that changes the UI.

@@ -1,0 +1,116 @@
+# App shell
+
+Tracking issue: [#6](https://github.com/bradreimer/fibotrail/issues/6).
+
+## Purpose
+
+This spec defines the frame that every Fibotrail screen sits in: installation to the home screen,
+navigation, the design tokens, and the four screen states. It's where the "native iOS feel"
+guideline is met once, so each screen doesn't have to meet it again.
+
+It covers story U10 in the [roadmap](../roadmap.md#mvp-version-01), MVP step 2a.
+
+## User story
+
+As a person on the couch with a phone or iPad, I want Fibotrail to open from my home screen and
+behave like an app, so that browsing my trips feels as comfortable as a native iOS app.
+
+## Goals
+
+- On an iPhone, the app meets every row of the table in
+  [ADR-007](../adr/ADR-007-native-ios-feel-through-a-progressive-web-app.md).
+- Every screen uses the same tokens, navigation, and states, so a new screen is quick to build.
+- The browser talks only to Fibotrail.
+
+## Non-goals
+
+- The content of the Inbox, Trips, and trip page screens. Each has its own spec.
+- The Map, Collections, and Stats screens.
+- Signature animations: the route that draws itself and numbers that count up.
+- Offline use. The service worker caches the app shell, not your trips or photos.
+
+## Requirements
+
+### Project
+
+- The UI is a TypeScript, React, and Vite project in `apps/web`, per
+  [ADR-004](../adr/ADR-004-technology-stack.md). The server serves the built files.
+- The TypeScript types for the API are generated from the OpenAPI document that the server
+  produces.
+
+### Installation
+
+- The app has a web app manifest with the name "Fibotrail", standalone display mode, the brand
+  colors, and icons for the iPhone and iPad home screens.
+- A service worker caches the app shell, so the first screen appears without waiting for the
+  network.
+- In Safari on an iPhone or iPad, when the app isn't installed, a hint explains **Add to Home
+  Screen**. It shows once, and you can dismiss it.
+
+### Navigation
+
+| Width | Navigation | Layout |
+| --- | --- | --- |
+| Under 600 px | Bottom tab bar | One column |
+| 600 to 1023 px | Left sidebar that collapses to icons | Two columns where a screen defines them |
+| 1024 px and up | Left sidebar with labels | List on the left, detail on the right |
+
+- The MVP destinations are Trips, Inbox, and Settings, per ADR-007. The four destinations of the
+  design document (Trips, Map, Collections, and Stats) replace them when the Map screen ships, and
+  Inbox and Settings move to the top bar.
+- The active item is Trail Teal with a Golden Gold marker. Each item has an icon and a label.
+- Going back returns to the previous screen at the scroll position you left.
+- The MVP Settings screen shows the Immich connection status, the home location, the **Scan now**
+  button, and **Sign out**. Other specs define each of these.
+
+### Look
+
+- The design tokens from the
+  [design and branding document](../knowledge/design-and-branding.md#design-tokens) live in one
+  CSS file. Colors, spacing, radius, and durations come only from tokens.
+- The app follows the system light and dark setting by swapping token values.
+- Fraunces and Inter are served from the container.
+- Screen changes take 377 ms, and small transitions take 233 ms. With the system reduce-motion
+  setting on, the app shows the final state with no animation.
+
+### iOS behavior
+
+- Content respects the safe areas at every edge.
+- Tap targets are at least 44 by 44 points, with no gray tap highlight.
+- Only content areas scroll. The page doesn't bounce or pull to refresh, and the header and tab
+  bar stay fixed.
+- Inputs use a font size of at least 16 px, so the page doesn't zoom on focus.
+- Text in controls isn't selectable.
+
+### Screen states
+
+Shared components provide the four states, and every screen uses them.
+
+| State | What you see |
+| --- | --- |
+| Loading | Gray skeleton shapes in the final layout |
+| Scanning | A slim banner under the header with progress. The app stays usable |
+| Empty | A message and one next step |
+| Error | A plain explanation and a button to retry or open Settings |
+
+### Privacy and accessibility
+
+- A Content Security Policy allows scripts, styles, fonts, and images from Fibotrail only.
+- Text and key controls meet WCAG 2.2 AA contrast with the palette in the design and branding
+  document.
+- The whole shell works with a keyboard and a screen reader, and honors the system text size.
+
+## Acceptance criteria
+
+- On an iPhone, the app installs with **Add to Home Screen** and opens with no browser bars.
+- A run-through on a real iPhone passes every row of the ADR-007 table.
+- At 599 px the tab bar shows, and at 600 px the sidebar shows.
+- Switching the system between light and dark changes the app without a reload.
+- With reduce motion on, no animation plays.
+- The browser's network log shows no request to a host other than Fibotrail.
+- `./scripts/check.sh` runs the UI steps from the [quality gates spec](quality-gates.md) and
+  passes.
+
+## Open questions
+
+None.
