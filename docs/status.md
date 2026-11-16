@@ -203,8 +203,10 @@ The plan is in [roadmap.md](roadmap.md). Specs are in [specs/](specs/README.md).
   release, or recorded as a known gap. Also record the per-line results of the
   [accessibility checklist](knowledge/accessibility-checklist.md).
 - Zoom the life map to cities, and to regions outside Canada and the USA
-  ([#48](https://github.com/bradreimer/fibotrail/issues/48)). It needs boundary data below country
-  level and a decision on how cities are named and counted, so it starts with an ADR.
+  ([#48](https://github.com/bradreimer/fibotrail/issues/48)). Cities are decided in
+  [ADR-015](adr/ADR-015-cities-are-merged-places-and-theme-parks-keep-their-own-identity.md)
+  (proposed): stops within 25 km merge into one place, and theme parks stay their own places. Which
+  countries get regions, and the size of that data, is still open and the regions work waits for it.
 - Make the switches look like iOS switches: **Hide from map** in the photo viewer
   ([#52](https://github.com/bradreimer/fibotrail/issues/52)) and **Show routes** on the life map,
   and keep the photo viewer dark in dark mode
