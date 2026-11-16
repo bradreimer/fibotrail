@@ -18,7 +18,7 @@ Three facts shape the choice:
 - The country outlines are a bundled file, per
   [ADR-009](ADR-009-a-bundled-natural-earth-base-map.md), and today only the web app has them.
 - A library has tens of added trips, not thousands. The maintainer's has 35 suggestions. Matching a
-  few hundred stops to 177 country outlines is fast.
+  few hundred stops to the 241 outlines (countries and territories) of the 1:50 million data is fast.
 
 The Stats screen and the collections of phase 5 need the same counts, and need them on the server,
 because the rules for them must be tested with plain data and no browser.
@@ -56,10 +56,17 @@ When a feature needs stored matches, such as a place with its own boundary in a 
 
 - Visits are always current: adding, ignoring, or changing a trip changes the map on the next
   request, with nothing to rebuild.
-- The outlines now ship in two places, the web bundle and the server. One script makes both from
-  the same package, and a test compares their country counts.
+- The outlines now ship in two places, the web bundle and the server. `npm run outlines` writes the
+  server's copy from the same package, as a 556 KB gzipped resource, and a web test compares the two
+  lists of countries, so a change to the package fails the check until the copy is rebuilt.
 - The work is repeated on every request. With tens of trips that is a few milliseconds. If a
   library grows to thousands, cache the result and clear it when a trip's status or stops change.
+- The outlines of Russia and Fiji have rings that cross the antimeridian: their points jump from
+  179.9 East to 180 West. Used as flat polygons, they cover the sea across the world, which filled the
+  map wrongly and matched stops at 65 to 69 degrees North to Russia. Found on the first real map
+  ([#55](https://github.com/bradreimer/fibotrail/issues/55)). `npm run outlines` and the web map now
+  cut those rings at the antimeridian with one shared function. A ring around a pole, such as
+  Antarctica's, isn't cut.
 - A stop at 1:50 million detail can fall just outside every outline on a coast. The spec gives a
   nearest-country rule for that, and the 25 km value is a starting point that real trips may change.
 - Regions and cities will need their own boundary data and their own decision. This ADR doesn't

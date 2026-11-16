@@ -68,7 +68,8 @@ behave like an app, so that browsing my trips feels as comfortable as a native i
 - The MVP destinations are Trips, Inbox, and Settings, per ADR-007. The four destinations of the
   design document (Trips, Map, Collections, and Stats) replace them when the Map screen ships, and
   Inbox and Settings move to the top bar. The [life map spec](life-map.md) says what changes in
-  the first release: the tab bar holds Trips and Map until the other two screens exist.
+  the first release: the tab bar holds Trips and Map until the other two screens exist, Inbox and
+  Settings are icon buttons in the top bar under 600 px, and the sidebar from 600 px holds all four.
 - The active item is Trail Teal with a Golden Gold marker. Each item has an icon and a label.
 - Going back returns to the previous screen at the scroll position you left.
 - The MVP Settings screen shows the Immich connection status, the home location, the **Scan now**

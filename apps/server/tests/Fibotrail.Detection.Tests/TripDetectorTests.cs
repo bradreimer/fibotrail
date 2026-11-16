@@ -363,4 +363,70 @@ public class TripDetectorTests
         Assert.True(photos.Count > 70000);
         Assert.True(watch.Elapsed < TimeSpan.FromSeconds(10), $"Detection took {watch.Elapsed.TotalSeconds:0.0} seconds.");
     }
+
+    [Fact]
+    public void Four_busy_days_with_no_position_become_one_low_confidence_trip()
+    {
+        // March 2006: a camera with no GPS, 90 photos a day for 4 days.
+        var photos = At(null, 360, Time(2006, 3, 12, 8), Time(2006, 3, 15, 22));
+
+        var trip = Assert.Single(TripDetector.Detect(photos, Home));
+
+        Assert.Equal(new DateOnly(2006, 3, 12), trip.StartDate);
+        Assert.Equal(new DateOnly(2006, 3, 15), trip.EndDate);
+        Assert.Equal(360, trip.PhotoIds.Count);
+        Assert.Equal(0, trip.AwayPhotoCount);
+        Assert.Empty(trip.Stops);
+        Assert.Null(trip.MainPlace);
+        Assert.Equal("Trip, March 2006", trip.Name);
+        Assert.Equal(Confidence.Low, trip.Confidence);
+    }
+
+    [Fact]
+    public void Two_busy_days_with_no_position_are_not_a_trip()
+    {
+        Assert.Empty(TripDetector.Detect(At(null, 180, Time(2006, 3, 12, 8), Time(2006, 3, 13, 22)), Home));
+    }
+
+    [Fact]
+    public void Days_with_few_photos_are_not_burst_days()
+    {
+        // 25 photos a day is a normal week, not a trip.
+        Assert.Empty(TripDetector.Detect(At(null, 100, Time(2006, 3, 12, 8), Time(2006, 3, 15, 22)), Home));
+    }
+
+    [Fact]
+    public void A_photo_placed_at_home_keeps_its_day_out_of_a_burst()
+    {
+        var photos = At(null, 360, Time(2006, 3, 12, 8), Time(2006, 3, 15, 22));
+        photos.AddRange(At(Home, 1, Time(2006, 3, 13, 12), Time(2006, 3, 13, 12)));
+
+        Assert.Empty(TripDetector.Detect(photos, Home));
+    }
+
+    [Fact]
+    public void Burst_days_inside_a_located_trip_do_not_make_a_second_trip()
+    {
+        var photos = At(Lake, 30, Time(2027, 3, 12, 9), Time(2027, 3, 16, 18), "Lakeside");
+        photos.AddRange(At(null, 200, Time(2027, 3, 12, 8), Time(2027, 3, 16, 22)));
+
+        var trip = Assert.Single(TripDetector.Detect(photos, Home));
+
+        Assert.Equal(30, trip.AwayPhotoCount);
+    }
+
+    [Fact]
+    public void Lighter_travel_days_next_to_a_burst_join_it()
+    {
+        var photos = At(null, 240, Time(2007, 3, 20, 8), Time(2007, 3, 23, 22));
+        photos.AddRange(At(null, 16, Time(2007, 3, 18, 8), Time(2007, 3, 18, 20)));
+        photos.AddRange(At(null, 11, Time(2007, 3, 19, 8), Time(2007, 3, 19, 20)));
+        photos.AddRange(At(null, 5, Time(2007, 3, 25, 8), Time(2007, 3, 25, 20)));
+
+        var trip = Assert.Single(TripDetector.Detect(photos, Home));
+
+        Assert.Equal(new DateOnly(2007, 3, 18), trip.StartDate);
+        Assert.Equal(new DateOnly(2007, 3, 23), trip.EndDate);
+        Assert.Equal(267, trip.PhotoIds.Count);
+    }
 }

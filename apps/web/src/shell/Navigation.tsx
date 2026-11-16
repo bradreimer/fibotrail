@@ -2,7 +2,7 @@ import { NavLink } from 'react-router-dom';
 
 import { useInboxBadge } from '../api/inbox';
 import { countOf } from '../trips/dates';
-import { DESTINATIONS } from './destinations';
+import { navigationDestinations } from './destinations';
 import type { NavigationMode } from './useNavigationMode';
 
 /** The tab bar on a phone, and the sidebar on wider screens. Each item has an icon and a label. */
@@ -11,7 +11,7 @@ export function Navigation({ mode }: { mode: NavigationMode }) {
   return (
     <nav className="nav" aria-label="Main">
       <ul className="nav__list">
-        {DESTINATIONS.map((destination) => (
+        {navigationDestinations(mode === 'tabs').map((destination) => (
           <li key={destination.path} className="nav__item">
             <NavLink
               to={destination.path}

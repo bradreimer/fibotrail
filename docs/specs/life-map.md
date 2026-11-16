@@ -46,7 +46,8 @@ visited, so that I can see my travel history at a glance.
 - A country is visited when an added trip has a stop in it. Stops are the ones stored with the trip
   ([ADR-010](../adr/ADR-010-stops-and-routes-are-stored-with-the-trip.md)), and they leave out
   photos that are on the way ([on the way](on-the-way.md)), so a layover country doesn't fill in.
-- A stop belongs to the country whose outline contains its position. The outlines are the bundled
+- A stop belongs to the country whose outline contains its position. Outlines that cross the
+  antimeridian (Russia and Fiji) are cut there first, so they don't cover the sea. The outlines are the bundled
   Natural Earth countries of [ADR-009](../adr/ADR-009-a-bundled-natural-earth-base-map.md).
 - A stop that no outline contains, such as one on a coast at 1:50 million detail, joins the nearest
   country within 25 km. A stop farther than that from every country counts for none. 25 km is a
@@ -85,17 +86,24 @@ visited, so that I can see my travel history at a glance.
 - When the Map ships, the tab bar holds Trips and Map. Collections and Stats don't exist yet, and a
   tab never leads to a screen that doesn't exist, per
   [ADR-007](../adr/ADR-007-native-ios-feel-through-a-progressive-web-app.md).
-- Inbox and Settings move to the top bar as icon buttons, each at least 44 points, with accessible
-  names. The Inbox badge moves with the Inbox button.
+- Under 600 px, where the navigation is the tab bar, Inbox and Settings are icon buttons in the top
+  bar, each at least 44 points, with accessible names. The Inbox badge moves with the Inbox
+  button.
+- From 600 px up, the sidebar holds all four destinations: Trips, Map, Inbox, and Settings. The
+  Inbox badge stays on the Inbox item. The maintainer decided this on 2026-11-16.
 - The [app shell spec](app-shell.md) is updated in the same change.
 
 ### API
 
 - `GET /api/map` needs a session, like every other route. It returns the visited countries (name,
-  code, first visit, and trips with ID, name, and dates), each added trip's route (the stops in
+  `id`, first visit, and trips with ID, name, and dates), each added trip's route (the stops in
   order), and the totals (countries, trips, days away, and distance in kilometers).
 - The OpenAPI document and the TypeScript types are updated, per
   [web-app-development.md](../knowledge/web-app-development.md).
+
+- A country's `id` is the ISO 3166-1 numeric code that the web app's map features carry, so the
+  screen fills the right outline. A few territories have no code, and their `id` is null. The screen
+  then matches them by name.
 
 ### Accessibility and iOS
 
@@ -119,8 +127,8 @@ visited, so that I can see my travel history at a glance.
   from every country counts for none.
 - Days away is the sum of the days of added trips, and distance is the sum of their distances.
 - The browser's network log shows no request to a host other than Fibotrail.
-- The tab bar shows Trips and Map. Inbox and Settings are in the top bar, and the Inbox button shows
-  the badge.
+- Under 600 px, the tab bar shows Trips and Map. Inbox and Settings are in the top bar, and the
+  Inbox button shows the badge. From 600 px, the sidebar shows all four.
 - The screen passes the ADR-007 run-through on an iPhone.
 
 ## Open questions
@@ -130,8 +138,5 @@ visited, so that I can see my travel history at a glance.
    travel to. The default is to count it only after a domestic trip.
 2. **Is 25 km the right distance for a stop outside every outline?** It is a starting value, not
    tested on real trips.
-3. **Where do Inbox and Settings go on a tablet or desktop?** ADR-007 moves them to the top bar for
-   the phone tab bar. The sidebar layout (600 px and wider) has room for all four destinations.
-   The default is to keep them in the sidebar there, and to move them only under 600 px.
-4. **How are regions and cities named and counted?** That belongs to
+3. **How are regions and cities named and counted?** That belongs to
    [#48](https://github.com/bradreimer/fibotrail/issues/48), and to the Stats screen.

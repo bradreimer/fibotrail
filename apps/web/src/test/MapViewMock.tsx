@@ -8,12 +8,27 @@ export default function MapViewMock({
   label,
   markers,
   route = [],
+  routes,
+  visited,
+  onCountrySelect,
   draggableId,
   onDrag,
   onSelect,
 }: MapViewProps) {
   return (
-    <div role="application" aria-label={label} data-route={JSON.stringify(route)}>
+    <div
+      role="application"
+      aria-label={label}
+      data-route={JSON.stringify(route)}
+      data-routes={routes ? JSON.stringify(routes) : undefined}
+      data-visited={visited ? JSON.stringify(visited) : undefined}
+    >
+      {onCountrySelect &&
+        visited?.map((key) => (
+          <button key={key} type="button" onClick={() => onCountrySelect(key)}>
+            {`Country on the map: ${key}`}
+          </button>
+        ))}
       {markers.map((marker) => (
         <button
           key={marker.id}

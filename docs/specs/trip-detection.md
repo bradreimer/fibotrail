@@ -72,6 +72,9 @@ home is, so that I review suggestions and don't build my travel history by hand.
 | Minimum photos | 20 | Fewer photos than this isn't a trip |
 | Minimum days | 2 calendar days | Shorter outings aren't trips |
 | Stop radius | 1 km | Photos this close together form one stop |
+| Burst photos per day | 30 | A day with this many photos with no position can be part of a trip with no location |
+| Burst minimum days | 3 | Consecutive burst days that make a trip with no location |
+| Burst edge photos per day | 10 | A lighter day next to a burst joins it, for up to 2 days at each end |
 
 ### Rules
 
@@ -80,6 +83,14 @@ home is, so that I review suggestions and don't build my travel history by hand.
    home radius.
 3. **Split into trips.** Sort away photos by time. Start a new trip when a photo appears inside
    the home radius, or when no away photo appears for the gap limit.
+3b. **Find trips with no location.** Cameras before about 2010 recorded no position, so rules 2
+   and 3 can't see those trips. A calendar day is a burst day when it has at least 30 photos with
+   no position, no photo inside the home radius, and no overlap with a trip from rule 3. A run of
+   at least 3 consecutive burst days is a trip. A day next to the run joins it with at least 10
+   photos with no position, up to 2 days at each end, which catches travel days. The trip has no
+   stops, no route, and no main place, so it's named "Trip, March 2006", and it's always Low
+   confidence. Only its dates and photos are known. Count only the photos with no position on
+   those days.
 4. **Filter.** Keep a trip that has at least the minimum photos and the minimum days. Only away
    photos count toward the minimum photos. Days run from the first day to the last, counting
    both.
@@ -176,6 +187,9 @@ want a number after a rule change.
 - A photo with no position, taken during a trip, belongs to that trip.
 - A photo taken at 23:30 local time abroad is counted on that local day.
 - Running detection twice on the same photos produces the same trips with the same fingerprints.
+- 4 days of 90 photos each with no position, taken far from any home photo, become one Low
+  confidence trip. 2 such days, or 4 days of 25 photos, become none.
+- A day with a photo at home, or inside a trip that rule 3 found, is never a burst day.
 - After **Not a trip**, a rescan that adds photos to the same trip creates no suggestion.
 - After a rename, a rescan keeps the new name.
 - The review gate is met on the maintainer's library: at least 8 of the first 10 High-confidence
@@ -199,8 +213,10 @@ reviewed, so the questions below stay open until a case turns up.
    rule 3. If someone else in the household adds photos at home to the same library while you're
    away, your trip is split in two. The review gate shows how often this happens.
 3. Should photos with no position count toward the minimum photos? 84.5 percent of the
-   maintainer's photos have no position, and rule 4 counts away photos only. A trip taken with a
-   camera that records no position can fall under the minimum. The review gate shows whether
-   remembered trips are missed for this reason.
+   maintainer's photos have no position, and rule 4 counts away photos only. Rule 3b answers it
+   for trips with no position at all, found on 2026-11-16: March 2006 and March 2007 were missed
+   because no photo from those years has a position. On the maintainer's library rule 3b finds
+   about 29 more trips, all Low confidence. How many are real trips isn't known yet. Christmas
+   and weekend gatherings at home with no position may be among them.
 4. Does the home suggestion work for a library with two homes, such as after a move? The MVP uses
    one home location. A dated list of homes is a later feature if the review gate shows a need.

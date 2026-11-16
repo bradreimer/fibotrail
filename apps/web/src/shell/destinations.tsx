@@ -4,6 +4,11 @@ export interface Destination {
   path: string;
   label: string;
   icon: ReactNode;
+  /**
+   * "main" destinations are always in the navigation. "tool" destinations, the Inbox and Settings,
+   * move to the top bar when the navigation is a tab bar, and stay in the sidebar on wider screens.
+   */
+  placement: 'main' | 'tool';
 }
 
 /** Icons use a 2 px rounded line, per the design and branding document. */
@@ -26,12 +31,14 @@ function Icon({ children }: { children: ReactNode }) {
 }
 
 /**
- * The MVP destinations, per ADR-007. A destination is listed only when its screen exists.
+ * The destinations, per ADR-007. A destination is listed only when its screen exists, so the tab
+ * bar holds Trips and Map until Collections and Stats ship.
  */
 export const DESTINATIONS: readonly Destination[] = [
   {
     path: '/trips',
     label: 'Trips',
+    placement: 'main',
     icon: (
       <Icon>
         <path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2Z" />
@@ -40,8 +47,20 @@ export const DESTINATIONS: readonly Destination[] = [
     ),
   },
   {
+    path: '/map',
+    label: 'Map',
+    placement: 'main',
+    icon: (
+      <Icon>
+        <circle cx="12" cy="12" r="9" />
+        <path d="M3 12h18M12 3c2.5 2.5 3.5 5.5 3.5 9S14.5 18.5 12 21c-2.5-2.5-3.5-5.5-3.5-9S9.5 5.5 12 3Z" />
+      </Icon>
+    ),
+  },
+  {
     path: '/inbox',
     label: 'Inbox',
+    placement: 'tool',
     icon: (
       <Icon>
         <path d="M3 13h5l1.5 3h5L16 13h5" />
@@ -52,6 +71,7 @@ export const DESTINATIONS: readonly Destination[] = [
   {
     path: '/settings',
     label: 'Settings',
+    placement: 'tool',
     icon: (
       <Icon>
         <path d="M4 7h10M18 7h2M4 17h2M10 17h10" />
@@ -61,6 +81,18 @@ export const DESTINATIONS: readonly Destination[] = [
     ),
   },
 ];
+
+/** The destinations in the tab bar, and in the sidebar. In the tab bar the tools are in the top bar. */
+export function navigationDestinations(tabs: boolean): readonly Destination[] {
+  return tabs
+    ? DESTINATIONS.filter((destination) => destination.placement === 'main')
+    : DESTINATIONS;
+}
+
+/** The Inbox and Settings, for the top bar of a phone. */
+export const TOOLS: readonly Destination[] = DESTINATIONS.filter(
+  (destination) => destination.placement === 'tool',
+);
 
 export function destinationFor(pathname: string): Destination | undefined {
   return DESTINATIONS.find(

@@ -7,13 +7,16 @@ import { feature } from 'topojson-client';
 import type { Topology } from 'topojson-specification';
 import countriesUrl from 'world-atlas/countries-50m.json?url';
 
+import { cutGeometry } from './antimeridian.mjs';
 import {
   LAND_SOURCE,
   ROUTE_SOURCE,
   baseMapStyle,
   boundsOf,
   readMapColors,
-  routeGeoJson,
+  VISITED_LAYER,
+  routesGeoJson,
+  visitedFilter,
   type Position,
 } from './mapStyle';
 
@@ -36,6 +39,12 @@ export interface MapViewProps {
   markers: readonly MapMarker[];
   /** The points of the route, in order. */
   route?: readonly Position[];
+  /** Several routes at once, such as every trip on the life map. Used instead of `route` when given. */
+  routes?: readonly (readonly Position[])[];
+  /** The keys of the countries to fill as visited: the ISO code, or the name when a country has none. */
+  visited?: readonly string[];
+  /** Called with the key of a visited country when the person taps it. */
+  onCountrySelect?: (key: string) => void;
   /** Called when the person drags the marker with this ID. Only that marker can be dragged. */
   draggableId?: string;
   onDrag?: (position: Position) => void;
@@ -53,10 +62,19 @@ let countries: Promise<GeoJSON.FeatureCollection> | null = null;
 function loadCountries(): Promise<GeoJSON.FeatureCollection> {
   countries ??= fetch(countriesUrl)
     .then((response) => response.json() as Promise<Topology>)
-    .then(
-      (topology) =>
-        feature(topology, topology.objects.countries!) as unknown as GeoJSON.FeatureCollection,
-    );
+    .then((topology) => {
+      const land = feature(
+        topology,
+        topology.objects.countries!,
+      ) as unknown as GeoJSON.FeatureCollection;
+      // The key lets the visited layer pick outlines by the same ID the server uses.
+      for (const item of land.features) {
+        item.properties = { ...item.properties, key: String(item.id ?? item.properties?.name) };
+        // Russia and Fiji cross the antimeridian. Uncut, their outlines cover the sea across the map.
+        item.geometry = cutGeometry(item.geometry as GeoJSON.Polygon | GeoJSON.MultiPolygon);
+      }
+      return land;
+    });
   return countries;
 }
 
@@ -87,6 +105,9 @@ export default function MapView({
   label,
   markers,
   route = [],
+  routes,
+  visited,
+  onCountrySelect,
   draggableId,
   onDrag,
   onSelect,
@@ -95,9 +116,9 @@ export default function MapView({
   const container = useRef<HTMLDivElement>(null);
   const map = useRef<MapLibreMap | null>(null);
   const shown = useRef<Marker[]>([]);
-  const handlers = useRef({ onDrag, onSelect });
+  const handlers = useRef({ onDrag, onSelect, onCountrySelect });
   useEffect(() => {
-    handlers.current = { onDrag, onSelect };
+    handlers.current = { onDrag, onSelect, onCountrySelect };
   });
 
   // Create the map once.
@@ -125,12 +146,27 @@ export default function MapView({
       });
     });
 
+    // A visited country opens its sheet. The pointer shows that it can be tapped.
+    if (interactive) {
+      created.on('click', VISITED_LAYER, (event) => {
+        const key = event.features?.[0]?.properties?.key as string | undefined;
+        if (key) handlers.current.onCountrySelect?.(key);
+      });
+      created.on('mouseenter', VISITED_LAYER, () => {
+        created.getCanvas().style.cursor = 'pointer';
+      });
+      created.on('mouseleave', VISITED_LAYER, () => {
+        created.getCanvas().style.cursor = '';
+      });
+    }
+
     // The map follows the system light and dark setting without a reload. Only the colors
     // change, so the outlines, the route, and the markers stay where they are.
     const recolor = () => {
       const colors = readMapColors(element, scheme.matches);
       created.setPaintProperty('water', 'background-color', colors.water);
       created.setPaintProperty('land', 'fill-color', colors.land);
+      created.setPaintProperty(VISITED_LAYER, 'fill-color', colors.visited);
       created.setPaintProperty('borders', 'line-color', colors.border);
       created.setPaintProperty('route-outline', 'line-color', colors.routeOutline);
       created.setPaintProperty('route', 'line-color', colors.route);
@@ -144,13 +180,24 @@ export default function MapView({
     };
   }, [interactive]);
 
+  // Fill the visited countries.
+  useEffect(() => {
+    const current = map.current;
+    if (!current) return;
+    const apply = () => current.setFilter(VISITED_LAYER, visitedFilter(visited ?? []));
+    if (current.isStyleLoaded()) apply();
+    else current.once('load', apply);
+  }, [visited]);
+
   // Draw the route and the markers, and move the view to hold them.
   useEffect(() => {
     const current = map.current;
     if (!current) return;
 
     const drawRoute = () =>
-      (current.getSource(ROUTE_SOURCE) as GeoJSONSource | undefined)?.setData(routeGeoJson(route));
+      (current.getSource(ROUTE_SOURCE) as GeoJSONSource | undefined)?.setData(
+        routesGeoJson(routes ?? [route]),
+      );
     if (current.isStyleLoaded()) drawRoute();
     else current.once('load', drawRoute);
 
@@ -185,7 +232,7 @@ export default function MapView({
       const maxZoom = bounds[0] === bounds[2] && bounds[1] === bounds[3] ? SINGLE_POINT_ZOOM : 11;
       current.fitBounds(bounds, { padding: 48, maxZoom, animate: !reduceMotion, duration: 377 });
     }
-  }, [markers, route, draggableId, onSelect]);
+  }, [markers, route, routes, draggableId, onSelect]);
 
   return <div ref={container} className="map" role="application" aria-label={label} />;
 }

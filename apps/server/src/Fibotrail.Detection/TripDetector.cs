@@ -41,6 +41,91 @@ public static class TripDetector
             trips.Add(Describe(away, [.. attached], home, settings, onTheWay));
         }
 
+        trips.AddRange(DetectUnlocated(all, trips, home, settings, onTheWay));
+        return [.. trips.OrderBy(trip => trip.StartDate).ThenBy(trip => trip.Fingerprint, StringComparer.Ordinal)];
+    }
+
+    /// <summary>
+    /// Rule 3b, for photos from before cameras recorded a position. A run of consecutive days that
+    /// each have at least <see cref="DetectionSettings.BurstPhotosPerDay"/> photos with no position
+    /// is a trip, when the run has at least <see cref="DetectionSettings.BurstMinimumDays"/> days.
+    /// A day already inside a trip, or with any photo placed at home, is not a burst day. The trip
+    /// has no stops and no place, and it's always Low confidence: only its dates and photos are known.
+    /// </summary>
+    public static IReadOnlyList<DetectedTrip> DetectUnlocated(IReadOnlyList<PhotoPoint> allByTime, IReadOnlyList<DetectedTrip> found, GeoPoint home, DetectionSettings settings, IReadOnlySet<string>? onTheWay = null)
+    {
+        ArgumentNullException.ThrowIfNull(allByTime);
+        ArgumentNullException.ThrowIfNull(found);
+        ArgumentNullException.ThrowIfNull(settings);
+
+        var byDay = allByTime.GroupBy(photo => photo.LocalDay).ToDictionary(group => group.Key, group => group.ToList());
+        bool Free(KeyValuePair<DateOnly, List<PhotoPoint>> day) =>
+            !day.Value.Any(photo => photo.Position is { } position && Geo.DistanceKm(home, position) <= settings.HomeRadiusKm)
+            && !found.Any(trip => trip.StartDate <= day.Key && day.Key <= trip.EndDate);
+        int Unplaced(KeyValuePair<DateOnly, List<PhotoPoint>> day) => day.Value.Count(photo => photo.Position is null);
+
+        var burstDays = byDay
+            .Where(day => Unplaced(day) >= settings.BurstPhotosPerDay && Free(day))
+            .Select(day => day.Key)
+            .Order()
+            .ToList();
+
+        // A travel day next to a burst is lighter, so it joins with a lower bar, for a few days at most.
+        DateOnly Extend(DateOnly edge, int step)
+        {
+            for (var added = 0; added < settings.BurstEdgeDays; added++)
+            {
+                var next = edge.AddDays(step);
+                if (!byDay.TryGetValue(next, out var photos))
+                {
+                    break;
+                }
+
+                var day = KeyValuePair.Create(next, photos);
+                if (Unplaced(day) < settings.BurstEdgePhotosPerDay || !Free(day))
+                {
+                    break;
+                }
+
+                edge = next;
+            }
+
+            return edge;
+        }
+
+        var trips = new List<DetectedTrip>();
+        var run = new List<DateOnly>();
+        void Close()
+        {
+            if (run.Count >= settings.BurstMinimumDays)
+            {
+                var first = Extend(run[0], -1);
+                var last = Extend(run[^1], 1);
+                var photos = Enumerable.Range(0, last.DayNumber - first.DayNumber + 1)
+                    .SelectMany(offset => byDay.GetValueOrDefault(first.AddDays(offset)) ?? [])
+                    .Where(photo => photo.Position is null)
+                    .ToList();
+                var ids = photos.Select(photo => photo.Id).ToList();
+                var geometry = Measure([], ids, home, settings, onTheWay);
+                trips.Add(new DetectedTrip(
+                    Fingerprint(first, null), Name(null, first), null, null, first, last, ids, 0,
+                    geometry.Stops, geometry.DistanceKm, geometry.FarthestFromHomeKm, Confidence.Low, geometry.CoverPhotoId));
+            }
+
+            run = [];
+        }
+
+        foreach (var day in burstDays)
+        {
+            if (run.Count > 0 && day.DayNumber - run[^1].DayNumber > 1)
+            {
+                Close();
+            }
+
+            run.Add(day);
+        }
+
+        Close();
         return trips;
     }
 

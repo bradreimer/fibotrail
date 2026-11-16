@@ -2,15 +2,23 @@
 
 ## Current milestone
 
-Version 0.1.0 was tagged and published on 2026-11-16 (MVP step 3d). Every work item of the MVP is
-built, and the review gate of step 3a is met. The release workflow's first run succeeded:
-`ghcr.io/bradreimer/fibotrail:0.1.0` and `:latest` are the same image, for linux/amd64 and
-linux/arm64, and pull without signing in. **What wasn't recorded before the tag:** the lines of the
-ADR-007 table that the maintainer didn't report, and the per-line results of the accessibility
-checklist (the maintainer reported that it passed, apart from the timeline tile shapes, which are
-fixed). See [roadmap.md](roadmap.md#mvp-version-01).
+Version 0.2.0 was tagged and published on 2026-11-16: the Map (phase 4, countries only), hiding a
+photo from a trip's map, and the new navigation. The release workflow's second run succeeded:
+`ghcr.io/bradreimer/fibotrail:0.2.0` and `:latest` are the same image, for linux/amd64 and
+linux/arm64, and `:0.1.0` is unchanged. See [roadmap.md](roadmap.md) and
+[the release](https://github.com/bradreimer/fibotrail/releases/tag/v0.2.0).
+
+**What wasn't recorded before the tag:** the maintainer checked the Map in a desktop browser, where
+it looked right after the antimeridian fix. The Map on a phone and an iPad, the top bar buttons and
+the sidebar, and the **Hide** checkbox on a device weren't reported. The ADR-007 table lines for
+version 0.1 and the per-line results of the accessibility checklist are also still unrecorded.
 
 ## Completed
+
+- [#61](https://github.com/bradreimer/fibotrail/issues/61) Trips with no location. Rule 3b finds
+  runs of 3 or more days with 30 or more photos a day and no position, which catches March 2006,
+  March 2007, and March 2012. On the maintainer's library it adds about 29 Low confidence
+  suggestions, and how many are real isn't known yet.
 
 - Image publishing. After CI passes on a push to `main`,
   `.github/workflows/publish-image.yml` builds `docker/Dockerfile` for amd64 and arm64 and pushes
@@ -92,47 +100,51 @@ fixed). See [roadmap.md](roadmap.md#mvp-version-01).
   the tile shapes in the trip timeline
   ([#41](https://github.com/bradreimer/fibotrail/issues/41), fixed and confirmed).
 
+- Version 0.2.0, tagged on 2026-11-16 at `d17f13c`. It adds the Map
+  ([#45](https://github.com/bradreimer/fibotrail/issues/45), with the server side in
+  [#46](https://github.com/bradreimer/fibotrail/issues/46) and
+  [ADR-011](adr/ADR-011-visits-are-derived-from-added-trips-on-the-server.md)), hiding a photo from
+  a trip's map ([#35](https://github.com/bradreimer/fibotrail/issues/35), see
+  [on-the-way.md](specs/on-the-way.md)), and the navigation change
+  ([#47](https://github.com/bradreimer/fibotrail/issues/47)): Trips and Map in the tab bar, Inbox and
+  Settings in the top bar under 600 px, and all four in the sidebar from 600 px. The first look at the
+  Map found outlines that cross the antimeridian covering the sea and matching stops to Russia
+  ([#55](https://github.com/bradreimer/fibotrail/issues/55)), fixed before the tag. The image
+  carries `FIBOTRAIL_VERSION=0.2.0` and runs as user 1654. On the maintainer's upgrade, Fibotrail
+  copied the database to `fibotrail-backup-<time>.db` before applying the new table.
+
 ## In progress
 
-- [#41](https://github.com/bradreimer/fibotrail/issues/41) Thumbnails in the trip timeline were too
-  wide for their photos: tiles grew to fill the row, so every tile in a row had the same width and
-  the photos were cropped. Found in the accessibility checklist on the phone, 2026-11-16. A tile
-  now takes its photo's proportions once its thumbnail loads. Not yet confirmed on the phone.
-- [#24](https://github.com/bradreimer/fibotrail/issues/24) The release, step 3d, is published. It
-  stays open until the maintainer says the rest of the ADR-007 table passed, or records which lines
-  are known gaps.
+Nothing is in progress.
 
 ## Next
 
-The MVP plan is in [roadmap.md](roadmap.md#mvp-version-01). Its specs are in
-[specs/](specs/README.md).
+The plan is in [roadmap.md](roadmap.md). Specs are in [specs/](specs/README.md).
 
-- Finish recording the ADR-007 run-through on a real iPhone. Confirmed so far: the Add trip sheet,
-  the photo viewer, the map overlays, and the timeline tiles. The rest of the table isn't recorded
-  for [#6](https://github.com/bradreimer/fibotrail/issues/6),
+- Record what hasn't been checked on devices: the Map, the top bar buttons, the sidebar, and **Hide**
+  on a phone and an iPad, and the rest of the ADR-007 table for
+  [#6](https://github.com/bradreimer/fibotrail/issues/6),
   [#9](https://github.com/bradreimer/fibotrail/issues/9),
   [#10](https://github.com/bradreimer/fibotrail/issues/10), and
   [#11](https://github.com/bradreimer/fibotrail/issues/11). A failed line is fixed in a patch
-  release, or recorded as a known gap.
-- Record the per-line results of the [accessibility checklist](knowledge/accessibility-checklist.md).
-- Decide the next phase from the [roadmap](roadmap.md): the life map (phase 4) comes next, then
-  collections and statistics (phase 5).
-- Phase 4, the life map, first release (countries only), specced in
-  [life-map.md](specs/life-map.md): the Map screen ([#45](https://github.com/bradreimer/fibotrail/issues/45)),
-  working out the visited countries on the server
-  ([#46](https://github.com/bradreimer/fibotrail/issues/46), with
-  [ADR-011](adr/ADR-011-visits-are-derived-from-added-trips-on-the-server.md), accepted), and moving
-  Inbox and Settings to the top bar ([#47](https://github.com/bradreimer/fibotrail/issues/47)).
-  Zooming to regions and cities is [#48](https://github.com/bradreimer/fibotrail/issues/48). Not
-  built yet. Start with #46.
-- Photos and stops that are on the way (layover airports and in-transit photos): hide a photo from
-  the map ([#35](https://github.com/bradreimer/fibotrail/issues/35)), then suggested stops
-  ([#32](https://github.com/bradreimer/fibotrail/issues/32)). Both are one idea, specced in
-  [on-the-way.md](specs/on-the-way.md). The first part, hiding a photo (#35), is built. Its
-  checkbox became an iOS-style **Hide from map** switch
-  ([#52](https://github.com/bradreimer/fibotrail/issues/52)), and the viewer now stays dark in dark
-  mode ([#51](https://github.com/bradreimer/fibotrail/issues/51)). Both were checked in a desktop
-  browser at phone size, not yet on a phone. Suggested stops (#32) aren't built.
+  release, or recorded as a known gap. Also record the per-line results of the
+  [accessibility checklist](knowledge/accessibility-checklist.md).
+- Zoom the life map to regions and cities
+  ([#48](https://github.com/bradreimer/fibotrail/issues/48)). It needs boundary data below country
+  level and a decision on how cities are named and counted, so it starts with an ADR.
+- Make the switches look like iOS switches: **Hide from map** in the photo viewer
+  ([#52](https://github.com/bradreimer/fibotrail/issues/52)) and **Show routes** on the life map,
+  and keep the photo viewer dark in dark mode
+  ([#51](https://github.com/bradreimer/fibotrail/issues/51)). Built and checked in a desktop browser
+  at phone size, not yet on a phone.
+- Suggest stops that are on the way ([#32](https://github.com/bradreimer/fibotrail/issues/32)), the
+  second part of the idea in [on-the-way.md](specs/on-the-way.md). Its rule needs real examples
+  first.
+- Phase 5: collections, such as Disney parks, and the Stats screen. The tab bar then gains
+  Collections and Stats, per ADR-007.
+- Answer the open questions in the [life map spec](specs/life-map.md) with real use: whether the
+  home country should always fill in, and whether 25 km is the right distance for a stop just off a
+  coast.
 - Answer the remaining open questions in the
   [design and branding document](knowledge/design-and-branding.md#risks-open-questions-and-next-steps).
   The server language is settled: see [ADR-004](adr/ADR-004-technology-stack.md).

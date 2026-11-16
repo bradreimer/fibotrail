@@ -74,6 +74,23 @@ test fails when the file is out of date, and `npm run api:check` fails when the 
 A route appears in the document only when its address starts with `/api/` and it returns a typed
 result, such as `TypedResults.Ok(new SessionInfo(...))`.
 
+## After the country outlines change
+
+The server finds a stop's country with its own copy of the Natural Earth outlines, written from the
+same `world-atlas` package that the web app draws ([ADR-011](../adr/ADR-011-visits-are-derived-from-added-trips-on-the-server.md)).
+After the package changes, rebuild the copy and commit it:
+
+```bash
+cd apps/web && npm run outlines
+```
+
+It writes `apps/server/src/Fibotrail.Places/Data/countries.json.gz`. A web test fails when the copy
+and the package disagree.
+
+Russia and Fiji have rings that cross longitude 180, and drawn flat they cover the sea. Both the
+script and the web map cut those rings with `src/map/antimeridian.mjs`, one shared function with its
+own tests. Don't load the outlines without it.
+
 ## After you change the icon
 
 The app icons and the iOS launch images are drawn by a script, from the spiral of the logo
