@@ -106,6 +106,35 @@ This part isn't built, and its rule isn't tested. It is written down so the two 
 - Your choice wins. A stop you've put back on the way or brought back stays that way, and detection
   never proposes it again.
 
+#### Measuring the rule
+
+`fibotrail stops` ([#60](https://github.com/bradreimer/fibotrail/issues/60), the first step of
+[#32](https://github.com/bradreimer/fibotrail/issues/32)) shows how the candidate rule behaves on a
+real library, so the rule is tuned before any suggestion is built. It is read-only and it applies nothing: no stop is hidden, no photo is
+marked, and no trip is changed.
+
+- The command is `docker exec -it fibotrail fibotrail stops`. It takes no arguments.
+- It reads the stops stored with each **added** trip, in order of start date. Photos already on the
+  way aren't in those stops, so they don't count here. Trips in the inbox, ignored trips, and trips
+  you put off with Later are skipped.
+- For each trip it prints the name and dates. For each stop it prints the number in the route, the
+  place, whether the stop is first, last, middle, or the only stop, the photo count, the time from the
+  first photo to the last, and either `not flagged` or `FLAGGED` with the condition that held.
+- It ends with the number of trips and stops, the number of flagged stops, and how many flags came
+  from each condition: first or last with fewer than 5 photos, photos spanning less than 3 hours, and
+  both.
+- The thresholds are the defaults, 5 photos and 3 hours. The function is
+  `OnTheWayRule.Assess` in `Fibotrail.Detection`, and it takes both as parameters, so a later change
+  to the rule needs no change to the stored data.
+- The output holds trip names, place names, counts, and times. It never holds coordinates, photo IDs,
+  or the Immich key, so it can be pasted into a conversation.
+- A stop with one photo spans 0 hours, so the rule flags it wherever it is in the trip.
+
+What the output can't tell you: whether a flagged stop was really on the way. Read each flagged line
+and decide. A rule that flags stops you wanted to keep, or misses layovers, is the reason to change a
+threshold, and the results settle that before [#32](https://github.com/bradreimer/fibotrail/issues/32)
+builds suggestions.
+
 ### API
 
 - One route sets or clears the mark for one photo, and returns the trip's new stops and measures.

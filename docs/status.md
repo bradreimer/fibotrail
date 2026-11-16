@@ -115,7 +115,10 @@ version 0.1 and the per-line results of the accessibility checklist are also sti
 
 ## In progress
 
-Nothing is in progress.
+- Measuring the on-the-way stop rule ([#60](https://github.com/bradreimer/fibotrail/issues/60), the
+  first step of [#32](https://github.com/bradreimer/fibotrail/issues/32)). The `fibotrail stops`
+  command is built and tested. It waits for the maintainer to run it on the real library and report
+  what it flags, so the rule's thresholds can be tuned. See [on-the-way.md](specs/on-the-way.md).
 
 ## Next
 
@@ -134,7 +137,7 @@ The plan is in [roadmap.md](roadmap.md). Specs are in [specs/](specs/README.md).
   level and a decision on how cities are named and counted, so it starts with an ADR.
 - Suggest stops that are on the way ([#32](https://github.com/bradreimer/fibotrail/issues/32)), the
   second part of the idea in [on-the-way.md](specs/on-the-way.md). Its rule needs real examples
-  first.
+  first, which `fibotrail stops` ([#60](https://github.com/bradreimer/fibotrail/issues/60)) produces.
 - Phase 5: collections, such as Disney parks, and the Stats screen. The tab bar then gains
   Collections and Stats, per ADR-007.
 - Answer the open questions in the [life map spec](specs/life-map.md) with real use: whether the
