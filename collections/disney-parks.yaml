@@ -1,6 +1,5 @@
-# Disney parks. A place needs a boundary file in boundaries/ before it can be listed, so only the
-# parks that have one are active. To add a park, export its outline (see README.md), save it as
-# boundaries/<id>.geojson, and uncomment its entry.
+# Disney parks. Each place needs a boundary file in boundaries/ before it can be listed. To add a
+# park, export its outline (see README.md), save it as boundaries/<id>.geojson, and add its entry.
 id: disney-parks
 name: Disney parks
 description: Every Disney theme park in the world
@@ -75,5 +74,8 @@ places:
     status: open
     boundary: boundaries/hong-kong-disneyland.geojson
 
-  # Shanghai
-  # - {id: shanghai-disneyland, name: Shanghai Disneyland, group: Shanghai Disney Resort, status: open, boundary: boundaries/shanghai-disneyland.geojson}
+  - id: shanghai-disneyland
+    name: Shanghai Disneyland
+    group: Shanghai Disney Resort
+    status: open
+    boundary: boundaries/shanghai-disneyland.geojson

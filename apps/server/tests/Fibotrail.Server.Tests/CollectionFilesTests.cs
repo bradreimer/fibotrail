@@ -170,5 +170,8 @@ public sealed class CollectionFilesTests : IDisposable
         Assert.Equal("disneyland-paris", catalog.Lookup.Find(48.8735, 2.7750)?.Id);
         Assert.Equal("disney-adventure-world", catalog.Lookup.Find(48.8650, 2.7760)?.Id);
         Assert.Equal("hong-kong-disneyland", catalog.Lookup.Find(22.3130, 114.0413)?.Id);
+        Assert.Equal("shanghai-disneyland", catalog.Lookup.Find(31.1465, 121.6560)?.Id);
+        // All 12 Disney parks are in the file.
+        Assert.Equal(12, disney.Places.Count);
     }
 }

@@ -193,15 +193,16 @@ version 0.1 and the per-line results of the accessibility checklist are also sti
   server and the web screens are built: the park lookup and day count, the collection file loader and
   its startup checks, the Collections destination with its list, stamp book, and park sheet, the
   Theme parks Stats view, and the [Theme parks view spec](specs/theme-parks-view.md). Collections and
-  the view read the same park days, and a test checks they agree. **Boundaries:** The four Walt Disney World parks ship in `collections/disney-parks.yaml`: Magic Kingdom (OpenStreetMap
-  way 297428432), EPCOT (805298160), Disney's Hollywood Studios (806728401), and Disney's Animal
-  Kingdom (297441457), plus Disneyland Park (relation 5586855) and Disney California Adventure
-  (relation 15626312) in Anaheim, and Tokyo Disneyland (way 1282875870) and Tokyo DisneySea
-  (way 203538370), and Disneyland Park (way 775180147) and Disney Adventure World (way 205734843,
-  formerly Walt Disney Studios Park) in Paris, and Hong Kong Disneyland (way 377094298). The other Disney parks are commented out in that file, and the Universal parks aren't
-  added yet, so the issue stays open for them. They need OpenStreetMap outlines checked by hand
-  against satellite imagery, and they couldn't be fetched from this environment on 2026-11-16 (three
-  Overpass hosts refused or timed out), so the maintainer exports them. ADR-013 planned new `trip_photo` columns, but the `photo` table
+  the view read the same park days, and a test checks they agree. **Boundaries:** all 12 Disney parks ship in `collections/disney-parks.yaml`, each from OpenStreetMap
+  and each ring closed. They are Magic Kingdom (way 297428432), EPCOT (805298160), Disney's
+  Hollywood Studios (806728401), and Disney's Animal Kingdom (297441457); Disneyland Park (relation
+  5586855) and Disney California Adventure (relation 15626312); Tokyo Disneyland (1282875870) and
+  Tokyo DisneySea (203538370); Disneyland Park in Paris (775180147) and Disney Adventure World
+  (205734843, formerly Walt Disney Studios Park); Hong Kong Disneyland (377094298); and Shanghai
+  Disneyland (494725605). The Universal parks aren't added yet, so the issue stays open for them.
+  The outlines weren't diffed against satellite imagery, and they couldn't be fetched from this
+  environment on 2026-11-16 (three Overpass hosts refused or timed out), so the maintainer exported
+  them. ADR-013 planned new `trip_photo` columns, but the `photo` table
   already holds each photo's position and local time, which the stats library reads, so no migration
   was needed. Checked in a desktop browser only, not yet on a phone.
 
