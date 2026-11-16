@@ -59,3 +59,4 @@ What becomes easier, what becomes harder, and what must stay true?
 | [ADR-010](ADR-010-stops-and-routes-are-stored-with-the-trip.md) | Stops and routes are stored with the trip, and decisions carry their dates | Accepted |
 | [ADR-011](ADR-011-visits-are-derived-from-added-trips-on-the-server.md) | Visits are derived from added trips on the server | Accepted |
 | [ADR-012](ADR-012-detail-regions-are-bundled-outlines-for-a-short-list-of-countries.md) | Detail regions are bundled outlines for a short list of countries | Accepted |
+| [ADR-013](ADR-013-park-days-are-derived-from-stored-photo-positions.md) | Park days are derived from stored photo positions | Accepted |

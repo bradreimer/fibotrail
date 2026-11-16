@@ -15,11 +15,12 @@ One idea has two parts, and they use the same words and have the same effect:
 1. **You hide a photo.** A switch in the photo viewer puts one photo on the way. This is built
    first, tracked by [#35](https://github.com/bradreimer/fibotrail/issues/35), and the switch by
    [#52](https://github.com/bradreimer/fibotrail/issues/52).
-2. **Fibotrail suggests stops.** Detection proposes that a short first or last stop is on the way,
-   and you can accept or undo it. This comes later, tracked by
-   [#32](https://github.com/bradreimer/fibotrail/issues/32), because its rule isn't tested yet.
+2. **Fibotrail suggests stops.** Detection would propose that a short first or last stop is on the
+   way, and you could accept or undo it. This was measured and set aside on 2026-11-16, tracked by
+   [#32](https://github.com/bradreimer/fibotrail/issues/32). See
+   [Suggesting stops](#suggesting-stops-set-aside).
 
-The manual part works today and stays useful when the automatic part guesses wrong. The two earlier
+The manual part works today and is the only way to put a stop on the way. The two earlier
 names for this, "getting there" and "along the way", mean the same thing, and "on the way" replaces
 both.
 
@@ -40,8 +41,8 @@ the map.
 
 ## Non-goals
 
-- Finding airports or layovers automatically. That is the second part of this idea, in
-  [Suggesting stops](#suggesting-stops-later).
+- Finding airports or layovers automatically. That was the second part of this idea, and it is set
+  aside. See [Suggesting stops](#suggesting-stops-set-aside).
 - Marking several photos at once.
 - Changing how photos are split into trips, or how the main destination is chosen.
 - Removing a photo from a trip, or moving it to another trip.
@@ -102,9 +103,12 @@ the map.
   from home tiles leave photos on the way out.
 - The inbox route preview leaves them out too, because it reads the same stored stops.
 
-### Suggesting stops (later)
+### Suggesting stops (set aside)
 
-This part isn't built, and its rule isn't tested. It is written down so the two parts stay one idea.
+This part isn't built, and it won't be unless you ask for it again. The maintainer measured the rule
+below on a real library on 2026-11-16 (see [Measuring the rule](#measuring-the-rule)) and chose to
+put stops on the way by hand with the switch instead. The design stays here so that a later session
+doesn't rebuild it without knowing what the measurement found.
 
 - Detection may propose that a stop is on the way. A candidate rule, to be checked against real
   trips first: the stop is the first or last stop of the trip and has fewer than 5 photos, or the
@@ -133,16 +137,41 @@ marked, and no trip is changed.
   from each condition: first or last with fewer than 5 photos, photos spanning less than 3 hours, and
   both.
 - The thresholds are the defaults, 5 photos and 3 hours. The function is
-  `OnTheWayRule.Assess` in `Fibotrail.Detection`, and it takes both as parameters, so a later change
-  to the rule needs no change to the stored data.
+  `OnTheWayRule.Assess` in `Fibotrail.Detection`, and it takes both as parameters, but the command
+  doesn't expose them.
 - The output holds trip names, place names, counts, and times. It never holds coordinates, photo IDs,
   or the Immich key, so it can be pasted into a conversation.
 - A stop with one photo spans 0 hours, so the rule flags it wherever it is in the trip.
 
-What the output can't tell you: whether a flagged stop was really on the way. Read each flagged line
-and decide. A rule that flags stops you wanted to keep, or misses layovers, is the reason to change a
-threshold, and the results settle that before [#32](https://github.com/bradreimer/fibotrail/issues/32)
-builds suggestions.
+What the output can't tell you: whether a flagged stop was really on the way. That takes reading
+each flagged line.
+
+##### Result of the first run
+
+The maintainer ran the command on 2026-11-16 on 46 added trips. 11 of them have no stops, probably
+because their photos have no position (not checked), so the rule can't judge them. The other 35
+trips have 288 stops.
+
+| Condition | Flagged stops |
+| --- | --- |
+| First or last, with fewer than 5 photos | 34 |
+| Photos span less than 3 hours | 196 |
+| Both | 31 |
+| Any (the stop is flagged) | 199, which is 69% of 288 |
+
+- **First or last with few photos** looked mostly right. Many of its hits have the names of airports,
+  which isn't confirmed. It missed some: one trip's first stop had 8 photos, and another stop had
+  exactly 5, which isn't "fewer than 5".
+- **A short span** flagged real destinations. A stop with 64 photos in 38 minutes, one with 86 photos
+  in 2 hours 44 minutes, and several with 18 to 25 photos on one trip were all flagged. The stops that
+  were really passed through mostly had 1 to 3 photos.
+- A trip splits one place into several stops when you return to it, so a place such as Stockholm can
+  appear six times in one trip. That inflates the counts.
+
+A rule worth building would have to keep the first-or-last condition and limit the short span to
+stops with few photos, probably under 10, with the thresholds settable from the command so that
+several can be compared in one run. The maintainer chose not to build it: hiding the photos of a few
+stops by hand is quick enough.
 
 ### API
 
