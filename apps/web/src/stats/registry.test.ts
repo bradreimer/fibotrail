@@ -27,6 +27,7 @@ describe('the view registry', () => {
     expect(viewsFor('stats').map((view) => view.id)).toEqual([
       'trips-per-year',
       'trip-length',
+      'travel-clock',
       'records',
     ]);
     expect(viewsFor('country')).toEqual([]);
