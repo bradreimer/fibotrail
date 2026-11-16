@@ -15,6 +15,10 @@ version 0.1 and the per-line results of the accessibility checklist are also sti
 
 ## Completed
 
+- Docker image build. `docker/Dockerfile` didn't copy `Fibotrail.Stats.csproj` before restoring, so an
+  image build of `main` after the Stats screen would have failed at publish. It does now, and it
+  copies `collections/` into the image.
+
 - [#59](https://github.com/bradreimer/fibotrail/issues/59) The Fibonacci spiral of trips, a Stats
   view ([spec](specs/trip-spiral.md)). Every added trip is a dot along a spiral of quarter circles
   in Fibonacci squares, oldest at the center, sized by days and colored by continent, with continent
@@ -174,7 +178,18 @@ version 0.1 and the per-line results of the accessibility checklist are also sti
 
 ## In progress
 
-Nothing is in progress.
+- [#64](https://github.com/bradreimer/fibotrail/issues/64) Park days in Collections and Stats.
+  **Built (server):** the park lookup and day count in `Fibotrail.Detection` (13 tests), the
+  collection file loader and its startup checks, `GET /api/collections`,
+  `GET /api/collections/{id}`, `GET /api/stats/theme-parks`, and the
+  [Theme parks view spec](specs/theme-parks-view.md). Collections and the Theme parks view read the
+  same park days from the stats library, and a test checks they agree. **Not built:** the park
+  boundary files, the Collections destination and screens, and the Theme parks view in the web app.
+  The boundaries need OpenStreetMap data checked by hand against satellite imagery. They couldn't be
+  fetched from this environment on 2026-11-16: three Overpass hosts refused or timed out, so no
+  collection file ships and the Collections screen is empty until they're added. ADR-013 planned
+  new `trip_photo` columns, but the `photo` table already holds each photo's position and local
+  time, which the stats library reads, so no migration was needed.
 
 ## Next
 

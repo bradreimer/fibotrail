@@ -244,6 +244,38 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/collections": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["GetCollections"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/collections/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["GetCollection"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/stats/summary": {
         parameters: {
             query?: never;
@@ -300,6 +332,22 @@ export interface paths {
             cookie?: never;
         };
         get: operations["GetStatsTripsPerYear"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/stats/theme-parks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["GetStatsThemeParks"];
         put?: never;
         post?: never;
         delete?: never;
@@ -414,6 +462,35 @@ export interface components {
             /** Format: int32 */
             days: number;
             trips: components["schemas"]["TripRef"][];
+        };
+        CollectionDetail: {
+            summary: components["schemas"]["CollectionSummary"];
+            places: components["schemas"]["CollectionPlaceInfo"][];
+            attribution: string;
+        };
+        CollectionPlaceInfo: {
+            id: string;
+            name: string;
+            group: string;
+            status: string;
+            /** Format: int32 */
+            days: number;
+            /** Format: int32 */
+            trips: number;
+            /** Format: date */
+            firstVisit: null | string;
+            tripList: components["schemas"]["PlaceTrip"][];
+        };
+        CollectionSummary: {
+            id: string;
+            name: string;
+            description: string;
+            /** Format: int32 */
+            visited: number;
+            /** Format: int32 */
+            total: number;
+            /** Format: int32 */
+            totalDays: number;
         };
         CountryRecord: {
             countryId: string;
@@ -549,6 +626,13 @@ export interface components {
             /** Format: double */
             longitude: number;
             name: string;
+        };
+        PlaceTrip: {
+            /** Format: int32 */
+            tripId: number;
+            name: string;
+            /** Format: int32 */
+            days: number;
         };
         ProblemDetail: {
             detail: string;
@@ -690,6 +774,26 @@ export interface components {
             coverPhotoId: string;
             strip: components["schemas"]["PhotoInfo"][];
             route: components["schemas"]["RoutePoint"][];
+        };
+        ThemePark: {
+            id: string;
+            name: string;
+            group: string;
+            /** Format: int32 */
+            days: number;
+            /** Format: int32 */
+            trips: number;
+            /** Format: date */
+            firstVisit: null | string;
+        };
+        ThemeParkGroup: {
+            collectionId: string;
+            name: string;
+            /** Format: int32 */
+            totalDays: number;
+            /** Format: int32 */
+            visited: number;
+            parks: components["schemas"]["ThemePark"][];
         };
         TripChange: {
             name?: null | string;
@@ -1281,6 +1385,48 @@ export interface operations {
             };
         };
     };
+    GetCollections: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CollectionSummary"][];
+                };
+            };
+        };
+    };
+    GetCollection: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CollectionDetail"];
+                };
+            };
+        };
+    };
     GetStatsSummary: {
         parameters: {
             query?: never;
@@ -1361,6 +1507,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["YearCount"][];
+                };
+            };
+        };
+    };
+    GetStatsThemeParks: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ThemeParkGroup"][];
                 };
             };
         };

@@ -1,3 +1,4 @@
+using Fibotrail.Server.Collections;
 using Fibotrail.Server.Auth;
 using Fibotrail.Server.Cli;
 using Fibotrail.Server.Data;
@@ -64,6 +65,17 @@ public static class EntryPoint
         if (folderProblem is not null)
         {
             await error.WriteLineAsync(folderProblem);
+            return 1;
+        }
+
+        // A bad collection file stops the app with the file's name. It is never skipped silently.
+        try
+        {
+            builder.Services.AddSingleton(CollectionFiles.Load(CollectionFiles.DefaultDirectory));
+        }
+        catch (CollectionFileException exception)
+        {
+            await error.WriteLineAsync($"Fibotrail can't start: {exception.Message}");
             return 1;
         }
 

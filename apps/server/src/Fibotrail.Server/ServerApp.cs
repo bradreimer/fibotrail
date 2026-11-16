@@ -1,4 +1,5 @@
 using Fibotrail.Places;
+using Fibotrail.Server.Collections;
 using Fibotrail.Server.Map;
 using Fibotrail.Server.Stats;
 using System.Net;
@@ -61,6 +62,9 @@ public static partial class ServerApp
         services.AddSingleton(_ => CountryOutlines.Load());
         services.AddSingleton(_ => RegionOutlines.Load());
         services.AddSingleton<CountryOutlinesCache>();
+
+        // The collection files are checked at startup, so a bad file stops the app with its name.
+        services.TryAddSingleton(_ => CollectionFiles.Load(CollectionFiles.DefaultDirectory));
 
         // When a scan completes, trip detection runs.
         services.AddScoped<IScanCompletedHandler>(provider => provider.GetRequiredService<DetectionService>());
@@ -318,6 +322,7 @@ public static partial class ServerApp
         api.MapTripRoutes();
         api.MapMapRoutes();
         api.MapStatsRoutes();
+        api.MapCollectionRoutes();
 
         app.MapOpenApi();
 

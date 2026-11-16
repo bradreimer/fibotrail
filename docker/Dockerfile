@@ -24,6 +24,7 @@ COPY .editorconfig apps/server/global.json apps/server/Directory.Build.props ./
 COPY apps/server/src/Fibotrail.Detection/Fibotrail.Detection.csproj src/Fibotrail.Detection/
 COPY apps/server/src/Fibotrail.Immich/Fibotrail.Immich.csproj src/Fibotrail.Immich/
 COPY apps/server/src/Fibotrail.Places/Fibotrail.Places.csproj src/Fibotrail.Places/
+COPY apps/server/src/Fibotrail.Stats/Fibotrail.Stats.csproj src/Fibotrail.Stats/
 COPY apps/server/src/Fibotrail.Server/Fibotrail.Server.csproj src/Fibotrail.Server/
 RUN dotnet restore src/Fibotrail.Server -a "$TARGETARCH"
 
@@ -44,6 +45,9 @@ ENV ASPNETCORE_HTTP_PORTS=8080 \
 WORKDIR /app
 COPY --from=build /app ./
 COPY --from=web /web/dist/ ./wwwroot/
+
+# The collection files: YAML, and a GeoJSON boundary for each place.
+COPY collections/ ./collections/
 
 # /data is the one writable folder. "fibotrail" on the path is what
 # "docker exec -it fibotrail fibotrail reset-password" runs.
