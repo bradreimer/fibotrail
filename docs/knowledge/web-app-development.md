@@ -91,6 +91,23 @@ Russia and Fiji have rings that cross longitude 180, and drawn flat they cover t
 script and the web map cut those rings with `src/map/antimeridian.mjs`, one shared function with its
 own tests. Don't load the outlines without it.
 
+## After the region outlines or the detail countries change
+
+The regions of Canada and the USA come from Natural Earth's states and provinces, pinned to
+release `v5.1.2`, and the list of detail countries is
+`apps/web/scripts/detail-countries.json` ([ADR-012](../adr/ADR-012-detail-regions-are-bundled-outlines-for-a-short-list-of-countries.md)).
+After either changes, rebuild both copies and commit them:
+
+```bash
+cd apps/web && npm run outlines
+```
+
+To use a copy of the Natural Earth file you already have, run
+`node scripts/build-region-outlines.mjs path/to/ne_50m_admin_1_states_provinces.geojson`. The script
+writes `apps/server/src/Fibotrail.Places/Data/regions.json.gz` for the server and
+`apps/web/src/map/regions.json` for the map. A web test fails when the two disagree. The web copy is
+one long line, so Prettier skips it.
+
 ## After you change the icon
 
 The app icons and the iOS launch images are drawn by a script, from the spiral of the logo

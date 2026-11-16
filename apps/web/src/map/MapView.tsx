@@ -7,12 +7,18 @@ import { feature } from 'topojson-client';
 import type { Topology } from 'topojson-specification';
 import countriesUrl from 'world-atlas/countries-50m.json?url';
 
+import regionsUrl from './regions.json?url';
+
 import { cutGeometry } from './antimeridian.mjs';
 import {
   LAND_SOURCE,
+  REGION_BORDERS_LAYER,
+  REGION_SOURCE,
+  REGION_VISITED_LAYER,
   ROUTE_SOURCE,
   baseMapStyle,
   boundsOf,
+  DETAIL_VISITED_LAYER,
   readMapColors,
   VISITED_LAYER,
   routesGeoJson,
@@ -45,6 +51,15 @@ export interface MapViewProps {
   visited?: readonly string[];
   /** Called with the key of a visited country when the person taps it. */
   onCountrySelect?: (key: string) => void;
+  /**
+   * The keys of the countries that also show their regions (Canada and the USA). Giving it makes
+   * the map load the region outlines, which the other maps don't need.
+   */
+  detailCountries?: readonly string[];
+  /** The ISO 3166-2 codes of the regions to fill as visited, such as "CA-ON". */
+  visitedRegions?: readonly string[];
+  /** Called with the code of a visited region when the person taps it. */
+  onRegionSelect?: (key: string) => void;
   /** Called when the person drags the marker with this ID. Only that marker can be dragged. */
   draggableId?: string;
   onDrag?: (position: Position) => void;
@@ -78,6 +93,16 @@ function loadCountries(): Promise<GeoJSON.FeatureCollection> {
   return countries;
 }
 
+let regions: Promise<GeoJSON.FeatureCollection> | null = null;
+
+/** Loads the region outlines once, for the maps that show regions. Part of the app, like the countries. */
+function loadRegions(): Promise<GeoJSON.FeatureCollection> {
+  regions ??= fetch(regionsUrl).then(
+    (response) => response.json() as Promise<GeoJSON.FeatureCollection>,
+  );
+  return regions;
+}
+
 function markerElement(marker: MapMarker, onSelect?: (id: string) => void): HTMLElement {
   // Only a stop opens its photos. Home and the start of a route are marks, not controls.
   if (marker.kind !== 'stop') onSelect = undefined;
@@ -108,6 +133,9 @@ export default function MapView({
   routes,
   visited,
   onCountrySelect,
+  detailCountries,
+  visitedRegions,
+  onRegionSelect,
   draggableId,
   onDrag,
   onSelect,
@@ -116,9 +144,10 @@ export default function MapView({
   const container = useRef<HTMLDivElement>(null);
   const map = useRef<MapLibreMap | null>(null);
   const shown = useRef<Marker[]>([]);
-  const handlers = useRef({ onDrag, onSelect, onCountrySelect });
+  const handlers = useRef({ onDrag, onSelect, onCountrySelect, onRegionSelect });
+  const wantsRegions = detailCountries !== undefined;
   useEffect(() => {
-    handlers.current = { onDrag, onSelect, onCountrySelect };
+    handlers.current = { onDrag, onSelect, onCountrySelect, onRegionSelect };
   });
 
   // Create the map once.
@@ -144,20 +173,35 @@ export default function MapView({
       void loadCountries().then((land) => {
         (created.getSource(LAND_SOURCE) as GeoJSONSource | undefined)?.setData(land);
       });
+      if (wantsRegions) {
+        void loadRegions().then((land) => {
+          (created.getSource(REGION_SOURCE) as GeoJSONSource | undefined)?.setData(land);
+        });
+      }
     });
 
     // A visited country opens its sheet. The pointer shows that it can be tapped.
     if (interactive) {
-      created.on('click', VISITED_LAYER, (event) => {
+      // A detail country is filled whole only below the zoom where its regions draw, so a tap on
+      // a zoomed-in detail country reaches the region layer, and an unvisited region does nothing.
+      for (const layer of [VISITED_LAYER, DETAIL_VISITED_LAYER]) {
+        created.on('click', layer, (event) => {
+          const key = event.features?.[0]?.properties?.key as string | undefined;
+          if (key) handlers.current.onCountrySelect?.(key);
+        });
+      }
+      created.on('click', REGION_VISITED_LAYER, (event) => {
         const key = event.features?.[0]?.properties?.key as string | undefined;
-        if (key) handlers.current.onCountrySelect?.(key);
+        if (key) handlers.current.onRegionSelect?.(key);
       });
-      created.on('mouseenter', VISITED_LAYER, () => {
-        created.getCanvas().style.cursor = 'pointer';
-      });
-      created.on('mouseleave', VISITED_LAYER, () => {
-        created.getCanvas().style.cursor = '';
-      });
+      for (const layer of [VISITED_LAYER, DETAIL_VISITED_LAYER, REGION_VISITED_LAYER]) {
+        created.on('mouseenter', layer, () => {
+          created.getCanvas().style.cursor = 'pointer';
+        });
+        created.on('mouseleave', layer, () => {
+          created.getCanvas().style.cursor = '';
+        });
+      }
     }
 
     // The map follows the system light and dark setting without a reload. Only the colors
@@ -167,7 +211,10 @@ export default function MapView({
       created.setPaintProperty('water', 'background-color', colors.water);
       created.setPaintProperty('land', 'fill-color', colors.land);
       created.setPaintProperty(VISITED_LAYER, 'fill-color', colors.visited);
+      created.setPaintProperty(DETAIL_VISITED_LAYER, 'fill-color', colors.visited);
+      created.setPaintProperty(REGION_VISITED_LAYER, 'fill-color', colors.visited);
       created.setPaintProperty('borders', 'line-color', colors.border);
+      created.setPaintProperty(REGION_BORDERS_LAYER, 'line-color', colors.border);
       created.setPaintProperty('route-outline', 'line-color', colors.routeOutline);
       created.setPaintProperty('route', 'line-color', colors.route);
     };
@@ -178,16 +225,34 @@ export default function MapView({
       created.remove();
       map.current = null;
     };
-  }, [interactive]);
+  }, [interactive, wantsRegions]);
 
-  // Fill the visited countries.
+  // Fill the visited countries. A detail country fills whole only until its regions are drawn.
   useEffect(() => {
     const current = map.current;
     if (!current) return;
-    const apply = () => current.setFilter(VISITED_LAYER, visitedFilter(visited ?? []));
+    const detailSet = new Set(detailCountries ?? []);
+    const all = visited ?? [];
+    const apply = () => {
+      current.setFilter(VISITED_LAYER, visitedFilter(all.filter((key) => !detailSet.has(key))));
+      current.setFilter(
+        DETAIL_VISITED_LAYER,
+        visitedFilter(all.filter((key) => detailSet.has(key))),
+      );
+    };
     if (current.isStyleLoaded()) apply();
     else current.once('load', apply);
-  }, [visited]);
+  }, [visited, detailCountries]);
+
+  // Fill the visited regions.
+  useEffect(() => {
+    const current = map.current;
+    if (!current) return;
+    const apply = () =>
+      current.setFilter(REGION_VISITED_LAYER, visitedFilter(visitedRegions ?? []));
+    if (current.isStyleLoaded()) apply();
+    else current.once('load', apply);
+  }, [visitedRegions]);
 
   // Draw the route and the markers, and move the view to hold them.
   useEffect(() => {

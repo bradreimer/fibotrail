@@ -11,6 +11,9 @@ export default function MapViewMock({
   routes,
   visited,
   onCountrySelect,
+  detailCountries,
+  visitedRegions,
+  onRegionSelect,
   draggableId,
   onDrag,
   onSelect,
@@ -22,11 +25,19 @@ export default function MapViewMock({
       data-route={JSON.stringify(route)}
       data-routes={routes ? JSON.stringify(routes) : undefined}
       data-visited={visited ? JSON.stringify(visited) : undefined}
+      data-detail-countries={detailCountries ? JSON.stringify(detailCountries) : undefined}
+      data-visited-regions={visitedRegions ? JSON.stringify(visitedRegions) : undefined}
     >
       {onCountrySelect &&
         visited?.map((key) => (
           <button key={key} type="button" onClick={() => onCountrySelect(key)}>
             {`Country on the map: ${key}`}
+          </button>
+        ))}
+      {onRegionSelect &&
+        visitedRegions?.map((key) => (
+          <button key={key} type="button" onClick={() => onRegionSelect(key)}>
+            {`Region on the map: ${key}`}
           </button>
         ))}
       {markers.map((marker) => (
