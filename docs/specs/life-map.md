@@ -81,10 +81,15 @@ states: the 50 states and the District of Columbia.
 - **Names come from the outlines.** Immich's state names are not used, because they are
   inconsistent.
 - **The first visit to a region** is the start date of the earliest added trip with a stop there.
-- **On the map.** Visited regions are filled with Meadow when you zoom to a detail country.
-  Zoomed out, a detail country fills as a whole, as today. Tapping a visited region opens a sheet
+- **On the map.** From zoom 2.5, where Canada is about 700 px wide, a detail country draws its
+  regions: the visited ones are filled with Meadow, and every region has a border line. Below zoom
+  2.5, a detail country fills as a whole, as today. The region outlines load only on the Map
+  screen. Tapping a visited region opens a sheet
   with its name, how many trips went there, the date of the first visit, and the trips, each
   linking to its trip page.
+- **Which countries are listed.** A detail country appears in the API and on the screen when an
+  added trip has a stop in it, even if no stop falls in a region ("0 of 13 provinces and
+  territories"). A country that no trip visited isn't listed.
 - **Progress.** Each detail country has a line under the summary, for example "7 of 13 provinces
   and territories" and "23 of 51 states". The count is of visited regions, so it never passes the
   total.
@@ -138,8 +143,8 @@ states: the 50 states and the District of Columbia.
 
 - `GET /api/map` needs a session, like every other route. It returns the visited countries (name,
   `id`, first visit, and trips with ID, name, and dates), the visited regions of each detail
-  country (name, `id`, first visit, and trips, and the total regions in that country), each added
-  trip's route (the stops in
+  country (`id`, name, the plural noun for its regions, the total regions, and the visited regions
+  with `id`, name, first visit, and trips), each added trip's route (the stops in
   order), and the totals (countries, trips, days away, and distance in kilometers).
 - The OpenAPI document and the TypeScript types are updated, per
   [web-app-development.md](../knowledge/web-app-development.md).
@@ -175,7 +180,7 @@ states: the 50 states and the District of Columbia.
 - With added trips in Texas and Oregon, the USA shows "2 of 51 states".
 - A suggested, later, or ignored trip, or a stop that is only on the way, fills no region.
 - A stop 10 km off a coast, outside every region, counts for the nearest region. A stop 40 km from
-  every region of a detail country counts for none of its regions and still counts for the country.
+  every region of a detail country counts for none of its regions.
 - Tapping a visited region opens a sheet with its trips and the date of the first visit, and each
   trip links to its page.
 - Each detail country lists its visited regions once, oldest first, and a screen reader reads the

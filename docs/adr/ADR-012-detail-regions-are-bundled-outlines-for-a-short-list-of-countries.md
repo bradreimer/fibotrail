@@ -2,7 +2,7 @@
 
 ## Status
 
-Proposed
+Accepted
 
 ## Context
 
@@ -47,8 +47,10 @@ countries, bundled with the app and matched on the server.
   detail countries, with coordinates rounded to 3 decimal places. About 132 KB gzipped for Canada and
   the USA. A script, `npm run outlines`, builds it from the same source as the country outlines, and
   the server and the web app each embed a copy, as for countries in ADR-011.
-- **The list is data.** The detail countries are a short file of ISO 3166-1 alpha-3 codes, starting
-  with `CAN` and `USA`. Adding one means adding a code and rebuilding the outlines. Each added
+- **The list is data.** The detail countries are a short file, `apps/web/scripts/detail-countries.json`,
+  of ISO 3166-1 alpha-3 codes, each with the plural noun for its regions ("states", "provinces and
+  territories"). It starts with `CAN` and `USA`. Adding one means adding a row and rebuilding the
+  outlines. Each added
   country adds its own size, which the script prints.
 - **Matching.** A new pure function in `Fibotrail.Places`: stop position and a detail country in,
   region out. It first finds the country, then tests only that country's regions. The 25 km
@@ -64,8 +66,12 @@ countries, bundled with the app and matched on the server.
 - **Tapping a small region.** The visited-regions list is also a way in: a row opens the same sheet
   as a tap on the map. Prince Edward Island and the District of Columbia are a few pixels wide on a
   phone, so the map alone can't be the only way to reach them.
-- **Zoom.** Regions draw only when the map is zoomed to a detail country. Zoomed out, the country
-  fills as a whole, as today.
+- **Zoom.** Regions draw from zoom 2.5, where Canada is about 700 px wide. Below that, the country
+  fills as a whole, as today. The whole-country fill of a detail country is a layer with a maximum
+  zoom of 2.5, not a zoom in a data expression: MapLibre reads a zoom in a data expression per tile,
+  in whole zooms, and the first version left a detail country filled whole between zoom 2.5 and 3.
+- **Where the web copy loads.** Only the Map screen asks for the region outlines. The trip page
+  maps don't.
 
 ## Alternatives considered
 
@@ -96,8 +102,11 @@ countries, bundled with the app and matched on the server.
 - Detail is coarse. At 1:50 million, a stop near a border between two regions, or on a coast, can
   fall in the wrong region or in none. The nearest-region rule covers the second case. The first is
   an accepted limit, and the first real library may change it.
-- The District of Columbia is about 177 square kilometers. A stop in it can fall in Maryland or
-  Virginia at this scale. Test it with a real stop.
+- The District of Columbia is about 177 square kilometers, and at this scale its outline is a
+  9-point diamond. Measured: the White House and the Capitol fall in DC, and the Washington Monument
+  (38.8895, -77.0353) falls in Virginia, because the outline's western edge cuts across the National
+  Mall. This is the accepted limit. A trip to DC that only has photos on the Mall's west end can
+  miss the District until the 1:10 million data is used, at 601 KB gzipped.
 - The detail list is short on purpose. Each country added is a license check, a size, and a name
   check, not only a code.
 - Tests must include: a stop in each of two regions, a stop 10 km off a coast, a stop 40 km from

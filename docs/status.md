@@ -15,6 +15,13 @@ version 0.1 and the per-line results of the accessibility checklist are also sti
 
 ## Completed
 
+- [#62](https://github.com/bradreimer/fibotrail/issues/62) Provinces, territories, and states on
+  the Map. Canada's 13 and the USA's 51 fill when the Map is zoomed in, with a progress line for
+  each country, a list of visited regions, and a sheet for each ([spec](specs/life-map.md#detail-regions),
+  [ADR-012](adr/ADR-012-detail-regions-are-bundled-outlines-for-a-short-list-of-countries.md)). The
+  region outlines add 132 KB gzipped. The Washington Monument falls in Virginia at 1:50 million, so
+  DC can be missed. It is checked in a desktop browser only, not yet on a phone or an iPad.
+
 - [#61](https://github.com/bradreimer/fibotrail/issues/61) Trips with no location. Rule 3b finds
   runs of 3 or more days with 30 or more photos a day and no position, which catches March 2006,
   March 2007, and March 2012. On the maintainer's library it adds about 29 Low confidence
@@ -136,7 +143,7 @@ The plan is in [roadmap.md](roadmap.md). Specs are in [specs/](specs/README.md).
   [#11](https://github.com/bradreimer/fibotrail/issues/11). A failed line is fixed in a patch
   release, or recorded as a known gap. Also record the per-line results of the
   [accessibility checklist](knowledge/accessibility-checklist.md).
-- Zoom the life map to regions and cities
+- Zoom the life map to cities, and to regions outside Canada and the USA
   ([#48](https://github.com/bradreimer/fibotrail/issues/48)). It needs boundary data below country
   level and a decision on how cities are named and counted, so it starts with an ADR.
 - Make the switches look like iOS switches: **Hide from map** in the photo viewer
