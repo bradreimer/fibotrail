@@ -198,7 +198,7 @@ public static class TripDetector
     /// Ranks places by the number of distinct days with a photo there, most first. A day with photos in
     /// two places counts for both. A tie goes to the place with more photos, then to the one whose
     /// first photo comes earlier, so the photos must be in time order. Photos with no place are
-    /// skipped. This is the main destination rule of docs/specs/trip-names.md.
+    /// skipped. This is the main destination rule of docs/specs/main-destination.md.
     /// </summary>
     public static IReadOnlyList<string> RankPlaces<T>(IEnumerable<T> photos, Func<T, DateOnly> day, Func<T, string?> place)
     {

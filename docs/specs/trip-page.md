@@ -107,9 +107,8 @@ At 600 px and wider, the map sits beside the timeline in two columns.
 
 ### Edits
 
-- **Rename** changes the trip name: pick one of the suggested names, or type your own, per
-  [trip names](trip-names.md). **Change cover** picks a cover from the trip's photos. Both are in
-  one sheet, opened by **Rename or change cover** in the header.
+- **Rename** changes the trip name. **Change cover** picks a cover from the trip's photos. Both
+  are in one sheet, opened by **Rename or change cover** in the header.
 - Renaming a suggested trip doesn't add it. Its status stays as it was.
 - Both are saved as decisions and survive a rescan, per
   [ADR-002](../adr/ADR-002-decisions-are-stored-separately-from-detected-data.md).

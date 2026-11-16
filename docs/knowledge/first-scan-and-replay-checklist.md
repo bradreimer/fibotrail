@@ -114,9 +114,8 @@ Reading a miss or a no:
 | High confidence, but you'd call it Medium or Low, or the reverse | The confidence thresholds | 1 |
 | The home suggestion was wrong | A move, a second home, or a long stay somewhere else | 4 |
 
-Names and destinations that aren't right are not a failure of this gate. They go to
-[#30](https://github.com/bradreimer/fibotrail/issues/30) and
-[#31](https://github.com/bradreimer/fibotrail/issues/31).
+Names and destinations that aren't right are not a failure of this gate. Note them under
+[#31](https://github.com/bradreimer/fibotrail/issues/31), which chooses the main destination.
 
 **If it passes**, write the numbers down: how many of the 10 you accepted, how many remembered
 trips you found, and the reasons for each no. Answer the open questions in the spec with what you
