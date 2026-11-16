@@ -7,6 +7,7 @@ import { feature } from 'topojson-client';
 import type { Topology } from 'topojson-specification';
 import countriesUrl from 'world-atlas/countries-50m.json?url';
 
+import { cutGeometry } from './antimeridian.mjs';
 import {
   LAND_SOURCE,
   ROUTE_SOURCE,
@@ -69,6 +70,8 @@ function loadCountries(): Promise<GeoJSON.FeatureCollection> {
       // The key lets the visited layer pick outlines by the same ID the server uses.
       for (const item of land.features) {
         item.properties = { ...item.properties, key: String(item.id ?? item.properties?.name) };
+        // Russia and Fiji cross the antimeridian. Uncut, their outlines cover the sea across the map.
+        item.geometry = cutGeometry(item.geometry as GeoJSON.Polygon | GeoJSON.MultiPolygon);
       }
       return land;
     });

@@ -61,6 +61,12 @@ When a feature needs stored matches, such as a place with its own boundary in a 
   lists of countries, so a change to the package fails the check until the copy is rebuilt.
 - The work is repeated on every request. With tens of trips that is a few milliseconds. If a
   library grows to thousands, cache the result and clear it when a trip's status or stops change.
+- The outlines of Russia and Fiji have rings that cross the antimeridian: their points jump from
+  179.9 East to 180 West. Used as flat polygons, they cover the sea across the world, which filled the
+  map wrongly and matched stops at 65 to 69 degrees North to Russia. Found on the first real map
+  ([#55](https://github.com/bradreimer/fibotrail/issues/55)). `npm run outlines` and the web map now
+  cut those rings at the antimeridian with one shared function. A ring around a pole, such as
+  Antarctica's, isn't cut.
 - A stop at 1:50 million detail can fall just outside every outline on a coast. The spec gives a
   nearest-country rule for that, and the 25 km value is a starting point that real trips may change.
 - Regions and cities will need their own boundary data and their own decision. This ADR doesn't
