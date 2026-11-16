@@ -1209,6 +1209,43 @@
           }
         }
       },
+      "MapCity": {
+        "required": [
+          "name",
+          "latitude",
+          "longitude",
+          "isPark",
+          "firstVisit",
+          "trips"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "latitude": {
+            "type": "number",
+            "format": "double"
+          },
+          "longitude": {
+            "type": "number",
+            "format": "double"
+          },
+          "isPark": {
+            "type": "boolean"
+          },
+          "firstVisit": {
+            "type": "string",
+            "format": "date"
+          },
+          "trips": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MapTripRef"
+            }
+          }
+        }
+      },
       "MapCountry": {
         "required": [
           "id",
@@ -1274,6 +1311,7 @@
         "required": [
           "countries",
           "detailCountries",
+          "cities",
           "routes",
           "totals"
         ],
@@ -1289,6 +1327,12 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/MapDetailCountry"
+            }
+          },
+          "cities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MapCity"
             }
           },
           "routes": {
@@ -1907,6 +1951,7 @@
           "countries",
           "outlineCountries",
           "continents",
+          "cities",
           "daysAway",
           "distanceKm",
           "continentCards"
@@ -1926,6 +1971,10 @@
             "format": "int32"
           },
           "continents": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "cities": {
             "type": "integer",
             "format": "int32"
           },

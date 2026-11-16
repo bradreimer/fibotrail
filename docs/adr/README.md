@@ -61,4 +61,4 @@ What becomes easier, what becomes harder, and what must stay true?
 | [ADR-012](ADR-012-detail-regions-are-bundled-outlines-for-a-short-list-of-countries.md) | Detail regions are bundled outlines for a short list of countries | Accepted |
 | [ADR-013](ADR-013-park-days-are-derived-from-stored-photo-positions.md) | Park days are derived from stored photo positions | Accepted |
 | [ADR-014](ADR-014-stats-views-are-self-contained-modules.md) | Stats views are self-contained modules, joined only by their routes and a registry | Accepted |
-| [ADR-015](ADR-015-cities-are-merged-places-and-theme-parks-keep-their-own-identity.md) | Cities are merged places, and theme parks keep their own identity | Proposed |
+| [ADR-015](ADR-015-cities-are-merged-places-and-theme-parks-keep-their-own-identity.md) | Cities are merged places, and theme parks keep their own identity | Accepted |

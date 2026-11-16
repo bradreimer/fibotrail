@@ -45,6 +45,7 @@ public class StatsTests
         var summary = await browser.GetJsonAsync("/api/stats/summary");
 
         Assert.Equal((2, 2, 2), (summary.GetProperty("trips").GetInt32(), summary.GetProperty("countries").GetInt32(), summary.GetProperty("continents").GetInt32()));
+        Assert.Equal(2, summary.GetProperty("cities").GetInt32());
         Assert.Equal(2, summary.GetProperty("continentCards").EnumerateArray().Sum(card => card.GetProperty("visited").GetInt32()));
         // Continents with visits come first.
         Assert.Equal(["Europe", "North America"], summary.GetProperty("continentCards").EnumerateArray().Take(2).Select(card => card.GetProperty("name").GetString()).Order());

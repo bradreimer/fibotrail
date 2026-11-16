@@ -11,7 +11,12 @@ import regionsUrl from './regions.json?url';
 
 import { cutGeometry } from './antimeridian.mjs';
 import {
+  CITY_LAYER,
+  CITY_SOURCE,
+  citiesGeoJson,
+  type CityPin,
   LAND_SOURCE,
+  PARK_LAYER,
   REGION_BORDERS_LAYER,
   REGION_SOURCE,
   REGION_VISITED_LAYER,
@@ -60,6 +65,10 @@ export interface MapViewProps {
   visitedRegions?: readonly string[];
   /** Called with the code of a visited region when the person taps it. */
   onRegionSelect?: (key: string) => void;
+  /** The cities and parks to pin once the map is zoomed in. */
+  cities?: readonly CityPin[];
+  /** Called with the key of a pin when the person taps it. */
+  onCitySelect?: (key: string) => void;
   /** Called when the person drags the marker with this ID. Only that marker can be dragged. */
   draggableId?: string;
   onDrag?: (position: Position) => void;
@@ -136,6 +145,8 @@ export default function MapView({
   detailCountries,
   visitedRegions,
   onRegionSelect,
+  cities,
+  onCitySelect,
   draggableId,
   onDrag,
   onSelect,
@@ -144,10 +155,10 @@ export default function MapView({
   const container = useRef<HTMLDivElement>(null);
   const map = useRef<MapLibreMap | null>(null);
   const shown = useRef<Marker[]>([]);
-  const handlers = useRef({ onDrag, onSelect, onCountrySelect, onRegionSelect });
+  const handlers = useRef({ onDrag, onSelect, onCountrySelect, onRegionSelect, onCitySelect });
   const wantsRegions = detailCountries !== undefined;
   useEffect(() => {
-    handlers.current = { onDrag, onSelect, onCountrySelect, onRegionSelect };
+    handlers.current = { onDrag, onSelect, onCountrySelect, onRegionSelect, onCitySelect };
   });
 
   // Create the map once.
@@ -194,7 +205,19 @@ export default function MapView({
         const key = event.features?.[0]?.properties?.key as string | undefined;
         if (key) handlers.current.onRegionSelect?.(key);
       });
-      for (const layer of [VISITED_LAYER, DETAIL_VISITED_LAYER, REGION_VISITED_LAYER]) {
+      for (const layer of [CITY_LAYER, PARK_LAYER]) {
+        created.on('click', layer, (event) => {
+          const key = event.features?.[0]?.properties?.key as string | undefined;
+          if (key) handlers.current.onCitySelect?.(key);
+        });
+      }
+      for (const layer of [
+        VISITED_LAYER,
+        DETAIL_VISITED_LAYER,
+        REGION_VISITED_LAYER,
+        CITY_LAYER,
+        PARK_LAYER,
+      ]) {
         created.on('mouseenter', layer, () => {
           created.getCanvas().style.cursor = 'pointer';
         });
@@ -217,6 +240,10 @@ export default function MapView({
       created.setPaintProperty(REGION_BORDERS_LAYER, 'line-color', colors.border);
       created.setPaintProperty('route-outline', 'line-color', colors.routeOutline);
       created.setPaintProperty('route', 'line-color', colors.route);
+      created.setPaintProperty(CITY_LAYER, 'circle-color', colors.route);
+      created.setPaintProperty(CITY_LAYER, 'circle-stroke-color', colors.routeOutline);
+      created.setPaintProperty(PARK_LAYER, 'circle-color', colors.visited);
+      created.setPaintProperty(PARK_LAYER, 'circle-stroke-color', colors.routeOutline);
     };
     scheme.addEventListener('change', recolor);
 
@@ -253,6 +280,18 @@ export default function MapView({
     if (current.isStyleLoaded()) apply();
     else current.once('load', apply);
   }, [visitedRegions]);
+
+  // Pin the cities and parks. They only draw once the map is zoomed in.
+  useEffect(() => {
+    const current = map.current;
+    if (!current) return;
+    const apply = () =>
+      (current.getSource(CITY_SOURCE) as GeoJSONSource | undefined)?.setData(
+        citiesGeoJson(cities ?? []),
+      );
+    if (current.isStyleLoaded()) apply();
+    else current.once('load', apply);
+  }, [cities]);
 
   // Draw the route and the markers, and move the view to hold them.
   useEffect(() => {

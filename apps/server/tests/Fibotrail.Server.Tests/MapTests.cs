@@ -219,4 +219,20 @@ public class MapTests
 
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
+
+    [Fact]
+    public async Task Added_trips_give_city_pins_and_a_suggested_trip_gives_none()
+    {
+        var (app, browser, orlando, paris, _) = await StartAsync();
+        await using var _ = app;
+        await DecideAsync(browser, orlando, "add");
+        await DecideAsync(browser, paris, "later");
+
+        var map = await MapAsync(browser);
+
+        var city = Assert.Single(map.GetProperty("cities").EnumerateArray());
+        Assert.Equal("Orlando", city.GetProperty("name").GetString());
+        Assert.False(city.GetProperty("isPark").GetBoolean());
+        Assert.Equal(orlando, Assert.Single(city.GetProperty("trips").EnumerateArray()).GetProperty("id").GetInt32());
+    }
 }

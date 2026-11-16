@@ -51,8 +51,8 @@ went.
 
 - Collections such as Disney parks. They have their own spec, [collections.md](collections.md). Their
   days appear on this screen in the [Theme parks view](theme-parks-view.md).
-- Regions and cities, and a count of them
-  ([#48](https://github.com/bradreimer/fibotrail/issues/48)).
+- Regions, and a count of them. Only Canada and the USA have regions, per
+  [ADR-015](../adr/ADR-015-cities-are-merged-places-and-theme-parks-keep-their-own-identity.md).
 - Filters by year or by collection.
 - Sharing or exporting the numbers.
 - A yearly recap page and Home Assistant sensors. They come after version 1.
@@ -97,8 +97,9 @@ went.
 From top to bottom:
 
 1. **Summary tiles.** Trips, countries (with the share of the 236 bundled outlines that have an
-   `id`, such as "12 / 236 · 5.1%"), continents (such as "4 / 7"), days away, and distance in
-   kilometers. The tiles use the stat tile pattern of the design document, with the 34 px size of
+   `id`, such as "12 / 236 · 5.1%"), continents (such as "4 / 7"), cities (merged by the rule of
+   [ADR-015](../adr/ADR-015-cities-are-merged-places-and-theme-parks-keep-their-own-identity.md), without
+   theme parks), days away, and distance in kilometers. The tiles use the stat tile pattern of the design document, with the 34 px size of
    the [trip page](trip-page.md). They are part of the host, not a view, so the screen is never
    empty.
 2. **Continents.** A row of cards that scrolls sideways. Each card shows a progress ring with the

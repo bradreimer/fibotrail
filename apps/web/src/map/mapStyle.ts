@@ -34,6 +34,15 @@ export const VISITED_LAYER = 'visited';
 export const DETAIL_VISITED_LAYER = 'visited-detail';
 export const REGION_VISITED_LAYER = 'region-visited';
 export const REGION_BORDERS_LAYER = 'region-borders';
+export const CITY_SOURCE = 'cities';
+export const CITY_LAYER = 'city-pins';
+export const PARK_LAYER = 'park-pins';
+
+/**
+ * From this zoom up, a pin marks each city and theme park you've been to. A pin is about a
+ * neighborhood wide at this zoom, so merged cities stay one pin. See ADR-015.
+ */
+export const CITY_MIN_ZOOM = 4.5;
 
 /**
  * From this zoom up, the regions of a detail country are drawn: a Canada or USA fills by province,
@@ -64,6 +73,7 @@ export function baseMapStyle(colors: MapColors): StyleSpecification {
       [LAND_SOURCE]: { type: 'geojson', data: { type: 'FeatureCollection', features: [] } },
       [ROUTE_SOURCE]: { type: 'geojson', data: { type: 'FeatureCollection', features: [] } },
       [REGION_SOURCE]: { type: 'geojson', data: { type: 'FeatureCollection', features: [] } },
+      [CITY_SOURCE]: { type: 'geojson', data: { type: 'FeatureCollection', features: [] } },
     },
     layers: [
       { id: 'water', type: 'background', paint: { 'background-color': colors.water } },
@@ -106,6 +116,32 @@ export function baseMapStyle(colors: MapColors): StyleSpecification {
         paint: { 'line-color': colors.border, 'line-width': 0.75 },
       },
       {
+        id: CITY_LAYER,
+        type: 'circle',
+        source: CITY_SOURCE,
+        minzoom: CITY_MIN_ZOOM,
+        filter: ['!=', ['get', 'isPark'], true],
+        paint: {
+          'circle-radius': 6,
+          'circle-color': colors.route,
+          'circle-stroke-color': colors.routeOutline,
+          'circle-stroke-width': 2,
+        },
+      },
+      {
+        id: PARK_LAYER,
+        type: 'circle',
+        source: CITY_SOURCE,
+        minzoom: CITY_MIN_ZOOM,
+        filter: ['==', ['get', 'isPark'], true],
+        paint: {
+          'circle-radius': 6,
+          'circle-color': colors.visited,
+          'circle-stroke-color': colors.routeOutline,
+          'circle-stroke-width': 2,
+        },
+      },
+      {
         id: 'route-outline',
         type: 'line',
         source: ROUTE_SOURCE,
@@ -120,6 +156,24 @@ export function baseMapStyle(colors: MapColors): StyleSpecification {
         paint: { 'line-color': colors.route, 'line-width': 4 },
       },
     ],
+  };
+}
+
+/** One place on the zoomed-in map. `key` ties a pin to its row in the list. */
+export interface CityPin extends Position {
+  key: string;
+  isPark: boolean;
+}
+
+/** The pins as GeoJSON, with the key and the kind in each feature's properties. */
+export function citiesGeoJson(cities: readonly CityPin[]): GeoJSON.FeatureCollection {
+  return {
+    type: 'FeatureCollection',
+    features: cities.map((city) => ({
+      type: 'Feature',
+      properties: { key: city.key, isPark: city.isPark },
+      geometry: { type: 'Point', coordinates: [city.longitude, city.latitude] },
+    })),
   };
 }
 

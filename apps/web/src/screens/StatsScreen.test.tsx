@@ -13,6 +13,7 @@ const summary = {
   countries: 5,
   outlineCountries: 236,
   continents: 2,
+  cities: 9,
   daysAway: 80,
   distanceKm: 51234.5,
   continentCards: [
@@ -80,6 +81,7 @@ describe('the Stats screen', () => {
     ).toEqual([
       '12Trips',
       '5Countries5 / 236 · 2.1%',
+      '9Cities',
       '2 / 7Continents',
       '80Days away',
       '51,235 kmDistance',
@@ -142,7 +144,9 @@ describe('the Stats screen', () => {
   });
 
   it('shows an empty state with no trips', async () => {
-    fakeServer({ 'GET /api/stats/summary': { ...summary, trips: 0, countries: 0, continents: 0 } });
+    fakeServer({
+      'GET /api/stats/summary': { ...summary, trips: 0, countries: 0, continents: 0, cities: 0 },
+    });
     renderAt('/stats');
 
     expect(
