@@ -227,3 +227,95 @@
 .records dd {
   margin: 0;
 }
+
+/* The travel clock: twelve wedges, January at the top. The bars grow out from the center. */
+.clock {
+  display: grid;
+  gap: var(--fibo-space-3);
+  justify-items: center;
+}
+
+.clock__switch {
+  display: inline-flex;
+  border: var(--fibo-border) solid var(--fibo-teal);
+  border-radius: var(--fibo-radius);
+  overflow: hidden;
+}
+
+.clock__option {
+  min-width: calc(var(--fibo-space-7) * 1.5);
+  min-height: var(--fibo-tap);
+  border: 0;
+  background: none;
+  color: var(--fibo-teal);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.clock__option[aria-pressed='true'] {
+  background: var(--fibo-teal);
+  color: var(--fibo-on-teal);
+}
+
+.clock__wheel {
+  width: min(100%, calc(var(--fibo-space-7) * 7));
+  height: auto;
+}
+
+.clock__core {
+  fill: var(--fibo-paper);
+  stroke: var(--fibo-mist);
+}
+
+.clock__line {
+  fill: var(--fibo-mist);
+}
+
+.clock__bar {
+  fill: var(--fibo-teal);
+  transform-box: view-box;
+  transform-origin: center;
+  animation: clock-grow var(--fibo-dur-signature) both;
+  animation-delay: calc(var(--i) * var(--fibo-stagger));
+}
+
+.clock__bar--selected {
+  fill: var(--fibo-gold);
+}
+
+.clock__hit {
+  fill: transparent;
+  cursor: pointer;
+}
+
+.clock__month {
+  fill: var(--fibo-ink-muted);
+  font-size: var(--fibo-text-caption);
+}
+
+.clock__center,
+.clock__center-value {
+  fill: var(--fibo-ink);
+  font-weight: 700;
+  font-size: var(--fibo-text-caption);
+}
+
+.clock__steps {
+  display: flex;
+  gap: var(--fibo-space-3);
+}
+
+.clock__card {
+  width: 100%;
+}
+
+@keyframes clock-grow {
+  from {
+    transform: scale(0);
+  }
+
+  to {
+    transform: scale(1);
+  }
+}

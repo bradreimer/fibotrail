@@ -82,6 +82,8 @@
   --fibo-dur-base: 233ms;
   --fibo-dur-page: 377ms;
   --fibo-dur-signature: 610ms;
+  /* The delay between one bar and the next when a chart first draws. */
+  --fibo-stagger: 34ms;
   --fibo-shift: 13px;
 }
 
@@ -102,6 +104,7 @@
     --fibo-dur-base: 0ms;
     --fibo-dur-page: 0ms;
     --fibo-dur-signature: 0ms;
+    --fibo-stagger: 0ms;
     --fibo-shift: 0px;
   }
 }

@@ -15,6 +15,12 @@ version 0.1 and the per-line results of the accessibility checklist are also sti
 
 ## Completed
 
+- [#66](https://github.com/bradreimer/fibotrail/issues/66) The travel clock, a Stats view
+  ([spec](specs/travel-clock.md)). A wheel of 12 months where each bar grows with the days you were
+  away in that month, across every year, with a **Days** and **Trips** switch, **Earlier** and
+  **Later** buttons, and the month's trips under the wheel. A wedge can be tapped on a touch screen,
+  and the buttons cover the keyboard. It is checked in a desktop browser only, not yet on a phone.
+
 - [#54](https://github.com/bradreimer/fibotrail/issues/54) The Stats screen host. A Stats tab with
   the summary tiles, continent cards with progress rings, a continent page, and a country page with
   trips and days ("3 trips · 19 days"). Server: the `Fibotrail.Stats` library, a continent table in
@@ -181,10 +187,8 @@ The plan is in [roadmap.md](roadmap.md). Specs are in [specs/](specs/README.md).
   and stories: the season wheel ([#58](https://github.com/bradreimer/fibotrail/issues/58),
   [season-wheel.md](specs/season-wheel.md)), the trip spiral
   ([#59](https://github.com/bradreimer/fibotrail/issues/59), [trip-spiral.md](specs/trip-spiral.md)),
-  the travel clock ([#66](https://github.com/bradreimer/fibotrail/issues/66),
-  [travel-clock.md](specs/travel-clock.md)), and the distance rings
-  ([#67](https://github.com/bradreimer/fibotrail/issues/67),
-  [distance-rings.md](specs/distance-rings.md)). Not built yet.
+  and the distance rings ([#67](https://github.com/bradreimer/fibotrail/issues/67),
+  [distance-rings.md](specs/distance-rings.md)). The travel clock is built. The others aren't.
 - Answer the remaining open questions in the
   [design and branding document](knowledge/design-and-branding.md#risks-open-questions-and-next-steps).
   The server language is settled: see [ADR-004](adr/ADR-004-technology-stack.md).

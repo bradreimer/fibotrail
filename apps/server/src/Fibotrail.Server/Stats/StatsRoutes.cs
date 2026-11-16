@@ -3,6 +3,7 @@ using Fibotrail.Server.Data;
 using Fibotrail.Server.Trips;
 using Fibotrail.Stats;
 using Fibotrail.Stats.Views.Records;
+using Fibotrail.Stats.Views.TravelClock;
 using Fibotrail.Stats.Views.TripLength;
 using Fibotrail.Stats.Views.TripsPerYear;
 using Microsoft.EntityFrameworkCore;
@@ -96,6 +97,7 @@ public static class StatsRoutes
         // The one list of view routes. Adding or removing a view is one line here.
         stats.MapViewRoute("/trips-per-year", "GetStatsTripsPerYear", TripsPerYearView.Compute);
         stats.MapViewRoute("/trip-length", "GetStatsTripLength", TripLengthView.Compute);
+        stats.MapViewRoute("/travel-clock", "GetStatsTravelClock", TravelClockView.Compute);
         stats.MapViewRoute("/records", "GetStatsRecords", RecordsView.Compute);
     }
 

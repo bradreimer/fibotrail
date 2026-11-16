@@ -644,6 +644,29 @@
         }
       }
     },
+    "/api/stats/travel-clock": {
+      "get": {
+        "tags": [
+          "Fibotrail"
+        ],
+        "operationId": "GetStatsTravelClock",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ClockMonth"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/stats/records": {
       "get": {
         "tags": [
@@ -667,6 +690,30 @@
   },
   "components": {
     "schemas": {
+      "ClockMonth": {
+        "required": [
+          "month",
+          "days",
+          "trips"
+        ],
+        "type": "object",
+        "properties": {
+          "month": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "days": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "trips": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TripRef"
+            }
+          }
+        }
+      },
       "CountryRecord": {
         "required": [
           "countryId",
