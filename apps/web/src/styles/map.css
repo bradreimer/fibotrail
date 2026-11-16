@@ -186,3 +186,33 @@ button.map-marker::after {
   display: grid;
   gap: var(--fibo-space-4);
 }
+
+/* The regions you've visited in Canada and the USA: a line for each, and a list under the first visits. */
+.region-progress {
+  display: grid;
+  gap: var(--fibo-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.region-progress__item {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--fibo-space-4);
+}
+
+.region-progress__country {
+  font-weight: 700;
+}
+
+.region-progress__count,
+.life-map__note {
+  color: var(--fibo-ink-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.life-map__note {
+  margin: 0;
+}

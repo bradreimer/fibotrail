@@ -5,7 +5,8 @@ namespace Fibotrail.Places;
 
 /// <summary>A country that also tracks its regions: Canada and the USA to start. See ADR-012.</summary>
 /// <param name="Id">The ISO 3166-1 numeric code, the same <see cref="Country.Id"/> that the country outlines carry.</param>
-public sealed record DetailCountry(string Id, string Name);
+/// <param name="RegionNoun">What its regions are called, in the plural: "states", or "provinces and territories".</param>
+public sealed record DetailCountry(string Id, string Name, string RegionNoun);
 
 /// <summary>A region outline, tied to the detail country that holds it.</summary>
 /// <param name="CountryId">The ISO 3166-1 numeric code of the detail country.</param>
@@ -28,7 +29,7 @@ public static class RegionOutlines
         using var document = JsonDocument.Parse(gzip);
         var root = document.RootElement;
         var countries = root.GetProperty("countries").EnumerateArray()
-            .Select(country => new DetailCountry(country.GetProperty("id").GetString()!, country.GetProperty("name").GetString()!))
+            .Select(country => new DetailCountry(country.GetProperty("id").GetString()!, country.GetProperty("name").GetString()!, country.GetProperty("regions").GetString()!))
             .ToList();
         var regions = root.GetProperty("regions").EnumerateArray().Select(region => new RegionOutline(
             region.GetProperty("country").GetString()!,

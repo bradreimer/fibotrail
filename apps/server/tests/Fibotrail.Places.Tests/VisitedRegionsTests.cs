@@ -15,7 +15,7 @@ public class VisitedRegionsTests
 
     /// <summary>Alpha has West (0 to 5) and East (5 to 10). Beta has one region.</summary>
     private static RegionFinder Regions() => new(
-        [new DetailCountry("001", "Alpha"), new DetailCountry("002", "Beta")],
+        [new DetailCountry("001", "Alpha", "regions"), new DetailCountry("002", "Beta", "districts")],
         [
             new RegionOutline("001", new CountryOutline("AA-W", "West", [[Square(0, 0, 5, 10)]])),
             new RegionOutline("001", new CountryOutline("AA-E", "East", [[Square(5, 0, 10, 10)]])),
@@ -81,7 +81,7 @@ public class VisitedRegionsTests
         // The stop is in Alpha's outline, but Alpha's only region covers the south of it, far from the stop.
         var countries = new CountryFinder([new CountryOutline("001", "Alpha", [[Square(0, 0, 10, 20)]])]);
         var regions = new RegionFinder(
-            [new DetailCountry("001", "Alpha")],
+            [new DetailCountry("001", "Alpha", "regions")],
             [new RegionOutline("001", new CountryOutline("AA-W", "West", [[Square(0, 0, 5, 10)]]))]);
 
         var alpha = Assert.Single(VisitedRegions.Find([Trip(1, "Gap", 3, (18, 8))], countries, regions));

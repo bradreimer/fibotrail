@@ -1,8 +1,9 @@
 // Writes the region outlines of the detail countries (ADR-012).
 // Intention: the Map shows which provinces, territories, and states you've visited in the few
 // countries you travel in most, and the server and the web app draw and match against one source,
-// Natural Earth's states and provinces at 1:50 million.
-// Method: read the Natural Earth admin-1 file, keep the countries listed in detail-countries.json,
+// Natural Earth's states and provinces at 1:50 million. detail-countries.json lists the countries,
+// with the plural noun for their regions, such as "states", which the screen uses.
+// Method: read the Natural Earth admin-1 file, keep those countries,
 // round each position to 3 decimals (about 100 m, far finer than the data), and write two copies:
 // a gzipped resource of Fibotrail.Places for the server, and a GeoJSON file for the web app.
 // Run it with "npm run outlines" after the list or the Natural Earth version changes, and commit
@@ -23,7 +24,10 @@ const SOURCE_URL = `https://raw.githubusercontent.com/nvkelso/natural-earth-vect
 
 const require = createRequire(import.meta.url);
 const topology = require('world-atlas/countries-50m.json');
-const detailCodes = JSON.parse(readFileSync(path.join(import.meta.dirname, 'detail-countries.json'), 'utf8'));
+const detail = JSON.parse(
+  readFileSync(path.join(import.meta.dirname, 'detail-countries.json'), 'utf8'),
+);
+const detailCodes = detail.map((item) => item.code);
 
 const round = (value) => Math.round(value * 1000) / 1000;
 
@@ -49,11 +53,12 @@ const worldCountries = feature(topology, topology.objects.countries).features;
 // The detail countries, tied to the same ISO numeric code the country outlines carry.
 const names = new Map();
 for (const item of source.features) names.set(item.properties.adm0_a3, item.properties.admin);
-const countries = detailCodes.map((code) => {
+const countries = detail.map(({ code, regions: noun }) => {
   const admin = names.get(code);
   const world = worldCountries.find((item) => item.properties.name === admin);
-  if (!admin || !world?.id) throw new Error(`No country outline matches the detail country ${code}`);
-  return { code, id: world.id, name: world.properties.name };
+  if (!admin || !world?.id)
+    throw new Error(`No country outline matches the detail country ${code}`);
+  return { code, id: world.id, name: world.properties.name, regions: noun };
 });
 
 const regions = source.features
@@ -98,7 +103,7 @@ writeFileSync(
         coordinates: region.polygons,
       },
     })),
-  }),
+  }) + '\n',
 );
 
 for (const file of [serverFile, webFile]) {

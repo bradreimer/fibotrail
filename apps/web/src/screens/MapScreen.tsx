@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 
 import { useApi } from '../api/useApi';
 import { CountrySheet, type MapCountry } from '../map/CountrySheet';
+import { RegionLists, RegionProgress } from '../map/DetailRegions';
 import { LazyMap } from '../map/LazyMap';
 import { MapSummary } from '../map/MapSummary';
 import { EmptyState } from '../states/EmptyState';
@@ -21,10 +22,16 @@ function keyOf(country: MapCountry): string {
 export function MapScreen() {
   const map = useApi('/api/map');
   const [selected, setSelected] = useState<string | null>(null);
+  const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
   const [showRoutes, setShowRoutes] = useState(false);
 
   const data = map.data;
   const visited = useMemo(() => data?.countries.map(keyOf) ?? [], [data]);
+  const detailKeys = useMemo(() => data?.detailCountries.map((item) => item.id) ?? [], [data]);
+  const visitedRegions = useMemo(
+    () => data?.detailCountries.flatMap((item) => item.regions.map((region) => region.id)) ?? [],
+    [data],
+  );
   const routes = useMemo(
     () => (showRoutes ? (data?.routes.map((route) => route.points) ?? []) : []),
     [data, showRoutes],
@@ -59,16 +66,33 @@ export function MapScreen() {
   }
 
   const country = data.countries.find((item) => keyOf(item) === selected) ?? null;
+  const region =
+    data.detailCountries
+      .flatMap((item) => item.regions)
+      .find((item) => item.id === selectedRegion) ?? null;
+  const hasDetail = data.detailCountries.length > 0;
+  const selectCountry = (key: string | null) => {
+    setSelectedRegion(null);
+    setSelected(key);
+  };
+  const selectRegion = (key: string | null) => {
+    setSelected(null);
+    setSelectedRegion(key);
+  };
   return (
     <div className="life-map">
       <MapSummary totals={data.totals} />
+      <RegionProgress countries={data.detailCountries} />
       <LazyMap
         className="life-map__map"
-        label="World map. The countries you've visited are filled in green."
+        label={`World map. The countries you've visited are filled in green.${hasDetail ? " Zoom in to a country with regions to see the ones you've visited." : ''}`}
         markers={[]}
         visited={visited}
+        detailCountries={hasDetail ? detailKeys : undefined}
+        visitedRegions={hasDetail ? visitedRegions : undefined}
         routes={routes}
-        onCountrySelect={setSelected}
+        onCountrySelect={selectCountry}
+        onRegionSelect={selectRegion}
       />
       <label className="setting-row">
         <span>Show routes</span>
@@ -90,7 +114,7 @@ export function MapScreen() {
               <button
                 type="button"
                 className="first-visits__item"
-                onClick={() => setSelected(keyOf(item))}
+                onClick={() => selectCountry(keyOf(item))}
               >
                 <span className="first-visits__name">{item.name}</span>
                 <span className="first-visits__date">
@@ -101,7 +125,9 @@ export function MapScreen() {
           ))}
         </ol>
       </section>
+      <RegionLists countries={data.detailCountries} onSelect={(item) => selectRegion(item.id)} />
       {country && <CountrySheet country={country} onClose={() => setSelected(null)} />}
+      {region && <CountrySheet country={region} onClose={() => setSelectedRegion(null)} />}
     </div>
   );
 }

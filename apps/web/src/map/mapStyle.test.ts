@@ -1,7 +1,14 @@
 import { featureFilter, validateStyleMin } from '@maplibre/maplibre-gl-style-spec';
 import { describe, expect, it } from 'vitest';
 
-import { baseMapStyle, boundsOf, routeGeoJson, routesGeoJson, visitedFilter } from './mapStyle';
+import {
+  REGION_MIN_ZOOM,
+  baseMapStyle,
+  boundsOf,
+  routeGeoJson,
+  routesGeoJson,
+  visitedFilter,
+} from './mapStyle';
 
 const colors = {
   water: '#dde6e4',
@@ -30,7 +37,17 @@ describe('the base map style', () => {
 
   it('draws the route as a 4 px line over an outline, above the land', () => {
     const ids = style.layers.map((layer) => layer.id);
-    expect(ids).toEqual(['water', 'land', 'visited', 'borders', 'route-outline', 'route']);
+    expect(ids).toEqual([
+      'water',
+      'land',
+      'visited',
+      'visited-detail',
+      'region-visited',
+      'borders',
+      'region-borders',
+      'route-outline',
+      'route',
+    ]);
     const route = style.layers.find((layer) => layer.id === 'route')!;
     expect(route.paint).toMatchObject({ 'line-color': '#146560', 'line-width': 4 });
   });
@@ -65,6 +82,35 @@ describe('boundsOf', () => {
       ]),
     ).toEqual([-123.1, 28.4, -81.55, 49.25]);
     expect(boundsOf([])).toBeNull();
+  });
+});
+
+describe('the regions of the detail countries', () => {
+  const style = baseMapStyle(colors);
+
+  it('are drawn from their own source, only once the map is zoomed in', () => {
+    for (const id of ['region-visited', 'region-borders']) {
+      const layer = style.layers.find((item) => item.id === id)!;
+      expect(layer).toMatchObject({ source: 'regions', minzoom: REGION_MIN_ZOOM });
+    }
+    expect(style.sources.regions).toMatchObject({ type: 'geojson' });
+  });
+
+  it('fill only the visited regions, in the same green as a visited country', () => {
+    const visited = style.layers.find((layer) => layer.id === 'region-visited')!;
+    expect(visited.paint).toMatchObject({ 'fill-color': '#7bae7f' });
+    expect(visited).toMatchObject({ filter: visitedFilter([]) });
+  });
+
+  it('replace the whole-country fill of a detail country from the zoom where they draw', () => {
+    const detail = style.layers.find((layer) => layer.id === 'visited-detail')!;
+    expect(detail).toMatchObject({ source: 'land', maxzoom: REGION_MIN_ZOOM });
+    expect(detail.paint).toMatchObject({ 'fill-color': '#7bae7f' });
+    expect(detail).toMatchObject({ filter: visitedFilter([]) });
+  });
+
+  it('make a style the engine accepts', () => {
+    expect(validateStyleMin(style as never)).toEqual([]);
   });
 });
 

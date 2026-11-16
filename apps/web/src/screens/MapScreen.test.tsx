@@ -11,7 +11,42 @@ import { installMatchMedia } from '../test/window';
 
 type MapInfo = components['schemas']['MapInfo'];
 
+const canada = {
+  id: '124',
+  name: 'Canada',
+  regionNoun: 'provinces and territories',
+  totalRegions: 13,
+  regions: [
+    {
+      id: 'CA-ON',
+      name: 'Ontario',
+      firstVisit: '2023-07-01',
+      trips: [
+        { id: 12, name: 'Toronto, July 2023', startDate: '2023-07-01', endDate: '2023-07-06' },
+      ],
+    },
+    {
+      id: 'CA-AB',
+      name: 'Alberta',
+      firstVisit: '2024-08-10',
+      trips: [
+        { id: 13, name: 'Banff, August 2024', startDate: '2024-08-10', endDate: '2024-08-17' },
+        { id: 14, name: 'Banff, August 2025', startDate: '2025-08-09', endDate: '2025-08-16' },
+      ],
+    },
+  ],
+};
+
+const usa = {
+  id: '840',
+  name: 'United States of America',
+  regionNoun: 'states',
+  totalRegions: 51,
+  regions: [],
+};
+
 const map: MapInfo = {
+  detailCountries: [],
   countries: [
     {
       id: '752',
@@ -156,10 +191,128 @@ describe('the Map screen', () => {
     expect(item).toHaveFocus();
   });
 
+  it('shows no region line, list, or region data when no visited country has regions', async () => {
+    fakeServer({ 'GET /api/map': map });
+    renderMap();
+    const worldMap = await screen.findByRole('application');
+
+    expect(worldMap.dataset.detailCountries).toBeUndefined();
+    expect(worldMap.dataset.visitedRegions).toBeUndefined();
+    expect(
+      screen.queryByRole('heading', { name: "Regions you've visited" }),
+    ).not.toBeInTheDocument();
+  });
+
+  describe('for the countries that show their regions', () => {
+    const detail: MapInfo = { ...map, detailCountries: [canada, usa] };
+
+    it('says how many provinces, territories, and states you have visited, under the numbers', async () => {
+      fakeServer({ 'GET /api/map': detail });
+      renderMap();
+
+      const lines = (
+        await screen.findByRole('heading', { name: "Regions you've visited" })
+      ).closest('section')!;
+
+      expect(
+        within(lines)
+          .getAllByRole('listitem')
+          .map((item) => item.textContent),
+      ).toEqual([
+        'Canada2 of 13 provinces and territories',
+        'United States of America0 of 51 states',
+      ]);
+    });
+
+    it('gives the map the detail countries and the visited regions by code', async () => {
+      fakeServer({ 'GET /api/map': detail });
+      renderMap();
+
+      const worldMap = await screen.findByRole('application', {
+        name: /^World map\. .* Zoom in to a country with regions/,
+      });
+
+      expect(JSON.parse(worldMap.dataset.detailCountries!)).toEqual(['124', '840']);
+      expect(JSON.parse(worldMap.dataset.visitedRegions!)).toEqual(['CA-ON', 'CA-AB']);
+    });
+
+    it('lists the visited regions of each country with the first visit, in the order the server gives', async () => {
+      fakeServer({ 'GET /api/map': detail });
+      renderMap();
+
+      const canadaList = (
+        await screen.findByRole('heading', { name: 'Canada: 2 of 13 provinces and territories' })
+      ).closest('section')!;
+      expect(
+        within(canadaList)
+          .getAllByRole('listitem')
+          .map((item) => item.textContent),
+      ).toEqual(['OntarioJul 1, 2023', 'AlbertaAug 10, 2024']);
+      expect(
+        screen.getByRole('heading', { name: 'United States of America: 0 of 51 states' }),
+      ).toBeInTheDocument();
+      expect(screen.getByText('No states yet.')).toBeInTheDocument();
+    });
+
+    it('opens a sheet for a region tapped on the map, with its trips and its first visit', async () => {
+      fakeServer({ 'GET /api/map': detail });
+      renderMap();
+
+      await userEvent.click(
+        await screen.findByRole('button', { name: 'Region on the map: CA-AB' }),
+      );
+
+      const sheet = screen.getByRole('dialog', { name: 'Alberta' });
+      expect(within(sheet).getByText('2 trips · First visit Aug 10, 2024')).toBeInTheDocument();
+      expect(
+        within(sheet)
+          .getAllByRole('link')
+          .map((link) => link.getAttribute('href')),
+      ).toEqual(['/trips/13', '/trips/14']);
+      expect(within(sheet).getByRole('button', { name: 'Close' })).toHaveFocus();
+    });
+
+    it('opens the same sheet from the list, so a small region needs no precise tap', async () => {
+      fakeServer({ 'GET /api/map': detail });
+      renderMap();
+      const item = await screen.findByRole('button', { name: /^OntarioJul 1, 2023$/ });
+
+      await userEvent.click(item);
+      const sheet = screen.getByRole('dialog', { name: 'Ontario' });
+      expect(within(sheet).getByText('1 trip · First visit Jul 1, 2023')).toBeInTheDocument();
+      expectNoAccessibilityProblems();
+
+      await userEvent.keyboard('{Escape}');
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+      expect(item).toHaveFocus();
+    });
+
+    it('shows one sheet at a time', async () => {
+      fakeServer({ 'GET /api/map': detail });
+      renderMap();
+      await userEvent.click(await screen.findByRole('button', { name: /^OntarioJul 1, 2023$/ }));
+      await userEvent.keyboard('{Escape}');
+
+      await userEvent.click(screen.getByRole('button', { name: 'Country on the map: 752' }));
+
+      expect(screen.getAllByRole('dialog')).toHaveLength(1);
+      expect(screen.getByRole('dialog', { name: 'Sweden' })).toBeInTheDocument();
+    });
+
+    it('has an accessible name on every control', async () => {
+      fakeServer({ 'GET /api/map': detail });
+      renderMap();
+      await screen.findByRole('application');
+
+      expectNoAccessibilityProblems();
+    });
+  });
+
   it('says No places yet and links to the inbox when no trip has been added', async () => {
     fakeServer({
       'GET /api/map': {
         countries: [],
+        detailCountries: [],
         routes: [],
         totals: { countries: 0, trips: 0, daysAway: 0, distanceKm: 0 },
       },

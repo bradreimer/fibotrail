@@ -1,1 +1,4 @@
-["CAN", "USA"]
+[
+  { "code": "CAN", "regions": "provinces and territories" },
+  { "code": "USA", "regions": "states" }
+]

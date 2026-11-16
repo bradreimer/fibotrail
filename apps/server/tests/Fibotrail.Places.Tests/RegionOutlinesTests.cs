@@ -13,7 +13,7 @@ public class RegionOutlinesTests
     [Fact]
     public void Canada_has_13_provinces_and_territories_and_the_USA_has_50_states_and_the_District_of_Columbia()
     {
-        Assert.Equal([(Canada, "Canada"), (UnitedStates, "United States of America")], Finder.DetailCountries.Select(country => (country.Id, country.Name)));
+        Assert.Equal([(Canada, "Canada", "provinces and territories"), (UnitedStates, "United States of America", "states")], Finder.DetailCountries.Select(country => (country.Id, country.Name, country.RegionNoun)));
         Assert.Equal(13, Finder.Total(Canada));
         Assert.Equal(51, Finder.Total(UnitedStates));
         Assert.Contains(Finder.Regions(UnitedStates), region => region is { Id: "US-DC", Name: "District of Columbia" });

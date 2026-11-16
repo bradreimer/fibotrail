@@ -720,6 +720,7 @@
         "required": [
           "id",
           "name",
+          "regionNoun",
           "totalRegions",
           "regions"
         ],
@@ -729,6 +730,9 @@
             "type": "string"
           },
           "name": {
+            "type": "string"
+          },
+          "regionNoun": {
             "type": "string"
           },
           "totalRegions": {

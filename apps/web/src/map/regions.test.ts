@@ -12,7 +12,7 @@ import regions from './regions.json';
 
 interface ServerRegions {
   source: string;
-  countries: { code: string; id: string; name: string }[];
+  countries: { code: string; id: string; name: string; regions: string }[];
   regions: { id: string; name: string; country: string; polygons: number[][][][] }[];
 }
 

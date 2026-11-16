@@ -7,7 +7,7 @@ public class RegionFinderTests
 
     /// <summary>Alpha (001) has two regions side by side. Beta (002) has one. Gamma (003) is not a detail country.</summary>
     private static RegionFinder Finder() => new(
-        [new DetailCountry("001", "Alpha"), new DetailCountry("002", "Beta")],
+        [new DetailCountry("001", "Alpha", "regions"), new DetailCountry("002", "Beta", "districts")],
         [
             new RegionOutline("001", new CountryOutline("AA-W", "West", [[Square(0, 0, 5, 10)]])),
             new RegionOutline("001", new CountryOutline("AA-E", "East", [[Square(5, 0, 10, 10)]])),

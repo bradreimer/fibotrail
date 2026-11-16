@@ -297,6 +297,7 @@ export interface components {
         MapDetailCountry: {
             id: string;
             name: string;
+            regionNoun: string;
             /** Format: int32 */
             totalRegions: number;
             regions: components["schemas"]["MapRegion"][];

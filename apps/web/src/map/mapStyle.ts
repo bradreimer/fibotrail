@@ -28,7 +28,18 @@ export function readMapColors(element: Element, dark: boolean): MapColors {
 
 export const LAND_SOURCE = 'land';
 export const ROUTE_SOURCE = 'route';
+export const REGION_SOURCE = 'regions';
 export const VISITED_LAYER = 'visited';
+/** The visited detail countries, filled whole only until the regions are drawn. */
+export const DETAIL_VISITED_LAYER = 'visited-detail';
+export const REGION_VISITED_LAYER = 'region-visited';
+export const REGION_BORDERS_LAYER = 'region-borders';
+
+/**
+ * From this zoom up, the regions of a detail country are drawn: a Canada or USA fills by province,
+ * territory, or state. Below it, the country fills as a whole. Canada is about 700 px wide at this zoom, wider than a phone.
+ */
+export const REGION_MIN_ZOOM = 2.5;
 
 /**
  * Matches the countries whose key is in the list. A country's key is its ISO code, or its name
@@ -52,6 +63,7 @@ export function baseMapStyle(colors: MapColors): StyleSpecification {
     sources: {
       [LAND_SOURCE]: { type: 'geojson', data: { type: 'FeatureCollection', features: [] } },
       [ROUTE_SOURCE]: { type: 'geojson', data: { type: 'FeatureCollection', features: [] } },
+      [REGION_SOURCE]: { type: 'geojson', data: { type: 'FeatureCollection', features: [] } },
     },
     layers: [
       { id: 'water', type: 'background', paint: { 'background-color': colors.water } },
@@ -64,10 +76,34 @@ export function baseMapStyle(colors: MapColors): StyleSpecification {
         paint: { 'fill-color': colors.visited },
       },
       {
+        // A layer's zoom range is exact. A zoom in a data expression is read per tile, in whole zooms.
+        id: DETAIL_VISITED_LAYER,
+        type: 'fill',
+        source: LAND_SOURCE,
+        maxzoom: REGION_MIN_ZOOM,
+        filter: visitedFilter([]),
+        paint: { 'fill-color': colors.visited },
+      },
+      {
+        id: REGION_VISITED_LAYER,
+        type: 'fill',
+        source: REGION_SOURCE,
+        minzoom: REGION_MIN_ZOOM,
+        filter: visitedFilter([]),
+        paint: { 'fill-color': colors.visited },
+      },
+      {
         id: 'borders',
         type: 'line',
         source: LAND_SOURCE,
         paint: { 'line-color': colors.border, 'line-width': 1 },
+      },
+      {
+        id: REGION_BORDERS_LAYER,
+        type: 'line',
+        source: REGION_SOURCE,
+        minzoom: REGION_MIN_ZOOM,
+        paint: { 'line-color': colors.border, 'line-width': 0.75 },
       },
       {
         id: 'route-outline',

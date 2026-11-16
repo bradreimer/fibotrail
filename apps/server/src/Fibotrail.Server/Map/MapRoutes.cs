@@ -22,9 +22,10 @@ public sealed record MapRegion(string Id, string Name, DateOnly FirstVisit, IRea
 
 /// <summary>A visited country that also tracks its regions, with the regions visited so far.</summary>
 /// <param name="Id">The ISO 3166-1 numeric code of the country, the same as <see cref="MapCountry.Id"/>.</param>
+/// <param name="RegionNoun">What its regions are called, in the plural: "states", or "provinces and territories".</param>
 /// <param name="TotalRegions">How many regions the country has: 13 for Canada and 51 for the USA.</param>
 /// <param name="Regions">The visited regions, earliest first visit first.</param>
-public sealed record MapDetailCountry(string Id, string Name, int TotalRegions, IReadOnlyList<MapRegion> Regions);
+public sealed record MapDetailCountry(string Id, string Name, string RegionNoun, int TotalRegions, IReadOnlyList<MapRegion> Regions);
 
 public sealed record MapPoint(double Latitude, double Longitude);
 
@@ -85,6 +86,7 @@ public static class MapRoutes
             [.. visitedRegions.Select(detail => new MapDetailCountry(
                 detail.Country.Id,
                 detail.Country.Name,
+                detail.Country.RegionNoun,
                 detail.Total,
                 [.. detail.Regions.Select(region => new MapRegion(
                     region.Country.Id!,

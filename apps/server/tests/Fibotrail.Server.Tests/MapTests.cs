@@ -161,6 +161,7 @@ public class MapTests
         // France isn't a detail country. Canada and the USA are, in that order.
         Assert.Equal(["124", "840"], detail.Select(country => country.GetProperty("id").GetString()));
         Assert.Equal(["Canada", "United States of America"], detail.Select(country => country.GetProperty("name").GetString()));
+        Assert.Equal(["provinces and territories", "states"], detail.Select(country => country.GetProperty("regionNoun").GetString()));
         Assert.Equal([13, 51], detail.Select(country => country.GetProperty("totalRegions").GetInt32()));
         Assert.Equal(["CA-BC"], RegionIds(detail[0]));
         Assert.Equal(["US-FL"], RegionIds(detail[1]));
