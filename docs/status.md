@@ -113,12 +113,16 @@ version 0.1 and the per-line results of the accessibility checklist are also sti
   carries `FIBOTRAIL_VERSION=0.2.0` and runs as user 1654. On the maintainer's upgrade, Fibotrail
   copied the database to `fibotrail-backup-<time>.db` before applying the new table.
 
+- [#60](https://github.com/bradreimer/fibotrail/issues/60) Measuring the on-the-way stop rule, the
+  first step of [#32](https://github.com/bradreimer/fibotrail/issues/32). `fibotrail stops` reports
+  which stops of each added trip the candidate rule flags, and why, and changes nothing. It was
+  merged on 2026-11-16 and is tested on made-up trips only. It hasn't been run on the maintainer's
+  library yet, and the rule's thresholds stay untuned until it is. See
+  [on-the-way.md](specs/on-the-way.md#measuring-the-rule).
+
 ## In progress
 
-- Measuring the on-the-way stop rule ([#60](https://github.com/bradreimer/fibotrail/issues/60), the
-  first step of [#32](https://github.com/bradreimer/fibotrail/issues/32)). The `fibotrail stops`
-  command is built and tested. It waits for the maintainer to run it on the real library and report
-  what it flags, so the rule's thresholds can be tuned. See [on-the-way.md](specs/on-the-way.md).
+Nothing is in progress.
 
 ## Next
 
