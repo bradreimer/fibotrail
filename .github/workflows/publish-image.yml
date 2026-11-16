@@ -3,7 +3,8 @@ name: Publish image
 # Intention: every commit on main that passes CI becomes ghcr.io/bradreimer/fibotrail:edge, for
 # testing. The tag "latest" is for releases only and is pushed by release.yml.
 # Method: wait for the CI workflow to succeed on main, then build docker/Dockerfile for amd64 and
-# arm64 and push it with the tags "edge" and "sha-<commit>".
+# arm64 and push it with the tags "edge" and "sha-<commit>". The version in the image is
+# "edge-" and the first 7 characters of the commit, which /healthz reports.
 
 on:
   workflow_run:
@@ -48,12 +49,20 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Name the version
+        id: version
+        run: echo "version=edge-${SHA::7}" >> "$GITHUB_OUTPUT"
+        env:
+          SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+
       - uses: docker/build-push-action@v6
         with:
           context: .
           file: docker/Dockerfile
           platforms: linux/amd64,linux/arm64
           push: true
+          build-args: |
+            VERSION=${{ steps.version.outputs.version }}
           tags: |
             ${{ env.IMAGE }}:edge
             ${{ env.IMAGE }}:sha-${{ github.event.workflow_run.head_sha || github.sha }}

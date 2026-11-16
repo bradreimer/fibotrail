@@ -393,6 +393,7 @@ export function checkPublishWorkflow(yaml) {
   const problems = [];
   if (!/:edge\b/.test(yaml)) problems.push('must push edge');
   if (!/:sha-/.test(yaml)) problems.push('must push the commit tag');
+  if (!/VERSION=\$\{\{ steps\.version\.outputs\.version \}\}/.test(yaml)) problems.push('must pass the version to the build');
   if (/:latest\b/.test(yaml.replace(/^\s*#.*$/gm, ''))) {
     problems.push('must not push latest, which is for releases only');
   }
