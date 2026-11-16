@@ -15,7 +15,7 @@ in the app, and a decision about how to name and count them. That is
 [#45](https://github.com/bradreimer/fibotrail/issues/45) (the screen),
 [#46](https://github.com/bradreimer/fibotrail/issues/46) (which countries count), and
 [#47](https://github.com/bradreimer/fibotrail/issues/47) (the navigation change). The data decision
-is [ADR-011](../adr/ADR-011-visits-are-derived-from-added-trips-on-the-server.md), proposed.
+is [ADR-011](../adr/ADR-011-visits-are-derived-from-added-trips-on-the-server.md), accepted.
 
 ## User story
 

@@ -121,7 +121,7 @@ The MVP plan is in [roadmap.md](roadmap.md#mvp-version-01). Its specs are in
   [life-map.md](specs/life-map.md): the Map screen ([#45](https://github.com/bradreimer/fibotrail/issues/45)),
   working out the visited countries on the server
   ([#46](https://github.com/bradreimer/fibotrail/issues/46), with
-  [ADR-011](adr/ADR-011-visits-are-derived-from-added-trips-on-the-server.md), proposed), and moving
+  [ADR-011](adr/ADR-011-visits-are-derived-from-added-trips-on-the-server.md), accepted), and moving
   Inbox and Settings to the top bar ([#47](https://github.com/bradreimer/fibotrail/issues/47)).
   Zooming to regions and cities is [#48](https://github.com/bradreimer/fibotrail/issues/48). Not
   built yet. Start with #46.
