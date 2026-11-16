@@ -32,9 +32,18 @@ places:
     status: open
     boundary: boundaries/animal-kingdom.geojson
 
-  # Disneyland Resort
-  # - {id: disneyland, name: Disneyland Park, group: Disneyland Resort, status: open, boundary: boundaries/disneyland.geojson}
-  # - {id: california-adventure, name: Disney California Adventure, group: Disneyland Resort, status: open, boundary: boundaries/california-adventure.geojson}
+  - id: disneyland
+    name: Disneyland Park
+    group: Disneyland Resort
+    status: open
+    boundary: boundaries/disneyland.geojson
+
+  - id: california-adventure
+    name: Disney California Adventure
+    group: Disneyland Resort
+    status: open
+    boundary: boundaries/california-adventure.geojson
+
   # Tokyo Disney Resort
   # - {id: tokyo-disneyland, name: Tokyo Disneyland, group: Tokyo Disney Resort, status: open, boundary: boundaries/tokyo-disneyland.geojson}
   # - {id: tokyo-disneysea, name: Tokyo DisneySea, group: Tokyo Disney Resort, status: open, boundary: boundaries/tokyo-disneysea.geojson}
