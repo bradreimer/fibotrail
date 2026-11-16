@@ -58,3 +58,4 @@ What becomes easier, what becomes harder, and what must stay true?
 | [ADR-009](ADR-009-a-bundled-natural-earth-base-map.md) | A bundled Natural Earth outline is the base map | Accepted |
 | [ADR-010](ADR-010-stops-and-routes-are-stored-with-the-trip.md) | Stops and routes are stored with the trip, and decisions carry their dates | Accepted |
 | [ADR-011](ADR-011-visits-are-derived-from-added-trips-on-the-server.md) | Visits are derived from added trips on the server | Accepted |
+| [ADR-012](ADR-012-park-days-are-derived-from-stored-photo-positions.md) | Park days are derived from stored photo positions | Accepted |

@@ -27,9 +27,8 @@ Added trips ─▶ Photos with a position ─▶ Park boundaries ─▶ Park day
                                                                        └─▶ Stats: Theme parks view
 ```
 
-The Stats screen shows park days in a self-contained view, per
-[ADR-012](https://github.com/bradreimer/fibotrail/blob/main/docs/adr/ADR-012-stats-views-are-self-contained-modules.md).
-That view has its own spec. This spec covers the data files, the counting rule, the shared
+The Stats screen shows park days in a self-contained view, following the stats views decision
+tracked in [#54](https://github.com/bradreimer/fibotrail/issues/54). That view has its own spec. This spec covers the data files, the counting rule, the shared
 numbers, and the Collections screens.
 
 ## User story
@@ -133,10 +132,10 @@ visit, such as a day your phone died after one photo. See open question 1.
 
 ### Shared numbers
 
-- The park days are computed once, on the server, from the stored trip photos and the boundaries.
-  Nothing is stored in a table, per
-  [ADR-011](../adr/ADR-011-visits-are-derived-from-added-trips-on-the-server.md). A new ADR
-  records the choice to extend the stats library with parks for each day.
+- The park days are computed on the server, on each request, from the stored position and local
+  day of each trip photo and from the boundaries. No park or day table is stored, per
+  [ADR-012](../adr/ADR-012-park-days-are-derived-from-stored-photo-positions.md), which follows
+  [ADR-011](../adr/ADR-011-visits-are-derived-from-added-trips-on-the-server.md).
 - The lookup and the day count are pure functions in the detection project, so they test with plain
   data and no running Immich.
 - Collections and the Theme parks view call the same function. A test checks that both return the
