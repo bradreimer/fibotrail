@@ -48,7 +48,11 @@
   overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: contain;
-  -webkit-overflow-scrolling: touch;
+  /*
+   * No -webkit-overflow-scrolling here. On iOS it makes this area its own stacking layer, so a
+   * fixed sheet, viewer, or map inside it can't rise above the tab bar that follows it. Momentum
+   * scrolling is the default since iOS 13.
+   */
   padding: var(--fibo-space-5) calc(env(safe-area-inset-right) + var(--fibo-space-5))
     var(--fibo-space-5) calc(env(safe-area-inset-left) + var(--fibo-space-5));
 }
