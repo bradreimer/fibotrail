@@ -3,12 +3,14 @@
     <Project Path="src/Fibotrail.Detection/Fibotrail.Detection.csproj" />
     <Project Path="src/Fibotrail.Immich/Fibotrail.Immich.csproj" />
     <Project Path="src/Fibotrail.Places/Fibotrail.Places.csproj" />
+    <Project Path="src/Fibotrail.Stats/Fibotrail.Stats.csproj" />
     <Project Path="src/Fibotrail.Server/Fibotrail.Server.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Fibotrail.Detection.Tests/Fibotrail.Detection.Tests.csproj" />
     <Project Path="tests/Fibotrail.Immich.Tests/Fibotrail.Immich.Tests.csproj" />
     <Project Path="tests/Fibotrail.Places.Tests/Fibotrail.Places.Tests.csproj" />
+    <Project Path="tests/Fibotrail.Stats.Tests/Fibotrail.Stats.Tests.csproj" />
     <Project Path="tests/Fibotrail.Server.Tests/Fibotrail.Server.Tests.csproj" />
   </Folder>
 </Solution>

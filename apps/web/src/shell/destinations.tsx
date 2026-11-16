@@ -58,6 +58,16 @@ export const DESTINATIONS: readonly Destination[] = [
     ),
   },
   {
+    path: '/stats',
+    label: 'Stats',
+    placement: 'main',
+    icon: (
+      <Icon>
+        <path d="M4 20V10M10 20V4M16 20v-7M22 20H2" />
+      </Icon>
+    ),
+  },
+  {
     path: '/inbox',
     label: 'Inbox',
     placement: 'tool',

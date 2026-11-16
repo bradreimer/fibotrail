@@ -15,6 +15,19 @@ version 0.1 and the per-line results of the accessibility checklist are also sti
 
 ## Completed
 
+- [#54](https://github.com/bradreimer/fibotrail/issues/54) The Stats screen host. A Stats tab with
+  the summary tiles, continent cards with progress rings, a continent page, and a country page with
+  trips and days ("3 trips · 19 days"). Server: the `Fibotrail.Stats` library, a continent table in
+  `Fibotrail.Places`, and `GET /api/stats/*`. The first three views are trips per year, trip length,
+  and records, each a self-contained module per
+  [ADR-014](adr/ADR-014-stats-views-are-self-contained-modules.md). Not built yet: the continent's
+  outline inside each ring. It is checked in a desktop browser only, not yet on a phone, and it
+  isn't known how long the screen takes on the maintainer's 46 trips. Related views are
+  [#58](https://github.com/bradreimer/fibotrail/issues/58),
+  [#59](https://github.com/bradreimer/fibotrail/issues/59),
+  [#66](https://github.com/bradreimer/fibotrail/issues/66), and
+  [#67](https://github.com/bradreimer/fibotrail/issues/67).
+
 - [#62](https://github.com/bradreimer/fibotrail/issues/62) Provinces, territories, and states on
   the Map. Canada's 13 and the USA's 51 fill when the Map is zoomed in, with a progress line for
   each country, a list of visited regions, and a sheet for each ([spec](specs/life-map.md#detail-regions),

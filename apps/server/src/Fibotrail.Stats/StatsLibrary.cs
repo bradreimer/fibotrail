@@ -1,0 +1,135 @@
+using Fibotrail.Places;
+
+namespace Fibotrail.Stats;
+
+/// <summary>An away photo with a position, reduced to the local day it was taken and where.</summary>
+public sealed record PhotoPosition(DateOnly Day, double Latitude, double Longitude);
+
+/// <summary>An added trip, as the stats library reads it.</summary>
+/// <param name="Stops">The stored stops. Photos on the way aren't among them.</param>
+/// <param name="Photos">The positioned away photos of the trip, without photos on the way.</param>
+public sealed record StatsTrip(
+    int Id,
+    string Name,
+    DateOnly StartDate,
+    DateOnly EndDate,
+    int Days,
+    double DistanceKm,
+    double FarthestFromHomeKm,
+    IReadOnlyList<(double Latitude, double Longitude)> Stops,
+    IReadOnlyList<PhotoPosition> Photos)
+{
+    /// <summary>True when the trip has fewer positioned local days than days.</summary>
+    public bool HasUnpositionedDays => Photos.Select(photo => photo.Day).Distinct().Count() < Days;
+}
+
+/// <summary>A trip as a list row. Shared by the host and the views.</summary>
+public sealed record TripRef(int Id, string Name, DateOnly StartDate, DateOnly EndDate, int Days);
+
+/// <summary>Helpers on the library's trips.</summary>
+public static class StatsTripExtensions
+{
+    public static TripRef ToRef(this StatsTrip trip)
+    {
+        ArgumentNullException.ThrowIfNull(trip);
+        return new TripRef(trip.Id, trip.Name, trip.StartDate, trip.EndDate, trip.Days);
+    }
+}
+
+/// <summary>A country with the numbers the Stats screen shows for it.</summary>
+/// <param name="Trips">Added trips with a stop in the country, earliest first.</param>
+/// <param name="Days">Distinct local days with at least one positioned away photo in the country.</param>
+public sealed record CountryStats(Country Country, Continent Continent, DateOnly FirstVisit, IReadOnlyList<VisitedTrip> Trips, int Days);
+
+/// <summary>The totals of the summary tiles.</summary>
+public sealed record StatsTotals(int Trips, int DaysAway, double DistanceKm, int Countries, int Continents);
+
+/// <summary>How many countries of a continent have been visited, out of how many there are.</summary>
+public sealed record ContinentProgress(Continent Continent, int Visited, int Total);
+
+/// <summary>
+/// The shared, read-only input of every stats view: the added trips and the numbers worked out per
+/// country, by the rules of docs/specs/stats-screen.md. Pure: callers pass the added trips and the
+/// outlines, so it is tested with plain data. See ADR-014.
+/// </summary>
+public sealed class StatsLibrary
+{
+    private StatsLibrary(IReadOnlyList<StatsTrip> trips, IReadOnlyList<CountryStats> countries, IReadOnlyDictionary<Continent, int> totals, int outlineCountries)
+    {
+        Trips = trips;
+        Countries = countries;
+        ContinentTotals = totals;
+        OutlineCountries = outlineCountries;
+    }
+
+    /// <summary>The added trips, earliest first.</summary>
+    public IReadOnlyList<StatsTrip> Trips { get; }
+
+    /// <summary>The visited countries, most days first, then most trips, then name.</summary>
+    public IReadOnlyList<CountryStats> Countries { get; }
+
+    /// <summary>The number of countries on each continent.</summary>
+    public IReadOnlyDictionary<Continent, int> ContinentTotals { get; }
+
+    /// <summary>The number of bundled outlines that have an id.</summary>
+    public int OutlineCountries { get; }
+
+    /// <summary>Builds the library. Pass added trips only.</summary>
+    public static StatsLibrary Build(IEnumerable<StatsTrip> trips, CountryFinder finder, IEnumerable<CountryOutline> outlines)
+    {
+        ArgumentNullException.ThrowIfNull(trips);
+        ArgumentNullException.ThrowIfNull(finder);
+        ArgumentNullException.ThrowIfNull(outlines);
+
+        var ordered = trips.OrderBy(trip => trip.StartDate).ThenBy(trip => trip.Id).ToList();
+        var outlineList = outlines.ToList();
+        var visited = VisitedCountries.Find(
+            ordered.Select(trip => new TripStops(trip.Id, trip.Name, trip.StartDate, trip.EndDate, trip.Stops)),
+            finder);
+
+        // Days: each local day counts for every country that has a positioned away photo that day.
+        var daysByCountry = new Dictionary<string, HashSet<DateOnly>>(StringComparer.Ordinal);
+        foreach (var photo in ordered.SelectMany(trip => trip.Photos))
+        {
+            if (finder.Find(photo.Latitude, photo.Longitude)?.Country is not { } country) continue;
+            if (!daysByCountry.TryGetValue(country.Key, out var days)) daysByCountry[country.Key] = days = [];
+            days.Add(photo.Day);
+        }
+
+        var countries = visited
+            .Select(entry => (Entry: entry, Continent: Continents.Of(entry.Country)))
+            .Where(item => item.Continent is not null)
+            .Select(item => new CountryStats(
+                item.Entry.Country,
+                item.Continent!.Value,
+                item.Entry.FirstVisit,
+                item.Entry.Trips,
+                daysByCountry.TryGetValue(item.Entry.Country.Key, out var days) ? days.Count : 0))
+            .OrderByDescending(country => country.Days)
+            .ThenByDescending(country => country.Trips.Count)
+            .ThenBy(country => country.Country.Name, StringComparer.Ordinal)
+            .ToList();
+
+        return new StatsLibrary(ordered, countries, Continents.Totals(outlineList), outlineList.Count(outline => outline.Id is not null));
+    }
+
+    /// <summary>The summary tiles.</summary>
+    public StatsTotals Totals() => new(
+        Trips.Count,
+        Trips.Sum(trip => trip.Days),
+        Math.Round(Trips.Sum(trip => trip.DistanceKm), 1),
+        Countries.Count,
+        Countries.Select(country => country.Continent).Distinct().Count());
+
+    /// <summary>Each continent's progress, visited first, then by name.</summary>
+    public IReadOnlyList<ContinentProgress> Progress() => [.. Continents.All
+        .Select(continent => new ContinentProgress(continent, Countries.Count(country => country.Continent == continent), ContinentTotals[continent]))
+        .OrderByDescending(progress => progress.Visited > 0)
+        .ThenBy(progress => Continents.Name(progress.Continent), StringComparer.Ordinal)];
+
+    /// <summary>The visited countries of a continent, in the library's order.</summary>
+    public IReadOnlyList<CountryStats> CountriesOn(Continent continent) => [.. Countries.Where(country => country.Continent == continent)];
+
+    /// <summary>One visited country by its key (its id, or its name when it has none), or null.</summary>
+    public CountryStats? Country(string key) => Countries.FirstOrDefault(country => country.Country.Key == key);
+}

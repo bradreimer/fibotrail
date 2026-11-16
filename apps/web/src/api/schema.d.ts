@@ -244,16 +244,126 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/stats/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["GetStatsSummary"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/stats/continents/{continent}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["GetStatsContinent"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/stats/countries/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["GetStatsCountry"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/stats/trips-per-year": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["GetStatsTripsPerYear"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/stats/trip-length": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["GetStatsTripLength"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/stats/records": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["GetStatsRecords"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        CountryRecord: {
+            countryId: string;
+            name: string;
+            /** Format: int32 */
+            trips: number;
+            /** Format: int32 */
+            days: number;
+        };
         /** @enum {unknown} */
         DecisionAction: "add" | "ignore" | "later" | "restore";
         DecisionRequest: {
             action: components["schemas"]["DecisionAction"];
             name?: null | string;
             coverPhotoId?: null | string;
+        };
+        GapRecord: {
+            /** Format: int32 */
+            days: number;
+            after: components["schemas"]["TripRef"];
+            before: components["schemas"]["TripRef"];
         };
         HomeState: {
             confirmed: null | components["schemas"]["PlaceInfo"];
@@ -284,6 +394,15 @@ export interface components {
             count: number;
         };
         InboxCount: {
+            /** Format: int32 */
+            count: number;
+        };
+        LengthBin: {
+            label: string;
+            /** Format: int32 */
+            minDays: number;
+            /** Format: int32 */
+            maxDays: null | number;
             /** Format: int32 */
             count: number;
         };
@@ -363,6 +482,13 @@ export interface components {
         ProblemDetail: {
             detail: string;
         };
+        RecordsResult: {
+            longestTrip: null | components["schemas"]["TripRecord"];
+            farthestTrip: null | components["schemas"]["TripRecord"];
+            mostCountriesTrip: null | components["schemas"]["TripRecord"];
+            mostVisitedCountry: null | components["schemas"]["CountryRecord"];
+            longestGap: null | components["schemas"]["GapRecord"];
+        };
         RoutePoint: {
             /** Format: double */
             latitude: number;
@@ -400,6 +526,60 @@ export interface components {
             trips: number;
             /** Format: int32 */
             newSuggestions: number;
+        };
+        StatsContinent: {
+            id: string;
+            name: string;
+            /** Format: int32 */
+            visited: number;
+            /** Format: int32 */
+            total: number;
+        };
+        StatsContinentPage: {
+            id: string;
+            name: string;
+            /** Format: int32 */
+            visited: number;
+            /** Format: int32 */
+            total: number;
+            countries: components["schemas"]["StatsCountryRow"][];
+        };
+        StatsCountryPage: {
+            id: string;
+            name: string;
+            continentId: string;
+            continentName: string;
+            /** Format: date */
+            firstVisit: string;
+            /** Format: int32 */
+            trips: number;
+            /** Format: int32 */
+            days: number;
+            hasUnpositionedDays: boolean;
+            tripList: components["schemas"]["TripRef"][];
+        };
+        StatsCountryRow: {
+            id: string;
+            name: string;
+            /** Format: int32 */
+            trips: number;
+            /** Format: int32 */
+            days: number;
+        };
+        StatsSummary: {
+            /** Format: int32 */
+            trips: number;
+            /** Format: int32 */
+            countries: number;
+            /** Format: int32 */
+            outlineCountries: number;
+            /** Format: int32 */
+            continents: number;
+            /** Format: int32 */
+            daysAway: number;
+            /** Format: double */
+            distanceKm: number;
+            continentCards: components["schemas"]["StatsContinent"][];
         };
         Suggestion: {
             /** Format: int32 */
@@ -468,6 +648,22 @@ export interface components {
             immichUrl: null | string;
             onTheWay: boolean;
         };
+        TripRecord: {
+            trip: components["schemas"]["TripRef"];
+            /** Format: double */
+            value: number;
+        };
+        TripRef: {
+            /** Format: int32 */
+            id: number;
+            name: string;
+            /** Format: date */
+            startDate: string;
+            /** Format: date */
+            endDate: string;
+            /** Format: int32 */
+            days: number;
+        };
         TripStats: {
             /** Format: int32 */
             days: number;
@@ -507,6 +703,13 @@ export interface components {
             days: number;
             place: null | string;
             coverPhotoId: string;
+        };
+        YearCount: {
+            /** Format: int32 */
+            year: number;
+            trips: components["schemas"]["TripRef"][];
+            /** Format: int32 */
+            count?: number;
         };
     };
     responses: never;
@@ -968,6 +1171,130 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["MapInfo"];
+                };
+            };
+        };
+    };
+    GetStatsSummary: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StatsSummary"];
+                };
+            };
+        };
+    };
+    GetStatsContinent: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                continent: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StatsContinentPage"];
+                };
+            };
+        };
+    };
+    GetStatsCountry: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StatsCountryPage"];
+                };
+            };
+        };
+    };
+    GetStatsTripsPerYear: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["YearCount"][];
+                };
+            };
+        };
+    };
+    GetStatsTripLength: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LengthBin"][];
+                };
+            };
+        };
+    };
+    GetStatsRecords: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecordsResult"];
                 };
             };
         };
