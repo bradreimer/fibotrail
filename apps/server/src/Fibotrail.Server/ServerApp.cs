@@ -1,5 +1,6 @@
 using Fibotrail.Places;
 using Fibotrail.Server.Map;
+using Fibotrail.Server.Stats;
 using System.Net;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -59,6 +60,7 @@ public static partial class ServerApp
         // The country outlines are read from an embedded resource the first time the map asks.
         services.AddSingleton(_ => CountryOutlines.Load());
         services.AddSingleton(_ => RegionOutlines.Load());
+        services.AddSingleton<CountryOutlinesCache>();
 
         // When a scan completes, trip detection runs.
         services.AddScoped<IScanCompletedHandler>(provider => provider.GetRequiredService<DetectionService>());
@@ -315,6 +317,7 @@ public static partial class ServerApp
         api.MapInboxRoutes();
         api.MapTripRoutes();
         api.MapMapRoutes();
+        api.MapStatsRoutes();
 
         app.MapOpenApi();
 
