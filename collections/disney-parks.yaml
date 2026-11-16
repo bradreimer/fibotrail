@@ -69,6 +69,11 @@ places:
     status: open
     boundary: boundaries/disney-adventure-world.geojson
 
-  # Hong Kong and Shanghai
-  # - {id: hong-kong-disneyland, name: Hong Kong Disneyland, group: Hong Kong Disneyland Resort, status: open, boundary: boundaries/hong-kong-disneyland.geojson}
+  - id: hong-kong-disneyland
+    name: Hong Kong Disneyland
+    group: Hong Kong Disneyland Resort
+    status: open
+    boundary: boundaries/hong-kong-disneyland.geojson
+
+  # Shanghai
   # - {id: shanghai-disneyland, name: Shanghai Disneyland, group: Shanghai Disney Resort, status: open, boundary: boundaries/shanghai-disneyland.geojson}
