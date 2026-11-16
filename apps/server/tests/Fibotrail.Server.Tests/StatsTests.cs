@@ -146,6 +146,17 @@ public class StatsTests
     }
 
     [Fact]
+    public async Task With_no_collection_files_the_collections_and_the_theme_parks_view_are_empty()
+    {
+        var (app, browser, _, _, _) = await StartAsync();
+        await using var _ = app;
+
+        Assert.Equal(0, (await browser.GetJsonAsync("/api/collections")).GetArrayLength());
+        Assert.Equal(0, (await browser.GetJsonAsync("/api/stats/theme-parks")).GetArrayLength());
+        Assert.Equal(HttpStatusCode.NotFound, (await browser.GetAsync("/api/collections/disney-parks")).StatusCode);
+    }
+
+    [Fact]
     public async Task The_stats_routes_need_a_session()
     {
         await using var app = await TestApp.StartAsync();

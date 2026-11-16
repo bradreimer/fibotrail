@@ -29,6 +29,7 @@ first three views. Other views have their own specs:
 | Season wheel | Country page | [season-wheel.md](season-wheel.md) | [#58](https://github.com/bradreimer/fibotrail/issues/58) |
 | Fibonacci spiral of trips | Stats screen | [trip-spiral.md](trip-spiral.md) | [#59](https://github.com/bradreimer/fibotrail/issues/59) |
 | Travel clock | Stats screen | [travel-clock.md](travel-clock.md) | [#66](https://github.com/bradreimer/fibotrail/issues/66) |
+| Theme parks | Stats screen | [theme-parks-view.md](theme-parks-view.md) | [#64](https://github.com/bradreimer/fibotrail/issues/64) |
 | Distance rings | Stats screen | [distance-rings.md](distance-rings.md) | [#67](https://github.com/bradreimer/fibotrail/issues/67) |
 
 ## User story
@@ -48,7 +49,8 @@ went.
 
 ## Non-goals
 
-- Collections such as Disney parks. They are their own phase 5 work, with their own spec.
+- Collections such as Disney parks. They have their own spec, [collections.md](collections.md). Their
+  days appear on this screen in the [Theme parks view](theme-parks-view.md).
 - Regions and cities, and a count of them
   ([#48](https://github.com/bradreimer/fibotrail/issues/48)).
 - Filters by year or by collection.
