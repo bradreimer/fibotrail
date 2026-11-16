@@ -34,6 +34,7 @@ function photo(
     isVideo: false,
     durationMs: null,
     immichUrl: `https://photos.example.com/photos/${id}`,
+    onTheWay: false,
     ...more,
   };
 }
@@ -373,6 +374,129 @@ describe('rename and change cover', () => {
     expect(sent.headers['X-CSRF-Token']).toBe('token-1');
     expect(await screen.findByRole('heading', { name: 'Spring in Florida' })).toBeInTheDocument();
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+});
+
+describe('hiding a photo from the map', () => {
+  /** The trip as the server answers after photo `id` is put on the way: its stop goes, and the photo stays. */
+  function hiddenTrip(id: string, onTheWay: boolean): TripDetail {
+    const stops = onTheWay ? trip.stops.filter((stop) => stop.place !== 'Sanford') : trip.stops;
+    return {
+      ...trip,
+      stats: { ...trip.stats, stops: stops.length },
+      stops: stops.map((stop, index) => ({ ...stop, index })),
+      days: trip.days.map((day) => ({
+        ...day,
+        photos: day.photos.map((photo) =>
+          photo.id === id
+            ? {
+                ...photo,
+                onTheWay,
+                alt: onTheWay ? `${photo.alt}, hidden from the map` : photo.alt,
+              }
+            : photo,
+        ),
+      })),
+    };
+  }
+
+  async function openViewer() {
+    renderTrip();
+    await userEvent.click(
+      await screen.findByRole('button', { name: 'Photo taken 2027-03-16 in Sanford' }),
+    );
+    return screen.getByRole('dialog', { name: 'Photo 3 of 6' });
+  }
+
+  it('shows a Hide checkbox with its hint under the place, clear for a photo that is on the map', async () => {
+    fakeServer({ 'GET /api/trips/7': trip });
+    const viewer = await openViewer();
+
+    const box = within(viewer).getByRole('checkbox', { name: 'Hide' });
+    expect(box).not.toBeChecked();
+    expect(box).toHaveAccessibleDescription('Keeps this photo in the trip but off the map.');
+    expectNoAccessibilityProblems();
+  });
+
+  it('saves at once, sends the anti-forgery token, and the map and the numbers follow', async () => {
+    let current: TripDetail = trip;
+    const server = fakeServer({
+      'GET /api/trips/7': () => current,
+      'PUT /api/photos/b1/on-the-way': () => {
+        current = hiddenTrip('b1', true);
+        return current;
+      },
+    });
+    const viewer = await openViewer();
+
+    await userEvent.click(within(viewer).getByRole('checkbox', { name: 'Hide' }));
+
+    const sent = server.sent('PUT', '/api/photos/b1/on-the-way')[0]!;
+    expect(sent.body).toEqual({ onTheWay: true });
+    expect(sent.headers['X-CSRF-Token']).toBe('token-1');
+    expect(within(viewer).getByRole('checkbox', { name: 'Hide' })).toBeChecked();
+    // The page read the trip again: Sanford is gone from the pins, and the stop tile says 3.
+    await waitFor(() =>
+      expect(screen.queryByRole('button', { name: /^Stop \d: Sanford/ })).not.toBeInTheDocument(),
+    );
+    const tiles = screen.getByRole('heading', { name: 'Trip numbers' }).closest('section')!;
+    expect(
+      within(tiles)
+        .getAllByRole('listitem')
+        .map((tile) => tile.textContent),
+    ).toEqual(['4Days', '6Photos', '3Stops', '90 kmDistance', '4,182 kmFarthest from home']);
+    // The photo is still in the trip, and the checkbox still says it's hidden.
+    expect(within(viewer).getByRole('checkbox', { name: 'Hide' })).toBeChecked();
+  });
+
+  it('shows a mark on the thumbnail, and its name says the photo is hidden from the map', async () => {
+    fakeServer({ 'GET /api/trips/7': hiddenTrip('b1', true) });
+    renderTrip();
+
+    const tile = await screen.findByRole('button', {
+      name: 'Photo taken 2027-03-16 in Sanford, hidden from the map',
+    });
+
+    expect(tile.querySelector('.photo-tile__hidden')).not.toBeNull();
+    expect(screen.getAllByRole('button', { name: /^Photo taken/ })).toHaveLength(5);
+  });
+
+  it('brings the photo back when the box is cleared', async () => {
+    let current: TripDetail = hiddenTrip('b1', true);
+    const server = fakeServer({
+      'GET /api/trips/7': () => current,
+      'PUT /api/photos/b1/on-the-way': () => {
+        current = hiddenTrip('b1', false);
+        return current;
+      },
+    });
+    renderTrip();
+    await userEvent.click(
+      await screen.findByRole('button', {
+        name: 'Photo taken 2027-03-16 in Sanford, hidden from the map',
+      }),
+    );
+    const viewer = screen.getByRole('dialog', { name: 'Photo 3 of 6' });
+    expect(within(viewer).getByRole('checkbox', { name: 'Hide' })).toBeChecked();
+
+    await userEvent.click(within(viewer).getByRole('checkbox', { name: 'Hide' }));
+
+    expect(server.sent('PUT', '/api/photos/b1/on-the-way')[0]!.body).toEqual({ onTheWay: false });
+    expect(await screen.findByRole('button', { name: /Stop 2: Sanford/ })).toBeInTheDocument();
+    expect(within(viewer).getByRole('checkbox', { name: 'Hide' })).not.toBeChecked();
+  });
+
+  it('puts the box back and says so when the save fails', async () => {
+    fakeServer({ 'GET /api/trips/7': trip, 'PUT /api/photos/b1/on-the-way': status(500) });
+    const viewer = await openViewer();
+
+    await userEvent.click(within(viewer).getByRole('checkbox', { name: 'Hide' }));
+
+    expect(await within(viewer).findByRole('alert')).toHaveTextContent(
+      "We couldn't save that. Try again.",
+    );
+    expect(within(viewer).getByRole('checkbox', { name: 'Hide' })).not.toBeChecked();
+    expect(screen.getByRole('button', { name: /Stop 2: Sanford/ })).toBeInTheDocument();
   });
 });
 

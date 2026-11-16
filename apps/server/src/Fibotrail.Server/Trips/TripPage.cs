@@ -10,6 +10,7 @@ namespace Fibotrail.Server.Trips;
 /// <param name="StopIndex">The stop where the photo was taken, or null for a photo with no position.</param>
 /// <param name="DurationMs">The length of a video, in milliseconds.</param>
 /// <param name="ImmichUrl">The photo in Immich, at the address your browser uses. Null when IMMICH_EXTERNAL_URL is empty.</param>
+/// <param name="OnTheWay">True when you put the photo on the way: it stays in the trip but adds no stop to the map.</param>
 public sealed record TripPhotoInfo(
     string Id,
     string Alt,
@@ -20,7 +21,8 @@ public sealed record TripPhotoInfo(
     int? StopIndex,
     bool IsVideo,
     int? DurationMs,
-    string? ImmichUrl);
+    string? ImmichUrl,
+    bool OnTheWay);
 
 /// <summary>The photos of one local day.</summary>
 /// <param name="Number">1 for the trip's first day.</param>
@@ -73,6 +75,7 @@ public static class TripPage
         var links = await db.TripPhotos.AsNoTracking().Where(link => link.TripId == id).ToDictionaryAsync(link => link.PhotoId, link => link.StopIndex, cancellationToken);
         var photos = await InboxRoutes.TripPhotosAsync(db, id, cancellationToken);
         var stops = DetectionService.ReadStops(trip.StopsJson);
+        var onTheWay = (await db.OnTheWayPhotos.AsNoTracking().Select(photo => photo.PhotoId).ToListAsync(cancellationToken)).ToHashSet(StringComparer.Ordinal);
 
         // Photos are grouped by the local day they were taken, so 23:30 abroad stays on its day.
         var days = photos
@@ -89,7 +92,7 @@ public static class TripPage
                     .FirstOrDefault(),
                 [.. group.Select(photo => new TripPhotoInfo(
                     photo.Id,
-                    InboxRoutes.ToPhotoInfo(photo).Alt,
+                    onTheWay.Contains(photo.Id) ? $"{InboxRoutes.ToPhotoInfo(photo).Alt}, hidden from the map" : InboxRoutes.ToPhotoInfo(photo).Alt,
                     photo.LocalTime,
                     photo.Latitude,
                     photo.Longitude,
@@ -97,7 +100,8 @@ public static class TripPage
                     links.GetValueOrDefault(photo.Id),
                     photo.IsVideo,
                     photo.DurationMs,
-                    ImmichPhotoUrl(settings.ImmichExternalUrl, photo.Id)))]))
+                    ImmichPhotoUrl(settings.ImmichExternalUrl, photo.Id),
+                    onTheWay.Contains(photo.Id)))]))
             .ToList();
 
         return new TripDetail(

@@ -212,6 +212,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/photos/{id}/on-the-way": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["SetPhotoOnTheWay"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -254,6 +270,9 @@ export interface components {
         InboxCount: {
             /** Format: int32 */
             count: number;
+        };
+        OnTheWayChange: {
+            onTheWay: boolean;
         };
         PhotoInfo: {
             id: string;
@@ -373,6 +392,7 @@ export interface components {
             /** Format: int32 */
             durationMs: null | number;
             immichUrl: null | string;
+            onTheWay: boolean;
         };
         TripStats: {
             /** Format: int32 */
@@ -814,6 +834,39 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    SetPhotoOnTheWay: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OnTheWayChange"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TripDetail"];
                 };
             };
             /** @description Not Found */

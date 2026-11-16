@@ -217,6 +217,18 @@ public sealed class Decision
     public DateTime DecidedAt { get; set; }
 }
 
+/// <summary>
+/// A photo you put on the way: it stays in its trip, but it adds no stop, line, or distance to the
+/// map. A row here is a decision, keyed by the Immich asset ID, so it belongs to the photo and not to
+/// a trip. Detection reads this table and never changes it. See docs/specs/on-the-way.md and ADR-002.
+/// </summary>
+public sealed class OnTheWayPhoto
+{
+    public required string PhotoId { get; set; }
+
+    public DateTime DecidedAt { get; set; }
+}
+
 /// <summary>One setting, such as the home location.</summary>
 public sealed class Setting
 {

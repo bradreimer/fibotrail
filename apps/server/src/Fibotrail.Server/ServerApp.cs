@@ -52,6 +52,7 @@ public static partial class ServerApp
         services.AddScoped<ThumbnailStore>();
         services.AddScoped<DetectionService>();
         services.AddScoped<TripDecisions>();
+        services.AddScoped<OnTheWayPhotos>();
 
         // When a scan completes, trip detection runs.
         services.AddScoped<IScanCompletedHandler>(provider => provider.GetRequiredService<DetectionService>());

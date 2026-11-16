@@ -14,6 +14,7 @@ const photo: TripPhoto = {
   isVideo: false,
   durationMs: null,
   immichUrl: null,
+  onTheWay: false,
 };
 
 function load(image: HTMLElement, width: number, height: number) {
@@ -47,5 +48,22 @@ describe('PhotoTile', () => {
     load(container.querySelector('img')!, 0, 0);
 
     expect(screen.getByRole('button')).toHaveStyle({ aspectRatio: String(DEFAULT_RATIO) });
+  });
+
+  it('shows a small mark on a photo that is on the way, and none on any other', () => {
+    const { container, rerender } = render(<PhotoTile photo={photo} onOpen={vi.fn()} />);
+    expect(container.querySelector('.photo-tile__hidden')).toBeNull();
+
+    rerender(
+      <PhotoTile
+        photo={{ ...photo, onTheWay: true, alt: `${photo.alt}, hidden from the map` }}
+        onOpen={vi.fn()}
+      />,
+    );
+
+    expect(container.querySelector('.photo-tile__hidden')).not.toBeNull();
+    // The mark is for the eye. A screen reader gets the alt text, which says so.
+    expect(screen.getByRole('button', { name: /hidden from the map$/ })).toBeInTheDocument();
+    expect(container.querySelector('.photo-tile__hidden')).toHaveAttribute('aria-hidden', 'true');
   });
 });

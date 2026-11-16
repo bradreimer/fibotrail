@@ -116,7 +116,9 @@ right day.
 - A detected trip that matches nothing becomes a new suggestion.
 - Detected data can be deleted and rebuilt from the `photo` table at any time. The `decision`
   table is never rebuilt.
-- The tables are `trip`, `trip_photo`, `decision`, and `setting`. Stops and the route are stored
+- The tables are `trip`, `trip_photo`, `decision`, `on_the_way_photo`, and `setting`. A row in
+  `on_the_way_photo` is a decision about one photo, and detection never changes it. Rules 6 to 8
+  skip those photos: see [on the way](on-the-way.md). Stops and the route are stored
   with the trip.
 - When no fingerprint matches, a detected trip matches the stored trip or decision whose dates
   cover more than half of its days. The decision then takes the trip's new fingerprint. See
