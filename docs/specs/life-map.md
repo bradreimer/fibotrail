@@ -92,10 +92,14 @@ visited, so that I can see my travel history at a glance.
 ### API
 
 - `GET /api/map` needs a session, like every other route. It returns the visited countries (name,
-  code, first visit, and trips with ID, name, and dates), each added trip's route (the stops in
+  `id`, first visit, and trips with ID, name, and dates), each added trip's route (the stops in
   order), and the totals (countries, trips, days away, and distance in kilometers).
 - The OpenAPI document and the TypeScript types are updated, per
   [web-app-development.md](../knowledge/web-app-development.md).
+
+- A country's `id` is the ISO 3166-1 numeric code that the web app's map features carry, so the
+  screen fills the right outline. A few territories have no code, and their `id` is null. The screen
+  then matches them by name.
 
 ### Accessibility and iOS
 
