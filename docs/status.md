@@ -124,7 +124,9 @@ The MVP plan is in [roadmap.md](roadmap.md#mvp-version-01). Its specs are in
   [ADR-011](adr/ADR-011-visits-are-derived-from-added-trips-on-the-server.md), accepted), and moving
   Inbox and Settings to the top bar ([#47](https://github.com/bradreimer/fibotrail/issues/47)).
   Zooming to regions and cities is [#48](https://github.com/bradreimer/fibotrail/issues/48). Not
-  built yet. Start with #46.
+  built yet, except
+  [#46](https://github.com/bradreimer/fibotrail/issues/46): the `Fibotrail.Places` project, the
+  outlines, and `GET /api/map` are built, and not merged. Next is #45.
 - Photos and stops that are on the way (layover airports and in-transit photos): hide a photo from
   the map ([#35](https://github.com/bradreimer/fibotrail/issues/35)), then suggested stops
   ([#32](https://github.com/bradreimer/fibotrail/issues/32)). Both are one idea, specced in

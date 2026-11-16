@@ -23,6 +23,7 @@ WORKDIR /source
 COPY .editorconfig apps/server/global.json apps/server/Directory.Build.props ./
 COPY apps/server/src/Fibotrail.Detection/Fibotrail.Detection.csproj src/Fibotrail.Detection/
 COPY apps/server/src/Fibotrail.Immich/Fibotrail.Immich.csproj src/Fibotrail.Immich/
+COPY apps/server/src/Fibotrail.Places/Fibotrail.Places.csproj src/Fibotrail.Places/
 COPY apps/server/src/Fibotrail.Server/Fibotrail.Server.csproj src/Fibotrail.Server/
 RUN dotnet restore src/Fibotrail.Server -a "$TARGETARCH"
 
