@@ -163,5 +163,8 @@ public sealed class CollectionFilesTests : IDisposable
         // Disneyland and California Adventure are across a promenade, and each resolves to itself.
         Assert.Equal("disneyland", catalog.Lookup.Find(33.8130, -117.9200)?.Id);
         Assert.Equal("california-adventure", catalog.Lookup.Find(33.8060, -117.9195)?.Id);
+        // Tokyo Disneyland and DisneySea share an edge, and each resolves to itself.
+        Assert.Equal("tokyo-disneyland", catalog.Lookup.Find(35.6330, 139.8820)?.Id);
+        Assert.Equal("tokyo-disneysea", catalog.Lookup.Find(35.6265, 139.8830)?.Id);
     }
 }

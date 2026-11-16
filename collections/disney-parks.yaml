@@ -44,9 +44,18 @@ places:
     status: open
     boundary: boundaries/california-adventure.geojson
 
-  # Tokyo Disney Resort
-  # - {id: tokyo-disneyland, name: Tokyo Disneyland, group: Tokyo Disney Resort, status: open, boundary: boundaries/tokyo-disneyland.geojson}
-  # - {id: tokyo-disneysea, name: Tokyo DisneySea, group: Tokyo Disney Resort, status: open, boundary: boundaries/tokyo-disneysea.geojson}
+  - id: tokyo-disneyland
+    name: Tokyo Disneyland
+    group: Tokyo Disney Resort
+    status: open
+    boundary: boundaries/tokyo-disneyland.geojson
+
+  - id: tokyo-disneysea
+    name: Tokyo DisneySea
+    group: Tokyo Disney Resort
+    status: open
+    boundary: boundaries/tokyo-disneysea.geojson
+
   # Disneyland Paris
   # - {id: disneyland-paris, name: Disneyland Park (Paris), group: Disneyland Paris, status: open, boundary: boundaries/disneyland-paris.geojson}
   # - {id: walt-disney-studios, name: Walt Disney Studios Park, group: Disneyland Paris, status: open, boundary: boundaries/walt-disney-studios.geojson}

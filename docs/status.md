@@ -196,7 +196,8 @@ version 0.1 and the per-line results of the accessibility checklist are also sti
   the view read the same park days, and a test checks they agree. **Boundaries:** The four Walt Disney World parks ship in `collections/disney-parks.yaml`: Magic Kingdom (OpenStreetMap
   way 297428432), EPCOT (805298160), Disney's Hollywood Studios (806728401), and Disney's Animal
   Kingdom (297441457), plus Disneyland Park (relation 5586855) and Disney California Adventure
-  (relation 15626312) in Anaheim. The other Disney parks are commented out in that file, and the Universal parks aren't
+  (relation 15626312) in Anaheim, and Tokyo Disneyland (way 1282875870) and Tokyo DisneySea
+  (way 203538370). The other Disney parks are commented out in that file, and the Universal parks aren't
   added yet, so the issue stays open for them. They need OpenStreetMap outlines checked by hand
   against satellite imagery, and they couldn't be fetched from this environment on 2026-11-16 (three
   Overpass hosts refused or timed out), so the maintainer exports them. ADR-013 planned new `trip_photo` columns, but the `photo` table
