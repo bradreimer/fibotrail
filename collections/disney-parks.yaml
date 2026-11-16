@@ -56,9 +56,19 @@ places:
     status: open
     boundary: boundaries/tokyo-disneysea.geojson
 
-  # Disneyland Paris
-  # - {id: disneyland-paris, name: Disneyland Park (Paris), group: Disneyland Paris, status: open, boundary: boundaries/disneyland-paris.geojson}
-  # - {id: walt-disney-studios, name: Walt Disney Studios Park, group: Disneyland Paris, status: open, boundary: boundaries/walt-disney-studios.geojson}
+  - id: disneyland-paris
+    name: Disneyland Park (Paris)
+    group: Disneyland Paris
+    status: open
+    boundary: boundaries/disneyland-paris.geojson
+
+  # Walt Disney Studios Park was renamed Disney Adventure World in 2025.
+  - id: disney-adventure-world
+    name: Disney Adventure World
+    group: Disneyland Paris
+    status: open
+    boundary: boundaries/disney-adventure-world.geojson
+
   # Hong Kong and Shanghai
   # - {id: hong-kong-disneyland, name: Hong Kong Disneyland, group: Hong Kong Disneyland Resort, status: open, boundary: boundaries/hong-kong-disneyland.geojson}
   # - {id: shanghai-disneyland, name: Shanghai Disneyland, group: Shanghai Disney Resort, status: open, boundary: boundaries/shanghai-disneyland.geojson}

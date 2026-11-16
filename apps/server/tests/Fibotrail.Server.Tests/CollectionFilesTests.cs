@@ -166,5 +166,8 @@ public sealed class CollectionFilesTests : IDisposable
         // Tokyo Disneyland and DisneySea share an edge, and each resolves to itself.
         Assert.Equal("tokyo-disneyland", catalog.Lookup.Find(35.6330, 139.8820)?.Id);
         Assert.Equal("tokyo-disneysea", catalog.Lookup.Find(35.6265, 139.8830)?.Id);
+        // Each of the two Paris parks resolves to itself.
+        Assert.Equal("disneyland-paris", catalog.Lookup.Find(48.8735, 2.7750)?.Id);
+        Assert.Equal("disney-adventure-world", catalog.Lookup.Find(48.8650, 2.7760)?.Id);
     }
 }

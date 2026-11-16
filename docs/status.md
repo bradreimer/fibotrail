@@ -197,7 +197,8 @@ version 0.1 and the per-line results of the accessibility checklist are also sti
   way 297428432), EPCOT (805298160), Disney's Hollywood Studios (806728401), and Disney's Animal
   Kingdom (297441457), plus Disneyland Park (relation 5586855) and Disney California Adventure
   (relation 15626312) in Anaheim, and Tokyo Disneyland (way 1282875870) and Tokyo DisneySea
-  (way 203538370). The other Disney parks are commented out in that file, and the Universal parks aren't
+  (way 203538370), and Disneyland Park (way 775180147) and Disney Adventure World (way 205734843,
+  formerly Walt Disney Studios Park) in Paris. The other Disney parks are commented out in that file, and the Universal parks aren't
   added yet, so the issue stays open for them. They need OpenStreetMap outlines checked by hand
   against satellite imagery, and they couldn't be fetched from this environment on 2026-11-16 (three
   Overpass hosts refused or timed out), so the maintainer exports them. ADR-013 planned new `trip_photo` columns, but the `photo` table

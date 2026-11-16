@@ -5,7 +5,7 @@ this folder, and each place has a GeoJSON boundary in `boundaries/`. Adding a co
 code. The rules are in [docs/specs/collections.md](../docs/specs/collections.md) and
 [ADR-003](../docs/adr/ADR-003-collections-are-data-files.md).
 
-**Status:** `disney-parks.yaml` ships with the four Walt Disney World parks the two Anaheim parks, and the two Tokyo parks. The other Disney parks are commented
+**Status:** `disney-parks.yaml` ships with the four Walt Disney World parks the two Anaheim parks, the two Tokyo parks, and the two Paris parks. The other Disney parks are commented
 out in the file, and `universal-parks` isn't added yet. Each needs a boundary from OpenStreetMap that
 is checked by hand against satellite imagery. To add a park, export its outline from
 [Overpass Turbo](https://overpass-turbo.eu) as GeoJSON, save it as `boundaries/<id>.geojson`, and
