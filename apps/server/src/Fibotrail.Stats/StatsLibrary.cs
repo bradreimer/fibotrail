@@ -23,6 +23,19 @@ public sealed record StatsTrip(
     public bool HasUnpositionedDays => Photos.Select(photo => photo.Day).Distinct().Count() < Days;
 }
 
+/// <summary>A trip as a list row. Shared by the host and the views.</summary>
+public sealed record TripRef(int Id, string Name, DateOnly StartDate, DateOnly EndDate, int Days);
+
+/// <summary>Helpers on the library's trips.</summary>
+public static class StatsTripExtensions
+{
+    public static TripRef ToRef(this StatsTrip trip)
+    {
+        ArgumentNullException.ThrowIfNull(trip);
+        return new TripRef(trip.Id, trip.Name, trip.StartDate, trip.EndDate, trip.Days);
+    }
+}
+
 /// <summary>A country with the numbers the Stats screen shows for it.</summary>
 /// <param name="Trips">Added trips with a stop in the country, earliest first.</param>
 /// <param name="Days">Distinct local days with at least one positioned away photo in the country.</param>

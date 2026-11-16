@@ -50,6 +50,7 @@ only in a production build, so `npm run dev` never serves a stale file.
 | `src/shell/` | The frame: header, navigation, scroll memory, and the install hint |
 | `src/states/` | The four screen states: `Skeleton`, `ScanBanner`, `EmptyState`, and `ErrorState` |
 | `src/screens/` | One file for each screen |
+| `src/stats/` | The Stats host: the view registry, the view slot, and `views/<name>/` for each view. See [ADR-014](../adr/ADR-014-stats-views-are-self-contained-modules.md) |
 | `src/api/` | The API client, the OpenAPI document, and the types generated from it |
 | `src/service-worker.js` | The service worker. The build writes it to `sw.js` |
 | `vite-plugins/` | The build steps that write `sw.js` and the launch image links |

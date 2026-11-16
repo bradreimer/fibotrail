@@ -59,7 +59,7 @@ describe('the app shell', () => {
   it('has Trips and Map in the tab bar, and Inbox and Settings as icon buttons in the top bar', () => {
     renderApp();
     const tabs = within(screen.getByRole('navigation', { name: 'Main' })).getAllByRole('link');
-    expect(tabs.map((link) => link.textContent)).toEqual(['Trips', 'Map']);
+    expect(tabs.map((link) => link.textContent)).toEqual(['Trips', 'Map', 'Stats']);
     tabs.forEach((link) => expect(link.querySelector('svg')).not.toBeNull());
 
     const tools = within(
@@ -113,7 +113,13 @@ describe('the Inbox and Settings by width', () => {
 
       expect(container.querySelector('.app')).toHaveAttribute('data-nav', mode);
       const items = within(screen.getByRole('navigation', { name: 'Main' })).getAllByRole('link');
-      expect(items.map((link) => link.textContent)).toEqual(['Trips', 'Map', 'Inbox', 'Settings']);
+      expect(items.map((link) => link.textContent)).toEqual([
+        'Trips',
+        'Map',
+        'Stats',
+        'Inbox',
+        'Settings',
+      ]);
       expect(
         screen.queryByRole('navigation', { name: 'Inbox and settings' }),
       ).not.toBeInTheDocument();

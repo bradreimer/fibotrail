@@ -1,6 +1,6 @@
 using Fibotrail.Places;
 
-namespace Fibotrail.Stats.Views;
+namespace Fibotrail.Stats.Views.Records;
 
 /// <summary>A record that points at a trip.</summary>
 public sealed record TripRecord(TripRef Trip, double Value);
@@ -19,7 +19,7 @@ public sealed record RecordsResult(
     CountryRecord? MostVisitedCountry,
     GapRecord? LongestGap);
 
-public static class Records
+public static class RecordsView
 {
     public static RecordsResult Compute(StatsLibrary library)
     {
@@ -46,13 +46,13 @@ public static class Records
         for (var i = 1; i < trips.Count; i++)
         {
             var days = trips[i].StartDate.DayNumber - trips[i - 1].EndDate.DayNumber - 1;
-            if (days > 0 && (gap is null || days > gap.Days)) gap = new GapRecord(days, TripsPerYear.ToRef(trips[i - 1]), TripsPerYear.ToRef(trips[i]));
+            if (days > 0 && (gap is null || days > gap.Days)) gap = new GapRecord(days, trips[i - 1].ToRef(), trips[i].ToRef());
         }
 
         return new RecordsResult(
-            longest is null ? null : new TripRecord(TripsPerYear.ToRef(longest), longest.Days),
-            farthest is null || farthest.FarthestFromHomeKm <= 0 ? null : new TripRecord(TripsPerYear.ToRef(farthest), farthest.FarthestFromHomeKm),
-            mostCountries is null ? null : new TripRecord(TripsPerYear.ToRef(mostCountries), perTrip.Count),
+            longest is null ? null : new TripRecord(longest.ToRef(), longest.Days),
+            farthest is null || farthest.FarthestFromHomeKm <= 0 ? null : new TripRecord(farthest.ToRef(), farthest.FarthestFromHomeKm),
+            mostCountries is null ? null : new TripRecord(mostCountries.ToRef(), perTrip.Count),
             mostVisited is null ? null : new CountryRecord(mostVisited.Country.Key, mostVisited.Country.Name, mostVisited.Trips.Count, mostVisited.Days),
             gap);
     }

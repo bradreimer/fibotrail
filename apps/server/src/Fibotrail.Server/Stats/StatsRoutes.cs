@@ -2,7 +2,9 @@ using Fibotrail.Places;
 using Fibotrail.Server.Data;
 using Fibotrail.Server.Trips;
 using Fibotrail.Stats;
-using Fibotrail.Stats.Views;
+using Fibotrail.Stats.Views.Records;
+using Fibotrail.Stats.Views.TripLength;
+using Fibotrail.Stats.Views.TripsPerYear;
 using Microsoft.EntityFrameworkCore;
 
 namespace Fibotrail.Server.Stats;
@@ -92,9 +94,9 @@ public static class StatsRoutes
         }).WithName("GetStatsCountry").Produces<StatsCountryPage>();
 
         // The one list of view routes. Adding or removing a view is one line here.
-        stats.MapViewRoute("/trips-per-year", "GetStatsTripsPerYear", TripsPerYear.Compute);
-        stats.MapViewRoute("/trip-length", "GetStatsTripLength", TripLength.Compute);
-        stats.MapViewRoute("/records", "GetStatsRecords", Records.Compute);
+        stats.MapViewRoute("/trips-per-year", "GetStatsTripsPerYear", TripsPerYearView.Compute);
+        stats.MapViewRoute("/trip-length", "GetStatsTripLength", TripLengthView.Compute);
+        stats.MapViewRoute("/records", "GetStatsRecords", RecordsView.Compute);
     }
 
     private static void MapViewRoute<T>(this RouteGroupBuilder stats, string pattern, string name, Func<StatsLibrary, T> compute) =>

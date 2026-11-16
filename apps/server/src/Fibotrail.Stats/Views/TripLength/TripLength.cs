@@ -1,10 +1,10 @@
-namespace Fibotrail.Stats.Views;
+namespace Fibotrail.Stats.Views.TripLength;
 
 /// <summary>One bin of the histogram.</summary>
 public sealed record LengthBin(string Label, int MinDays, int? MaxDays, int Count);
 
 /// <summary>The "Trip length" view: trips by days, in five bins.</summary>
-public static class TripLength
+public static class TripLengthView
 {
     private static readonly (string Label, int Min, int? Max)[] Bins =
     [

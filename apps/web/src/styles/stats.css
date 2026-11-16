@@ -1,0 +1,229 @@
+/* The Stats screen: the host, the continent cards, and the three first views. */
+.stats-screen {
+  display: grid;
+  gap: var(--fibo-space-5);
+}
+
+.stat__detail {
+  font-size: var(--fibo-text-caption);
+  color: var(--fibo-ink-muted);
+}
+
+.stats-view {
+  display: grid;
+  gap: var(--fibo-space-3);
+}
+
+.stats-view__title {
+  margin: 0;
+  font-family: var(--fibo-font-display);
+  font-size: var(--fibo-text-h3);
+}
+
+.stats-view__subtitle {
+  margin: var(--fibo-space-3) 0 var(--fibo-space-2);
+}
+
+.stats-view__error,
+.stats-page__note {
+  color: var(--fibo-ink-muted);
+}
+
+.stats-page__title {
+  margin: 0;
+  font-family: var(--fibo-font-display);
+  font-size: var(--fibo-text-h2);
+}
+
+.stats-page__lead {
+  margin: 0;
+  color: var(--fibo-ink-muted);
+}
+
+/* Continent cards scroll sideways. */
+.continents {
+  display: flex;
+  gap: var(--fibo-space-3);
+  margin: 0;
+  padding: 0 0 var(--fibo-space-2);
+  overflow-x: auto;
+  list-style: none;
+  scroll-snap-type: x proximity;
+}
+
+.continent {
+  display: grid;
+  justify-items: center;
+  gap: var(--fibo-space-1);
+  min-width: calc(var(--fibo-space-7) * 2);
+  min-height: var(--fibo-tap);
+  padding: var(--fibo-space-3);
+  border: var(--fibo-border) solid var(--fibo-mist);
+  border-radius: var(--fibo-radius);
+  color: inherit;
+  text-decoration: none;
+  scroll-snap-align: start;
+}
+
+.continent__name {
+  font-weight: 600;
+}
+
+.continent__count {
+  font-size: var(--fibo-text-caption);
+  color: var(--fibo-ink-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.ring {
+  width: calc(var(--fibo-space-7) * 1.25);
+  height: calc(var(--fibo-space-7) * 1.25);
+}
+
+.ring__track {
+  stroke: var(--fibo-mist);
+}
+
+.ring__fill {
+  stroke: var(--fibo-teal);
+}
+
+.continent--none .ring__text {
+  fill: var(--fibo-ink-muted);
+}
+
+.ring__text {
+  fill: var(--fibo-ink);
+  font-size: var(--fibo-text-caption);
+  font-weight: 700;
+}
+
+/* Lists of trips and countries. */
+.stats-list {
+  display: grid;
+  gap: var(--fibo-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.stats-list li {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--fibo-space-2);
+  min-height: var(--fibo-tap);
+  align-items: center;
+}
+
+.stats-list__meta {
+  color: var(--fibo-ink-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Trips per year: a bar for each year, each a button of at least 44 pt. */
+.bars {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--fibo-space-1);
+  height: calc(var(--fibo-space-7) * 3);
+  margin: 0;
+  padding: 0;
+  overflow-x: auto;
+  list-style: none;
+}
+
+.bars__item {
+  flex: 1 0 var(--fibo-tap);
+  height: 100%;
+}
+
+.bars__button {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  justify-items: center;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.bars__button:disabled {
+  cursor: default;
+}
+
+.bars__bar {
+  align-self: end;
+  width: 60%;
+  min-height: var(--fibo-border);
+  border-radius: var(--fibo-space-1) var(--fibo-space-1) 0 0;
+  background: var(--fibo-teal);
+}
+
+.bars__button--current .bars__bar {
+  background: var(--fibo-gold);
+}
+
+.bars__button[aria-pressed='true'] .bars__bar {
+  outline: var(--fibo-border) solid var(--fibo-ink);
+}
+
+.bars__count,
+.bars__label {
+  font-size: var(--fibo-text-caption);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Trip length: one horizontal bar for each bin. */
+.hbars {
+  display: grid;
+  gap: var(--fibo-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.hbars__row {
+  display: grid;
+  grid-template-columns: calc(var(--fibo-space-7) * 2) 1fr var(--fibo-space-6);
+  align-items: center;
+  gap: var(--fibo-space-2);
+}
+
+.hbars__track {
+  height: var(--fibo-space-4);
+  border-radius: var(--fibo-space-1);
+  background: var(--fibo-mist);
+}
+
+.hbars__bar {
+  display: block;
+  height: 100%;
+  border-radius: var(--fibo-space-1);
+  background: var(--fibo-teal);
+}
+
+.hbars__count {
+  text-align: end;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Records. */
+.records {
+  display: grid;
+  gap: var(--fibo-space-3);
+  margin: 0;
+}
+
+.records dt {
+  font-size: var(--fibo-text-caption);
+  color: var(--fibo-ink-muted);
+}
+
+.records dd {
+  margin: 0;
+}
