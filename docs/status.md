@@ -178,18 +178,17 @@ version 0.1 and the per-line results of the accessibility checklist are also sti
 
 ## In progress
 
-- [#64](https://github.com/bradreimer/fibotrail/issues/64) Park days in Collections and Stats.
-  **Built (server):** the park lookup and day count in `Fibotrail.Detection` (13 tests), the
-  collection file loader and its startup checks, `GET /api/collections`,
-  `GET /api/collections/{id}`, `GET /api/stats/theme-parks`, and the
-  [Theme parks view spec](specs/theme-parks-view.md). Collections and the Theme parks view read the
-  same park days from the stats library, and a test checks they agree. **Not built:** the park
-  boundary files, the Collections destination and screens, and the Theme parks view in the web app.
-  The boundaries need OpenStreetMap data checked by hand against satellite imagery. They couldn't be
-  fetched from this environment on 2026-11-16: three Overpass hosts refused or timed out, so no
-  collection file ships and the Collections screen is empty until they're added. ADR-013 planned
-  new `trip_photo` columns, but the `photo` table already holds each photo's position and local
-  time, which the stats library reads, so no migration was needed.
+- [#64](https://github.com/bradreimer/fibotrail/issues/64) Park days in Collections and Stats. The
+  server and the web screens are built: the park lookup and day count, the collection file loader and
+  its startup checks, the Collections destination with its list, stamp book, and park sheet, the
+  Theme parks Stats view, and the [Theme parks view spec](specs/theme-parks-view.md). Collections and
+  the view read the same park days, and a test checks they agree. **Not done:** the park boundary
+  files. They need OpenStreetMap data checked by hand against satellite imagery, and they couldn't be
+  fetched from this environment on 2026-11-16 (three Overpass hosts refused or timed out). No
+  collection file ships, so the Collections screen says "No collections yet" until they're added, and
+  the issue stays open for that. ADR-013 planned new `trip_photo` columns, but the `photo` table
+  already holds each photo's position and local time, which the stats library reads, so no migration
+  was needed. Checked in a desktop browser only, not yet on a phone.
 
 ## Next
 

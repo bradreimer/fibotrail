@@ -27,6 +27,7 @@ describe('the view registry', () => {
     expect(viewsFor('stats').map((view) => view.id)).toEqual([
       'trips-per-year',
       'trip-length',
+      'theme-parks',
       'trip-spiral',
       'travel-clock',
       'distance-rings',
