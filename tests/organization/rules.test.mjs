@@ -339,7 +339,7 @@ describe('checkReleaseWorkflow', () => {
 });
 
 describe('checkPublishWorkflow', () => {
-  const good = 'tags: |\n  img:edge\n  img:sha-${{ github.sha }}';
+  const good = 'build-args: |\n  VERSION=${{ steps.version.outputs.version }}\ntags: |\n  img:edge\n  img:sha-${{ github.sha }}';
 
   it('passes edge and the commit tag, and ignores a comment about latest', () => {
     assert.deepEqual(checkPublishWorkflow(good + '\n# "latest" is for releases'), []);
@@ -349,5 +349,6 @@ describe('checkPublishWorkflow', () => {
     assert.match(checkPublishWorkflow(good + '\n  img:latest').join(), /not push latest/);
     assert.match(checkPublishWorkflow('img:sha-1').join(), /push edge/);
     assert.match(checkPublishWorkflow('img:edge').join(), /commit tag/);
+    assert.match(checkPublishWorkflow(good.replace('VERSION=', 'V=')).join(), /pass the version/);
   });
 });

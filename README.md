@@ -97,8 +97,8 @@ requests from Fibotrail.
 
 ## Backup
 
-Everything Fibotrail stores is in the `/data` volume, which is `fibotrail-data` in the example
-compose file:
+Everything Fibotrail stores is in `/data`. In the example compose file that's the volume
+`fibotrail-data`. If you mount a host folder instead, it's that folder:
 
 | Path | What it is | Back it up? |
 | --- | --- | --- |
@@ -110,17 +110,39 @@ compose file:
 Your decisions, such as added, ignored, and renamed trips, live in `fibotrail.db`, and they
 always win over detection. A backup keeps them.
 
-To back up, stop the container, then copy the volume to a tar file:
+To back up, stop the container, copy `/data` to a tar file, and start the container again. The
+container stops for about 10 seconds. Stopping first matters, because a copy of a database that's
+in use can be inconsistent.
 
 ```bash
-docker compose -f docker/compose.example.yml stop fibotrail
+docker stop fibotrail
 docker run --rm --volumes-from fibotrail -v "$PWD":/backup alpine \
   tar czf /backup/fibotrail-data.tar.gz -C /data .
-docker compose -f docker/compose.example.yml start fibotrail
+docker start fibotrail
 ```
 
-To restore, stop the container and untar the file into `/data` in the same way, with
-`tar xzf /backup/fibotrail-data.tar.gz -C /data`.
+The tar file holds your database, so keep it somewhere private. The helper container runs as
+root, so the file is owned by root. Use `sudo` to move or delete it.
+
+To restore, extract the tar file into an **empty** folder or volume. Don't extract over a database
+that's in use. Run it as root, as below, so each file keeps its owner (user 1654):
+
+```bash
+mkdir restored
+docker run --rm -v "$PWD/restored":/data -v "$PWD":/backup alpine \
+  tar xzf /backup/fibotrail-data.tar.gz -C /data
+```
+
+To use the restored data, stop the container, then mount `restored` on `/data` in place of the old
+folder or volume, and start it. To check a restored database without starting Fibotrail, open it
+read-only. The folder belongs to user 1654, so a plain `sqlite3 restored/fibotrail.db` fails with
+"attempt to write a readonly database":
+
+```bash
+sqlite3 "file:restored/fibotrail.db?immutable=1" "pragma integrity_check;"
+```
+
+It should print `ok`.
 
 Your photos are in Immich, not in Fibotrail. Back up Immich the way Immich describes.
 
@@ -147,6 +169,10 @@ If you forget your password, reset it:
 ```bash
 docker exec -it fibotrail fibotrail reset-password
 ```
+
+It asks for the new password twice. A password needs at least 12 characters. A shorter one is
+refused, and nothing changes: you stay signed in, and the old password still works. When the reset
+works, it signs you out everywhere, and the next visit shows the sign-in screen.
 
 ## Documentation
 

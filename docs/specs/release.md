@@ -80,8 +80,9 @@ The README keeps its documentation and contributing sections and adds these, in 
   production runs `:latest` or a pinned `:<version>`.
 - A tag build runs only when CI passed on the tagged commit.
 - The existing publish on every `main` commit keeps working.
-- The image carries the version, so the app can show it. `/healthz` or the settings screen reports
-  it.
+- The image carries the version, so the app can show it. `/healthz` reports it. A release shows its
+  version, such as `0.1.0`. A build of `main` shows `edge-` and the first 7 characters of the
+  commit. The settings screen doesn't show it.
 - The GHCR package is public, so a stranger can pull it without signing in.
 
 ### Gates before the tag
@@ -113,7 +114,8 @@ The tag is created only when these are met. They need the maintainer's library a
 - The README's API key section matches the allowed requests list in the code.
 - Pushing `v0.1.0` publishes `:0.1.0` and `:latest` for amd64 and arm64, and `docker pull` works
   without signing in.
-- A commit on `main` moves `:edge` and leaves `:latest` where it was.
+- A commit on `main` moves `:edge` and leaves `:latest` where it was. `/healthz` on that image
+  answers `ok edge-` and the first 7 characters of the commit.
 - The three gates before the tag are recorded as met in [status.md](../status.md).
 
 ## Open questions
