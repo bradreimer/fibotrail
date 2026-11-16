@@ -152,5 +152,9 @@ public sealed class CollectionFilesTests : IDisposable
         // The middle of Magic Kingdom is in the park, and Orlando's downtown is not.
         Assert.Equal("magic-kingdom", catalog.Lookup.Find(28.4195, -81.5810)?.Id);
         Assert.Null(catalog.Lookup.Find(28.5383, -81.3792));
+        // EPCOT is next to Magic Kingdom on the map, and a photo in one is never in the other.
+        Assert.Contains(disney.Places, place => place.Park.Id == "epcot");
+        Assert.Equal("epcot", catalog.Lookup.Find(28.3700, -81.5490)?.Id);
+        Assert.Equal("magic-kingdom", catalog.Lookup.Find(28.4195, -81.5810)?.Id);
     }
 }
