@@ -47,4 +47,8 @@ Run each on the five main screens: Inbox, Trips, a trip page, the photo viewer, 
 
 ## Result
 
-Not run yet. The run date, the iOS version, and the overall result go here.
+Run by the maintainer on an iPhone on 2026-11-16, for version 0.1.0. Overall result: passed, apart
+from one finding. The thumbnails in the trip timeline were too wide for their photos
+([#41](https://github.com/bradreimer/fibotrail/issues/41)). It was fixed and the maintainer
+confirmed the new tile shapes on the phone. The iOS version and the result of each line weren't
+written down, so the table above is blank. Fill it in at the next run, for version 0.2.

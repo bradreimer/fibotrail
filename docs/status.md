@@ -2,10 +2,13 @@
 
 ## Current milestone
 
-MVP step 3d, the release. Every work item of the MVP is built: steps 2a, 2b, 3a, 3b, and 3c. The
-review gate of step 3a is met (2026-11-16). **One gate isn't met yet:** the ADR-007 run-through on
-a real iPhone is partly done, and the manual accessibility checklist hasn't been run. Both need the
-maintainer's phone, and are listed under Next. See [roadmap.md](roadmap.md#mvp-version-01).
+Version 0.1.0 was tagged and published on 2026-11-16 (MVP step 3d). Every work item of the MVP is
+built, and the review gate of step 3a is met. The release workflow's first run succeeded:
+`ghcr.io/bradreimer/fibotrail:0.1.0` and `:latest` are the same image, for linux/amd64 and
+linux/arm64, and pull without signing in. **What wasn't recorded before the tag:** the lines of the
+ADR-007 table that the maintainer didn't report, and the per-line results of the accessibility
+checklist (the maintainer reported that it passed, apart from the timeline tile shapes, which are
+fixed). See [roadmap.md](roadmap.md#mvp-version-01).
 
 ## Completed
 
@@ -82,38 +85,38 @@ maintainer's phone, and are listed under Next. See [roadmap.md](roadmap.md#mvp-v
   scan ran before logging was on, so `GET /api/assets/statistics` (read only at the start of a full
   scan) wasn't seen.
 
+- Version 0.1.0, tagged on 2026-11-16 at `d7e0970`. The `v0.1.0` tag ran the release workflow for the
+  first time. It checked the tag, the commit on `main`, and its CI run, then pushed `:0.1.0` and
+  `:latest`. The image carries `FIBOTRAIL_VERSION=0.1.0`, the OCI version label, and runs as user
+  1654. The maintainer's run of the manual accessibility checklist on an iPhone passed, apart from
+  the tile shapes in the trip timeline
+  ([#41](https://github.com/bradreimer/fibotrail/issues/41), fixed and confirmed).
+
 ## In progress
 
 - [#41](https://github.com/bradreimer/fibotrail/issues/41) Thumbnails in the trip timeline were too
   wide for their photos: tiles grew to fill the row, so every tile in a row had the same width and
   the photos were cropped. Found in the accessibility checklist on the phone, 2026-11-16. A tile
   now takes its photo's proportions once its thumbnail loads. Not yet confirmed on the phone.
-- [#24](https://github.com/bradreimer/fibotrail/issues/24) The release, step 3d. Done: the
-  [release spec](specs/release.md); the README, whose backup, restore, reset-password, and health
-  commands were run on a real container on 2026-11-16; the automated accessibility checks (contrast,
-  alt text, accessible names, reduce motion, and the focus ring), which found and fixed two
-  failures; the generated client's license note (ADR-008); the name check (`fibotrail` is free on
-  Docker Hub and the App Store, and `ghcr.io/bradreimer/fibotrail` pulls without signing in); and
-  the tag workflow (`.github/workflows/release.yml`). The tag workflow hasn't run on GitHub: its
-  first run is the `v0.1.0` tag. Still open: the rest of the iPhone run-through and the manual
-  accessibility checklist, then the tag.
+- [#24](https://github.com/bradreimer/fibotrail/issues/24) The release, step 3d, is published. It
+  stays open until the maintainer says the rest of the ADR-007 table passed, or records which lines
+  are known gaps.
 
 ## Next
 
 The MVP plan is in [roadmap.md](roadmap.md#mvp-version-01). Its specs are in
 [specs/](specs/README.md).
 
-- Finish the ADR-007 run-through on a real iPhone, with the app installed to the home screen. So
-  far the Add trip sheet, the photo viewer, and the map overlays are confirmed. The rest of the
-  table is open for [#6](https://github.com/bradreimer/fibotrail/issues/6),
+- Finish recording the ADR-007 run-through on a real iPhone. Confirmed so far: the Add trip sheet,
+  the photo viewer, the map overlays, and the timeline tiles. The rest of the table isn't recorded
+  for [#6](https://github.com/bradreimer/fibotrail/issues/6),
   [#9](https://github.com/bradreimer/fibotrail/issues/9),
   [#10](https://github.com/bradreimer/fibotrail/issues/10), and
-  [#11](https://github.com/bradreimer/fibotrail/issues/11).
-- Run the manual lines of the [accessibility checklist](knowledge/accessibility-checklist.md) on the
-  iPhone, including VoiceOver, the largest text size, reduce motion, the Coral badge, and the focus
-  ring. A failed line is fixed, or recorded as a known gap, before the tag.
-- Tag `v0.1.0` when both are done, and check that the release workflow publishes `:0.1.0` and
-  `:latest` for amd64 and arm64.
+  [#11](https://github.com/bradreimer/fibotrail/issues/11). A failed line is fixed in a patch
+  release, or recorded as a known gap.
+- Record the per-line results of the [accessibility checklist](knowledge/accessibility-checklist.md).
+- Decide the next phase from the [roadmap](roadmap.md): the life map (phase 4) comes next, then
+  collections and statistics (phase 5).
 - The idea of marking airports and layovers is [#32](https://github.com/bradreimer/fibotrail/issues/32).
 - Answer the remaining open questions in the
   [design and branding document](knowledge/design-and-branding.md#risks-open-questions-and-next-steps).
