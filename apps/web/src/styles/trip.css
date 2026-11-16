@@ -321,60 +321,21 @@
   font-weight: 600;
 }
 
-.viewer__details > .viewer__hide {
+.viewer__details > .setting-row {
   justify-self: stretch;
 }
 
-.viewer__hide {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--fibo-space-4);
-  min-height: var(--fibo-tap);
-  padding: var(--fibo-space-2) var(--fibo-space-4);
-  border-radius: var(--fibo-radius);
+/* The viewer is dark in both modes, so its row and switch use the viewer colors. */
+.viewer .setting-row {
   background: var(--fibo-viewer-row);
-  font-size: var(--fibo-text-row);
-  font-weight: 500;
-  cursor: pointer;
 }
 
-/*
- * The iOS switch, drawn the same in every browser. The thumb slides, and reduce motion makes the
- * slide instant through the duration tokens.
- */
-.switch {
-  position: relative;
-  flex: none;
-  width: var(--fibo-switch-width);
-  height: var(--fibo-switch-height);
-  margin: 0;
-  border-radius: var(--fibo-switch-height);
+.viewer .switch {
   background: var(--fibo-viewer-track);
-  appearance: none;
-  cursor: pointer;
-  transition: background-color var(--fibo-dur-fast) ease-out;
 }
 
-.switch::before {
-  content: '';
-  position: absolute;
-  top: var(--fibo-switch-inset);
-  left: var(--fibo-switch-inset);
-  width: calc(var(--fibo-switch-height) - 2 * var(--fibo-switch-inset));
-  height: calc(var(--fibo-switch-height) - 2 * var(--fibo-switch-inset));
-  border-radius: 50%;
-  background: var(--fibo-switch-thumb);
-  box-shadow: var(--fibo-switch-shadow);
-  transition: transform var(--fibo-dur-fast) ease-out;
-}
-
-.switch:checked {
+.viewer .switch:checked {
   background: var(--fibo-viewer-accent);
-}
-
-.switch:checked::before {
-  transform: translateX(calc(var(--fibo-switch-width) - var(--fibo-switch-height)));
 }
 
 .viewer__hint {

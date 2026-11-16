@@ -71,6 +71,9 @@ visited, so that I can see my travel history at a glance.
   visited countries from it, and "visited" is never shown by color alone.
 - **Routes.** A switch, off by default, draws the route of every added trip on the map as lines
   through its stops, in the style of the trip page.
+- **The routes switch** is an iOS-style switch in a settings row: **Show routes** on the left and
+  the switch on the right, on a Mist fill. It is the same switch as **Hide from map** in the photo
+  viewer, per [on-the-way.md](on-the-way.md#photo-viewer).
 - **No outside request.** The map uses no tile source, font host, or image host, per ADR-009.
 
 ### States

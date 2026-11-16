@@ -40,7 +40,12 @@
   /* A switch on the row: on is 4.7:1, and the off track is 3.5:1. */
   --fibo-viewer-accent: #4fb3ab;
   --fibo-viewer-track: color-mix(in srgb, #f7f3ea 45%, #2a3b3f);
-  /* The iOS switch: 51 by 31 points, with a white thumb inset by 2 points. */
+  /*
+   * The iOS switch: 51 by 31 points, with a white thumb inset by 2 points. On the page it is Teal
+   * when on, and the off track is at least 3:1 on Paper and on Mist, in both modes.
+   */
+  --fibo-switch-on: var(--fibo-teal);
+  --fibo-switch-track: color-mix(in srgb, var(--fibo-ink) 60%, var(--fibo-paper));
   --fibo-switch-width: 51px;
   --fibo-switch-height: 31px;
   --fibo-switch-inset: 2px;

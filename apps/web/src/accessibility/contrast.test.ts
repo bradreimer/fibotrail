@@ -36,6 +36,20 @@ const PAIRS: { text: string; fill: string; minimum: number; what: string }[] = [
     what: 'the focus ring on its halo',
   },
   { text: '--fibo-on-coral', fill: '--fibo-coral', minimum: TEXT, what: 'text on Coral' },
+  { text: '--fibo-switch-on', fill: '--fibo-paper', minimum: CONTROL, what: 'a switch that is on' },
+  { text: '--fibo-switch-on', fill: '--fibo-mist', minimum: CONTROL, what: 'a switch on Mist' },
+  {
+    text: '--fibo-switch-track',
+    fill: '--fibo-paper',
+    minimum: CONTROL,
+    what: 'a switch that is off',
+  },
+  {
+    text: '--fibo-switch-track',
+    fill: '--fibo-mist',
+    minimum: CONTROL,
+    what: 'a switch that is off, on Mist',
+  },
   { text: '--fibo-on-viewer', fill: '--fibo-viewer', minimum: TEXT, what: 'text in the viewer' },
   {
     text: '--fibo-on-viewer-muted',
@@ -48,13 +62,13 @@ const PAIRS: { text: string; fill: string; minimum: number; what: string }[] = [
     text: '--fibo-viewer-accent',
     fill: '--fibo-viewer-row',
     minimum: CONTROL,
-    what: 'a switch that is on',
+    what: 'a viewer switch that is on',
   },
   {
     text: '--fibo-viewer-track',
     fill: '--fibo-viewer-row',
     minimum: CONTROL,
-    what: 'a switch that is off',
+    what: 'a viewer switch that is off',
   },
 ];
 

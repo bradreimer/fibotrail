@@ -178,7 +178,7 @@ export function PhotoViewer({
         <p className="viewer__time">{formatPhotoTime(photo.localTime)}</p>
         {photo.place && <p>{photo.place}</p>}
         {/* One settings row, as in iOS: the label on the left, the switch on the right. */}
-        <label className="viewer__hide">
+        <label className="setting-row">
           <span>Hide from map</span>
           <input
             type="checkbox"
