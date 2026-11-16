@@ -99,7 +99,7 @@ Each one is recorded as an ADR when it's made. Three are decided:
 
 ### Definition of done for the MVP
 
-- [ ] A fresh install connects to Immich, scans, and shows trip suggestions with no setup beyond
+- [x] A fresh install connects to Immich, scans, and shows trip suggestions with no setup beyond
       the `.env` file, the password, and the home location.
 - [ ] Adding or ignoring a suggestion works on phone and iPad, and the choice survives a rescan.
 - [x] The trip library and trip page work with your real data.
