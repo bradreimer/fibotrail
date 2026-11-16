@@ -716,9 +716,37 @@
           }
         }
       },
+      "MapDetailCountry": {
+        "required": [
+          "id",
+          "name",
+          "totalRegions",
+          "regions"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "totalRegions": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "regions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MapRegion"
+            }
+          }
+        }
+      },
       "MapInfo": {
         "required": [
           "countries",
+          "detailCountries",
           "routes",
           "totals"
         ],
@@ -728,6 +756,12 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/MapCountry"
+            }
+          },
+          "detailCountries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MapDetailCountry"
             }
           },
           "routes": {
@@ -755,6 +789,33 @@
           "longitude": {
             "type": "number",
             "format": "double"
+          }
+        }
+      },
+      "MapRegion": {
+        "required": [
+          "id",
+          "name",
+          "firstVisit",
+          "trips"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "firstVisit": {
+            "type": "string",
+            "format": "date"
+          },
+          "trips": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MapTripRef"
+            }
           }
         }
       },

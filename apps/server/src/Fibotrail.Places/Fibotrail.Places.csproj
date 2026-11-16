@@ -7,6 +7,8 @@
   <ItemGroup>
     <!-- Written by "npm run outlines" in apps/web, from the world-atlas package. See ADR-011. -->
     <EmbeddedResource Include="Data\countries.json.gz" LogicalName="Fibotrail.Places.countries.json.gz" />
+    <!-- Written by the same script, from Natural Earth's states and provinces. See ADR-012. -->
+    <EmbeddedResource Include="Data\regions.json.gz" LogicalName="Fibotrail.Places.regions.json.gz" />
   </ItemGroup>
 
 </Project>

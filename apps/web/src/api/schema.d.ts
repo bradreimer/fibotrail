@@ -294,8 +294,16 @@ export interface components {
             firstVisit: string;
             trips: components["schemas"]["MapTripRef"][];
         };
+        MapDetailCountry: {
+            id: string;
+            name: string;
+            /** Format: int32 */
+            totalRegions: number;
+            regions: components["schemas"]["MapRegion"][];
+        };
         MapInfo: {
             countries: components["schemas"]["MapCountry"][];
+            detailCountries: components["schemas"]["MapDetailCountry"][];
             routes: components["schemas"]["MapRoute"][];
             totals: components["schemas"]["MapTotals"];
         };
@@ -304,6 +312,13 @@ export interface components {
             latitude: number;
             /** Format: double */
             longitude: number;
+        };
+        MapRegion: {
+            id: string;
+            name: string;
+            /** Format: date */
+            firstVisit: string;
+            trips: components["schemas"]["MapTripRef"][];
         };
         MapRoute: {
             /** Format: int32 */

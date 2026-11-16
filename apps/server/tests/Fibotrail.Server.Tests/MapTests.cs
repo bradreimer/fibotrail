@@ -135,6 +135,79 @@ public class MapTests
         Assert.Equal(["United States of America"], Names(await MapAsync(browser)));
     }
 
+    private static List<string?> RegionIds(JsonElement country) =>
+        [.. country.GetProperty("regions").EnumerateArray().Select(region => region.GetProperty("id").GetString())];
+
+    [Fact]
+    public async Task With_no_added_trip_there_is_no_detail_country()
+    {
+        var (app, browser, _, _, _) = await StartAsync();
+        await using var _ = app;
+
+        Assert.Equal(0, (await MapAsync(browser)).GetProperty("detailCountries").GetArrayLength());
+    }
+
+    [Fact]
+    public async Task Added_trips_in_Canada_and_the_USA_fill_their_provinces_and_states_with_the_totals_of_each_country()
+    {
+        var (app, browser, orlando, paris, lake) = await StartAsync();
+        await using var _ = app;
+        await DecideAsync(browser, orlando, "add");
+        await DecideAsync(browser, paris, "add");
+        await DecideAsync(browser, lake, "add");
+
+        var detail = (await MapAsync(browser)).GetProperty("detailCountries").EnumerateArray().ToList();
+
+        // France isn't a detail country. Canada and the USA are, in that order.
+        Assert.Equal(["124", "840"], detail.Select(country => country.GetProperty("id").GetString()));
+        Assert.Equal(["Canada", "United States of America"], detail.Select(country => country.GetProperty("name").GetString()));
+        Assert.Equal([13, 51], detail.Select(country => country.GetProperty("totalRegions").GetInt32()));
+        Assert.Equal(["CA-BC"], RegionIds(detail[0]));
+        Assert.Equal(["US-FL"], RegionIds(detail[1]));
+        var florida = detail[1].GetProperty("regions")[0];
+        Assert.Equal(("Florida", "2027-03-15"), (florida.GetProperty("name").GetString(), florida.GetProperty("firstVisit").GetString()));
+        var trip = Assert.Single(florida.GetProperty("trips").EnumerateArray());
+        Assert.Equal(orlando, trip.GetProperty("id").GetInt32());
+    }
+
+    [Fact]
+    public async Task A_suggested_later_or_ignored_trip_never_fills_a_region()
+    {
+        var (app, browser, orlando, paris, lake) = await StartAsync();
+        await using var _ = app;
+        await DecideAsync(browser, orlando, "add");
+        await DecideAsync(browser, paris, "later");
+        await DecideAsync(browser, lake, "ignore");
+
+        var detail = Assert.Single((await MapAsync(browser)).GetProperty("detailCountries").EnumerateArray());
+
+        Assert.Equal(["US-FL"], RegionIds(detail));
+    }
+
+    [Fact]
+    public async Task A_region_where_a_trip_has_only_photos_on_the_way_does_not_fill_in()
+    {
+        var app = await TestApp.StartAsync();
+        await using var _ = app;
+        app.Immich.Assets.AddRange(TripLibrary.AtHome());
+        // A layover in Toronto on the first evening, then Orlando.
+        app.Immich.Assets.AddRange(TripLibrary.Trip(March14, 1, 6, 43.68, -79.63, "Mississauga", "Ontario", "Canada"));
+        app.Immich.Assets.AddRange(TripLibrary.Trip(March15, 6, 60));
+        var browser = await TripLibrary.ScanAndConfirmHomeAsync(app);
+        var tripId = (await TripLibrary.TripsAsync(app))[0].Id;
+        await DecideAsync(browser, tripId, "add");
+        Assert.Equal(["CA-ON"], RegionIds((await MapAsync(browser)).GetProperty("detailCountries")[0]));
+
+        var layover = await app.WithDbAsync(db => db.Photos.AsNoTracking().Where(photo => photo.City == "Mississauga").Select(photo => photo.Id).ToListAsync());
+        foreach (var id in layover)
+        {
+            Assert.Equal(HttpStatusCode.OK, (await browser.SendJsonAsync(HttpMethod.Put, $"/api/photos/{id}/on-the-way", new { onTheWay = true })).StatusCode);
+        }
+
+        var detail = Assert.Single((await MapAsync(browser)).GetProperty("detailCountries").EnumerateArray());
+        Assert.Equal(["US-FL"], RegionIds(detail));
+    }
+
     [Fact]
     public async Task The_route_needs_a_session()
     {

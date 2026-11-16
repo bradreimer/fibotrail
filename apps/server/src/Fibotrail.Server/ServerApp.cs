@@ -58,6 +58,7 @@ public static partial class ServerApp
 
         // The country outlines are read from an embedded resource the first time the map asks.
         services.AddSingleton(_ => CountryOutlines.Load());
+        services.AddSingleton(_ => RegionOutlines.Load());
 
         // When a scan completes, trip detection runs.
         services.AddScoped<IScanCompletedHandler>(provider => provider.GetRequiredService<DetectionService>());
