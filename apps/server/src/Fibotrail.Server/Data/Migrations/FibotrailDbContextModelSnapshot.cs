@@ -70,6 +70,19 @@ namespace Fibotrail.Server.Data.Migrations
                     b.ToTable("decision", (string)null);
                 });
 
+            modelBuilder.Entity("Fibotrail.Server.Data.OnTheWayPhoto", b =>
+                {
+                    b.Property<string>("PhotoId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("DecidedAt")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("PhotoId");
+
+                    b.ToTable("on_the_way_photo", (string)null);
+                });
+
             modelBuilder.Entity("Fibotrail.Server.Data.Photo", b =>
                 {
                     b.Property<string>("Id")

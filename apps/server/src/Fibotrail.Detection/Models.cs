@@ -56,6 +56,13 @@ public enum Confidence
 /// <param name="PhotoIds">The photos taken here, oldest first.</param>
 public sealed record TripStop(GeoPoint Center, DateTime FirstTime, DateTime LastTime, string? Place, IReadOnlyList<string> PhotoIds);
 
+/// <summary>What rules 6 to 8 make of a trip's photos.</summary>
+/// <param name="Stops">The stops, in the order they were first visited.</param>
+/// <param name="DistanceKm">The sum of the straight lines between consecutive stops.</param>
+/// <param name="FarthestFromHomeKm">The greatest distance from home to a stop. 0 when the trip has no stop.</param>
+/// <param name="CoverPhotoId">The suggested cover photo.</param>
+public sealed record TripGeometry(IReadOnlyList<TripStop> Stops, double DistanceKm, double FarthestFromHomeKm, string CoverPhotoId);
+
 /// <summary>A trip that the rules found.</summary>
 /// <param name="Fingerprint">A stable hash of the start date and the main place.</param>
 /// <param name="Name">The suggested name, such as "Orlando, March 2027".</param>

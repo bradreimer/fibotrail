@@ -21,6 +21,8 @@ public sealed class FibotrailDbContext(DbContextOptions<FibotrailDbContext> opti
 
     public DbSet<Decision> Decisions => Set<Decision>();
 
+    public DbSet<OnTheWayPhoto> OnTheWayPhotos => Set<OnTheWayPhoto>();
+
     public DbSet<Setting> Settings => Set<Setting>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -71,6 +73,12 @@ public sealed class FibotrailDbContext(DbContextOptions<FibotrailDbContext> opti
             entity.ToTable("decision");
             entity.HasIndex(decision => decision.Fingerprint).IsUnique();
             entity.Property(decision => decision.Status).HasConversion<string>();
+        });
+
+        modelBuilder.Entity<OnTheWayPhoto>(entity =>
+        {
+            entity.ToTable("on_the_way_photo");
+            entity.HasKey(photo => photo.PhotoId);
         });
 
         modelBuilder.Entity<Setting>(entity =>

@@ -65,8 +65,10 @@ the map.
 - A stop whose photos are all on the way disappears. A stop with some photos on the way stays, and
   its photo count leaves them out.
 - Rules 1 to 5 and 9 to 11 are unchanged. Photos on the way still count toward the trip's photos,
-  days, minimum photos, main destination, and confidence.
-- Visits for the life map (phase 4 of the [roadmap](../roadmap.md)) are built from the stored stops, so a country that only
+  days, minimum photos, and main destination. Confidence (rule 10) reads the same photo count and
+  days, and it reads the farthest point from home, which follows the stops, so a far layover that
+  goes on the way can lower a trip's confidence.
+- Visits for the [life map](life-map.md) are built from the stored stops, so a country that only
   has photos on the way doesn't count as visited.
 - Changing the state recomputes that trip's stops, route, distance, and farthest point at once,
   because they're stored with the trip, per
@@ -86,7 +88,7 @@ the map.
 
 - The Photos tile, the day timeline, and the viewer's "2 of 500" count still include photos on the way.
 - A photo on the way shows a small mark in the corner of its timeline thumbnail. Its alt text ends
-  with "hidden from the map."
+  with ", hidden from the map" (no full stop, like the rest of the alt text).
 - The route map, the stop pins, the **Stops in order** list, and the Stops, Distance, and Farthest
   from home tiles leave photos on the way out.
 - The inbox route preview leaves them out too, because it reads the same stored stops.

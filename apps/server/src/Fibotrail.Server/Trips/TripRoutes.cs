@@ -13,6 +13,9 @@ public sealed record TripSummary(int Id, string Name, DateOnly StartDate, DateOn
 /// <summary>A new name, a new cover, or both. A value left out stays as it is.</summary>
 public sealed record TripChange(string? Name = null, string? CoverPhotoId = null);
 
+/// <summary>Put a photo on the way (true), or bring it back (false).</summary>
+public sealed record OnTheWayChange(bool OnTheWay);
+
 /// <summary>The API routes for the trips you added.</summary>
 public static class TripRoutes
 {
@@ -32,6 +35,16 @@ public static class TripRoutes
         api.MapGet("/trips/{id:int}", async Task<Results<Ok<TripDetail>, NotFound>> (int id, FibotrailDbContext db, ServerSettings settings, CancellationToken cancellationToken) =>
             await TripPage.LoadAsync(db, settings, id, cancellationToken) is { } trip ? TypedResults.Ok(trip) : TypedResults.NotFound())
             .WithName("GetTrip");
+
+        // The Hide checkbox in the photo viewer. It answers with the trip as the page shows it, after the recompute.
+        api.MapPut("/photos/{id}/on-the-way", async Task<Results<Ok<TripDetail>, NotFound>> (
+            string id, OnTheWayChange change, OnTheWayPhotos photos, FibotrailDbContext db, ServerSettings settings, CancellationToken cancellationToken) =>
+        {
+            var result = await photos.SetAsync(id, change.OnTheWay, cancellationToken);
+            return result.Outcome == OnTheWayOutcome.Done && await TripPage.LoadAsync(db, settings, result.TripId!.Value, cancellationToken) is { } trip
+                ? TypedResults.Ok(trip)
+                : TypedResults.NotFound();
+        }).WithName("SetPhotoOnTheWay");
 
         // Rename and Change cover. Both are decisions, so they survive every rescan. See ADR-002.
         api.MapPut("/trips/{id:int}", async Task<Results<NoContent, NotFound, BadRequest<ProblemDetail>>> (

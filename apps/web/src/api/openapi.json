@@ -454,6 +454,49 @@
           }
         }
       }
+    },
+    "/api/photos/{id}/on-the-way": {
+      "put": {
+        "tags": [
+          "Fibotrail"
+        ],
+        "operationId": "SetPhotoOnTheWay",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OnTheWayChange"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TripDetail"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -620,6 +663,17 @@
           "count": {
             "type": "integer",
             "format": "int32"
+          }
+        }
+      },
+      "OnTheWayChange": {
+        "required": [
+          "onTheWay"
+        ],
+        "type": "object",
+        "properties": {
+          "onTheWay": {
+            "type": "boolean"
           }
         }
       },
@@ -1004,7 +1058,8 @@
           "stopIndex",
           "isVideo",
           "durationMs",
-          "immichUrl"
+          "immichUrl",
+          "onTheWay"
         ],
         "type": "object",
         "properties": {
@@ -1060,6 +1115,9 @@
               "null",
               "string"
             ]
+          },
+          "onTheWay": {
+            "type": "boolean"
           }
         }
       },

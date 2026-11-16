@@ -17,8 +17,12 @@ public static class TripDetector
     public const int HighDays = 3;
     public const double HighDistanceKm = 150;
 
-    /// <summary>Runs rules 1 to 10 and returns the trips, oldest first.</summary>
-    public static IReadOnlyList<DetectedTrip> Detect(IEnumerable<PhotoPoint> photos, GeoPoint home, DetectionSettings? settings = null)
+    /// <summary>
+    /// Runs rules 1 to 10 and returns the trips, oldest first. A photo whose ID is in
+    /// <paramref name="onTheWay"/> still belongs to its trip, but rules 6 to 8 skip it: it adds no
+    /// stop, no line, and no distance. See docs/specs/on-the-way.md.
+    /// </summary>
+    public static IReadOnlyList<DetectedTrip> Detect(IEnumerable<PhotoPoint> photos, GeoPoint home, DetectionSettings? settings = null, IReadOnlySet<string>? onTheWay = null)
     {
         ArgumentNullException.ThrowIfNull(photos);
         settings ??= DetectionSettings.Default;
@@ -34,7 +38,7 @@ public static class TripDetector
             var first = away[0].LocalTime;
             var last = away[^1].LocalTime;
             var attached = unplaced.Where(photo => photo.LocalTime >= first && photo.LocalTime <= last);
-            trips.Add(Describe(away, [.. attached], home, settings));
+            trips.Add(Describe(away, [.. attached], home, settings, onTheWay));
         }
 
         return trips;
@@ -145,23 +149,57 @@ public static class TripDetector
         return mainPlace is null ? $"Trip, {month}" : $"{mainPlace}, {month}";
     }
 
-    private static DetectedTrip Describe(IReadOnlyList<PhotoPoint> away, List<PhotoPoint> attached, GeoPoint home, DetectionSettings settings)
+    /// <summary>
+    /// Rules 6 to 8 and the suggested cover: the stops, the route's distance, the farthest stop from
+    /// home, and the cover photo. Photos in <paramref name="onTheWay"/> join no stop. Detection and
+    /// the recompute after you hide a photo both call this, so they always agree.
+    /// </summary>
+    /// <param name="awayPhotosByTime">The trip's photos that have a position, oldest first.</param>
+    /// <param name="tripPhotoIds">Every photo of the trip, oldest first. The cover comes from here when no stop is left.</param>
+    public static TripGeometry Measure(
+        IReadOnlyList<PhotoPoint> awayPhotosByTime,
+        IReadOnlyList<string> tripPhotoIds,
+        GeoPoint home,
+        DetectionSettings settings,
+        IReadOnlySet<string>? onTheWay = null)
     {
-        var stops = FindStops(away, settings);
+        ArgumentNullException.ThrowIfNull(awayPhotosByTime);
+        ArgumentNullException.ThrowIfNull(tripPhotoIds);
+        ArgumentNullException.ThrowIfNull(settings);
+
+        var onTheRoute = onTheWay is null || onTheWay.Count == 0
+            ? awayPhotosByTime
+            : [.. awayPhotosByTime.Where(photo => !onTheWay.Contains(photo.Id))];
+        var stops = FindStops(onTheRoute, settings);
 
         // Rules 7 and 8: the route connects the stops in order, and the distance is its length.
         var distance = stops.Zip(stops.Skip(1), (from, to) => Geo.DistanceKm(from.Center, to.Center)).Sum();
-        var farthest = stops.Max(stop => Geo.DistanceKm(home, stop.Center));
+        var farthest = stops.Count == 0 ? 0 : stops.Max(stop => Geo.DistanceKm(home, stop.Center));
 
+        // The cover is the first image at the stop with the most photos. A video's still frame is the last resort.
+        var videos = awayPhotosByTime.Where(photo => photo.IsVideo).Select(photo => photo.Id).ToHashSet(StringComparer.Ordinal);
+        string cover;
+        if (stops.Count > 0)
+        {
+            var busiest = stops.MaxBy(stop => stop.PhotoIds.Count)!;
+            cover = busiest.PhotoIds.FirstOrDefault(id => !videos.Contains(id)) ?? busiest.PhotoIds[0];
+        }
+        else
+        {
+            // Every away photo is on the way, so the trip has no stop. Its cover is still one of its photos.
+            cover = tripPhotoIds.FirstOrDefault(id => !videos.Contains(id)) ?? tripPhotoIds[0];
+        }
+
+        return new TripGeometry(stops, distance, farthest, cover);
+    }
+
+    private static DetectedTrip Describe(IReadOnlyList<PhotoPoint> away, List<PhotoPoint> attached, GeoPoint home, DetectionSettings settings, IReadOnlySet<string>? onTheWay)
+    {
         var mainPlace = MainPlace(away);
         var start = away[0].LocalDay;
         var end = away[^1].LocalDay;
         var photos = away.Concat(attached).OrderBy(photo => photo.LocalTime).ThenBy(photo => photo.Id, StringComparer.Ordinal).ToList();
-
-        // The cover is the first image at the stop with the most photos. A video's still frame is the last resort.
-        var busiest = stops.MaxBy(stop => stop.PhotoIds.Count)!;
-        var videos = away.Where(photo => photo.IsVideo).Select(photo => photo.Id).ToHashSet(StringComparer.Ordinal);
-        var cover = busiest.PhotoIds.FirstOrDefault(id => !videos.Contains(id)) ?? busiest.PhotoIds[0];
+        var geometry = Measure(away, [.. photos.Select(photo => photo.Id)], home, settings, onTheWay);
 
         return new DetectedTrip(
             Fingerprint(start, mainPlace),
@@ -172,11 +210,11 @@ public static class TripDetector
             end,
             [.. photos.Select(photo => photo.Id)],
             away.Count,
-            stops,
-            distance,
-            farthest,
-            Score(photos.Count, away.Count, end.DayNumber - start.DayNumber + 1, farthest, settings),
-            cover);
+            geometry.Stops,
+            geometry.DistanceKm,
+            geometry.FarthestFromHomeKm,
+            Score(photos.Count, away.Count, end.DayNumber - start.DayNumber + 1, geometry.FarthestFromHomeKm, settings),
+            geometry.CoverPhotoId);
     }
 
     /// <summary>The city with the most days, or the state, or the country, when no photo has a city.</summary>

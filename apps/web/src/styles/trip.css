@@ -224,6 +224,23 @@
   font-variant-numeric: tabular-nums;
 }
 
+.photo-tile__hidden {
+  position: absolute;
+  top: var(--fibo-space-2);
+  left: var(--fibo-space-2);
+  display: inline-flex;
+  align-items: center;
+  padding: var(--fibo-space-1);
+  border-radius: var(--fibo-space-3);
+  background: var(--fibo-scrim-strong);
+  color: var(--fibo-on-ocean);
+}
+
+.photo-tile__hidden-icon {
+  width: var(--fibo-space-4);
+  height: var(--fibo-space-4);
+}
+
 .photo-tile__play {
   width: var(--fibo-space-4);
   height: var(--fibo-space-4);
@@ -302,6 +319,29 @@
 
 .viewer__time {
   font-weight: 600;
+}
+
+.viewer__hide {
+  display: flex;
+  align-items: center;
+  gap: var(--fibo-space-3);
+  min-height: var(--fibo-tap);
+  cursor: pointer;
+}
+
+.viewer__hide input {
+  flex: none;
+  width: var(--fibo-space-5);
+  height: var(--fibo-space-5);
+  margin: 0;
+  accent-color: var(--fibo-teal);
+}
+
+.viewer__hint {
+  margin: 0;
+  color: var(--fibo-on-ocean);
+  font-size: var(--fibo-text-caption);
+  opacity: 0.85;
 }
 
 .viewer__map {

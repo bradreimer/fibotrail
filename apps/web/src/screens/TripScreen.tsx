@@ -112,6 +112,13 @@ export function TripScreen() {
     }
   }
 
+  /** Puts a photo on the way, or brings it back. The trip is read again, so the map and the numbers follow. */
+  async function hide(photoId: string, onTheWay: boolean) {
+    if (!session) throw new Error('Sign in to continue.');
+    await apiSend('PUT', `/api/photos/${photoId}/on-the-way`, session.csrfToken, { onTheWay });
+    setVersion((current) => current + 1);
+  }
+
   return (
     <article className="trip-page">
       <header className="trip-page__header">
@@ -252,6 +259,7 @@ export function TripScreen() {
           index={viewing}
           onIndexChange={setViewing}
           onClose={() => setViewing(null)}
+          onHideChange={hide}
         />
       )}
 

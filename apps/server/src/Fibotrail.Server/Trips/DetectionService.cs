@@ -28,6 +28,12 @@ public sealed partial class DetectionService(FibotrailDbContext db, HomeLocation
 
     public Task OnScanCompletedAsync(CancellationToken cancellationToken) => RunAsync(cancellationToken);
 
+    /// <summary>The stops as they're stored with the trip.</summary>
+    public static string StoreStops(IEnumerable<TripStop> stops) =>
+        JsonSerializer.Serialize(
+            stops.Select(stop => new StoredStop(stop.Center.Latitude, stop.Center.Longitude, stop.Place, stop.FirstTime, stop.LastTime, stop.PhotoIds.Count)),
+            StopJson);
+
     public static IReadOnlyList<StoredStop> ReadStops(string json) =>
         JsonSerializer.Deserialize<List<StoredStop>>(json, StopJson) ?? [];
 
@@ -41,7 +47,10 @@ public sealed partial class DetectionService(FibotrailDbContext db, HomeLocation
         }
 
         var photos = await HomeLocation.LoadPhotosAsync(db, placedOnly: false, cancellationToken);
-        var detected = TripDetector.Detect(photos, new GeoPoint(confirmed.Latitude, confirmed.Longitude));
+
+        // Photos you put on the way stay in their trips and add no stop. The decision table is read, never changed.
+        var onTheWay = (await db.OnTheWayPhotos.AsNoTracking().Select(photo => photo.PhotoId).ToListAsync(cancellationToken)).ToHashSet(StringComparer.Ordinal);
+        var detected = TripDetector.Detect(photos, new GeoPoint(confirmed.Latitude, confirmed.Longitude), onTheWay: onTheWay);
 
         await using var transaction = await db.Database.BeginTransactionAsync(cancellationToken);
         var trips = await db.Trips.ToListAsync(cancellationToken);
@@ -121,9 +130,7 @@ public sealed partial class DetectionService(FibotrailDbContext db, HomeLocation
             Confidence.Low => TripConfidence.Low,
             _ => TripConfidence.Medium,
         };
-        trip.StopsJson = JsonSerializer.Serialize(
-            found.Stops.Select(stop => new StoredStop(stop.Center.Latitude, stop.Center.Longitude, stop.Place, stop.FirstTime, stop.LastTime, stop.PhotoIds.Count)),
-            StopJson);
+        trip.StopsJson = StoreStops(found.Stops);
 
         var stopOf = found.Stops
             .SelectMany((stop, index) => stop.PhotoIds.Select(id => (id, index)))

@@ -13,17 +13,42 @@ interface PhotoViewerProps {
   index: number;
   onIndexChange: (index: number) => void;
   onClose: () => void;
+  /** Puts the photo on the way, or brings it back. It rejects when the change couldn't be saved. */
+  onHideChange: (photoId: string, onTheWay: boolean) => Promise<void>;
 }
 
 /**
  * One photo, full screen. A swipe or an arrow key moves through the trip's photos. A swipe down,
  * Close, or Escape returns to the page.
  */
-export function PhotoViewer({ photos, index, onIndexChange, onClose }: PhotoViewerProps) {
+export function PhotoViewer({
+  photos,
+  index,
+  onIndexChange,
+  onClose,
+  onHideChange,
+}: PhotoViewerProps) {
   const photo = photos[index]!;
   const close = useRef<HTMLButtonElement>(null);
   const start = useRef<{ x: number; y: number } | null>(null);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
+  // The checkbox shows what you chose at once. `from` is what the page said when you clicked, so
+  // your choice is shown only until the page reads the trip again and says something else.
+  const [pending, setPending] = useState<{ id: string; value: boolean; from: boolean } | null>(
+    null,
+  );
+  const [problem, setProblem] = useState<string | null>(null);
+  const checked =
+    pending?.id === photo.id && photo.onTheWay === pending.from ? pending.value : photo.onTheWay;
+
+  function toggleHidden(value: boolean) {
+    setProblem(null);
+    setPending({ id: photo.id, value, from: photo.onTheWay });
+    onHideChange(photo.id, value).catch(() => {
+      setPending(null);
+      setProblem("We couldn't save that. Try again.");
+    });
+  }
 
   // Focus starts on Close, and returns to the photo that was opened.
   useEffect(() => {
@@ -152,6 +177,19 @@ export function PhotoViewer({ photos, index, onIndexChange, onClose }: PhotoView
       <div className="viewer__details">
         <p className="viewer__time">{formatPhotoTime(photo.localTime)}</p>
         {photo.place && <p>{photo.place}</p>}
+        <label className="viewer__hide">
+          <input
+            type="checkbox"
+            checked={checked}
+            aria-describedby="viewer-hide-hint"
+            onChange={(event) => toggleHidden(event.target.checked)}
+          />
+          <span>Hide</span>
+        </label>
+        <p className="viewer__hint" id="viewer-hide-hint">
+          Keeps this photo in the trip but off the map.
+        </p>
+        {problem && <p role="alert">{problem}</p>}
         {markers.length > 0 && (
           <LazyMap
             className="viewer__map"

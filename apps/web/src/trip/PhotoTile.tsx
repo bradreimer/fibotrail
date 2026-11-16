@@ -37,6 +37,20 @@ export function PhotoTile({ photo, onOpen }: { photo: TripPhoto; onOpen: () => v
           if (naturalWidth > 0 && naturalHeight > 0) setRatio(naturalWidth / naturalHeight);
         }}
       />
+      {photo.onTheWay && (
+        // The alt text already says "hidden from the map", so the mark is only for the eye.
+        <span className="photo-tile__hidden" aria-hidden="true">
+          <svg viewBox="0 0 16 16" className="photo-tile__hidden-icon" focusable="false">
+            <path
+              d="M2 8s2.2-4 6-4 6 4 6 4-2.2 4-6 4-6-4-6-4Zm6 1.8a1.8 1.8 0 1 0 0-3.6 1.8 1.8 0 0 0 0 3.6ZM3 13 13 3"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.4"
+              strokeLinecap="round"
+            />
+          </svg>
+        </span>
+      )}
       {photo.isVideo && (
         <span className="photo-tile__video" aria-hidden="true">
           <svg viewBox="0 0 16 16" className="photo-tile__play" focusable="false">
