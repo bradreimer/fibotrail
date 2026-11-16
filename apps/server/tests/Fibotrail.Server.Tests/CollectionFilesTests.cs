@@ -173,5 +173,11 @@ public sealed class CollectionFilesTests : IDisposable
         Assert.Equal("shanghai-disneyland", catalog.Lookup.Find(31.1465, 121.6560)?.Id);
         // All 12 Disney parks are in the file.
         Assert.Equal(12, disney.Places.Count);
+        // The three Universal Orlando parks sit side by side, and each resolves to itself.
+        var universal = Assert.Single(catalog.Collections, collection => collection.Id == "universal-parks");
+        Assert.Equal(3, universal.Places.Count);
+        Assert.Equal("islands-of-adventure", catalog.Lookup.Find(28.4700, -81.4720)?.Id);
+        Assert.Equal("universal-studios-florida", catalog.Lookup.Find(28.4780, -81.4690)?.Id);
+        Assert.Equal("epic-universe", catalog.Lookup.Find(28.4470, -81.4440)?.Id);
     }
 }
