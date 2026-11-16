@@ -16,7 +16,7 @@ the trip page needs it.
 | 1 | Spike | Check Immich fields, keys, and time zones | Immich fields confirmed |
 | 2 | Foundation | Repository and CI, Docker image, scanner, database | None |
 | 3 | Trips | Detector, inbox, library, and trip page with its route map | Review gate met (you accept most High-confidence suggestions, and remembered trips appear), then version 0.1 published |
-| 4 | Maps | Life map and boundaries | None |
+| 4 | Maps | Life map and boundaries. The first release is countries only: see [life-map.md](specs/life-map.md). Regions and cities come after | None |
 | 5 | Collections | Disney parks, other sets, and stats | None |
 | 6 | Release | PWA polish, accessibility, docs, v1.0 | Version 1.0 published |
 

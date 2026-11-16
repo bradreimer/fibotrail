@@ -117,6 +117,14 @@ The MVP plan is in [roadmap.md](roadmap.md#mvp-version-01). Its specs are in
 - Record the per-line results of the [accessibility checklist](knowledge/accessibility-checklist.md).
 - Decide the next phase from the [roadmap](roadmap.md): the life map (phase 4) comes next, then
   collections and statistics (phase 5).
+- Phase 4, the life map, first release (countries only), specced in
+  [life-map.md](specs/life-map.md): the Map screen ([#45](https://github.com/bradreimer/fibotrail/issues/45)),
+  working out the visited countries on the server
+  ([#46](https://github.com/bradreimer/fibotrail/issues/46), with
+  [ADR-011](adr/ADR-011-visits-are-derived-from-added-trips-on-the-server.md), proposed), and moving
+  Inbox and Settings to the top bar ([#47](https://github.com/bradreimer/fibotrail/issues/47)).
+  Zooming to regions and cities is [#48](https://github.com/bradreimer/fibotrail/issues/48). Not
+  built yet. Start with #46.
 - Photos and stops that are on the way (layover airports and in-transit photos): hide a photo from
   the map ([#35](https://github.com/bradreimer/fibotrail/issues/35)), then suggested stops
   ([#32](https://github.com/bradreimer/fibotrail/issues/32)). Both are one idea, specced in

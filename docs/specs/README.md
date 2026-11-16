@@ -63,6 +63,7 @@ None.
 | [trip-inbox.md](trip-inbox.md) | Reviewing suggested trips with Add trip, Not a trip, and Later |
 | [trip-library.md](trip-library.md) | The grid of cards for the trips you've added |
 | [trip-page.md](trip-page.md) | One trip's route map, stat tiles, photo timeline, and photo viewer |
+| [life-map.md](life-map.md) | The Map screen: a world map of visited countries, a summary, first visits, and routes |
 | [main-destination.md](main-destination.md) | How a trip's main destination is chosen: the city with the most days |
 | [on-the-way.md](on-the-way.md) | Photos and stops that belong to a trip but not to its map: hide a photo, and later suggested stops |
 | [release.md](release.md) | The accessibility checks, README, and tagged image for version 0.1 |
