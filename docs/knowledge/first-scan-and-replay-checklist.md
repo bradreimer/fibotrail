@@ -2,11 +2,11 @@
 
 Intention: run Fibotrail against the maintainer's real Immich library once, and record what
 happens. This closes the open criteria of [#7](https://github.com/bradreimer/fibotrail/issues/7)
-and the gate of MVP step 3a, the replay test. It's the last evidence needed before the `v0.1.0`
+and the gate of MVP step 3a, the review gate. It's the last evidence needed before the `v0.1.0`
 tag in [#24](https://github.com/bradreimer/fibotrail/issues/24).
 
 Method: five parts, in order. Part 1 prepares, part 2 scans, part 3 proves Immich is only read,
-part 4 sets the home location, and part 5 replays your known trips. Write the result of each line
+part 4 sets the home location, and part 5 reviews the suggestions it found. Write the result of each line
 in the Result column. The scanner has only run against a stand-in for Immich so far, and the
 detector only against made-up photos, so expect to find something. A finding goes to a GitHub
 issue, not into this file.
@@ -80,11 +80,60 @@ isn't known yet, so record what you used.
 | 4.3 | Choose **Use this location**, or **Choose another** and search or move the pin | The step says how many trips it found | |
 | 4.4 | Check the Inbox | Suggestion cards appear, with a photo strip and route preview | |
 
-## Part 5. The replay test
+## Part 5. The review gate
 
-Pick 5 to 10 trips you know you took, from your whole library. Choose a mix: a long trip, a
-weekend, one with few photos, one abroad, one where someone else added photos at home, and one
-taken with a camera that records no GPS. Hard cases are the point of the test.
+You don't need a list of trips for this. The inbox is the test: you judge the app's suggestions,
+and the app does the remembering. The rules are in the
+[review gate](../specs/trip-detection.md#review-gate) of the trip detection spec.
+
+**5a. Accuracy.** Open the Inbox. Take the first 10 High-confidence suggestions, newest first, or
+all of them if there are fewer.
+
+| # | Step | Expected | Result |
+| --- | --- | --- | --- |
+| 5.1 | For each of the 10, decide: would you accept it with **Add trip**? Dates and photos right means yes. A different name or cover doesn't count against it | A yes or no for each | |
+| 5.2 | Count the yes answers | At least 8 of 10 (80 percent, when there are fewer than 10) | |
+| 5.3 | For each no, write the reason: merged with another trip, split in two, not a trip, or wrong dates | A reason for each | |
+
+**5b. Misses.** Without opening your library, write down 3 to 5 trips you remember.
+
+| # | Step | Expected | Result |
+| --- | --- | --- | --- |
+| 5.4 | For each, look for a suggestion or a trip whose dates cover its days. Search the Inbox, the Ignored tab, and the library | Found | |
+| 5.5 | Count the missing ones | At most 1 | |
+| 5.6 | For each missing trip, note why. See the table below | A reason for each | |
+
+Reading a miss or a no:
+
+| What you see | Likely cause | Spec question |
+| --- | --- | --- |
+| Missing, and the trip has few photos with GPS | Only away photos count toward the 20 minimum, and 84.5 percent of photos have no position | 3 |
+| One trip shown as two | A photo at home, from someone else or from you, ended the trip. Or a gap of 72 hours or more | 2 |
+| Two trips shown as one | Two trips less than 72 hours apart with no photo at home between them | none, note it |
+| Dates off by more than one day | Time zones, or photos with no position joining the wrong trip | none, note it |
+| High confidence, but you'd call it Medium or Low, or the reverse | The confidence thresholds | 1 |
+| The home suggestion was wrong | A move, a second home, or a long stay somewhere else | 4 |
+
+Names and destinations that aren't right are not a failure of this gate. They go to
+[#30](https://github.com/bradreimer/fibotrail/issues/30) and
+[#31](https://github.com/bradreimer/fibotrail/issues/31).
+
+**If it passes**, write the numbers down: how many of the 10 you accepted, how many remembered
+trips you found, and the reasons for each no. Answer the open questions in the spec with what you
+saw.
+
+**If it fails**, change one default at a time. The detection settings aren't editable in the app
+in version 0.1. The defaults are in `apps/server/src/Fibotrail.Detection/Models.cs`. Rebuild with
+`docker compose -f docker/compose.example.yml up -d --build`, scan again, and review again. Record
+each try: the value, and what the review showed. Don't change a default to match one trip. If the
+trips you miss share a cause, such as no GPS, the fix may be a rule change, not a number. Open a
+**Bug Report** for it.
+
+### Optional: the replay command
+
+Use this when you want a number after changing a rule. Pick 5 to 10 trips you know you took.
+Choose a mix: a long trip, a weekend, one with few photos, one abroad, one where someone else
+added photos at home, and one taken with a camera that records no GPS.
 
 1. Write `known-trips.json`, outside the repository, because it holds private data:
 
@@ -111,14 +160,14 @@ taken with a camera that records no GPS. Hard cases are the point of the test.
 
 | # | Step | Expected | Result |
 | --- | --- | --- | --- |
-| 5.1 | The command prints each known trip as matched or missed | One line per trip | |
-| 5.2 | It lists detected trips that match no known trip | Review each. A real trip you forgot to list is fine | |
-| 5.3 | The exit code: `echo $?` | 0, which means at least 8 of every 10 matched | |
-| 5.4 | The command changed nothing: Trips and the Inbox look the same as before | Same | |
+| R.1 | The command prints each known trip as matched or missed | One line per trip | |
+| R.2 | It lists detected trips that match no known trip | Review each. A real trip you forgot to list is fine | |
+| R.3 | The exit code: `echo $?` | 0, which means at least 8 of every 10 matched. This is a tuning number, not the gate | |
+| R.4 | The command changed nothing: Trips and the Inbox look the same as before | Same | |
 
 A known trip is matched when a detected trip starts and ends within one day of it.
 
-### Reading a miss
+#### Reading a miss
 
 For each missed known trip, find the cause in this table. It maps to the open questions of the
 [trip detection spec](../specs/trip-detection.md#open-questions).
@@ -133,19 +182,19 @@ For each missed known trip, find the cause in this table. It maps to the open qu
 | The home suggestion was wrong | A move, a second home, or a long stay somewhere else | 4 |
 | A detected trip you didn't list | Fine, unless it isn't a trip. Count these | none |
 
-### If it passes
+#### If the replay passes
 
 Write the numbers down: trips matched out of known, detected trips not on your list, and how many
 High-confidence suggestions you'd accept without edits. The MVP aim is to accept most High
 suggestions. Then answer each open question in the spec with what you saw, and remove the
 question from the list.
 
-### If it fails
+#### If a gate or the replay fails
 
 The detection settings aren't editable in the app in version 0.1. The defaults are in
 `apps/server/src/Fibotrail.Detection/Models.cs`. Change one value at a time, rebuild with
-`docker compose -f docker/compose.example.yml up -d --build`, and run `replay` again. Record each
-try: the value, and how many known trips matched. Stop when you reach 8 of 10, and record the
+`docker compose -f docker/compose.example.yml up -d --build`, and run `replay` and the review again. Record each
+try: the value, and what the review showed. Stop when the gate is met, and record the
 reason for each changed default in the spec. Don't change a default to match one trip. If the
 trips you miss share a cause, such as no GPS, the fix may be a rule change, not a number. Open a
 **Bug Report** for it.
@@ -156,6 +205,6 @@ trips you miss share a cause, such as no GPS, the fix may be a rule change, not 
 | --- | --- | --- |
 | 6.1 | [#7](https://github.com/bradreimer/fibotrail/issues/7) | The full scan finished, the photo count, the time it took, and which method showed only allowed requests |
 | 6.2 | [Immich scanning spec](../specs/immich-scanning.md#acceptance-criteria) | Tick the two criteria that were open |
-| 6.3 | [trip-detection spec](../specs/trip-detection.md#open-questions) | An answer for each open question the replay settled |
-| 6.4 | [status.md](../status.md) | The gate of step 3a is met, with the matched count and the date. Remove the two Next items |
+| 6.3 | [trip-detection spec](../specs/trip-detection.md#open-questions) | An answer for each open question the review settled |
+| 6.4 | [status.md](../status.md) | The gate of step 3a is met, with the accepted count out of 10, the missing count, and the date. Remove the two Next items |
 | 6.5 | [#24](https://github.com/bradreimer/fibotrail/issues/24) | The first two gates before the tag are met |
