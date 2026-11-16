@@ -39,6 +39,11 @@ on first run, so that my travel history is running next to Immich and only I can
   and holds the ASP.NET Core runtime only, per [ADR-004](../adr/ADR-004-technology-stack.md).
 - The container runs as a non-root user with a read-only root file system. `/data` is the one
   writable volume.
+- At startup, before it opens the database, the server checks that it can write to `/data`. When
+  it can't, it prints one plain line, with no stack trace, that names the folder, the user ID the
+  container runs as, and the `chown` command that fixes it, then exits with code 1. A bind mount
+  keeps the owner of the host folder, so a folder owned by root fails for the container's non-root
+  user.
 - Inside the container, the server listens on port 8080 and serves the built UI and the API from
   the same origin.
 - `GET /healthz` returns 200 when the server is up and the database opens. It needs no session.
@@ -107,6 +112,8 @@ on first run, so that my travel history is running next to Immich and only I can
   `http://localhost:11235/healthz` returns 200 on the host.
 - With `IMMICH_API_KEY` removed from `.env`, the container exits and the log names
   `IMMICH_API_KEY`.
+- With a `/data` folder the container's user can't write to, the container exits with code 1 and
+  the log is one line that names the folder and the user ID, with no stack trace.
 - On a new `/data` volume, the first visit shows the setup screen. After setup, a visit with no
   session shows the sign-in screen.
 - A request to an API route with no session returns 401.

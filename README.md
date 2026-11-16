@@ -38,6 +38,15 @@ same Docker network as Immich.
 7. Choose **Scan now**, then confirm your home location when asked. Fibotrail needs it to know
    when you're away.
 
+The container runs as user 1654, not as root, and it can write only to `/data`. The example compose
+file uses a named volume, and Docker sets the owner for you. If you mount a host folder on `/data`
+instead, give that folder to the container's user first, or Fibotrail can't open its database and
+the log says so:
+
+```bash
+sudo chown 1654:1654 /path/to/your/folder
+```
+
 On a phone or iPad, open the HTTPS address in Safari and choose **Share**, then **Add to Home
 Screen**. The app then opens full screen, like a native app.
 

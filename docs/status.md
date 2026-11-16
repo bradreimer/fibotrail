@@ -60,6 +60,10 @@ maintainer's library and phone, and are listed under Next. See
 
 ## In progress
 
+- [#28](https://github.com/bradreimer/fibotrail/issues/28) A `/data` bind mount the container
+  can't write to. Found on the first real run: the host folder was owned by root, and the log was a
+  repeating SQLite stack trace. Startup now checks the folder and prints one line with the fix, and
+  the README explains the `chown`.
 - [#24](https://github.com/bradreimer/fibotrail/issues/24) The release, step 3d. The
   [release spec](specs/release.md) and the README are written, and a test keeps the README's
   sections, variables, and permissions in step with the code. The automated accessibility checks are in (contrast, alt text, accessible names, reduce motion, and

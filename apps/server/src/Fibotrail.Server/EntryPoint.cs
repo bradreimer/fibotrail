@@ -58,6 +58,13 @@ public static class EntryPoint
             return 1;
         }
 
+        var folderProblem = DataFolderCheck.Verify(settings);
+        if (folderProblem is not null)
+        {
+            await error.WriteLineAsync(folderProblem);
+            return 1;
+        }
+
         var app = ServerApp.Create(builder, settings);
         await ServerApp.PrepareDatabaseAsync(app);
         await app.StartAsync();
