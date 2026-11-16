@@ -117,7 +117,10 @@ The MVP plan is in [roadmap.md](roadmap.md#mvp-version-01). Its specs are in
 - Record the per-line results of the [accessibility checklist](knowledge/accessibility-checklist.md).
 - Decide the next phase from the [roadmap](roadmap.md): the life map (phase 4) comes next, then
   collections and statistics (phase 5).
-- The idea of marking airports and layovers is [#32](https://github.com/bradreimer/fibotrail/issues/32).
+- Photos and stops that are on the way (layover airports and in-transit photos): hide a photo from
+  the map ([#35](https://github.com/bradreimer/fibotrail/issues/35)), then suggested stops
+  ([#32](https://github.com/bradreimer/fibotrail/issues/32)). Both are one idea, specced in
+  [on-the-way.md](specs/on-the-way.md). Not built yet.
 - Answer the remaining open questions in the
   [design and branding document](knowledge/design-and-branding.md#risks-open-questions-and-next-steps).
   The server language is settled: see [ADR-004](adr/ADR-004-technology-stack.md).
