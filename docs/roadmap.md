@@ -102,8 +102,8 @@ Each one is recorded as an ADR when it's made. Three are decided:
 - [ ] A fresh install connects to Immich, scans, and shows trip suggestions with no setup beyond
       the `.env` file, the password, and the home location.
 - [ ] Adding or ignoring a suggestion works on phone and iPad, and the choice survives a rescan.
-- [ ] The trip library and trip page work with your real data.
-- [ ] The [review gate](specs/trip-detection.md#review-gate) is met: you accept at least 8 of the first 10 High-confidence suggestions, and at most 1 of 3 to 5 remembered trips is missing.
+- [x] The trip library and trip page work with your real data.
+- [x] The [review gate](specs/trip-detection.md#review-gate) is met (2026-11-16, 10 of 10 and 5 of 5): you accept at least 8 of the first 10 High-confidence suggestions, and at most 1 of 3 to 5 remembered trips is missing.
 - [ ] Fibotrail makes no write request to Immich and no outside request by default.
 - [ ] The app passes the iPhone run-through in ADR-007.
 
