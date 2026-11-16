@@ -127,6 +127,10 @@ The MVP plan is in [roadmap.md](roadmap.md#mvp-version-01). Its specs are in
   built yet, except
   [#46](https://github.com/bradreimer/fibotrail/issues/46): the `Fibotrail.Places` project, the
   outlines, and `GET /api/map` are built, and not merged. Next is #45.
+- Phase 5, the Stats screen, specced in [stats-screen.md](specs/stats-screen.md) and tracked by
+  [#54](https://github.com/bradreimer/fibotrail/issues/54): totals, continents, and each country's
+  trips, days, and seasons seen, with charts. Seasons are meteorological and flip in the southern
+  hemisphere. Not built yet. It depends on #45 and #46.
 - Photos and stops that are on the way (layover airports and in-transit photos): hide a photo from
   the map ([#35](https://github.com/bradreimer/fibotrail/issues/35)), then suggested stops
   ([#32](https://github.com/bradreimer/fibotrail/issues/32)). Both are one idea, specced in
