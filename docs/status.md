@@ -151,7 +151,7 @@ The plan is in [roadmap.md](roadmap.md). Specs are in [specs/](specs/README.md).
   gains Collections and Stats, per ADR-007. Collections are specified in
   [collections.md](specs/collections.md)
   ([#64](https://github.com/bradreimer/fibotrail/issues/64)). Park days are derived from stored photo
-  positions, per [ADR-012](adr/ADR-012-park-days-are-derived-from-stored-photo-positions.md). The
+  positions, per [ADR-013](adr/ADR-013-park-days-are-derived-from-stored-photo-positions.md). The
   boundary files and the Theme parks view spec come next.
 - Answer the open questions in the [life map spec](specs/life-map.md) with real use: whether the
   home country should always fill in, and whether 25 km is the right distance for a stop just off a

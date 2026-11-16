@@ -134,7 +134,7 @@ visit, such as a day your phone died after one photo. See open question 1.
 
 - The park days are computed on the server, on each request, from the stored position and local
   day of each trip photo and from the boundaries. No park or day table is stored, per
-  [ADR-012](../adr/ADR-012-park-days-are-derived-from-stored-photo-positions.md), which follows
+  [ADR-013](../adr/ADR-013-park-days-are-derived-from-stored-photo-positions.md), which follows
   [ADR-011](../adr/ADR-011-visits-are-derived-from-added-trips-on-the-server.md).
 - The lookup and the day count are pure functions in the detection project, so they test with plain
   data and no running Immich.

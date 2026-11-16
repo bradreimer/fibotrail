@@ -1,4 +1,4 @@
-# ADR-012: Park days are derived from stored photo positions
+# ADR-013: Park days are derived from stored photo positions
 
 ## Status
 

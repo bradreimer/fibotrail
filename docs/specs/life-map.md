@@ -195,12 +195,11 @@ states: the 50 states and the District of Columbia.
 3. **How are cities named and counted?** That belongs to
    [#48](https://github.com/bradreimer/fibotrail/issues/48), and to the Stats screen. Regions of
    the detail countries are decided above.
-4. **How big is the region file?** Natural Earth's states and provinces for Canada and the USA,
-   simplified, haven't been measured. The ADR for this work records the size and the
-   simplification, and the app's initial load must stay within the budget in the
+4. **How big is the region file?** Measured: about 132 KB gzipped for Canada and the USA at
+   1:50 million. [ADR-012](../adr/ADR-012-detail-regions-are-bundled-outlines-for-a-short-list-of-countries.md)
+   records the numbers. The app's initial load must stay within the budget in the
    [quality gates spec](quality-gates.md).
-5. **Do US territories count?** Puerto Rico and the others are not in the 51. The default is that
-   they don't count as states, and fill in as part of the USA only if their outlines are in the
-   country outline.
-6. **How does a phone zoom to a region?** Pinch zoom works, but a small region such as DC or Prince
-   Edward Island is hard to tap. The ADR decides whether the region list also opens the sheet.
+5. **Do US territories count?** No. In the 1:50 million data they are separate countries, so the
+   USA has 50 states and the District of Columbia.
+6. **How does a phone zoom to a region?** A row in the visited-regions list opens the same sheet as
+   a tap on the map, because the District of Columbia and Prince Edward Island are too small to tap.
