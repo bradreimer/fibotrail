@@ -47,6 +47,7 @@ const usa = {
 
 const map: MapInfo = {
   detailCountries: [],
+  cities: [],
   countries: [
     {
       id: '752',
@@ -313,6 +314,7 @@ describe('the Map screen', () => {
       'GET /api/map': {
         countries: [],
         detailCountries: [],
+        cities: [],
         routes: [],
         totals: { countries: 0, trips: 0, daysAway: 0, distanceKm: 0 },
       },
@@ -350,5 +352,79 @@ describe('the Map screen', () => {
     await screen.findByRole('application');
 
     expectNoAccessibilityProblems();
+  });
+
+  describe('cities and parks', () => {
+    const withCities: MapInfo = {
+      ...map,
+      cities: [
+        {
+          name: 'Stockholm',
+          latitude: 59.33,
+          longitude: 18.07,
+          isPark: false,
+          firstVisit: '2022-10-31',
+          trips: [
+            {
+              id: 5,
+              name: 'Stockholm, October 2022',
+              startDate: '2022-10-31',
+              endDate: '2022-11-07',
+            },
+          ],
+        },
+        {
+          name: 'Magic Kingdom',
+          latitude: 28.42,
+          longitude: -81.58,
+          isPark: true,
+          firstVisit: '2024-03-10',
+          trips: [
+            { id: 7, name: 'Orlando, March 2024', startDate: '2024-03-10', endDate: '2024-03-16' },
+          ],
+        },
+      ],
+    };
+
+    it('gives the map a pin for each city and park, and lists them with the first visit', async () => {
+      fakeServer({ 'GET /api/map': withCities });
+      renderMap();
+
+      const worldMap = await screen.findByRole('application');
+      expect(JSON.parse(worldMap.dataset.cities!)).toEqual([
+        { key: '0', latitude: 59.33, longitude: 18.07, isPark: false },
+        { key: '1', latitude: 28.42, longitude: -81.58, isPark: true },
+      ]);
+      const list = screen.getByRole('heading', { name: 'Cities and parks' }).closest('section')!;
+      expect(
+        within(list)
+          .getAllByRole('listitem')
+          .map((item) => item.textContent),
+      ).toEqual(['StockholmOct 31, 2022', 'Magic Kingdom (theme park)Park · Mar 10, 2024']);
+    });
+
+    it('opens a sheet with the trips from a pin on the map or a row in the list', async () => {
+      fakeServer({ 'GET /api/map': withCities });
+      renderMap();
+
+      await userEvent.click(await screen.findByRole('button', { name: 'Pin on the map: 1' }));
+      const sheet = screen.getByRole('dialog', { name: 'Magic Kingdom' });
+      expect(within(sheet).getByRole('link', { name: /Orlando, March 2024/ })).toHaveAttribute(
+        'href',
+        '/trips/7',
+      );
+      await userEvent.click(within(sheet).getByRole('button', { name: 'Close' }));
+
+      await userEvent.click(screen.getByRole('button', { name: /^StockholmOct 31, 2022$/ }));
+      expect(screen.getByRole('dialog', { name: 'Stockholm' })).toBeInTheDocument();
+    });
+
+    it('shows no list when no city has been visited', async () => {
+      fakeServer({ 'GET /api/map': map });
+      renderMap();
+      await screen.findByRole('application');
+
+      expect(screen.queryByRole('heading', { name: 'Cities and parks' })).not.toBeInTheDocument();
+    });
   });
 });

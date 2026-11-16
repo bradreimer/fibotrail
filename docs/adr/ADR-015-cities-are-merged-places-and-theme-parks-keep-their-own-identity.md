@@ -2,7 +2,7 @@
 
 ## Status
 
-Proposed
+Accepted
 
 ## Context
 
@@ -23,7 +23,7 @@ park as its own place with its own days and trips, and you want to see "Universa
 and not only "Orlando".
 
 Not known yet: how many places the merge gives on the maintainer's 46 added trips, and whether 25 km
-is the right distance. The maintainer's library has been used for similar measurements before, such
+is the right distance, since the first version was only tested on made-up stops. The maintainer's library has been used for similar measurements before, such
 as `fibotrail stops`.
 
 ## Decision
@@ -49,11 +49,11 @@ its own and is never grouped with a city.
   stops, with no table, as in [ADR-011](ADR-011-visits-are-derived-from-added-trips-on-the-server.md)
   and [ADR-014](ADR-014-stats-views-are-self-contained-modules.md). Photos on the way aren't in the
   stored stops, so a layover city doesn't count.
-- **Regions outside Canada and the USA are not decided here.** They need boundary data, which is a
-  question of size, and the choice of countries. The recommendation is the same short list of
-  countries as [ADR-012](ADR-012-detail-regions-are-bundled-outlines-for-a-short-list-of-countries.md),
-  extended by a few the maintainer chooses. This ADR stays `Proposed` until that is answered, and
-  the regions work waits for it.
+- **Regions stay at Canada and the USA.** The maintainer decided on 2026-11-16 that every other
+  country is a single unit, with no region outlines. That is the short list of
+  [ADR-012](ADR-012-detail-regions-are-bundled-outlines-for-a-short-list-of-countries.md), so no
+  new boundary data is bundled and the app doesn't grow. A country outside the two shows as one
+  fill, and its cities show as pins when the map is zoomed in.
 
 ## Alternatives considered
 

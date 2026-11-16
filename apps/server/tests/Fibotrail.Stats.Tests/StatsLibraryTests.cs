@@ -106,4 +106,24 @@ public class StatsLibraryTests
 
         Assert.Equal(library.Totals().Countries, library.Progress().Sum(progress => progress.Visited));
     }
+
+    [Fact]
+    public void Neighborhoods_of_one_city_count_as_one_city_and_a_second_city_makes_two()
+    {
+        var day = new DateOnly(2023, 5, 1);
+        var trip = new StatsTrip(1, "Trip 1", day, day.AddDays(3), 4, 0, 0, [], [],
+        [
+            new NamedStop("Gamla stan", 59.32, 18.07, 40),
+            new NamedStop("Sodermalm", 59.31, 18.06, 10),
+            new NamedStop("Malmo", 55.6, 13.0, 25),
+        ]);
+
+        var library = Build(trip);
+
+        Assert.Equal(2, library.CityCount);
+        Assert.Equal("Gamla stan", library.Places.Single(place => place.Trips.Count == 1 && place.Latitude > 58).Name);
+    }
+
+    [Fact]
+    public void With_no_named_stops_there_are_no_cities() => Assert.Equal(0, Build().CityCount);
 }

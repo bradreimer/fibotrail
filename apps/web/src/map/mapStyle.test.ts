@@ -45,6 +45,8 @@ describe('the base map style', () => {
       'region-visited',
       'borders',
       'region-borders',
+      'city-pins',
+      'park-pins',
       'route-outline',
       'route',
     ]);

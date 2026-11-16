@@ -15,6 +15,17 @@ version 0.1 and the per-line results of the accessibility checklist are also sti
 
 ## Completed
 
+- [#48](https://github.com/bradreimer/fibotrail/issues/48) Cities on the life map and on the Stats
+  screen, decided in
+  [ADR-015](adr/ADR-015-cities-are-merged-places-and-theme-parks-keep-their-own-identity.md)
+  (accepted). Stops of added trips within 25 km merge into one city, named by the stop with the most
+  photos. Disney and Universal parks stay places of their own and aren't counted as cities. The Map
+  shows a pin for each city and park once zoomed in, with a **Cities and parks** list and a sheet for
+  each, and the Stats summary has a Cities tile. Regions stay at Canada and the USA, and every other
+  country is one unit, so no new boundary data was added. Park pins appear only after the park
+  boundary files are added. The 25 km radius and the time it takes are unchecked on the maintainer's
+  library, and it is checked in a desktop browser only, not yet on a phone.
+
 - Docker image build. `docker/Dockerfile` didn't copy `Fibotrail.Stats.csproj` before restoring, so an
   image build of `main` after the Stats screen would have failed at publish. It does now, and it
   copies `collections/` into the image.
@@ -202,11 +213,8 @@ The plan is in [roadmap.md](roadmap.md). Specs are in [specs/](specs/README.md).
   [#11](https://github.com/bradreimer/fibotrail/issues/11). A failed line is fixed in a patch
   release, or recorded as a known gap. Also record the per-line results of the
   [accessibility checklist](knowledge/accessibility-checklist.md).
-- Zoom the life map to cities, and to regions outside Canada and the USA
-  ([#48](https://github.com/bradreimer/fibotrail/issues/48)). Cities are decided in
-  [ADR-015](adr/ADR-015-cities-are-merged-places-and-theme-parks-keep-their-own-identity.md)
-  (proposed): stops within 25 km merge into one place, and theme parks stay their own places. Which
-  countries get regions, and the size of that data, is still open and the regions work waits for it.
+- Check the city merge on the maintainer's library: how many cities 25 km gives for the 46 added
+  trips, and how long the Map takes ([ADR-015](adr/ADR-015-cities-are-merged-places-and-theme-parks-keep-their-own-identity.md)).
 - Make the switches look like iOS switches: **Hide from map** in the photo viewer
   ([#52](https://github.com/bradreimer/fibotrail/issues/52)) and **Show routes** on the life map,
   and keep the photo viewer dark in dark mode

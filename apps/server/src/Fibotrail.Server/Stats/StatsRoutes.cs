@@ -18,7 +18,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Fibotrail.Server.Stats;
 
 /// <summary>The summary tiles. <c>OutlineCountries</c> is the number of bundled outlines that have an id.</summary>
-public sealed record StatsSummary(int Trips, int Countries, int OutlineCountries, int Continents, int DaysAway, double DistanceKm, IReadOnlyList<StatsContinent> ContinentCards);
+public sealed record StatsSummary(int Trips, int Countries, int OutlineCountries, int Continents, int Cities, int DaysAway, double DistanceKm, IReadOnlyList<StatsContinent> ContinentCards);
 
 /// <summary>A continent card.</summary>
 /// <param name="Id">The route slug, such as "north-america".</param>
@@ -65,6 +65,7 @@ public static class StatsRoutes
                 totals.Countries,
                 library.OutlineCountries,
                 totals.Continents,
+                library.CityCount,
                 totals.DaysAway,
                 totals.DistanceKm,
                 [.. library.Progress().Select(progress => new StatsContinent(Continents.Slug(progress.Continent), Continents.Name(progress.Continent), progress.Visited, progress.Total))]));
@@ -159,7 +160,8 @@ public static class StatsRoutes
                 trip.DistanceKm,
                 trip.FarthestFromHomeKm,
                 [.. DetectionService.ReadStops(trip.StopsJson).Select(stop => (stop.Latitude, stop.Longitude))],
-                [.. byTrip[trip.Id].Select(photo => new PhotoPosition(DateOnly.FromDateTime(photo.LocalTime), photo.Latitude, photo.Longitude))])),
+                [.. byTrip[trip.Id].Select(photo => new PhotoPosition(DateOnly.FromDateTime(photo.LocalTime), photo.Latitude, photo.Longitude))],
+                [.. DetectionService.ReadStops(trip.StopsJson).Select(stop => new NamedStop(stop.Place, stop.Latitude, stop.Longitude, stop.PhotoCount))])),
             finder,
             outlines.Outlines,
             home is null ? null : new GeoPoint(home.Latitude, home.Longitude),

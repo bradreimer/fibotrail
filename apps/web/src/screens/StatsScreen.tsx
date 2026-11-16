@@ -51,6 +51,7 @@ export function StatsScreen() {
       label: data.countries === 1 ? 'Country' : 'Countries',
       detail: `${data.countries} / ${data.outlineCountries} · ${share.toFixed(1)}%`,
     },
+    { value: number.format(data.cities), label: data.cities === 1 ? 'City' : 'Cities' },
     {
       value: `${data.continents} / 7`,
       label: data.continents === 1 ? 'Continent' : 'Continents',

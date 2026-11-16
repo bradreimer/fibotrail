@@ -33,11 +33,10 @@ visited, so that I can see my travel history at a glance.
 
 ## Non-goals
 
-- Cities, and regions in countries other than the detail countries
-  ([#48](https://github.com/bradreimer/fibotrail/issues/48)).
+- Regions in countries other than the detail countries. Every other country is one unit
+  ([ADR-015](../adr/ADR-015-cities-are-merged-places-and-theme-parks-keep-their-own-identity.md)).
 - Collections such as Disney parks, and the Stats screen. They are phase 5.
-- Continents, and a count of cities. City names from Immich are granular, so a count would
-  overstate how many cities you've seen.
+- Continents. They are on the [Stats screen](stats-screen.md).
 - Adding or removing a visit by hand.
 - Filters by year or collection.
 
@@ -160,6 +159,20 @@ states: the 50 states and the District of Columbia.
 - The switch and the sheet have visible labels, work with a keyboard and a screen reader, and honor
   reduce motion. Nothing animates when the setting is on.
 
+### Cities and parks
+
+- Once the map is zoomed in to about 4.5 (a few hundred kilometers across on a phone), a pin marks
+  each city you've been to, and a different pin marks each theme park, per
+  [ADR-015](../adr/ADR-015-cities-are-merged-places-and-theme-parks-keep-their-own-identity.md).
+  Below that zoom no pin shows.
+- Stops of added trips within 25 km merge into one city. The city takes the name of the stop with the
+  most photos. A stop inside an open park of a [collection](collections.md) is a park place, is
+  never merged into a city, and isn't counted as a city.
+- Under the regions, a **Cities and parks** list gives each place and the date of the first visit. It
+  is the text equivalent of the pins. Tapping a pin or a row opens the same sheet as a country, with
+  the place's trips.
+- A suggested, later, or ignored trip adds no place. A photo on the way adds none either.
+
 ## Acceptance criteria
 
 - With no added trips, the screen shows the empty state and no filled country.
@@ -197,9 +210,9 @@ states: the 50 states and the District of Columbia.
    travel to. The default is to count it only after a domestic trip.
 2. **Is 25 km the right distance for a stop outside every outline?** It is a starting value, not
    tested on real trips.
-3. **How are cities named and counted?** That belongs to
-   [#48](https://github.com/bradreimer/fibotrail/issues/48), and to the Stats screen. Regions of
-   the detail countries are decided above.
+3. **Is 25 km the right distance to merge two stops into one city?** It is a starting value, not
+   tested on real trips. Cities and parks are decided in
+   [ADR-015](../adr/ADR-015-cities-are-merged-places-and-theme-parks-keep-their-own-identity.md).
 4. **How big is the region file?** Measured: about 132 KB gzipped for Canada and the USA at
    1:50 million. [ADR-012](../adr/ADR-012-detail-regions-are-bundled-outlines-for-a-short-list-of-countries.md)
    records the numbers. The app's initial load must stay within the budget in the

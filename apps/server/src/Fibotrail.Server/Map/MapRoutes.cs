@@ -1,4 +1,6 @@
+using Fibotrail.Detection.Cities;
 using Fibotrail.Places;
+using Fibotrail.Server.Collections;
 using Fibotrail.Server.Data;
 using Fibotrail.Server.Trips;
 using Microsoft.EntityFrameworkCore;
@@ -27,6 +29,10 @@ public sealed record MapRegion(string Id, string Name, DateOnly FirstVisit, IRea
 /// <param name="Regions">The visited regions, earliest first visit first.</param>
 public sealed record MapDetailCountry(string Id, string Name, string RegionNoun, int TotalRegions, IReadOnlyList<MapRegion> Regions);
 
+/// <summary>A place you've been, for the zoomed-in map: a merged city, or a theme park. See ADR-015.</summary>
+/// <param name="IsPark">True for a theme park. A park isn't counted as a city.</param>
+public sealed record MapCity(string Name, double Latitude, double Longitude, bool IsPark, DateOnly FirstVisit, IReadOnlyList<MapTripRef> Trips);
+
 public sealed record MapPoint(double Latitude, double Longitude);
 
 /// <summary>The route of one added trip: its stops, in order.</summary>
@@ -39,7 +45,8 @@ public sealed record MapTotals(int Countries, int Trips, int DaysAway, double Di
 
 /// <summary>Everything the Map screen shows.</summary>
 /// <param name="DetailCountries">The visited countries that also track their regions. Other countries aren't listed.</param>
-public sealed record MapInfo(IReadOnlyList<MapCountry> Countries, IReadOnlyList<MapDetailCountry> DetailCountries, IReadOnlyList<MapRoute> Routes, MapTotals Totals);
+/// <param name="Cities">The merged cities and the parks, for pins on the zoomed-in map.</param>
+public sealed record MapInfo(IReadOnlyList<MapCountry> Countries, IReadOnlyList<MapDetailCountry> DetailCountries, IReadOnlyList<MapCity> Cities, IReadOnlyList<MapRoute> Routes, MapTotals Totals);
 
 /// <summary>
 /// The life map's data. The countries are worked out from the stored stops of added trips and the
@@ -51,16 +58,17 @@ public static class MapRoutes
     {
         ArgumentNullException.ThrowIfNull(api);
 
-        api.MapGet("/map", async (FibotrailDbContext db, CountryFinder finder, RegionFinder regionFinder, CancellationToken cancellationToken) =>
-            TypedResults.Ok(await BuildAsync(db, finder, regionFinder, cancellationToken)))
+        api.MapGet("/map", async (FibotrailDbContext db, CountryFinder finder, RegionFinder regionFinder, CollectionCatalog catalog, CancellationToken cancellationToken) =>
+            TypedResults.Ok(await BuildAsync(db, finder, regionFinder, catalog, cancellationToken)))
             .WithName("GetMap");
     }
 
-    public static async Task<MapInfo> BuildAsync(FibotrailDbContext db, CountryFinder finder, RegionFinder regionFinder, CancellationToken cancellationToken)
+    public static async Task<MapInfo> BuildAsync(FibotrailDbContext db, CountryFinder finder, RegionFinder regionFinder, CollectionCatalog catalog, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(db);
         ArgumentNullException.ThrowIfNull(finder);
         ArgumentNullException.ThrowIfNull(regionFinder);
+        ArgumentNullException.ThrowIfNull(catalog);
 
         // Only added trips count. A suggested, later, or ignored trip never fills a country.
         var trips = await db.Trips.AsNoTracking()
@@ -76,6 +84,11 @@ public static class MapRoutes
             .ToList();
         var visited = VisitedCountries.Find(tripStops, finder);
         var visitedRegions = VisitedRegions.Find(tripStops, finder, regionFinder);
+
+        var places = CityPlaces.Find(
+            trips.SelectMany(trip => stops[trip.Id].Select(stop =>
+                new PlaceStop(trip.Id, trip.Name, trip.StartDate, trip.EndDate, stop.Place, stop.Latitude, stop.Longitude, stop.PhotoCount))),
+            catalog.Lookup);
 
         return new MapInfo(
             [.. visited.Select(country => new MapCountry(
@@ -93,6 +106,13 @@ public static class MapRoutes
                     region.Country.Name,
                     region.FirstVisit,
                     [.. region.Trips.Select(trip => new MapTripRef(trip.TripId, trip.Name, trip.StartDate, trip.EndDate))]))]))],
+            [.. places.Select(place => new MapCity(
+                place.Name,
+                place.Latitude,
+                place.Longitude,
+                place.IsPark,
+                place.FirstVisit,
+                [.. place.Trips.Select(trip => new MapTripRef(trip.TripId, trip.Name, trip.StartDate, trip.EndDate))]))],
             [.. trips.Select(trip => new MapRoute(trip.Id, [.. stops[trip.Id].Select(stop => new MapPoint(stop.Latitude, stop.Longitude))]))],
             new MapTotals(visited.Count, trips.Count, trips.Sum(trip => trip.Days), Math.Round(trips.Sum(trip => trip.DistanceKm), 1)));
     }

@@ -1,4 +1,5 @@
 using Fibotrail.Detection;
+using Fibotrail.Detection.Cities;
 using Fibotrail.Detection.Parks;
 using Fibotrail.Places;
 
@@ -6,6 +7,9 @@ namespace Fibotrail.Stats;
 
 /// <summary>An away photo with a position, reduced to the local day it was taken and where.</summary>
 public sealed record PhotoPosition(DateOnly Day, double Latitude, double Longitude);
+
+/// <summary>A stored stop with its place name and photo count, for grouping stops into cities.</summary>
+public sealed record NamedStop(string? Name, double Latitude, double Longitude, int PhotoCount);
 
 /// <summary>An added trip, as the stats library reads it.</summary>
 /// <param name="Stops">The stored stops. Photos on the way aren't among them.</param>
@@ -19,7 +23,8 @@ public sealed record StatsTrip(
     double DistanceKm,
     double FarthestFromHomeKm,
     IReadOnlyList<(double Latitude, double Longitude)> Stops,
-    IReadOnlyList<PhotoPosition> Photos)
+    IReadOnlyList<PhotoPosition> Photos,
+    IReadOnlyList<NamedStop>? NamedStops = null)
 {
     /// <summary>True when the trip has fewer positioned local days than days.</summary>
     public bool HasUnpositionedDays => Photos.Select(photo => photo.Day).Distinct().Count() < Days;
@@ -60,7 +65,7 @@ public sealed record ContinentProgress(Continent Continent, int Visited, int Tot
 /// </summary>
 public sealed class StatsLibrary
 {
-    private StatsLibrary(IReadOnlyList<StatsTrip> trips, IReadOnlyList<CountryStats> countries, IReadOnlyDictionary<Continent, int> totals, int outlineCountries, GeoPoint? home, IReadOnlyList<ParkStats> parks, IReadOnlyList<ParkSet> parkCollections)
+    private StatsLibrary(IReadOnlyList<StatsTrip> trips, IReadOnlyList<CountryStats> countries, IReadOnlyDictionary<Continent, int> totals, int outlineCountries, GeoPoint? home, IReadOnlyList<ParkStats> parks, IReadOnlyList<ParkSet> parkCollections, IReadOnlyList<VisitedPlace> places)
     {
         Trips = trips;
         Countries = countries;
@@ -69,6 +74,7 @@ public sealed class StatsLibrary
         Home = home;
         Parks = parks;
         ParkSets = parkCollections;
+        Places = places;
     }
 
     /// <summary>The added trips, earliest first.</summary>
@@ -88,6 +94,12 @@ public sealed class StatsLibrary
 
     /// <summary>The visited parks, most days first, by the rules of docs/specs/collections.md. Collections and the Theme parks view both read this.</summary>
     public IReadOnlyList<ParkStats> Parks { get; }
+
+    /// <summary>The places of added trips: merged cities and parks, by the rules of ADR-015.</summary>
+    public IReadOnlyList<VisitedPlace> Places { get; }
+
+    /// <summary>The number of cities: places that aren't parks.</summary>
+    public int CityCount => Places.Count(place => !place.IsPark);
 
     /// <summary>Every collection of parks, with its open places, visited or not.</summary>
     public IReadOnlyList<ParkSet> ParkSets { get; }
@@ -133,7 +145,12 @@ public sealed class StatsLibrary
             ? []
             : ParkDays.Count(ordered.Select(trip => new ParkTrip(trip.Id, trip.Name, [.. trip.Photos.Select(photo => new ParkPhoto(photo.Day, photo.Latitude, photo.Longitude))])), parkLookup);
 
-        return new StatsLibrary(ordered, countries, Continents.Totals(outlineList), outlineList.Count(outline => outline.Id is not null), home, parks, parkCollections ?? []);
+        var places = CityPlaces.Find(
+            ordered.SelectMany(trip => (trip.NamedStops ?? []).Select(stop =>
+                new PlaceStop(trip.Id, trip.Name, trip.StartDate, trip.EndDate, stop.Name, stop.Latitude, stop.Longitude, stop.PhotoCount))),
+            parkLookup);
+
+        return new StatsLibrary(ordered, countries, Continents.Totals(outlineList), outlineList.Count(outline => outline.Id is not null), home, parks, parkCollections ?? [], places);
     }
 
     /// <summary>The summary tiles.</summary>

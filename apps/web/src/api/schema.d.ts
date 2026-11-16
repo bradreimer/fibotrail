@@ -554,6 +554,17 @@ export interface components {
             /** Format: int32 */
             count: number;
         };
+        MapCity: {
+            name: string;
+            /** Format: double */
+            latitude: number;
+            /** Format: double */
+            longitude: number;
+            isPark: boolean;
+            /** Format: date */
+            firstVisit: string;
+            trips: components["schemas"]["MapTripRef"][];
+        };
         MapCountry: {
             id: null | string;
             name: string;
@@ -572,6 +583,7 @@ export interface components {
         MapInfo: {
             countries: components["schemas"]["MapCountry"][];
             detailCountries: components["schemas"]["MapDetailCountry"][];
+            cities: components["schemas"]["MapCity"][];
             routes: components["schemas"]["MapRoute"][];
             totals: components["schemas"]["MapTotals"];
         };
@@ -751,6 +763,8 @@ export interface components {
             outlineCountries: number;
             /** Format: int32 */
             continents: number;
+            /** Format: int32 */
+            cities: number;
             /** Format: int32 */
             daysAway: number;
             /** Format: double */

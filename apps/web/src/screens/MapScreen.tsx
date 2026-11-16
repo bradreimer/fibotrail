@@ -23,6 +23,7 @@ export function MapScreen() {
   const map = useApi('/api/map');
   const [selected, setSelected] = useState<string | null>(null);
   const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
+  const [selectedCity, setSelectedCity] = useState<string | null>(null);
   const [showRoutes, setShowRoutes] = useState(false);
 
   const data = map.data;
@@ -30,6 +31,16 @@ export function MapScreen() {
   const detailKeys = useMemo(() => data?.detailCountries.map((item) => item.id) ?? [], [data]);
   const visitedRegions = useMemo(
     () => data?.detailCountries.flatMap((item) => item.regions.map((region) => region.id)) ?? [],
+    [data],
+  );
+  const pins = useMemo(
+    () =>
+      data?.cities.map((city, index) => ({
+        key: String(index),
+        latitude: city.latitude,
+        longitude: city.longitude,
+        isPark: city.isPark,
+      })) ?? [],
     [data],
   );
   const routes = useMemo(
@@ -71,13 +82,21 @@ export function MapScreen() {
       .flatMap((item) => item.regions)
       .find((item) => item.id === selectedRegion) ?? null;
   const hasDetail = data.detailCountries.length > 0;
+  const city = selectedCity === null ? null : (data.cities[Number(selectedCity)] ?? null);
   const selectCountry = (key: string | null) => {
     setSelectedRegion(null);
+    setSelectedCity(null);
     setSelected(key);
   };
   const selectRegion = (key: string | null) => {
     setSelected(null);
+    setSelectedCity(null);
     setSelectedRegion(key);
+  };
+  const selectCity = (key: string | null) => {
+    setSelected(null);
+    setSelectedRegion(null);
+    setSelectedCity(key);
   };
   return (
     <div className="life-map">
@@ -92,6 +111,8 @@ export function MapScreen() {
         visitedRegions={hasDetail ? visitedRegions : undefined}
         routes={routes}
         onCountrySelect={selectCountry}
+        cities={pins}
+        onCitySelect={selectCity}
         onRegionSelect={selectRegion}
       />
       <label className="setting-row">
@@ -126,7 +147,40 @@ export function MapScreen() {
         </ol>
       </section>
       <RegionLists countries={data.detailCountries} onSelect={(item) => selectRegion(item.id)} />
+      {data.cities.length > 0 && (
+        <section aria-labelledby="visited-places">
+          <h3 className="life-map__heading" id="visited-places">
+            Cities and parks
+          </h3>
+          <ol className="first-visits">
+            {data.cities.map((item, index) => (
+              <li key={`${item.name}-${index}`}>
+                <button
+                  type="button"
+                  className="first-visits__item"
+                  onClick={() => selectCity(String(index))}
+                >
+                  <span className="first-visits__name">
+                    {item.name}
+                    {item.isPark && <span className="visually-hidden"> (theme park)</span>}
+                  </span>
+                  <span className="first-visits__date">
+                    {item.isPark ? 'Park · ' : ''}
+                    {formatDateRange(item.firstVisit, item.firstVisit)}
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ol>
+        </section>
+      )}
       {country && <CountrySheet country={country} onClose={() => setSelected(null)} />}
+      {city && (
+        <CountrySheet
+          country={{ id: null, name: city.name, firstVisit: city.firstVisit, trips: city.trips }}
+          onClose={() => setSelectedCity(null)}
+        />
+      )}
       {region && <CountrySheet country={region} onClose={() => setSelectedRegion(null)} />}
     </div>
   );
