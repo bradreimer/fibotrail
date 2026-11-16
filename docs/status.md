@@ -84,6 +84,10 @@ maintainer's phone, and are listed under Next. See [roadmap.md](roadmap.md#mvp-v
 
 ## In progress
 
+- [#41](https://github.com/bradreimer/fibotrail/issues/41) Thumbnails in the trip timeline were too
+  wide for their photos: tiles grew to fill the row, so every tile in a row had the same width and
+  the photos were cropped. Found in the accessibility checklist on the phone, 2026-11-16. A tile
+  now takes its photo's proportions once its thumbnail loads. Not yet confirmed on the phone.
 - [#24](https://github.com/bradreimer/fibotrail/issues/24) The release, step 3d. Done: the
   [release spec](specs/release.md); the README, whose backup, restore, reset-password, and health
   commands were run on a real container on 2026-11-16; the automated accessibility checks (contrast,

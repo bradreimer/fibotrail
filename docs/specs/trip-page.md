@@ -83,8 +83,10 @@ At 600 px and wider, the map sits beside the timeline in two columns.
 - Photos are grouped by the local day they were taken, in time order.
 - Each day has a heading with the day number, the date, and the main place, such as "Day 3 · Wed,
   Mar 17 · Orlando".
-- Photos sit in even rows that keep each photo's proportions. Every photo in a row has the same
-  height, 110 px, and the row fills its width.
+- Photos sit in rows that keep each photo's proportions. Every photo has the same height, 110 px,
+  and its width follows its proportions. Before its thumbnail loads, a tile is 4:3. A tile never
+  grows to fill its row, because that crops the photo, so the right edge of a row can be ragged.
+  Rows that also fill their width need the photo sizes, which Fibotrail doesn't store yet.
 - Thumbnails load through the thumbnail proxy as they come within one screen of view.
 - Each photo has alt text built from its date and place.
 - A video shows its still frame with a play mark and its length.
@@ -134,6 +136,8 @@ At 600 px and wider, the map sits beside the timeline in two columns.
   `https://photos.example.com/photos/abc`.
 - With `IMMICH_EXTERNAL_URL` empty, the viewer shows no **Open in Immich** link.
 - A video shows a play mark in the timeline, and the viewer offers **Play in Immich**.
+- A portrait photo in the timeline is a narrower tile than a landscape photo, and both are 110 px
+  high.
 - After a rename and a rescan, the page shows the new name.
 - With the default base map, the browser's network log shows no request to a host other than
   Fibotrail.
