@@ -37,10 +37,14 @@ public static class StatsTripExtensions
     }
 }
 
+/// <summary>A local day with a positioned away photo in a country, and the latitude of the first such photo.</summary>
+public sealed record CountryDay(DateOnly Day, double Latitude);
+
 /// <summary>A country with the numbers the Stats screen shows for it.</summary>
 /// <param name="Trips">Added trips with a stop in the country, earliest first.</param>
 /// <param name="Days">Distinct local days with at least one positioned away photo in the country.</param>
-public sealed record CountryStats(Country Country, Continent Continent, DateOnly FirstVisit, IReadOnlyList<VisitedTrip> Trips, int Days);
+/// <param name="DayList">Those days, oldest first, each with a latitude. <c>Days</c> is its length.</param>
+public sealed record CountryStats(Country Country, Continent Continent, DateOnly FirstVisit, IReadOnlyList<VisitedTrip> Trips, int Days, IReadOnlyList<CountryDay> DayList);
 
 /// <summary>The totals of the summary tiles.</summary>
 public sealed record StatsTotals(int Trips, int DaysAway, double DistanceKm, int Countries, int Continents);
@@ -93,23 +97,24 @@ public sealed class StatsLibrary
             finder);
 
         // Days: each local day counts for every country that has a positioned away photo that day.
-        var daysByCountry = new Dictionary<string, HashSet<DateOnly>>(StringComparer.Ordinal);
+        var daysByCountry = new Dictionary<string, Dictionary<DateOnly, double>>(StringComparer.Ordinal);
         foreach (var photo in ordered.SelectMany(trip => trip.Photos))
         {
             if (finder.Find(photo.Latitude, photo.Longitude)?.Country is not { } country) continue;
             if (!daysByCountry.TryGetValue(country.Key, out var days)) daysByCountry[country.Key] = days = [];
-            days.Add(photo.Day);
+            days.TryAdd(photo.Day, photo.Latitude);
         }
 
         var countries = visited
             .Select(entry => (Entry: entry, Continent: Continents.Of(entry.Country)))
             .Where(item => item.Continent is not null)
-            .Select(item => new CountryStats(
-                item.Entry.Country,
-                item.Continent!.Value,
-                item.Entry.FirstVisit,
-                item.Entry.Trips,
-                daysByCountry.TryGetValue(item.Entry.Country.Key, out var days) ? days.Count : 0))
+            .Select(item =>
+            {
+                IReadOnlyList<CountryDay> dayList = daysByCountry.TryGetValue(item.Entry.Country.Key, out var days)
+                    ? [.. days.OrderBy(pair => pair.Key).Select(pair => new CountryDay(pair.Key, pair.Value))]
+                    : [];
+                return new CountryStats(item.Entry.Country, item.Continent!.Value, item.Entry.FirstVisit, item.Entry.Trips, dayList.Count, dayList);
+            })
             .OrderByDescending(country => country.Days)
             .ThenByDescending(country => country.Trips.Count)
             .ThenBy(country => country.Country.Name, StringComparer.Ordinal)

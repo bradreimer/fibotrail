@@ -131,6 +131,21 @@ public class StatsTests
     }
 
     [Fact]
+    public async Task The_season_wheel_answers_for_a_visited_country_and_is_not_found_for_another()
+    {
+        var (app, browser, orlando, _, _) = await StartAsync();
+        await using var _ = app;
+        await DecideAsync(browser, orlando, "add");
+
+        var wheel = await browser.GetJsonAsync("/api/stats/countries/840/season-wheel");
+
+        Assert.Equal("United States of America", wheel.GetProperty("countryName").GetString());
+        Assert.Equal(12, wheel.GetProperty("months").GetArrayLength());
+        Assert.Equal(4, wheel.GetProperty("seasons").GetArrayLength());
+        Assert.Equal(HttpStatusCode.NotFound, (await browser.GetAsync("/api/stats/countries/752/season-wheel")).StatusCode);
+    }
+
+    [Fact]
     public async Task The_stats_routes_need_a_session()
     {
         await using var app = await TestApp.StartAsync();

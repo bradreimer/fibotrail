@@ -15,6 +15,14 @@ version 0.1 and the per-line results of the accessibility checklist are also sti
 
 ## Completed
 
+- [#58](https://github.com/bradreimer/fibotrail/issues/58) The season wheel, a country page view
+  ([spec](specs/season-wheel.md)). A ring of 12 months shaded by the country's days, four season
+  arcs (solid Gold when seen, dashed when not), a center that reads "2 of 4 seasons seen", and a row
+  for each season that dims the rest when tapped. Each day uses its own latitude for the
+  hemisphere. The stats library now keeps each day of a country with a latitude. Checked in a
+  desktop browser only, not yet on a phone. The spec's open question, whether one day makes a season
+  seen, is unanswered: one day does.
+
 - [#67](https://github.com/bradreimer/fibotrail/issues/67) The distance rings, a Stats view
   ([spec](specs/distance-rings.md)). Each added trip is a dot at the bearing and the distance of its
   farthest stop from home, on a log scale out to 20,000 km, with five distance bands, **Nearer** and
@@ -189,16 +197,14 @@ The plan is in [roadmap.md](roadmap.md). Specs are in [specs/](specs/README.md).
 - Answer the open questions in the [life map spec](specs/life-map.md) with real use: whether the
   home country should always fill in, and whether 25 km is the right distance for a stop just off a
   coast.
-- Phase 5, the Stats screen, specced in [stats-screen.md](specs/stats-screen.md) and tracked by
-  [#54](https://github.com/bradreimer/fibotrail/issues/54): the host, totals, continents, and each
-  country's trips and days. Its charts are self-contained views, per
-  [ADR-014](adr/ADR-014-stats-views-are-self-contained-modules.md). Four views have their own specs
-  and stories: the season wheel ([#58](https://github.com/bradreimer/fibotrail/issues/58),
-  [season-wheel.md](specs/season-wheel.md)), the trip spiral
-  ([#59](https://github.com/bradreimer/fibotrail/issues/59), [trip-spiral.md](specs/trip-spiral.md)),
-  and the distance rings ([#67](https://github.com/bradreimer/fibotrail/issues/67),
-  [distance-rings.md](specs/distance-rings.md)). The travel clock and the distance rings are built.
-  The others aren't.
+- Phase 5, the Stats views. The host and four views are built: trips per year, trip length, records
+  ([#54](https://github.com/bradreimer/fibotrail/issues/54)), the travel clock
+  ([#66](https://github.com/bradreimer/fibotrail/issues/66)), the distance rings
+  ([#67](https://github.com/bradreimer/fibotrail/issues/67)), and the season wheel
+  ([#58](https://github.com/bradreimer/fibotrail/issues/58)). The trip spiral
+  ([#59](https://github.com/bradreimer/fibotrail/issues/59), [trip-spiral.md](specs/trip-spiral.md))
+  isn't built. Views are self-contained, per
+  [ADR-014](adr/ADR-014-stats-views-are-self-contained-modules.md).
 - Answer the remaining open questions in the
   [design and branding document](knowledge/design-and-branding.md#risks-open-questions-and-next-steps).
   The server language is settled: see [ADR-004](adr/ADR-004-technology-stack.md).

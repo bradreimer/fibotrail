@@ -5,6 +5,7 @@ using Fibotrail.Server.Trips;
 using Fibotrail.Stats;
 using Fibotrail.Stats.Views.DistanceRings;
 using Fibotrail.Stats.Views.Records;
+using Fibotrail.Stats.Views.SeasonWheel;
 using Fibotrail.Stats.Views.TravelClock;
 using Fibotrail.Stats.Views.TripLength;
 using Fibotrail.Stats.Views.TripsPerYear;
@@ -101,6 +102,7 @@ public static class StatsRoutes
         stats.MapViewRoute("/trip-length", "GetStatsTripLength", TripLengthView.Compute);
         stats.MapViewRoute("/distance-rings", "GetStatsDistanceRings", DistanceRingsView.Compute);
         stats.MapViewRoute("/travel-clock", "GetStatsTravelClock", TravelClockView.Compute);
+        stats.MapCountryViewRoute("/countries/{id}/season-wheel", "GetStatsSeasonWheel", SeasonWheelView.Compute);
         stats.MapViewRoute("/records", "GetStatsRecords", RecordsView.Compute);
     }
 
@@ -108,6 +110,14 @@ public static class StatsRoutes
         stats.MapGet(pattern, async (FibotrailDbContext db, CountryFinder finder, CountryOutlinesCache outlines, HomeLocation home, CancellationToken cancellationToken) =>
             TypedResults.Ok(compute(await LoadAsync(db, finder, outlines, home, cancellationToken))))
             .WithName(name);
+
+    /// <summary>A view of one country. An unvisited country answers 404.</summary>
+    private static void MapCountryViewRoute<T>(this RouteGroupBuilder stats, string pattern, string name, Func<StatsLibrary, string, T?> compute)
+        where T : class =>
+        stats.MapGet(pattern, async (string id, FibotrailDbContext db, CountryFinder finder, CountryOutlinesCache outlines, HomeLocation home, CancellationToken cancellationToken) =>
+            compute(await LoadAsync(db, finder, outlines, home, cancellationToken), id) is { } result ? Results.Ok(result) : Results.NotFound())
+            .WithName(name)
+            .Produces<T>();
 
     private static StatsCountryRow Row(CountryStats country) => new(country.Country.Key, country.Country.Name, country.Trips.Count, country.Days);
 

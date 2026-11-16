@@ -690,6 +690,36 @@
         }
       }
     },
+    "/api/stats/countries/{id}/season-wheel": {
+      "get": {
+        "tags": [
+          "Fibotrail"
+        ],
+        "operationId": "GetStatsSeasonWheel",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SeasonWheelResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/stats/records": {
       "get": {
         "tags": [
@@ -1404,6 +1434,44 @@
           "failed"
         ]
       },
+      "SeasonWheelResult": {
+        "required": [
+          "countryName",
+          "hemisphere",
+          "arcHemisphere",
+          "seasonsSeen",
+          "months",
+          "seasons"
+        ],
+        "type": "object",
+        "properties": {
+          "countryName": {
+            "type": "string"
+          },
+          "hemisphere": {
+            "type": "string"
+          },
+          "arcHemisphere": {
+            "type": "string"
+          },
+          "seasonsSeen": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "months": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WheelMonth"
+            }
+          },
+          "seasons": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WheelSeason"
+            }
+          }
+        }
+      },
       "SessionInfo": {
         "required": [
           "csrfToken"
@@ -2063,6 +2131,55 @@
           },
           "coverPhotoId": {
             "type": "string"
+          }
+        }
+      },
+      "WheelMonth": {
+        "required": [
+          "month",
+          "days",
+          "hemisphere"
+        ],
+        "type": "object",
+        "properties": {
+          "month": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "days": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "hemisphere": {
+            "type": "string"
+          }
+        }
+      },
+      "WheelSeason": {
+        "required": [
+          "name",
+          "months",
+          "days",
+          "seen"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "months": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          "days": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "seen": {
+            "type": "boolean"
           }
         }
       },

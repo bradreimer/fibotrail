@@ -356,6 +356,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/stats/countries/{id}/season-wheel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["GetStatsSeasonWheel"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/stats/records": {
         parameters: {
             query?: never;
@@ -557,6 +573,15 @@ export interface components {
         };
         /** @enum {unknown} */
         ScanStatusState: "never" | "running" | "completed" | "failed";
+        SeasonWheelResult: {
+            countryName: string;
+            hemisphere: string;
+            arcHemisphere: string;
+            /** Format: int32 */
+            seasonsSeen: number;
+            months: components["schemas"]["WheelMonth"][];
+            seasons: components["schemas"]["WheelSeason"][];
+        };
         SessionInfo: {
             csrfToken: string;
         };
@@ -749,6 +774,20 @@ export interface components {
             days: number;
             place: null | string;
             coverPhotoId: string;
+        };
+        WheelMonth: {
+            /** Format: int32 */
+            month: number;
+            /** Format: int32 */
+            days: number;
+            hemisphere: string;
+        };
+        WheelSeason: {
+            name: string;
+            months: number[];
+            /** Format: int32 */
+            days: number;
+            seen: boolean;
         };
         YearCount: {
             /** Format: int32 */
@@ -1361,6 +1400,28 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ClockMonth"][];
+                };
+            };
+        };
+    };
+    GetStatsSeasonWheel: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SeasonWheelResult"];
                 };
             };
         };
