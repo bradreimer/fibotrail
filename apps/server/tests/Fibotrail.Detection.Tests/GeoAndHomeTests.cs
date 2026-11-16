@@ -165,4 +165,18 @@ public class ReplayTests
         Assert.Single(result.Matched);
         Assert.Single(result.Missed);
     }
+
+    [Theory]
+    [InlineData(0, 0, 10, 0, 0)]
+    [InlineData(0, 0, 0, 10, 90)]
+    [InlineData(0, 0, -10, 0, 180)]
+    [InlineData(0, 0, 0, -10, 270)]
+    [InlineData(21.3, -157.9, 35.7, 139.7, 299.5)]
+    public void The_bearing_runs_clockwise_from_north_and_takes_the_shorter_way_across_the_antimeridian(
+        double fromLatitude, double fromLongitude, double toLatitude, double toLongitude, double expected)
+    {
+        var bearing = Geo.BearingDegrees(new GeoPoint(fromLatitude, fromLongitude), new GeoPoint(toLatitude, toLongitude));
+
+        Assert.InRange(bearing, expected - 1, expected + 1);
+    }
 }

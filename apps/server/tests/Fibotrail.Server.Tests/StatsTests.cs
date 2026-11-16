@@ -115,6 +115,22 @@ public class StatsTests
     }
 
     [Fact]
+    public async Task The_distance_rings_place_an_added_trip_and_never_return_the_home_coordinates()
+    {
+        var (app, browser, orlando, _, _) = await StartAsync();
+        await using var _ = app;
+        await DecideAsync(browser, orlando, "add");
+
+        var rings = await browser.GetJsonAsync("/api/stats/distance-rings");
+
+        var ring = Assert.Single(rings.EnumerateArray());
+        Assert.Equal(orlando, ring.GetProperty("trip").GetProperty("id").GetInt32());
+        Assert.True(ring.GetProperty("distanceKm").GetDouble() > 0);
+        var names = ring.EnumerateObject().Select(property => property.Name).Order().ToList();
+        Assert.Equal(["bearingDegrees", "distanceKm", "trip"], names);
+    }
+
+    [Fact]
     public async Task The_stats_routes_need_a_session()
     {
         await using var app = await TestApp.StartAsync();

@@ -40,6 +40,12 @@ export const VIEWS: readonly StatsView[] = [
     component: lazy(() => import('./views/travel-clock')),
   },
   {
+    id: 'distance-rings',
+    slot: 'stats',
+    title: 'Distance rings',
+    component: lazy(() => import('./views/distance-rings')),
+  },
+  {
     id: 'records',
     slot: 'stats',
     title: 'Records',
