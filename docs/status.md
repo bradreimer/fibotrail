@@ -15,6 +15,14 @@ version 0.1 and the per-line results of the accessibility checklist are also sti
 
 ## Completed
 
+- [#59](https://github.com/bradreimer/fibotrail/issues/59) The Fibonacci spiral of trips, a Stats
+  view ([spec](specs/trip-spiral.md)). Every added trip is a dot along a spiral of quarter circles
+  in Fibonacci squares, oldest at the center, sized by days and colored by continent, with continent
+  chips, **Earlier** and **Later** buttons, and a card that opens the trip. A trip takes the continent
+  that has most of its countries. The seven continent colors are tokens, each at least 3:1 on Paper
+  in light and dark mode. Checked in a desktop browser only, not yet on a phone, and with a few
+  trips only, so how it looks at 60 or more is unknown. That is the spec's first open question.
+
 - [#58](https://github.com/bradreimer/fibotrail/issues/58) The season wheel, a country page view
   ([spec](specs/season-wheel.md)). A ring of 12 months shaded by the country's days, four season
   arcs (solid Gold when seen, dashed when not), a center that reads "2 of 4 seasons seen", and a row
@@ -197,13 +205,13 @@ The plan is in [roadmap.md](roadmap.md). Specs are in [specs/](specs/README.md).
 - Answer the open questions in the [life map spec](specs/life-map.md) with real use: whether the
   home country should always fill in, and whether 25 km is the right distance for a stop just off a
   coast.
-- Phase 5, the Stats views. The host and four views are built: trips per year, trip length, records
-  ([#54](https://github.com/bradreimer/fibotrail/issues/54)), the travel clock
+- Phase 5, the Stats views. The host and all six views with a spec are built: trips per year, trip
+  length, records ([#54](https://github.com/bradreimer/fibotrail/issues/54)), the travel clock
   ([#66](https://github.com/bradreimer/fibotrail/issues/66)), the distance rings
-  ([#67](https://github.com/bradreimer/fibotrail/issues/67)), and the season wheel
-  ([#58](https://github.com/bradreimer/fibotrail/issues/58)). The trip spiral
-  ([#59](https://github.com/bradreimer/fibotrail/issues/59), [trip-spiral.md](specs/trip-spiral.md))
-  isn't built. Views are self-contained, per
+  ([#67](https://github.com/bradreimer/fibotrail/issues/67)), the season wheel
+  ([#58](https://github.com/bradreimer/fibotrail/issues/58)), and the trip spiral
+  ([#59](https://github.com/bradreimer/fibotrail/issues/59)). They need a look on real data and on a
+  phone. Views are self-contained, per
   [ADR-014](adr/ADR-014-stats-views-are-self-contained-modules.md).
 - Answer the remaining open questions in the
   [design and branding document](knowledge/design-and-branding.md#risks-open-questions-and-next-steps).

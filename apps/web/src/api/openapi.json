@@ -621,6 +621,29 @@
         }
       }
     },
+    "/api/stats/trip-spiral": {
+      "get": {
+        "tags": [
+          "Fibotrail"
+        ],
+        "operationId": "GetStatsTripSpiral",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SpiralTrip"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/stats/trip-length": {
       "get": {
         "tags": [
@@ -1518,6 +1541,31 @@
           "newSuggestions": {
             "type": "integer",
             "format": "int32"
+          }
+        }
+      },
+      "SpiralTrip": {
+        "required": [
+          "trip",
+          "continentId",
+          "continentName"
+        ],
+        "type": "object",
+        "properties": {
+          "trip": {
+            "$ref": "#/components/schemas/TripRef"
+          },
+          "continentId": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "continentName": {
+            "type": [
+              "null",
+              "string"
+            ]
           }
         }
       },
