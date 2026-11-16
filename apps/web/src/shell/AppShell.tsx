@@ -4,6 +4,7 @@ import { Outlet, useLocation } from 'react-router-dom';
 import { useScan } from '../api/scan';
 import { ScanBanner, ScanFailedBanner } from '../states/ScanBanner';
 import { destinationFor } from './destinations';
+import { HeaderTools } from './HeaderTools';
 import { InstallHint } from './InstallHint';
 import { Navigation } from './Navigation';
 import { useNavigationMode } from './useNavigationMode';
@@ -29,6 +30,7 @@ export function AppShell() {
     <div className="app" data-nav={mode}>
       <header className="app__header">
         <h1 className="app__title">{title}</h1>
+        {mode === 'tabs' && <HeaderTools />}
       </header>
       <div className="app__banner">
         {scan.status?.state === 'running' && (

@@ -125,3 +125,80 @@ button.map-marker::after {
   color: var(--fibo-teal);
   font-weight: 600;
 }
+
+/* The life map screen: the numbers, the world map, the routes switch, and the first visits. */
+.life-map {
+  display: grid;
+  gap: var(--fibo-space-5);
+}
+
+.life-map__routes {
+  display: flex;
+  align-items: center;
+  gap: var(--fibo-space-3);
+  min-height: var(--fibo-tap);
+  cursor: pointer;
+}
+
+.life-map__routes input {
+  flex: none;
+  width: var(--fibo-space-5);
+  height: var(--fibo-space-5);
+  margin: 0;
+  accent-color: var(--fibo-teal);
+}
+
+.life-map__heading {
+  margin: 0 0 var(--fibo-space-3);
+  font-family: var(--fibo-font-body);
+  font-size: var(--fibo-text-body);
+  font-weight: 700;
+}
+
+.first-visits,
+.country-trips {
+  display: grid;
+  gap: var(--fibo-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.first-visits__item,
+.country-trips__link {
+  display: flex;
+  width: 100%;
+  min-height: var(--fibo-tap);
+  padding: var(--fibo-space-3) var(--fibo-space-4);
+  border: var(--fibo-border) solid var(--fibo-mist);
+  border-radius: var(--fibo-radius);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.first-visits__item {
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--fibo-space-4);
+}
+
+.country-trips__link {
+  flex-direction: column;
+  justify-content: center;
+}
+
+.first-visits__date,
+.country-trips__dates {
+  color: var(--fibo-ink-muted);
+  font-size: var(--fibo-text-caption);
+  font-variant-numeric: tabular-nums;
+}
+
+.map-skeleton {
+  display: grid;
+  gap: var(--fibo-space-4);
+}

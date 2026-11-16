@@ -85,8 +85,11 @@ visited, so that I can see my travel history at a glance.
 - When the Map ships, the tab bar holds Trips and Map. Collections and Stats don't exist yet, and a
   tab never leads to a screen that doesn't exist, per
   [ADR-007](../adr/ADR-007-native-ios-feel-through-a-progressive-web-app.md).
-- Inbox and Settings move to the top bar as icon buttons, each at least 44 points, with accessible
-  names. The Inbox badge moves with the Inbox button.
+- Under 600 px, where the navigation is the tab bar, Inbox and Settings are icon buttons in the top
+  bar, each at least 44 points, with accessible names. The Inbox badge moves with the Inbox
+  button.
+- From 600 px up, the sidebar holds all four destinations: Trips, Map, Inbox, and Settings. The
+  Inbox badge stays on the Inbox item. The maintainer decided this on 2026-11-16.
 - The [app shell spec](app-shell.md) is updated in the same change.
 
 ### API
@@ -123,8 +126,8 @@ visited, so that I can see my travel history at a glance.
   from every country counts for none.
 - Days away is the sum of the days of added trips, and distance is the sum of their distances.
 - The browser's network log shows no request to a host other than Fibotrail.
-- The tab bar shows Trips and Map. Inbox and Settings are in the top bar, and the Inbox button shows
-  the badge.
+- Under 600 px, the tab bar shows Trips and Map. Inbox and Settings are in the top bar, and the
+  Inbox button shows the badge. From 600 px, the sidebar shows all four.
 - The screen passes the ADR-007 run-through on an iPhone.
 
 ## Open questions
@@ -134,8 +137,5 @@ visited, so that I can see my travel history at a glance.
    travel to. The default is to count it only after a domestic trip.
 2. **Is 25 km the right distance for a stop outside every outline?** It is a starting value, not
    tested on real trips.
-3. **Where do Inbox and Settings go on a tablet or desktop?** ADR-007 moves them to the top bar for
-   the phone tab bar. The sidebar layout (600 px and wider) has room for all four destinations.
-   The default is to keep them in the sidebar there, and to move them only under 600 px.
-4. **How are regions and cities named and counted?** That belongs to
+3. **How are regions and cities named and counted?** That belongs to
    [#48](https://github.com/bradreimer/fibotrail/issues/48), and to the Stats screen.

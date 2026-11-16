@@ -35,7 +35,45 @@
 }
 
 .app__title {
+  flex: 1;
   font-size: var(--fibo-text-h3);
+}
+
+/* The Inbox and Settings, as icon buttons in the top bar of a phone. */
+.app__tools-list {
+  display: flex;
+  gap: var(--fibo-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.app__tool {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--fibo-tap);
+  min-height: var(--fibo-tap);
+  border-radius: var(--fibo-radius);
+  color: var(--fibo-on-ocean);
+}
+
+.app__tool .nav__icon {
+  width: var(--fibo-space-5);
+  height: var(--fibo-space-5);
+}
+
+/* The current tool has a Golden Gold marker under it, as the tab bar has over its item. */
+.app__tool[aria-current='page']::after {
+  content: '';
+  position: absolute;
+  right: 25%;
+  bottom: 0;
+  left: 25%;
+  height: var(--fibo-marker);
+  border-radius: var(--fibo-marker);
+  background: var(--fibo-gold);
 }
 
 .app__banner {

@@ -56,11 +56,18 @@ describe('navigation by width', () => {
 describe('the app shell', () => {
   beforeEach(() => installMatchMedia(390));
 
-  it('has the three MVP destinations, in order, each with an icon and a label', () => {
+  it('has Trips and Map in the tab bar, and Inbox and Settings as icon buttons in the top bar', () => {
     renderApp();
-    const links = within(screen.getByRole('navigation', { name: 'Main' })).getAllByRole('link');
-    expect(links.map((link) => link.textContent)).toEqual(['Trips', 'Inbox', 'Settings']);
-    links.forEach((link) => expect(link.querySelector('svg')).not.toBeNull());
+    const tabs = within(screen.getByRole('navigation', { name: 'Main' })).getAllByRole('link');
+    expect(tabs.map((link) => link.textContent)).toEqual(['Trips', 'Map']);
+    tabs.forEach((link) => expect(link.querySelector('svg')).not.toBeNull());
+
+    const tools = within(
+      screen.getByRole('navigation', { name: 'Inbox and settings' }),
+    ).getAllByRole('link');
+    expect(tools.map((link) => link.getAttribute('aria-label'))).toEqual(['Inbox', 'Settings']);
+    tools.forEach((link) => expect(link.querySelector('svg')).not.toBeNull());
+    expect(screen.getByRole('banner')).toContainElement(tools[0]!);
   });
 
   it('opens on Trips and marks it as the current page', () => {
@@ -91,5 +98,40 @@ describe('the app shell', () => {
     expect(form).toHaveAttribute('method', 'post');
     expect(form).toHaveAttribute('action', '/sign-out');
     expect(form.querySelector('input[name="csrf"]')).toHaveValue('token-1');
+  });
+});
+
+describe('the Inbox and Settings by width', () => {
+  it.each([
+    [600, 'rail'],
+    [1024, 'sidebar'],
+  ])(
+    'at %i px the sidebar holds all four destinations and the top bar has no tools',
+    (width, mode) => {
+      installMatchMedia(width);
+      const { container } = renderApp();
+
+      expect(container.querySelector('.app')).toHaveAttribute('data-nav', mode);
+      const items = within(screen.getByRole('navigation', { name: 'Main' })).getAllByRole('link');
+      expect(items.map((link) => link.textContent)).toEqual(['Trips', 'Map', 'Inbox', 'Settings']);
+      expect(
+        screen.queryByRole('navigation', { name: 'Inbox and settings' }),
+      ).not.toBeInTheDocument();
+    },
+  );
+
+  it('carries the Inbox badge to whichever place the Inbox is in', async () => {
+    fakeServer({ 'GET /api/inbox/count': { count: 3 } });
+    installMatchMedia(390);
+    const { unmount } = renderApp();
+    const topBar = await screen.findByRole('link', { name: 'Inbox, 3 possible trips' });
+    expect(screen.getByRole('navigation', { name: 'Inbox and settings' })).toContainElement(topBar);
+    expect(within(topBar).getByText('3')).toHaveClass('nav__badge');
+    unmount();
+
+    installMatchMedia(1280);
+    renderApp();
+    const sidebar = await screen.findByRole('link', { name: 'Inbox, 3 possible trips' });
+    expect(screen.getByRole('navigation', { name: 'Main' })).toContainElement(sidebar);
   });
 });
