@@ -503,3 +503,105 @@
 .season__days {
   font-variant-numeric: tabular-nums;
 }
+
+/* The trip spiral: Fibonacci squares, the spiral through them, and a dot for each trip. */
+.spiral {
+  display: grid;
+  gap: var(--fibo-space-3);
+  justify-items: center;
+}
+
+.spiral__chart {
+  width: min(100%, calc(var(--fibo-space-7) * 6));
+  height: auto;
+}
+
+.spiral__square {
+  fill: none;
+  stroke: var(--fibo-map-border);
+  stroke-width: 0.25;
+}
+
+.spiral__line {
+  fill: none;
+  stroke: var(--fibo-ink-muted);
+  stroke-width: 0.6;
+  stroke-dasharray: 1;
+  animation: spiral-draw var(--fibo-dur-draw) both;
+}
+
+.spiral__year {
+  fill: var(--fibo-ink-muted);
+}
+
+.spiral__dot {
+  transition: opacity var(--fibo-dur-base);
+  animation: rings-in var(--fibo-dur-base) both;
+  animation-delay: calc(var(--fibo-dot-delay) + var(--i) * var(--fibo-dot-stagger));
+}
+
+.spiral__dot--faded {
+  opacity: 0.18;
+}
+
+.spiral__mark {
+  fill: var(--fibo-ink-muted);
+}
+
+.spiral__mark--selected {
+  stroke: var(--fibo-paper);
+  stroke-width: 0.8;
+}
+
+.spiral__hit {
+  fill: transparent;
+  cursor: pointer;
+}
+
+.spiral__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--fibo-space-2);
+  justify-content: center;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@keyframes spiral-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.spiral__mark--europe {
+  fill: var(--fibo-continent-europe);
+}
+
+.spiral__mark--north-america {
+  fill: var(--fibo-continent-north-america);
+}
+
+.spiral__mark--asia {
+  fill: var(--fibo-continent-asia);
+}
+
+.spiral__mark--africa {
+  fill: var(--fibo-continent-africa);
+}
+
+.spiral__mark--south-america {
+  fill: var(--fibo-continent-south-america);
+}
+
+.spiral__mark--oceania {
+  fill: var(--fibo-continent-oceania);
+}
+
+.spiral__mark--antarctica {
+  fill: var(--fibo-continent-antarctica);
+}

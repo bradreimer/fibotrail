@@ -21,6 +21,14 @@
   --fibo-on-ocean: #f7f3ea;
   /* Night on Coral is 5.4:1. Ink on Coral is only 4.4:1, and white on Coral is 3.2:1. */
   --fibo-on-coral: #0e1a1d;
+  /* One color for each continent on the trip spiral. Each is at least 3:1 on Paper. */
+  --fibo-continent-europe: #146560;
+  --fibo-continent-north-america: #c4472a;
+  --fibo-continent-asia: #9a6b00;
+  --fibo-continent-africa: #8a4f1d;
+  --fibo-continent-south-america: #3f7d34;
+  --fibo-continent-oceania: #2f6fb0;
+  --fibo-continent-antarctica: #6b5b95;
   --fibo-map-border: #c3cfcc;
   --fibo-map-ring: 2px;
   --fibo-ink-muted: color-mix(in srgb, var(--fibo-ink) 75%, var(--fibo-paper));
@@ -84,6 +92,10 @@
   --fibo-dur-signature: 610ms;
   /* The delay between one bar and the next when a chart first draws. */
   --fibo-stagger: 34ms;
+  /* The trip spiral draws itself over 1,597 ms, and its dots appear one by one from 600 ms. */
+  --fibo-dur-draw: 1597ms;
+  --fibo-dot-delay: 600ms;
+  --fibo-dot-stagger: 55ms;
   --fibo-shift: 13px;
 }
 
@@ -94,6 +106,13 @@
     --fibo-teal: #4fb3ab;
     --fibo-mist: #2a3b3f;
     --fibo-on-teal: #0e1a1d;
+    --fibo-continent-europe: #4fb3ab;
+    --fibo-continent-north-america: #f08a6e;
+    --fibo-continent-asia: #e0a526;
+    --fibo-continent-africa: #d49a63;
+    --fibo-continent-south-america: #8cc77f;
+    --fibo-continent-oceania: #6fa8e0;
+    --fibo-continent-antarctica: #a99ad1;
   }
 }
 
@@ -105,6 +124,9 @@
     --fibo-dur-page: 0ms;
     --fibo-dur-signature: 0ms;
     --fibo-stagger: 0ms;
+    --fibo-dur-draw: 0ms;
+    --fibo-dot-delay: 0ms;
+    --fibo-dot-stagger: 0ms;
     --fibo-shift: 0px;
   }
 }

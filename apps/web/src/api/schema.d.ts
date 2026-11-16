@@ -308,6 +308,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/stats/trip-spiral": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["GetStatsTripSpiral"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/stats/trip-length": {
         parameters: {
             query?: never;
@@ -597,6 +613,11 @@ export interface components {
             trips: number;
             /** Format: int32 */
             newSuggestions: number;
+        };
+        SpiralTrip: {
+            trip: components["schemas"]["TripRef"];
+            continentId: null | string;
+            continentName: null | string;
         };
         StatsContinent: {
             id: string;
@@ -1340,6 +1361,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["YearCount"][];
+                };
+            };
+        };
+    };
+    GetStatsTripSpiral: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SpiralTrip"][];
                 };
             };
         };

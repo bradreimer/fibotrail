@@ -140,6 +140,18 @@ public sealed class StatsLibrary
     /// <summary>The visited countries of a continent, in the library's order.</summary>
     public IReadOnlyList<CountryStats> CountriesOn(Continent continent) => [.. Countries.Where(country => country.Continent == continent)];
 
+    /// <summary>
+    /// The continent a trip is placed on: the one with the most of the trip's visited countries, and
+    /// the first in the continent list on a tie. Null for a trip with no stop in a country.
+    /// </summary>
+    public Continent? ContinentOfTrip(int tripId) => Countries
+        .Where(country => country.Trips.Any(trip => trip.TripId == tripId))
+        .GroupBy(country => country.Continent)
+        .OrderByDescending(group => group.Count())
+        .ThenBy(group => group.Key)
+        .Select(group => (Continent?)group.Key)
+        .FirstOrDefault();
+
     /// <summary>One visited country by its key (its id, or its name when it has none), or null.</summary>
     public CountryStats? Country(string key) => Countries.FirstOrDefault(country => country.Country.Key == key);
 }
