@@ -161,6 +161,17 @@ The plan is in [roadmap.md](roadmap.md). Specs are in [specs/](specs/README.md).
 - Answer the open questions in the [life map spec](specs/life-map.md) with real use: whether the
   home country should always fill in, and whether 25 km is the right distance for a stop just off a
   coast.
+- Phase 5, the Stats screen, specced in [stats-screen.md](specs/stats-screen.md) and tracked by
+  [#54](https://github.com/bradreimer/fibotrail/issues/54): the host, totals, continents, and each
+  country's trips and days. Its charts are self-contained views, per
+  [ADR-014](adr/ADR-014-stats-views-are-self-contained-modules.md). Four views have their own specs
+  and stories: the season wheel ([#58](https://github.com/bradreimer/fibotrail/issues/58),
+  [season-wheel.md](specs/season-wheel.md)), the trip spiral
+  ([#59](https://github.com/bradreimer/fibotrail/issues/59), [trip-spiral.md](specs/trip-spiral.md)),
+  the travel clock ([#66](https://github.com/bradreimer/fibotrail/issues/66),
+  [travel-clock.md](specs/travel-clock.md)), and the distance rings
+  ([#67](https://github.com/bradreimer/fibotrail/issues/67),
+  [distance-rings.md](specs/distance-rings.md)). Not built yet.
 - Answer the remaining open questions in the
   [design and branding document](knowledge/design-and-branding.md#risks-open-questions-and-next-steps).
   The server language is settled: see [ADR-004](adr/ADR-004-technology-stack.md).
