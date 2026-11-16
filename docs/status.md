@@ -15,6 +15,11 @@ version 0.1 and the per-line results of the accessibility checklist are also sti
 
 ## Completed
 
+- [#61](https://github.com/bradreimer/fibotrail/issues/61) Trips with no location. Rule 3b finds
+  runs of 3 or more days with 30 or more photos a day and no position, which catches March 2006,
+  March 2007, and March 2012. On the maintainer's library it adds about 29 Low confidence
+  suggestions, and how many are real isn't known yet.
+
 - Image publishing. After CI passes on a push to `main`,
   `.github/workflows/publish-image.yml` builds `docker/Dockerfile` for amd64 and arm64 and pushes
   `ghcr.io/bradreimer/fibotrail:edge` and `:sha-<commit>`, for testing. `:latest` is for releases

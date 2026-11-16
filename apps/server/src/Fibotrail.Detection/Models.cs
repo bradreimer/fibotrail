@@ -41,6 +41,18 @@ public sealed record DetectionSettings
 
     /// <summary>Photos this close together form one stop.</summary>
     public double StopRadiusKm { get; init; } = 1;
+
+    /// <summary>A day with at least this many photos that have no position counts as a burst day.</summary>
+    public int BurstPhotosPerDay { get; init; } = 30;
+
+    /// <summary>Consecutive burst days that make a trip when no photo says where they were taken.</summary>
+    public int BurstMinimumDays { get; init; } = 3;
+
+    /// <summary>A day next to a burst joins it with at least this many photos with no position. Travel days are lighter.</summary>
+    public int BurstEdgePhotosPerDay { get; init; } = 10;
+
+    /// <summary>The most days that can join each end of a burst.</summary>
+    public int BurstEdgeDays { get; init; } = 2;
 }
 
 public enum Confidence
