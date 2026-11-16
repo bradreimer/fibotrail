@@ -11,7 +11,9 @@ added into one picture of where you've been.
 
 The first release stops at countries. Zooming to regions and cities needs boundary data that isn't
 in the app, and a decision about how to name and count them. That is
-[#48](https://github.com/bradreimer/fibotrail/issues/48). The work is split across
+[#48](https://github.com/bradreimer/fibotrail/issues/48). The one exception is detail regions for
+Canada and the USA, in [#62](https://github.com/bradreimer/fibotrail/issues/62), because you travel
+there most. The work is split across
 [#45](https://github.com/bradreimer/fibotrail/issues/45) (the screen),
 [#46](https://github.com/bradreimer/fibotrail/issues/46) (which countries count), and
 [#47](https://github.com/bradreimer/fibotrail/issues/47) (the navigation change). The data decision
@@ -31,7 +33,8 @@ visited, so that I can see my travel history at a glance.
 
 ## Non-goals
 
-- Regions and cities, and zooming to them ([#48](https://github.com/bradreimer/fibotrail/issues/48)).
+- Cities, and regions in countries other than the detail countries
+  ([#48](https://github.com/bradreimer/fibotrail/issues/48)).
 - Collections such as Disney parks, and the Stats screen. They are phase 5.
 - Continents, and a count of cities. City names from Immich are granular, so a count would
   overstate how many cities you've seen.
@@ -55,6 +58,41 @@ visited, so that I can see my travel history at a glance.
 - A trip with stops in two countries counts for both.
 - The home country counts only when an added trip has a stop there. See the open questions.
 - The first visit to a country is the start date of the earliest added trip that has a stop there.
+
+### Detail regions
+
+Tracking issue: [#62](https://github.com/bradreimer/fibotrail/issues/62).
+
+Some countries get more detail because you visit them often. A **detail country** also tracks the
+regions inside it. The first two are Canada, with 13 provinces and territories, and the USA, with 51
+states: the 50 states and the District of Columbia.
+
+- **The list is data.** The detail countries are a short list in the app's data, not in code.
+  Adding Mexico or Australia later means adding a row and its outlines.
+- **A region is visited by the same rule as a country.** Only added trips count. A stop belongs to
+  the region whose outline contains it, and stops that are on the way don't count. A trip with
+  stops in two regions counts for both.
+- **Outlines.** The regions are Natural Earth's states and provinces, bundled with the app, cut to
+  the detail countries and simplified. They are never fetched, per ADR-009. The size of the file is
+  not measured yet. See the open questions.
+- **Outside every outline.** A stop in a detail country that no region contains joins the nearest
+  region within 25 km, the same starting value as for countries. A stop farther than that counts
+  for the country but for no region.
+- **Names come from the outlines.** Immich's state names are not used, because they are
+  inconsistent.
+- **The first visit to a region** is the start date of the earliest added trip with a stop there.
+- **On the map.** Visited regions are filled with Meadow when you zoom to a detail country.
+  Zoomed out, a detail country fills as a whole, as today. Tapping a visited region opens a sheet
+  with its name, how many trips went there, the date of the first visit, and the trips, each
+  linking to its trip page.
+- **Progress.** Each detail country has a line under the summary, for example "7 of 13 provinces
+  and territories" and "23 of 51 states". The count is of visited regions, so it never passes the
+  total.
+- **Region list.** Under the first visits list, each detail country has a list of its visited
+  regions with the date of the first visit, oldest first. It is the text alternative to the region
+  fills: a screen reader reads the visited regions from it, and "visited" is never shown by color
+  alone.
+- **Other countries** behave as before.
 
 ### The Map screen
 
@@ -99,7 +137,9 @@ visited, so that I can see my travel history at a glance.
 ### API
 
 - `GET /api/map` needs a session, like every other route. It returns the visited countries (name,
-  `id`, first visit, and trips with ID, name, and dates), each added trip's route (the stops in
+  `id`, first visit, and trips with ID, name, and dates), the visited regions of each detail
+  country (name, `id`, first visit, and trips, and the total regions in that country), each added
+  trip's route (the stops in
   order), and the totals (countries, trips, days away, and distance in kilometers).
 - The OpenAPI document and the TypeScript types are updated, per
   [web-app-development.md](../knowledge/web-app-development.md).
@@ -130,6 +170,17 @@ visited, so that I can see my travel history at a glance.
   from every country counts for none.
 - Days away is the sum of the days of added trips, and distance is the sum of their distances.
 - The browser's network log shows no request to a host other than Fibotrail.
+- With added trips that have stops in Ontario and Alberta, Canada shows "2 of 13 provinces and
+  territories", and the two regions fill when you zoom to Canada.
+- With added trips in Texas and Oregon, the USA shows "2 of 51 states".
+- A suggested, later, or ignored trip, or a stop that is only on the way, fills no region.
+- A stop 10 km off a coast, outside every region, counts for the nearest region. A stop 40 km from
+  every region of a detail country counts for none of its regions and still counts for the country.
+- Tapping a visited region opens a sheet with its trips and the date of the first visit, and each
+  trip links to its page.
+- Each detail country lists its visited regions once, oldest first, and a screen reader reads the
+  list.
+- A country that isn't a detail country shows no region progress line and no region list.
 - Under 600 px, the tab bar shows Trips and Map. Inbox and Settings are in the top bar, and the
   Inbox button shows the badge. From 600 px, the sidebar shows all four.
 - The screen passes the ADR-007 run-through on an iPhone.
@@ -141,5 +192,15 @@ visited, so that I can see my travel history at a glance.
    travel to. The default is to count it only after a domestic trip.
 2. **Is 25 km the right distance for a stop outside every outline?** It is a starting value, not
    tested on real trips.
-3. **How are regions and cities named and counted?** That belongs to
-   [#48](https://github.com/bradreimer/fibotrail/issues/48), and to the Stats screen.
+3. **How are cities named and counted?** That belongs to
+   [#48](https://github.com/bradreimer/fibotrail/issues/48), and to the Stats screen. Regions of
+   the detail countries are decided above.
+4. **How big is the region file?** Natural Earth's states and provinces for Canada and the USA,
+   simplified, haven't been measured. The ADR for this work records the size and the
+   simplification, and the app's initial load must stay within the budget in the
+   [quality gates spec](quality-gates.md).
+5. **Do US territories count?** Puerto Rico and the others are not in the 51. The default is that
+   they don't count as states, and fill in as part of the USA only if their outlines are in the
+   country outline.
+6. **How does a phone zoom to a region?** Pinch zoom works, but a small region such as DC or Prince
+   Edward Island is hard to tap. The ADR decides whether the region list also opens the sheet.
