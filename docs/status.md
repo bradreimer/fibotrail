@@ -118,15 +118,14 @@ The MVP plan is in [roadmap.md](roadmap.md#mvp-version-01). Its specs are in
 - Decide the next phase from the [roadmap](roadmap.md): the life map (phase 4) comes next, then
   collections and statistics (phase 5).
 - Phase 4, the life map, first release (countries only), specced in
-  [life-map.md](specs/life-map.md): the Map screen ([#45](https://github.com/bradreimer/fibotrail/issues/45)),
-  working out the visited countries on the server
+  [life-map.md](specs/life-map.md). Built: working out the visited countries on the server
   ([#46](https://github.com/bradreimer/fibotrail/issues/46), with
-  [ADR-011](adr/ADR-011-visits-are-derived-from-added-trips-on-the-server.md), accepted), and moving
-  Inbox and Settings to the top bar ([#47](https://github.com/bradreimer/fibotrail/issues/47)).
-  Zooming to regions and cities is [#48](https://github.com/bradreimer/fibotrail/issues/48). Not
-  built yet, except
-  [#46](https://github.com/bradreimer/fibotrail/issues/46): the `Fibotrail.Places` project, the
-  outlines, and `GET /api/map` are built, and not merged. Next is #45.
+  [ADR-011](adr/ADR-011-visits-are-derived-from-added-trips-on-the-server.md)), and, not yet merged
+  or checked on a phone, the Map screen ([#45](https://github.com/bradreimer/fibotrail/issues/45))
+  with the navigation change ([#47](https://github.com/bradreimer/fibotrail/issues/47)): Trips and
+  Map in the tab bar, Inbox and Settings in the top bar under 600 px, and all four in the sidebar
+  from 600 px. Zooming to regions and cities is
+  [#48](https://github.com/bradreimer/fibotrail/issues/48), not built.
 - Photos and stops that are on the way (layover airports and in-transit photos): hide a photo from
   the map ([#35](https://github.com/bradreimer/fibotrail/issues/35)), then suggested stops
   ([#32](https://github.com/bradreimer/fibotrail/issues/32)). Both are one idea, specced in

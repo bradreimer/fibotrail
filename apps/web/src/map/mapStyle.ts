@@ -7,6 +7,8 @@ export interface MapColors {
   border: string;
   route: string;
   routeOutline: string;
+  /** The fill of a country you've visited. */
+  visited: string;
 }
 
 /** Reads the map colors from the tokens, so the map follows light and dark mode. */
@@ -20,11 +22,24 @@ export function readMapColors(element: Element, dark: boolean): MapColors {
     border: dark ? token('--fibo-mist') : token('--fibo-map-border'),
     route: token('--fibo-teal'),
     routeOutline: token('--fibo-paper'),
+    visited: token('--fibo-meadow'),
   };
 }
 
 export const LAND_SOURCE = 'land';
 export const ROUTE_SOURCE = 'route';
+export const VISITED_LAYER = 'visited';
+
+/**
+ * Matches the countries whose key is in the list. A country's key is its ISO code, or its name
+ * when it has none, so the screen and the map agree on which outline is which. An empty list
+ * matches nothing.
+ */
+export function visitedFilter(keys: readonly string[]): ExpressionFilter {
+  return ['in', ['get', 'key'], ['literal', keys.length > 0 ? [...keys] : ['']]];
+}
+
+type ExpressionFilter = ['in', ['get', string], ['literal', string[]]];
 
 /**
  * The quiet base map: country outlines from Natural Earth, and nothing else. It has no labels,
@@ -41,6 +56,13 @@ export function baseMapStyle(colors: MapColors): StyleSpecification {
     layers: [
       { id: 'water', type: 'background', paint: { 'background-color': colors.water } },
       { id: 'land', type: 'fill', source: LAND_SOURCE, paint: { 'fill-color': colors.land } },
+      {
+        id: VISITED_LAYER,
+        type: 'fill',
+        source: LAND_SOURCE,
+        filter: visitedFilter([]),
+        paint: { 'fill-color': colors.visited },
+      },
       {
         id: 'borders',
         type: 'line',
@@ -65,24 +87,26 @@ export function baseMapStyle(colors: MapColors): StyleSpecification {
   };
 }
 
-/** A line through the points, in order, as GeoJSON. Fewer than two points give no line. */
-export function routeGeoJson(points: readonly Position[]): GeoJSON.FeatureCollection {
+/** A line through each list of points, in order, as GeoJSON. Fewer than two points give no line. */
+export function routesGeoJson(routes: readonly (readonly Position[])[]): GeoJSON.FeatureCollection {
   return {
     type: 'FeatureCollection',
-    features:
-      points.length < 2
-        ? []
-        : [
-            {
-              type: 'Feature',
-              properties: {},
-              geometry: {
-                type: 'LineString',
-                coordinates: points.map((point) => [point.longitude, point.latitude]),
-              },
-            },
-          ],
+    features: routes
+      .filter((points) => points.length >= 2)
+      .map((points) => ({
+        type: 'Feature' as const,
+        properties: {},
+        geometry: {
+          type: 'LineString' as const,
+          coordinates: points.map((point) => [point.longitude, point.latitude]),
+        },
+      })),
   };
+}
+
+/** A line through the points, in order, as GeoJSON. Fewer than two points give no line. */
+export function routeGeoJson(points: readonly Position[]): GeoJSON.FeatureCollection {
+  return routesGeoJson([points]);
 }
 
 export interface Position {
