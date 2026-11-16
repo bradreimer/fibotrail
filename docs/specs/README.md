@@ -66,5 +66,7 @@ None.
 | [life-map.md](life-map.md) | The Map screen: a world map of visited countries, a summary, first visits, and routes |
 | [main-destination.md](main-destination.md) | How a trip's main destination is chosen: the city with the most days |
 | [on-the-way.md](on-the-way.md) | Photos and stops that belong to a trip but not to its map: hide a photo, and later suggested stops |
-| [stats-screen.md](stats-screen.md) | The Stats screen: totals, continents, countries with trips, days, and seasons, and charts |
+| [stats-screen.md](stats-screen.md) | The Stats screen: the host for stats views, totals, continents, and countries with trips and days |
+| [season-wheel.md](season-wheel.md) | A stats view: the months and seasons you have spent in a country |
+| [trip-spiral.md](trip-spiral.md) | A stats view: every trip along a Fibonacci spiral in date order |
 | [release.md](release.md) | The accessibility checks, README, and tagged image for version 0.1 |

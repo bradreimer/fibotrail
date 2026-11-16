@@ -128,9 +128,13 @@ The MVP plan is in [roadmap.md](roadmap.md#mvp-version-01). Its specs are in
   [#46](https://github.com/bradreimer/fibotrail/issues/46): the `Fibotrail.Places` project, the
   outlines, and `GET /api/map` are built, and not merged. Next is #45.
 - Phase 5, the Stats screen, specced in [stats-screen.md](specs/stats-screen.md) and tracked by
-  [#54](https://github.com/bradreimer/fibotrail/issues/54): totals, continents, and each country's
-  trips, days, and seasons seen, with charts. Seasons are meteorological and flip in the southern
-  hemisphere. Not built yet. It depends on #45 and #46.
+  [#54](https://github.com/bradreimer/fibotrail/issues/54): the host, totals, continents, and each
+  country's trips and days. Its charts are self-contained views, per
+  [ADR-012](adr/ADR-012-stats-views-are-self-contained-modules.md), accepted. Two views have their
+  own specs and stories: the season wheel ([#58](https://github.com/bradreimer/fibotrail/issues/58),
+  [season-wheel.md](specs/season-wheel.md)) and the trip spiral
+  ([#59](https://github.com/bradreimer/fibotrail/issues/59), [trip-spiral.md](specs/trip-spiral.md)).
+  Not built yet. They depend on #45 and #46.
 - Photos and stops that are on the way (layover airports and in-transit photos): hide a photo from
   the map ([#35](https://github.com/bradreimer/fibotrail/issues/35)), then suggested stops
   ([#32](https://github.com/bradreimer/fibotrail/issues/32)). Both are one idea, specced in
