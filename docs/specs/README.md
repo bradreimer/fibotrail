@@ -69,4 +69,6 @@ None.
 | [stats-screen.md](stats-screen.md) | The Stats screen: the host for stats views, totals, continents, and countries with trips and days |
 | [season-wheel.md](season-wheel.md) | A stats view: the months and seasons you have spent in a country |
 | [trip-spiral.md](trip-spiral.md) | A stats view: every trip along a Fibonacci spiral in date order |
+| [travel-clock.md](travel-clock.md) | A stats view: days away and trips in each month of the year |
+| [distance-rings.md](distance-rings.md) | A stats view: every trip on rings around home, by distance and direction |
 | [release.md](release.md) | The accessibility checks, README, and tagged image for version 0.1 |

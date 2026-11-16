@@ -130,10 +130,14 @@ The MVP plan is in [roadmap.md](roadmap.md#mvp-version-01). Its specs are in
 - Phase 5, the Stats screen, specced in [stats-screen.md](specs/stats-screen.md) and tracked by
   [#54](https://github.com/bradreimer/fibotrail/issues/54): the host, totals, continents, and each
   country's trips and days. Its charts are self-contained views, per
-  [ADR-012](adr/ADR-012-stats-views-are-self-contained-modules.md), accepted. Two views have their
+  [ADR-012](adr/ADR-012-stats-views-are-self-contained-modules.md), accepted. Four views have their
   own specs and stories: the season wheel ([#58](https://github.com/bradreimer/fibotrail/issues/58),
   [season-wheel.md](specs/season-wheel.md)) and the trip spiral
-  ([#59](https://github.com/bradreimer/fibotrail/issues/59), [trip-spiral.md](specs/trip-spiral.md)).
+  ([#59](https://github.com/bradreimer/fibotrail/issues/59), [trip-spiral.md](specs/trip-spiral.md)),
+  the travel clock ([#66](https://github.com/bradreimer/fibotrail/issues/66),
+  [travel-clock.md](specs/travel-clock.md)), and the distance rings
+  ([#67](https://github.com/bradreimer/fibotrail/issues/67),
+  [distance-rings.md](specs/distance-rings.md)).
   Not built yet. They depend on #45 and #46.
 - Photos and stops that are on the way (layover airports and in-transit photos): hide a photo from
   the map ([#35](https://github.com/bradreimer/fibotrail/issues/35)), then suggested stops

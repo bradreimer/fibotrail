@@ -28,6 +28,8 @@ first three views. Other views have their own specs:
 | Records | Stats screen | This spec | [#54](https://github.com/bradreimer/fibotrail/issues/54) |
 | Season wheel | Country page | [season-wheel.md](season-wheel.md) | [#58](https://github.com/bradreimer/fibotrail/issues/58) |
 | Fibonacci spiral of trips | Stats screen | [trip-spiral.md](trip-spiral.md) | [#59](https://github.com/bradreimer/fibotrail/issues/59) |
+| Travel clock | Stats screen | [travel-clock.md](travel-clock.md) | [#66](https://github.com/bradreimer/fibotrail/issues/66) |
+| Distance rings | Stats screen | [distance-rings.md](distance-rings.md) | [#67](https://github.com/bradreimer/fibotrail/issues/67) |
 
 ## User story
 
@@ -61,7 +63,7 @@ went.
   once per request, from the database and `Fibotrail.Places`, and it is read-only.
 - It holds the added trips with their ID, name, start and end dates, days, stops, and distance, and
   for each local day of each trip, the countries of its positioned away photos with their
-  latitudes.
+  latitudes. It also holds the home location, which no route returns.
 - Only trips with the status "added" are in it. Suggested, later, and ignored trips aren't.
 
 ### What counts
@@ -166,8 +168,5 @@ From top to bottom:
 
 ## Open questions
 
-1. **Which other views come next?** Two ideas are waiting: a travel clock that shows the months of
-   all trips on one wheel, and distance rings that place each trip by its distance from home. Each
-   would get its own spec and work item.
-2. **Should a country with no positioned photos on a trip still count that trip's days?** The
+1. **Should a country with no positioned photos on a trip still count that trip's days?** The
    default is no, because a day can't be placed without a position.
