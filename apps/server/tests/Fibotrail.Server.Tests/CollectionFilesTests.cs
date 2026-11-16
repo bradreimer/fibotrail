@@ -160,5 +160,8 @@ public sealed class CollectionFilesTests : IDisposable
         Assert.Equal("hollywood-studios", catalog.Lookup.Find(28.3590, -81.5620)?.Id);
         Assert.Equal("animal-kingdom", catalog.Lookup.Find(28.3600, -81.5910)?.Id);
         Assert.Null(catalog.Lookup.Find(28.3830, -81.5200));
+        // Disneyland and California Adventure are across a promenade, and each resolves to itself.
+        Assert.Equal("disneyland", catalog.Lookup.Find(33.8130, -117.9200)?.Id);
+        Assert.Equal("california-adventure", catalog.Lookup.Find(33.8060, -117.9195)?.Id);
     }
 }
