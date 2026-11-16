@@ -140,11 +140,17 @@ public sealed class CollectionFilesTests : IDisposable
     }
 
     [Fact]
-    public void The_collections_shipped_with_the_app_load()
+    public void The_collections_shipped_with_the_app_load_and_find_the_parks_they_list()
     {
         var shipped = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "..", "..", "collections"));
+        Assert.True(Directory.Exists(shipped), $"The shipped collections folder wasn't found at {shipped}.");
 
-        // Whatever is in the shipped folder must load without error. An empty folder is fine.
-        _ = CollectionFiles.Load(shipped);
+        var catalog = CollectionFiles.Load(shipped);
+
+        var disney = Assert.Single(catalog.Collections, collection => collection.Id == "disney-parks");
+        Assert.Contains(disney.Places, place => place.Park.Id == "magic-kingdom");
+        // The middle of Magic Kingdom is in the park, and Orlando's downtown is not.
+        Assert.Equal("magic-kingdom", catalog.Lookup.Find(28.4195, -81.5810)?.Id);
+        Assert.Null(catalog.Lookup.Find(28.5383, -81.3792));
     }
 }
