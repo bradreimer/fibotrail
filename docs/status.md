@@ -60,6 +60,11 @@ maintainer's library and phone, and are listed under Next. See
 
 ## In progress
 
+- [#38](https://github.com/bradreimer/fibotrail/issues/38) On an iPhone, the Add trip sheet was
+  under the tab bar and **Add** was hidden. Found in the ADR-007 run-through on 2026-11-16. The
+  cause was `-webkit-overflow-scrolling: touch` on the scroll area, which makes an iOS stacking
+  layer. It's removed, with a test. Not yet confirmed on the phone. The photo viewer, the stop
+  sheet, and the full-screen map had the same risk, and need the same check.
 - [#28](https://github.com/bradreimer/fibotrail/issues/28) A `/data` bind mount the container
   can't write to. Found on the first real run: the host folder was owned by root, and the log was a
   repeating SQLite stack trace. Startup now checks the folder and prints one line with the fix, and

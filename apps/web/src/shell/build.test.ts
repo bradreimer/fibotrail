@@ -136,6 +136,17 @@ describe('iOS behavior', () => {
     expect(base).toContain('user-select: none');
   });
 
+  it('keeps every scroll area out of a stacking layer, so dialogs rise above the tab bar', () => {
+    // -webkit-overflow-scrolling: touch traps a fixed child under the tab bar on iOS (#38).
+    const styles = filesIn('src/styles').map((file) => ({ file, text: read(file) }));
+    const found = styles
+      .filter(({ text }) =>
+        /-webkit-overflow-scrolling/.test(text.replace(/\/\*[\s\S]*?\*\//g, '')),
+      )
+      .map(({ file }) => file);
+    expect(found).toEqual([]);
+  });
+
   it('respects the safe area at every edge', () => {
     for (const edge of ['top', 'right', 'bottom', 'left']) {
       expect(shell).toContain(`env(safe-area-inset-${edge})`);
