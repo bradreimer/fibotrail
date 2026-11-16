@@ -14,8 +14,12 @@ places:
     status: open
     boundary: boundaries/magic-kingdom.geojson
 
-  # Walt Disney World Resort
-  # - {id: epcot, name: EPCOT, group: Walt Disney World Resort, status: open, boundary: boundaries/epcot.geojson}
+  - id: epcot
+    name: EPCOT
+    group: Walt Disney World Resort
+    status: open
+    boundary: boundaries/epcot.geojson
+
   # - {id: hollywood-studios, name: "Disney's Hollywood Studios", group: Walt Disney World Resort, status: open, boundary: boundaries/hollywood-studios.geojson}
   # - {id: animal-kingdom, name: "Disney's Animal Kingdom", group: Walt Disney World Resort, status: open, boundary: boundaries/animal-kingdom.geojson}
   # Disneyland Resort
