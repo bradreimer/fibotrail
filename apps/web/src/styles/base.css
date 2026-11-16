@@ -126,6 +126,62 @@ textarea {
   color: var(--fibo-teal);
 }
 
+/*
+ * A settings row, as in iOS: the label on the left, the control on the right, on a Mist fill. The
+ * whole row is the tap target.
+ */
+.setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--fibo-space-4);
+  min-height: var(--fibo-tap);
+  padding: var(--fibo-space-2) var(--fibo-space-4);
+  border-radius: var(--fibo-radius);
+  background: var(--fibo-mist);
+  font-size: var(--fibo-text-row);
+  font-weight: 500;
+  cursor: pointer;
+}
+
+/*
+ * The iOS switch, drawn the same in every browser, on a checkbox with the role switch. The thumb
+ * slides, and reduce motion makes the slide instant through the duration tokens.
+ */
+.switch {
+  position: relative;
+  flex: none;
+  width: var(--fibo-switch-width);
+  height: var(--fibo-switch-height);
+  margin: 0;
+  border-radius: var(--fibo-switch-height);
+  background: var(--fibo-switch-track);
+  appearance: none;
+  cursor: pointer;
+  transition: background-color var(--fibo-dur-fast) ease-out;
+}
+
+.switch::before {
+  content: '';
+  position: absolute;
+  top: var(--fibo-switch-inset);
+  left: var(--fibo-switch-inset);
+  width: calc(var(--fibo-switch-height) - 2 * var(--fibo-switch-inset));
+  height: calc(var(--fibo-switch-height) - 2 * var(--fibo-switch-inset));
+  border-radius: 50%;
+  background: var(--fibo-switch-thumb);
+  box-shadow: var(--fibo-switch-shadow);
+  transition: transform var(--fibo-dur-fast) ease-out;
+}
+
+.switch:checked {
+  background: var(--fibo-switch-on);
+}
+
+.switch:checked::before {
+  transform: translateX(calc(var(--fibo-switch-width) - var(--fibo-switch-height)));
+}
+
 .visually-hidden {
   position: absolute;
   width: 1px;

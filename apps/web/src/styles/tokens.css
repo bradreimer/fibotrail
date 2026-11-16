@@ -28,6 +28,30 @@
   /* Text on a photo sits on this. Paper text on it is at least 7:1, whatever the photo. */
   --fibo-scrim-strong: color-mix(in srgb, #071e25 85%, transparent);
 
+  /*
+   * The photo viewer is dark in both modes, so these values never swap. Paper on the viewer is
+   * 13.2:1, and the muted hint is 9.0:1.
+   */
+  --fibo-viewer: #1d2b2f;
+  --fibo-on-viewer: #f7f3ea;
+  --fibo-on-viewer-muted: color-mix(in srgb, #f7f3ea 80%, #1d2b2f);
+  /* A settings row in the viewer. Paper on it is 10.6:1. */
+  --fibo-viewer-row: #2a3b3f;
+  /* A switch on the row: on is 4.7:1, and the off track is 3.5:1. */
+  --fibo-viewer-accent: #4fb3ab;
+  --fibo-viewer-track: color-mix(in srgb, #f7f3ea 45%, #2a3b3f);
+  /*
+   * The iOS switch: 51 by 31 points, with a white thumb inset by 2 points. On the page it is Teal
+   * when on, and the off track is at least 3:1 on Paper and on Mist, in both modes.
+   */
+  --fibo-switch-on: var(--fibo-teal);
+  --fibo-switch-track: color-mix(in srgb, var(--fibo-ink) 60%, var(--fibo-paper));
+  --fibo-switch-width: 51px;
+  --fibo-switch-height: 31px;
+  --fibo-switch-inset: 2px;
+  --fibo-switch-thumb: #ffffff;
+  --fibo-switch-shadow: 0 2px 4px rgb(0 0 0 / 25%);
+
   /* Shape and space: Fibonacci numbers */
   --fibo-radius: 13px;
   --fibo-space-1: 3px;
@@ -46,6 +70,8 @@
   --fibo-font-body: 'Inter Variable', system-ui, -apple-system, sans-serif;
   --fibo-text-caption: 0.8125rem;
   --fibo-text-body: 1rem;
+  /* A settings row, the size iOS uses for a row label: 17 px. */
+  --fibo-text-row: 1.0625rem;
   --fibo-text-h3: 1.3125rem;
   --fibo-text-h2: 2.125rem;
   --fibo-text-hero: 3.4375rem;

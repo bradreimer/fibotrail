@@ -117,6 +117,16 @@ describe('the Map screen', () => {
     expect(JSON.parse(screen.getByRole('application').dataset.routes!)).toEqual([]);
   });
 
+  it('turns the routes on from a tap anywhere on the Show routes row', async () => {
+    fakeServer({ 'GET /api/map': map });
+    renderMap();
+    await screen.findByRole('application');
+
+    await userEvent.click(screen.getByText('Show routes'));
+
+    expect(screen.getByRole('switch', { name: 'Show routes' })).toBeChecked();
+  });
+
   it('opens a sheet for a country tapped on the map, with its trips and its first visit', async () => {
     fakeServer({ 'GET /api/map': map });
     renderMap();

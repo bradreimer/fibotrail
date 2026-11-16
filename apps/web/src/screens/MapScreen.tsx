@@ -70,14 +70,15 @@ export function MapScreen() {
         routes={routes}
         onCountrySelect={setSelected}
       />
-      <label className="life-map__routes">
+      <label className="setting-row">
+        <span>Show routes</span>
         <input
           type="checkbox"
           role="switch"
+          className="switch"
           checked={showRoutes}
           onChange={(event) => setShowRoutes(event.target.checked)}
         />
-        <span>Show routes</span>
       </label>
       <section aria-labelledby="first-visits">
         <h3 className="life-map__heading" id="first-visits">

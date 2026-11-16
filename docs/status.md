@@ -135,6 +135,11 @@ The plan is in [roadmap.md](roadmap.md). Specs are in [specs/](specs/README.md).
 - Zoom the life map to regions and cities
   ([#48](https://github.com/bradreimer/fibotrail/issues/48)). It needs boundary data below country
   level and a decision on how cities are named and counted, so it starts with an ADR.
+- Make the switches look like iOS switches: **Hide from map** in the photo viewer
+  ([#52](https://github.com/bradreimer/fibotrail/issues/52)) and **Show routes** on the life map,
+  and keep the photo viewer dark in dark mode
+  ([#51](https://github.com/bradreimer/fibotrail/issues/51)). Built and checked in a desktop browser
+  at phone size, not yet on a phone.
 - Suggest stops that are on the way ([#32](https://github.com/bradreimer/fibotrail/issues/32)), the
   second part of the idea in [on-the-way.md](specs/on-the-way.md). Its rule needs real examples
   first, which `fibotrail stops` ([#60](https://github.com/bradreimer/fibotrail/issues/60)) produces.
