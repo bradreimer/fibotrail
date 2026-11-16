@@ -6,7 +6,7 @@ code. The rules are in [docs/specs/collections.md](../docs/specs/collections.md)
 [ADR-003](../docs/adr/ADR-003-collections-are-data-files.md).
 
 **Status:** `disney-parks.yaml` has all 12 Disney parks. `universal-parks.yaml` has the three Universal Orlando
-parks and Universal Studios Hollywood. Japan, Singapore, and Beijing are still to add. Each park
+parks, Universal Studios Hollywood, and Universal Studios Japan. Singapore and Beijing are still to add. Each park
 needs a boundary from OpenStreetMap that is checked by hand against satellite imagery. To add a park,
 export its outline from [Overpass Turbo](https://overpass-turbo.eu) as GeoJSON, save it as
 `boundaries/<id>.geojson`, and add its entry to the YAML file.
