@@ -169,5 +169,6 @@ public sealed class CollectionFilesTests : IDisposable
         // Each of the two Paris parks resolves to itself.
         Assert.Equal("disneyland-paris", catalog.Lookup.Find(48.8735, 2.7750)?.Id);
         Assert.Equal("disney-adventure-world", catalog.Lookup.Find(48.8650, 2.7760)?.Id);
+        Assert.Equal("hong-kong-disneyland", catalog.Lookup.Find(22.3130, 114.0413)?.Id);
     }
 }
