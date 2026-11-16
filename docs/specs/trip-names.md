@@ -52,6 +52,10 @@ most days, so that the first guess is usually right.
 - Changing the rule moves the fingerprints of existing trips. A trip you added or ignored keeps its
   decision, because reconciliation matches by dates when no fingerprint matches, per
   [trip detection](trip-detection.md#reconciliation-and-decisions).
+- That date match needs the stored trip to cover more than half of the new trip's days. A trip
+  that more than doubles in length and changes its main place in the same run is treated as a new
+  suggestion. The old trip is removed, and its decision stays and applies again if the old trip
+  comes back.
 
 ### Name options
 
@@ -101,7 +105,8 @@ most days, so that the first guess is usually right.
 - Tapping an option fills the name field, and the button reads as pressed.
 - Typing your own name clears the mark. **Add** saves that name, and it survives a rescan.
 - Choosing the first option on a suggestion stores no name.
-- A trip added before the main destination rule changed keeps its status, name, and cover.
+- A trip added before the main destination rule changed keeps its status, name, and cover, even
+  though its fingerprint moves.
 - The group has the label "Suggested names", and each button is at least 44 points tall.
 - The sheet passes the ADR-007 run-through on an iPhone.
 

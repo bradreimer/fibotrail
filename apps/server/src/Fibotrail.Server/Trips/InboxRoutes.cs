@@ -1,3 +1,4 @@
+using Fibotrail.Detection;
 using System.Globalization;
 using Fibotrail.Server.Data;
 using Fibotrail.Server.Immich;
@@ -16,7 +17,7 @@ public sealed record RoutePoint(double Latitude, double Longitude, int PhotoCoun
 /// <summary>One suggested trip, as the inbox shows it.</summary>
 /// <param name="Name">The name the trip gets when you add it, unless you change it.</param>
 /// <param name="Place">The main place, for the sentence "We found a possible trip: Orlando, …".</param>
-/// <param name="Places">Up to three city names, by photo count.</param>
+/// <param name="Places">Up to three city names, by days spent, then by photo count.</param>
 /// <param name="Strip">Up to eight photos, spread evenly across the trip's days.</param>
 /// <param name="Route">The stops, in the order of the route.</param>
 public sealed record Suggestion(
@@ -144,13 +145,8 @@ public static class InboxRoutes
     private static async Task<Suggestion> ToSuggestionAsync(FibotrailDbContext db, Trip trip, CancellationToken cancellationToken)
     {
         var photos = await TripPhotosAsync(db, trip.Id, cancellationToken);
-        var places = photos
-            .Where(photo => photo.City is not null)
-            .GroupBy(photo => photo.City!)
-            .OrderByDescending(group => group.Count())
-            .ThenBy(group => group.Key, StringComparer.Ordinal)
+        var places = TripDetector.RankPlaces(photos, photo => DateOnly.FromDateTime(photo.LocalTime), photo => photo.City)
             .Take(PlaceCount)
-            .Select(group => group.Key)
             .ToList();
         var strip = PhotoStrip.Pick(photos, photo => DateOnly.FromDateTime(photo.LocalTime), StripLength);
         return new Suggestion(

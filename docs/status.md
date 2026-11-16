@@ -100,9 +100,10 @@ The MVP plan is in [roadmap.md](roadmap.md#mvp-version-01). Its seven specs are 
   [trip detection spec](specs/trip-detection.md#review-gate). It replaced the replay test as the
   gate on 2026-11-16, because writing a list of known trips is the work the app is meant to do.
   The three open questions in that spec wait for this result.
-- Build the trip names work: [#31](https://github.com/bradreimer/fibotrail/issues/31) (the main
-  destination by days) and [#30](https://github.com/bradreimer/fibotrail/issues/30) (a choice of
-  names), from the [trip names spec](specs/trip-names.md). The idea of marking airports and
+- Build [#30](https://github.com/bradreimer/fibotrail/issues/30) (a choice of names) from the
+  [trip names spec](specs/trip-names.md). [#31](https://github.com/bradreimer/fibotrail/issues/31),
+  the main destination by days, is built; the trips on the maintainer's library change their main
+  place and fingerprint on the next detection run. The idea of marking airports and
   layovers is [#32](https://github.com/bradreimer/fibotrail/issues/32).
 - Answer the remaining open questions in the
   [design and branding document](knowledge/design-and-branding.md#risks-open-questions-and-next-steps).

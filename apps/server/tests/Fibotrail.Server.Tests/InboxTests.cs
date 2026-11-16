@@ -57,6 +57,22 @@ public class InboxTests
     }
 
     [Fact]
+    public async Task The_main_places_on_a_card_are_ranked_by_days_spent_then_by_photos()
+    {
+        await using var app = await TestApp.StartAsync();
+        app.Immich.Assets.AddRange(TripLibrary.AtHome());
+        app.Immich.Assets.AddRange(TripLibrary.Trip(March15, 4, 12));
+        // One busy day in Kissimmee has far more photos than Orlando, but fewer days.
+        app.Immich.Assets.AddRange(TripLibrary.Trip(March15.AddDays(4), 1, 300, 28.29, -81.41, "Kissimmee", "Florida", "United States of America"));
+        var browser = await TripLibrary.ScanAndConfirmHomeAsync(app);
+
+        var card = Assert.Single((await InboxAsync(browser)).GetProperty("suggestions").EnumerateArray());
+
+        Assert.Equal(["Orlando", "Kissimmee"], card.GetProperty("places").EnumerateArray().Select(place => place.GetString()));
+        Assert.Equal("Orlando", card.GetProperty("place").GetString());
+    }
+
+    [Fact]
     public async Task The_photo_strip_has_eight_photos_spread_across_the_days_with_alt_text()
     {
         var (app, browser) = await StartWithThreeTripsAsync();

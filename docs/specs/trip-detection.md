@@ -107,7 +107,8 @@ right day.
 ### Reconciliation and decisions
 
 - A trip's fingerprint is a hash of its start date and its main place. The main place is the
-  city, or the state or country when no city is known, with the most photos.
+  city, or the state or country when no city is known, with the most days, per
+  [trip names](trip-names.md).
 - A detected trip with the fingerprint of a stored trip is the same trip. Its photos, stops, and
   route are updated. Its status, name, and cover aren't.
 - New photos that continue an added trip extend it, without a new suggestion.
