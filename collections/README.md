@@ -5,9 +5,11 @@ this folder, and each place has a GeoJSON boundary in `boundaries/`. Adding a co
 code. The rules are in [docs/specs/collections.md](../docs/specs/collections.md) and
 [ADR-003](../docs/adr/ADR-003-collections-are-data-files.md).
 
-**Status: no collection files ship yet.** The launch collections, `disney-parks` and
-`universal-parks`, need park boundaries that come from OpenStreetMap and are checked by hand against
-satellite imagery. Until those files are added, the Collections screen is empty.
+**Status:** `disney-parks.yaml` ships with Magic Kingdom only. The other Disney parks are commented
+out in the file, and `universal-parks` isn't added yet. Each needs a boundary from OpenStreetMap that
+is checked by hand against satellite imagery. To add a park, export its outline from
+[Overpass Turbo](https://overpass-turbo.eu) as GeoJSON, save it as `boundaries/<id>.geojson`, and
+add or uncomment its entry in the YAML file.
 
 ## File format
 
