@@ -1,0 +1,89 @@
+/* Collections: the list of cards, and the stamp book. */
+.collections {
+  display: grid;
+  gap: var(--fibo-space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.collection-card {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-areas:
+    'ring name'
+    'ring count';
+  align-items: center;
+  column-gap: var(--fibo-space-4);
+  min-height: var(--fibo-tap);
+  padding: var(--fibo-space-3) var(--fibo-space-4);
+  border: var(--fibo-border) solid var(--fibo-mist);
+  border-radius: var(--fibo-radius);
+  color: inherit;
+  text-decoration: none;
+}
+
+.collection-card .ring {
+  grid-area: ring;
+}
+
+.collection-card__name {
+  grid-area: name;
+  font-family: var(--fibo-font-display);
+  font-size: var(--fibo-text-h3);
+}
+
+.collection-card__count {
+  grid-area: count;
+  color: var(--fibo-ink-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.stamps {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(calc(var(--fibo-space-7) * 2.5), 1fr));
+  gap: var(--fibo-space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* The three states differ by line and by words, never by color alone. */
+.stamp {
+  display: grid;
+  align-content: center;
+  gap: var(--fibo-space-1);
+  width: 100%;
+  min-height: calc(var(--fibo-space-7) * 2);
+  padding: var(--fibo-space-3);
+  border-radius: var(--fibo-radius);
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: center;
+}
+
+.stamp--visited {
+  border: calc(var(--fibo-border) * 3) solid var(--fibo-gold);
+  background: color-mix(in srgb, var(--fibo-gold) 18%, var(--fibo-paper));
+  cursor: pointer;
+}
+
+.stamp--not-visited {
+  border: var(--fibo-border) dashed var(--fibo-ink-muted);
+  color: var(--fibo-ink-muted);
+}
+
+.stamp--planned {
+  border: var(--fibo-border) dotted var(--fibo-ink-muted);
+  color: var(--fibo-ink-muted);
+}
+
+.stamp__name {
+  font-weight: 600;
+}
+
+.stamp__detail {
+  font-size: var(--fibo-text-caption);
+  font-variant-numeric: tabular-nums;
+}

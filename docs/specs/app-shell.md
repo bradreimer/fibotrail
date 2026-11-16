@@ -70,8 +70,9 @@ behave like an app, so that browsing my trips feels as comfortable as a native i
   Inbox and Settings move to the top bar. The [life map spec](life-map.md) says what changes in
   the first release: the tab bar holds Trips and Map until the other two screens exist, Inbox and
   Settings are icon buttons in the top bar under 600 px, and the sidebar from 600 px holds all four.
-  The Stats screen ([stats-screen.md](stats-screen.md)) is the third tab, so the tab bar holds Trips,
-  Map, and Stats until Collections ships, and the sidebar holds those three plus Inbox and Settings.
+  Collections ([collections.md](collections.md)) is the third tab and the Stats screen
+  ([stats-screen.md](stats-screen.md)) the fourth, so the tab bar holds the four destinations of the
+  design document, and the sidebar holds those four plus Inbox and Settings.
 - The active item is Trail Teal with a Golden Gold marker. Each item has an icon and a label.
 - Going back returns to the previous screen at the scroll position you left.
 - The MVP Settings screen shows the Immich connection status, the home location, the **Scan now**

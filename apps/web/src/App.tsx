@@ -3,6 +3,8 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import { InboxProvider } from './api/inbox';
 import { ScanProvider } from './api/scan';
 import { SessionProvider } from './api/session';
+import { CollectionScreen } from './screens/CollectionScreen';
+import { CollectionsScreen } from './screens/CollectionsScreen';
 import { InboxScreen } from './screens/InboxScreen';
 import { MapScreen } from './screens/MapScreen';
 import { SettingsScreen } from './screens/SettingsScreen';
@@ -24,6 +26,8 @@ export function App() {
               <Route path="/trips" element={<TripsScreen />} />
               <Route path="/trips/:id" element={<TripScreen />} />
               <Route path="/map" element={<MapScreen />} />
+              <Route path="/collections" element={<CollectionsScreen />} />
+              <Route path="/collections/:id" element={<CollectionScreen />} />
               <Route path="/stats" element={<StatsScreen />} />
               <Route path="/stats/continents/:continent" element={<StatsContinentScreen />} />
               <Route path="/stats/countries/:id" element={<StatsCountryScreen />} />
