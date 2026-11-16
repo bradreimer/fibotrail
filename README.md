@@ -41,7 +41,15 @@ same Docker network as Immich.
 On a phone or iPad, open the HTTPS address in Safari and choose **Share**, then **Add to Home
 Screen**. The app then opens full screen, like a native app.
 
-The image is `ghcr.io/bradreimer/fibotrail`. It's built for amd64 and arm64. The first scan of a
+The image is `ghcr.io/bradreimer/fibotrail`. It's built for amd64 and arm64. Its tags are:
+
+| Tag | What it is |
+| --- | --- |
+| `latest` | The newest release. Use this in production |
+| `0.1.0` | One release, pinned. Use this to stay on a version |
+| `edge` | The newest commit on `main`. For testing, and it can be broken |
+
+The example compose file uses `latest`. The first scan of a
 large library takes a while. Fibotrail shows progress, and you can keep using the app.
 
 ## Configuration

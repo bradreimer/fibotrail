@@ -18,6 +18,7 @@ import {
   checkKnowledgeName,
   checkMentions,
   checkReadme,
+  checkPublishWorkflow,
   checkReleaseWorkflow,
   checkSpec,
   checkStatus,
@@ -334,5 +335,19 @@ describe('checkReleaseWorkflow', () => {
 
   it('rejects a branch trigger', () => {
     assert.match(checkReleaseWorkflow(good + '\n    branches: [main]').join(), /branches/);
+  });
+});
+
+describe('checkPublishWorkflow', () => {
+  const good = 'tags: |\n  img:edge\n  img:sha-${{ github.sha }}';
+
+  it('passes edge and the commit tag, and ignores a comment about latest', () => {
+    assert.deepEqual(checkPublishWorkflow(good + '\n# "latest" is for releases'), []);
+  });
+
+  it('rejects latest and a missing tag', () => {
+    assert.match(checkPublishWorkflow(good + '\n  img:latest').join(), /not push latest/);
+    assert.match(checkPublishWorkflow('img:sha-1').join(), /push edge/);
+    assert.match(checkPublishWorkflow('img:edge').join(), /commit tag/);
   });
 });

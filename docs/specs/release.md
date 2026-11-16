@@ -75,6 +75,9 @@ The README keeps its documentation and contributing sections and adds these, in 
 
 - Pushing a tag that matches `v*.*.*` builds `docker/Dockerfile` for linux/amd64 and linux/arm64
   and pushes `ghcr.io/bradreimer/fibotrail:<version>` (without the `v`) and `:latest`.
+- `:latest` means the newest release, and only a release tag pushes it. Every commit on `main` that
+  passes CI pushes `:edge` and `:sha-<commit>` instead, for testing. `:edge` can be broken, and
+  production runs `:latest` or a pinned `:<version>`.
 - A tag build runs only when CI passed on the tagged commit.
 - The existing publish on every `main` commit keeps working.
 - The image carries the version, so the app can show it. `/healthz` or the settings screen reports
@@ -109,6 +112,7 @@ The tag is created only when these are met. They need the maintainer's library a
 - The README's API key section matches the allowed requests list in the code.
 - Pushing `v0.1.0` publishes `:0.1.0` and `:latest` for amd64 and arm64, and `docker pull` works
   without signing in.
+- A commit on `main` moves `:edge` and leaves `:latest` where it was.
 - The three gates before the tag are recorded as met in [status.md](../status.md).
 
 ## Open questions

@@ -18,7 +18,7 @@ issue, not into this file.
 | 1.1 | In Immich, create an API key with `asset.read`, `asset.view`, `asset.statistics`, and `album.read`, and no other permission. See the [README](../../README.md#api-key-permissions) | |
 | 1.2 | Copy `.env.example` to `.env`. Set `IMMICH_API_KEY`, `IMMICH_URL` (the address the container uses, such as `http://immich_server:2283`), and `IMMICH_EXTERNAL_URL` (the address your browser uses) | |
 | 1.3 | In `docker/compose.example.yml`, set the network name to the one your Immich containers use. `docker network ls` lists them | |
-| 1.4 | Start it: `docker compose -f docker/compose.example.yml up -d`. This pulls `ghcr.io/bradreimer/fibotrail:latest`. To test your working copy instead, run `docker compose -f docker/compose.example.yml up -d --build` | |
+| 1.4 | Start it: `docker compose -f docker/compose.example.yml up -d`. Until `v0.1.0` is tagged, `latest` is a stale build, so change the image line in the compose file to `ghcr.io/bradreimer/fibotrail:edge` first. To test your working copy instead, run `docker compose -f docker/compose.example.yml up -d --build` | |
 | 1.5 | `docker ps` shows `fibotrail` as `healthy` within 1 minute | |
 | 1.6 | Open `http://localhost:11235` on the host, set the password, and sign in | |
 | 1.7 | In Settings, the Immich line says "Connected to Immich" with the version. Note the version here: Settings warns when it isn't 3.4 | |

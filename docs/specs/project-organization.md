@@ -64,7 +64,8 @@ that the repository stays organized without me policing it.
 
 - `.github/workflows/release.yml` runs only for tags that match `v*.*.*`. It checks that the
   tagged commit is on `main` and has a passing CI run, builds amd64 and arm64, and pushes the
-  version and `latest`, with the version passed to the build.
+  version and `latest`, with the version passed to the build. `.github/workflows/publish-image.yml`
+  pushes `edge` and `sha-<commit>` and never `latest`.
 
 ### The docs folder
 

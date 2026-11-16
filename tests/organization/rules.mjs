@@ -388,6 +388,17 @@ export function checkReleaseWorkflow(yaml) {
   return problems;
 }
 
+/** The main-branch publish workflow pushes "edge" and the commit tag, and never "latest". */
+export function checkPublishWorkflow(yaml) {
+  const problems = [];
+  if (!/:edge\b/.test(yaml)) problems.push('must push edge');
+  if (!/:sha-/.test(yaml)) problems.push('must push the commit tag');
+  if (/:latest\b/.test(yaml.replace(/^\s*#.*$/gm, ''))) {
+    problems.push('must not push latest, which is for releases only');
+  }
+  return problems;
+}
+
 /** Text files use LF line endings, have no trailing spaces, and end with exactly one newline. */
 export function checkTextFormat(text) {
   const problems = [];

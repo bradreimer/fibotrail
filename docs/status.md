@@ -12,7 +12,9 @@ maintainer's library and phone, and are listed under Next. See
 
 - Image publishing. After CI passes on a push to `main`,
   `.github/workflows/publish-image.yml` builds `docker/Dockerfile` for amd64 and arm64 and pushes
-  `ghcr.io/bradreimer/fibotrail:latest` and `:sha-<commit>`. Not yet run on GitHub. The package
+  `ghcr.io/bradreimer/fibotrail:edge` and `:sha-<commit>`, for testing. `:latest` is for releases
+  only. The first run was on 2026-11-15, before `edge` replaced `latest`, so `:latest` is a stale
+  build of `main` until `v0.1.0` is tagged. The package
   starts private; make it public in the package settings to pull without signing in.
 - [#1](https://github.com/bradreimer/fibotrail/pull/1) Design and branding document.
 - [#2](https://github.com/bradreimer/fibotrail/issues/2) Project organization: instructions,

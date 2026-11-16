@@ -3,7 +3,7 @@ name: Release
 # Intention: pushing a tag such as v0.1.0 publishes that version of the image, and nothing else does.
 # Method: refuse a tag that isn't vMAJOR.MINOR.PATCH, that isn't on main, or whose commit has no
 # passing CI run. Then build docker/Dockerfile for amd64 and arm64 and push it as ":0.1.0" (the tag
-# without the v) and ":latest". The version goes into the image, where /healthz reports it.
+# without the v) and ":latest", the tag for production. The version goes into the image, where /healthz reports it.
 
 on:
   push:
