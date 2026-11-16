@@ -36,6 +36,13 @@ const PAIRS: { text: string; fill: string; minimum: number; what: string }[] = [
     what: 'the focus ring on its halo',
   },
   { text: '--fibo-on-coral', fill: '--fibo-coral', minimum: TEXT, what: 'text on Coral' },
+  { text: '--fibo-on-viewer', fill: '--fibo-viewer', minimum: TEXT, what: 'text in the viewer' },
+  {
+    text: '--fibo-on-viewer-muted',
+    fill: '--fibo-viewer',
+    minimum: TEXT,
+    what: 'the hint in the viewer',
+  },
 ];
 
 describe.each([
@@ -60,6 +67,21 @@ describe.each([
         `Paper on the scrim over ${photo} is ${ratio.toFixed(2)}:1`,
       ).toBeGreaterThanOrEqual(TEXT);
     }
+  });
+});
+
+describe('the photo viewer', () => {
+  it('keeps the same colors in dark mode, so it stays dark', () => {
+    for (const name of ['--fibo-viewer', '--fibo-on-viewer', '--fibo-on-viewer-muted']) {
+      expect(resolve(name, dark), name).toEqual(resolve(name, light));
+    }
+  });
+
+  it('takes its colors from the viewer tokens, not from Ink and Paper, which swap', () => {
+    const trip = readFileSync(path.join(stylesDir, 'trip.css'), 'utf8');
+    const viewer = trip.match(/\n\.viewer \{([^}]*)\}/)?.[1] ?? '';
+    expect(viewer).toMatch(/background: var\(--fibo-viewer\)/);
+    expect(viewer).toMatch(/color: var\(--fibo-on-viewer\)/);
   });
 });
 

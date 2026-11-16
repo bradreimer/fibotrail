@@ -255,8 +255,8 @@
   grid-template-rows: auto minmax(0, 1fr) auto;
   padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom)
     env(safe-area-inset-left);
-  background: var(--fibo-ink);
-  color: var(--fibo-paper);
+  background: var(--fibo-viewer);
+  color: var(--fibo-on-viewer);
   animation: screen-in var(--fibo-dur-base) ease-out;
 }
 
@@ -339,9 +339,8 @@
 
 .viewer__hint {
   margin: 0;
-  color: var(--fibo-on-ocean);
+  color: var(--fibo-on-viewer-muted);
   font-size: var(--fibo-text-caption);
-  opacity: 0.85;
 }
 
 .viewer__map {
@@ -350,8 +349,8 @@
 }
 
 .viewer .button--secondary {
-  border-color: var(--fibo-paper);
-  color: var(--fibo-paper);
+  border-color: var(--fibo-on-viewer);
+  color: var(--fibo-on-viewer);
 }
 
 @media (prefers-reduced-motion: reduce) {

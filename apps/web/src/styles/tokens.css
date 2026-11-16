@@ -28,6 +28,14 @@
   /* Text on a photo sits on this. Paper text on it is at least 7:1, whatever the photo. */
   --fibo-scrim-strong: color-mix(in srgb, #071e25 85%, transparent);
 
+  /*
+   * The photo viewer is dark in both modes, so these values never swap. Paper on the viewer is
+   * 13.2:1, and the muted hint is 9.0:1.
+   */
+  --fibo-viewer: #1d2b2f;
+  --fibo-on-viewer: #f7f3ea;
+  --fibo-on-viewer-muted: color-mix(in srgb, #f7f3ea 80%, #1d2b2f);
+
   /* Shape and space: Fibonacci numbers */
   --fibo-radius: 13px;
   --fibo-space-1: 3px;
