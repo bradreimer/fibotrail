@@ -177,14 +177,17 @@ export function PhotoViewer({
       <div className="viewer__details">
         <p className="viewer__time">{formatPhotoTime(photo.localTime)}</p>
         {photo.place && <p>{photo.place}</p>}
+        {/* One settings row, as in iOS: the label on the left, the switch on the right. */}
         <label className="viewer__hide">
+          <span>Hide from map</span>
           <input
             type="checkbox"
+            role="switch"
+            className="switch"
             checked={checked}
             aria-describedby="viewer-hide-hint"
             onChange={(event) => toggleHidden(event.target.checked)}
           />
-          <span>Hide</span>
         </label>
         <p className="viewer__hint" id="viewer-hide-hint">
           Keeps this photo in the trip but off the map.

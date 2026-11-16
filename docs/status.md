@@ -128,8 +128,11 @@ The MVP plan is in [roadmap.md](roadmap.md#mvp-version-01). Its specs are in
 - Photos and stops that are on the way (layover airports and in-transit photos): hide a photo from
   the map ([#35](https://github.com/bradreimer/fibotrail/issues/35)), then suggested stops
   ([#32](https://github.com/bradreimer/fibotrail/issues/32)). Both are one idea, specced in
-  [on-the-way.md](specs/on-the-way.md). The first part, hiding a photo (#35), is built and not yet
-  checked on a phone. Suggested stops (#32) aren't built.
+  [on-the-way.md](specs/on-the-way.md). The first part, hiding a photo (#35), is built. Its
+  checkbox became an iOS-style **Hide from map** switch
+  ([#52](https://github.com/bradreimer/fibotrail/issues/52)), and the viewer now stays dark in dark
+  mode ([#51](https://github.com/bradreimer/fibotrail/issues/51)). Both were checked in a desktop
+  browser at phone size, not yet on a phone. Suggested stops (#32) aren't built.
 - Answer the remaining open questions in the
   [design and branding document](knowledge/design-and-branding.md#risks-open-questions-and-next-steps).
   The server language is settled: see [ADR-004](adr/ADR-004-technology-stack.md).

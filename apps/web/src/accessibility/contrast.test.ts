@@ -43,6 +43,19 @@ const PAIRS: { text: string; fill: string; minimum: number; what: string }[] = [
     minimum: TEXT,
     what: 'the hint in the viewer',
   },
+  { text: '--fibo-on-viewer', fill: '--fibo-viewer-row', minimum: TEXT, what: 'a viewer row' },
+  {
+    text: '--fibo-viewer-accent',
+    fill: '--fibo-viewer-row',
+    minimum: CONTROL,
+    what: 'a switch that is on',
+  },
+  {
+    text: '--fibo-viewer-track',
+    fill: '--fibo-viewer-row',
+    minimum: CONTROL,
+    what: 'a switch that is off',
+  },
 ];
 
 describe.each([
@@ -72,7 +85,14 @@ describe.each([
 
 describe('the photo viewer', () => {
   it('keeps the same colors in dark mode, so it stays dark', () => {
-    for (const name of ['--fibo-viewer', '--fibo-on-viewer', '--fibo-on-viewer-muted']) {
+    for (const name of [
+      '--fibo-viewer',
+      '--fibo-on-viewer',
+      '--fibo-on-viewer-muted',
+      '--fibo-viewer-row',
+      '--fibo-viewer-accent',
+      '--fibo-viewer-track',
+    ]) {
       expect(resolve(name, dark), name).toEqual(resolve(name, light));
     }
   });
