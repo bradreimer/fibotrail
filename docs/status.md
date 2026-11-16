@@ -147,8 +147,12 @@ The plan is in [roadmap.md](roadmap.md). Specs are in [specs/](specs/README.md).
 - Suggest stops that are on the way ([#32](https://github.com/bradreimer/fibotrail/issues/32)), the
   second part of the idea in [on-the-way.md](specs/on-the-way.md). Its rule needs real examples
   first, which `fibotrail stops` ([#60](https://github.com/bradreimer/fibotrail/issues/60)) produces.
-- Phase 5: collections, such as Disney parks, and the Stats screen. The tab bar then gains
-  Collections and Stats, per ADR-007.
+- Phase 5: collections, such as Disney and Universal parks, and the Stats screen. The tab bar then
+  gains Collections and Stats, per ADR-007. Collections are specified in
+  [collections.md](specs/collections.md)
+  ([#64](https://github.com/bradreimer/fibotrail/issues/64)). Park days are derived from stored photo
+  positions, per [ADR-013](adr/ADR-013-park-days-are-derived-from-stored-photo-positions.md). The
+  boundary files and the Theme parks view spec come next.
 - Answer the open questions in the [life map spec](specs/life-map.md) with real use: whether the
   home country should always fill in, and whether 25 km is the right distance for a stop just off a
   coast.
