@@ -87,6 +87,10 @@ cd apps/web && npm run outlines
 It writes `apps/server/src/Fibotrail.Places/Data/countries.json.gz`. A web test fails when the copy
 and the package disagree.
 
+Russia and Fiji have rings that cross longitude 180, and drawn flat they cover the sea. Both the
+script and the web map cut those rings with `src/map/antimeridian.mjs`, one shared function with its
+own tests. Don't load the outlines without it.
+
 ## After you change the icon
 
 The app icons and the iOS launch images are drawn by a script, from the spiral of the logo

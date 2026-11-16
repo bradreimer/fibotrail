@@ -57,4 +57,41 @@ public class CountryOutlinesTests
         Assert.Null(Finder.Find(38.78, -10.2));
         Assert.Null(Finder.Find(0, -30));
     }
+
+    // Russia, Fiji, and Antarctica have rings that cross the antimeridian. Drawn flat, the edge from
+    // 179.9 East to 180 West runs across the whole world, and the outline then covers the sea.
+    [Theory]
+    [InlineData(67.0, -30.0)]
+    [InlineData(67.0, 0.0)]
+    [InlineData(66.5, -60.0)]
+    [InlineData(73.0, -150.0)]
+    public void The_open_sea_at_the_latitude_of_Chukotka_belongs_to_no_country(double latitude, double longitude)
+    {
+        Assert.Null(Finder.Find(latitude, longitude));
+    }
+
+    [Theory]
+    [InlineData(67.8, -115.1, "Canada")]
+    [InlineData(64.2, -51.7, "Greenland")]
+    [InlineData(64.84, -147.72, "United States of America")]
+    public void Places_in_the_far_north_are_in_their_own_countries_and_not_in_Russia(double latitude, double longitude, string country)
+    {
+        Assert.Equal(country, Finder.Find(latitude, longitude)!.Country.Name);
+    }
+
+    [Theory]
+    [InlineData(64.73, 177.5)]
+    [InlineData(66.16, -169.8)]
+    public void Chukotka_is_in_Russia_on_both_sides_of_the_antimeridian(double latitude, double longitude)
+    {
+        Assert.Equal("Russia", Finder.Find(latitude, longitude)!.Country.Name);
+    }
+
+    [Theory]
+    [InlineData(-17.7, 178.0)]
+    [InlineData(-16.8, -179.95)]
+    public void Fiji_is_found_on_both_sides_of_the_antimeridian(double latitude, double longitude)
+    {
+        Assert.Equal("Fiji", Finder.Find(latitude, longitude)!.Country.Name);
+    }
 }

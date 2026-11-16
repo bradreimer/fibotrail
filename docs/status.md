@@ -124,7 +124,9 @@ The MVP plan is in [roadmap.md](roadmap.md#mvp-version-01). Its specs are in
   or checked on a phone, the Map screen ([#45](https://github.com/bradreimer/fibotrail/issues/45))
   with the navigation change ([#47](https://github.com/bradreimer/fibotrail/issues/47)): Trips and
   Map in the tab bar, Inbox and Settings in the top bar under 600 px, and all four in the sidebar
-  from 600 px. Zooming to regions and cities is
+  from 600 px. The first look at the Map found a bug: outlines that cross the antimeridian covered the sea
+  and matched stops to Russia ([#55](https://github.com/bradreimer/fibotrail/issues/55)), now fixed
+  in a branch. Zooming to regions and cities is
   [#48](https://github.com/bradreimer/fibotrail/issues/48), not built.
 - Photos and stops that are on the way (layover airports and in-transit photos): hide a photo from
   the map ([#35](https://github.com/bradreimer/fibotrail/issues/35)), then suggested stops

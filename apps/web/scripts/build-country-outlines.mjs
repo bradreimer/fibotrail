@@ -12,16 +12,22 @@ import { gzipSync } from 'node:zlib';
 
 import { feature } from 'topojson-client';
 
+import { cutPolygons } from '../src/map/antimeridian.mjs';
+
 const require = createRequire(import.meta.url);
 const topology = require('world-atlas/countries-50m.json');
 const { version } = require('world-atlas/package.json');
 
 const round = (value) => Math.round(value * 1000) / 1000;
 
-/** A GeoJSON Polygon or MultiPolygon as a list of polygons, each a list of rings (outer ring first). */
+/**
+ * A GeoJSON Polygon or MultiPolygon as a list of polygons, each a list of rings (outer ring first).
+ * Rings that cross the antimeridian (Russia, Fiji) are cut there first, so a flat point-in-polygon
+ * test doesn't see an outline that covers the sea across the world.
+ */
 function polygonsOf(geometry) {
   const polygons = geometry.type === 'Polygon' ? [geometry.coordinates] : geometry.coordinates;
-  return polygons.map((rings) =>
+  return cutPolygons(polygons).map((rings) =>
     rings.map((ring) => ring.map(([lon, lat]) => [round(lon), round(lat)])),
   );
 }

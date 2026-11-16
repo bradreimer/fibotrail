@@ -46,7 +46,8 @@ visited, so that I can see my travel history at a glance.
 - A country is visited when an added trip has a stop in it. Stops are the ones stored with the trip
   ([ADR-010](../adr/ADR-010-stops-and-routes-are-stored-with-the-trip.md)), and they leave out
   photos that are on the way ([on the way](on-the-way.md)), so a layover country doesn't fill in.
-- A stop belongs to the country whose outline contains its position. The outlines are the bundled
+- A stop belongs to the country whose outline contains its position. Outlines that cross the
+  antimeridian (Russia and Fiji) are cut there first, so they don't cover the sea. The outlines are the bundled
   Natural Earth countries of [ADR-009](../adr/ADR-009-a-bundled-natural-earth-base-map.md).
 - A stop that no outline contains, such as one on a coast at 1:50 million detail, joins the nearest
   country within 25 km. A stop farther than that from every country counts for none. 25 km is a
