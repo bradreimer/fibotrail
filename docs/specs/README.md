@@ -66,4 +66,5 @@ None.
 | [life-map.md](life-map.md) | The Map screen: a world map of visited countries, a summary, first visits, and routes |
 | [main-destination.md](main-destination.md) | How a trip's main destination is chosen: the city with the most days |
 | [on-the-way.md](on-the-way.md) | Photos and stops that belong to a trip but not to its map: hide a photo, and a set-aside idea for suggested stops |
+| [collections.md](collections.md) | Collections of places, such as Disney and Universal parks, with a stamp, days, and trips for each place |
 | [release.md](release.md) | The accessibility checks, README, and tagged image for version 0.1 |
