@@ -88,8 +88,9 @@ The README keeps its documentation and contributing sections and adds these, in 
 
 The tag is created only when these are met. They need the maintainer's library and phone.
 
-- The replay test finds the known trips
-  ([trip detection](trip-detection.md#replay-command)).
+- The review gate is met: at least 8 of the first 10 High-confidence suggestions are accepted, and
+  at most 1 of 3 to 5 remembered trips is missing
+  ([trip detection](trip-detection.md#review-gate)).
 - A full scan of the real library finishes, and the Immich access log shows only the four allowed
   requests ([immich scanning](immich-scanning.md)).
 - The ADR-007 run-through passes on an iPhone for the app shell, inbox, library, and trip page.

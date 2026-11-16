@@ -3,8 +3,8 @@
 ## Current milestone
 
 MVP step 3d, the release. Every work item of the MVP is built: steps 2a, 2b, 3a, 3b, and 3c.
-**Two gates aren't met yet.** The gate of step 3a, the replay test on the real library, hasn't
-run. Every UI work item still needs the ADR-007 run-through on a real iPhone. Both need the
+**Two gates aren't met yet.** The gate of step 3a, the review gate on the real library, is being
+run: the first scan finished and found 34 suggestions. Every UI work item still needs the ADR-007 run-through on a real iPhone. Both need the
 maintainer's library and phone, and are listed under Next. See
 [roadmap.md](roadmap.md#mvp-version-01).
 
@@ -94,11 +94,16 @@ The MVP plan is in [roadmap.md](roadmap.md#mvp-version-01). Its seven specs are 
   in the shapes the spike recorded, and never against a real Immich server. The criteria "a full
   scan of the maintainer's library finishes" and "the Immich access log shows only requests on
   the allowed list" are still open for [#7](https://github.com/bradreimer/fibotrail/issues/7).
-- Run the replay test, which is the gate of step 3a. Put five to ten known trips in
-  `/data/known-trips.json`, scan the real library, confirm the home location, and run
-  `docker exec -it fibotrail fibotrail replay`. The format is in the
-  [trip detection spec](specs/trip-detection.md#replay-command). The detector was tested with
-  made-up photo sets only. The three open questions in that spec wait for this result.
+- Pass the review gate, which is the gate of step 3a. Review the first 10 High-confidence
+  suggestions in the Inbox (accept at least 8), and check that 3 to 5 trips you remember appear (at
+  most 1 missing). The rules are in the
+  [trip detection spec](specs/trip-detection.md#review-gate). It replaced the replay test as the
+  gate on 2026-11-16, because writing a list of known trips is the work the app is meant to do.
+  The three open questions in that spec wait for this result.
+- Build the trip names work: [#31](https://github.com/bradreimer/fibotrail/issues/31) (the main
+  destination by days) and [#30](https://github.com/bradreimer/fibotrail/issues/30) (a choice of
+  names), from the [trip names spec](specs/trip-names.md). The idea of marking airports and
+  layovers is [#32](https://github.com/bradreimer/fibotrail/issues/32).
 - Answer the remaining open questions in the
   [design and branding document](knowledge/design-and-branding.md#risks-open-questions-and-next-steps).
   The server language is settled: see [ADR-004](adr/ADR-004-technology-stack.md).

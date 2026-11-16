@@ -91,9 +91,10 @@ home is, so that I review suggestions and don't build my travel history by hand.
 7. **Draw the route.** Connect the stops in order with straight lines.
 8. **Measure.** Distance is the sum of the lines between consecutive stops. Farthest from home is
    the greatest distance from home to a stop.
-9. **Name.** The suggested name is the city with the most photos, then the month and year of the
-   first day, such as "Orlando, March 2027". When no city is known, use the state, then the
-   country.
+9. **Name.** The suggested name is the main place, then the month and year of the first day, such
+   as "Orlando, March 2027". The main place is the city where the most days were spent, with the
+   state and then the country as fallbacks. The options for other names, and the rule for the main
+   place, are in [trip names](trip-names.md).
 10. **Score.** Label each suggestion High, Medium, or Low confidence from its photo count, days,
     and distance from home. High needs at least 50 photos, 3 days, and 150 km from home. Low is
     a trip with fewer than 25 away photos, which clears the minimum photos by less than 25
@@ -124,7 +125,33 @@ right day.
   if the trip comes back.
 - A cover you chose stays for as long as its photo is part of the trip.
 
+### Review gate
+
+Intention: judge detection by what you would accept, not by a list of trips you first have to
+remember. This is the gate for MVP step 3a. It replaces the replay test as the gate, per the
+decision of 2026-11-16 in [#24](https://github.com/bradreimer/fibotrail/issues/24).
+
+Method: scan the real library and confirm the home location. Then:
+
+1. **Accuracy.** Take the first 10 High-confidence suggestions in the inbox, newest first, or all
+   of them when there are fewer. Count the ones you would accept with **Add trip**. A trip is
+   accepted when its dates and photos are right. A different name or cover doesn't count against
+   it. A trip that should be merged with another, split in two, or isn't a trip doesn't count.
+   The gate is met when at least 8 of 10 are accepted, or at least 80 percent when there are
+   fewer than 10.
+2. **Misses.** Write down 3 to 5 trips you remember without looking in your library. A trip is
+   found when a suggestion's dates cover its days. The gate is met when at most 1 trip is missing.
+3. **Record.** Write the counts, and the reason for each trip that failed, in
+   [status.md](../status.md). Answer the open questions below with what you saw.
+
+The numbers are a start. If a gate fails, tune one default at a time, scan again, and record each
+try, the way the
+[first scan and replay checklist](../knowledge/first-scan-and-replay-checklist.md) describes.
+
 ### Replay command
+
+The replay command is a tuning tool and no longer a gate. Use it when you have a list of trips and
+want a number after a rule change.
 
 - A command in the container reads a list of known trips from a file in `/data`. Each entry has a
   name, a start date, and an end date.
@@ -149,21 +176,24 @@ right day.
 - Running detection twice on the same photos produces the same trips with the same fingerprints.
 - After **Not a trip**, a rescan that adds photos to the same trip creates no suggestion.
 - After a rename, a rescan keeps the new name.
-- The replay command matches at least 8 of every 10 known trips on the maintainer's library. This
-  is the gate for MVP step 3b.
+- The review gate is met on the maintainer's library: at least 8 of the first 10 High-confidence
+  suggestions are accepted, and at most 1 of 3 to 5 remembered trips is missing. This is the gate
+  for MVP step 3a.
+- The replay command still runs and still reports each known trip, but its result doesn't gate a
+  release.
 
 ## Open questions
 
 1. Are the thresholds for High, Medium, and Low confidence right? Rule 10 has the starting
    point. The Low margin applies to the photo count only: with a minimum of 2 days, a quarter of
-   a day can't be measured, and every weekend trip would be Low. The replay test on the real
+   a day can't be measured, and every weekend trip would be Low. The review gate on the real
    library settles it, and it hasn't run yet.
 2. Does a photo at home split too many trips? A photo inside the home radius ends a trip, per
    rule 3. If someone else in the household adds photos at home to the same library while you're
-   away, your trip is split in two. The replay test shows how often this happens.
+   away, your trip is split in two. The review gate shows how often this happens.
 3. Should photos with no position count toward the minimum photos? 84.5 percent of the
    maintainer's photos have no position, and rule 4 counts away photos only. A trip taken with a
-   camera that records no position can fall under the minimum. The replay test shows whether
-   known trips are missed for this reason.
+   camera that records no position can fall under the minimum. The review gate shows whether
+   remembered trips are missed for this reason.
 4. Does the home suggestion work for a library with two homes, such as after a move? The MVP uses
-   one home location. A dated list of homes is a later feature if the replay test shows a need.
+   one home location. A dated list of homes is a later feature if the review gate shows a need.

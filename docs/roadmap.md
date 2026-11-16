@@ -15,7 +15,7 @@ the trip page needs it.
 | --- | --- | --- | --- |
 | 1 | Spike | Check Immich fields, keys, and time zones | Immich fields confirmed |
 | 2 | Foundation | Repository and CI, Docker image, scanner, database | None |
-| 3 | Trips | Detector, inbox, library, and trip page with its route map | Replay test finds your known trips, then version 0.1 published |
+| 3 | Trips | Detector, inbox, library, and trip page with its route map | Review gate met (you accept most High-confidence suggestions, and remembered trips appear), then version 0.1 published |
 | 4 | Maps | Life map and boundaries | None |
 | 5 | Collections | Disney parks, other sets, and stats | None |
 | 6 | Release | PWA polish, accessibility, docs, v1.0 | Version 1.0 published |
@@ -54,8 +54,8 @@ The spike, step 1, is work item [#12](https://github.com/bradreimer/fibotrail/is
 Phase 1      Phase 2                    Phase 3
 1 Spike -◆-> 2a Skeleton -> 2b Scanner -> 3a Detector -◆-> 3b Inbox -> 3c Trips -> 3d Release -◆
          |                                            |                                       |
-   Immich fields                              Replay test finds                         Version 0.1
-     confirmed                                your known trips                           published
+   Immich fields                              Review gate met:                          Version 0.1
+     confirmed                                you accept most trips                      published
 ```
 
 Each diamond is a gate. The next step starts only when its criterion is met.
@@ -65,7 +65,7 @@ Each diamond is a gate. The next step starts only when its criterion is met.
 | 1 Spike | A throwaway script that pages through `POST /api/search/metadata` with a read-only key and saves a sample. A knowledge document that records the field names for capture time, time zone, GPS, and place names, how to request only changed photos, the share of photos with no GPS, and the tested Immich version | **Gate:** Immich fields confirmed |
 | 2a Skeleton | The .NET solution in `apps/server` and the Vite project in `apps/web`, with the checks from the [quality gates spec](specs/quality-gates.md). SQLite through Entity Framework Core, with migrations at startup. First-run password, sign-in, and the `fibotrail reset-password` command per [ADR-005](adr/ADR-005-secrets-come-from-the-environment.md). The app shell with the design tokens, self-hosted fonts, three-tab bar, and the behaviors in [ADR-007](adr/ADR-007-native-ios-feel-through-a-progressive-web-app.md). The two-stage Docker image, `/healthz`, and an example compose file | `docker compose up` shows the sign-in page, the app installs to an iPhone home screen, and CI is green |
 | 2b Scanner | The Immich client generated from the OpenAPI file. A connection check with plain error messages. A timeout for each Immich request, set by `IMMICH_TIMEOUT_SECONDS` (30 by default), with a retry and a plain message when Immich is slow. A paged scanner that resumes from a cursor and is incremental after the first run. The `photo` and `scan_run` tables. A **Scan now** button and the progress banner. The thumbnail proxy and cache | A full scan of your library finishes, a second scan reads only new photos, and no request writes to Immich |
-| 3a Detector | Detection steps 1 through 10 of the design document, as pure functions in their own C# project, with default settings. The home location suggestion. Stops, route, name, confidence, and fingerprint. Reconciliation with decisions per [ADR-002](adr/ADR-002-decisions-are-stored-separately-from-detected-data.md). The `trip`, `trip_photo`, `decision`, and `setting` tables. A replay command that compares the output with a list of your known trips | **Gate:** the replay test finds your known trips, and a rescan never undoes a decision |
+| 3a Detector | Detection steps 1 through 10 of the design document, as pure functions in their own C# project, with default settings. The home location suggestion. Stops, route, name, confidence, and fingerprint. Reconciliation with decisions per [ADR-002](adr/ADR-002-decisions-are-stored-separately-from-detected-data.md). The `trip`, `trip_photo`, `decision`, and `setting` tables. A replay command that compares the output with a list of known trips, for tuning | **Gate:** the [review gate](specs/trip-detection.md#review-gate) is met, and a rescan never undoes a decision |
 | 3b Inbox | Suggestion cards with dates, places, photo count, a photo strip, and a route preview. **Add trip**, **Not a trip**, and **Later**, with swipe on touch screens. The **Ignored** tab with restore. Rename and cover photo selection when you add a trip. The inbox badge | You can clear your inbox on a phone, and a rescan brings nothing back |
 | 3c Trips | The trip library grid, sorted by date. The trip page: header, route map, stat tiles (days, photos, stops, distance, farthest from home), and the photo timeline by day. The photo viewer with swipe and an **Open in Immich** link built from `IMMICH_EXTERNAL_URL`, the address your browser uses, which can differ from the `IMMICH_URL` the container uses | The trip library and trip page work with your real data on phone and iPad |
 | 3d Release | The accessibility checks from the design document. The README sections for installation, API key permissions, and backup. The `v0.1.0` image for amd64 and arm64 on GHCR | **Gate:** version 0.1 published |
@@ -103,7 +103,7 @@ Each one is recorded as an ADR when it's made. Three are decided:
       the `.env` file, the password, and the home location.
 - [ ] Adding or ignoring a suggestion works on phone and iPad, and the choice survives a rescan.
 - [ ] The trip library and trip page work with your real data.
-- [ ] The replay test finds your known trips.
+- [ ] The [review gate](specs/trip-detection.md#review-gate) is met: you accept at least 8 of the first 10 High-confidence suggestions, and at most 1 of 3 to 5 remembered trips is missing.
 - [ ] Fibotrail makes no write request to Immich and no outside request by default.
 - [ ] The app passes the iPhone run-through in ADR-007.
 
@@ -113,7 +113,7 @@ Each one is recorded as an ADR when it's made. Three are decided:
 | --- | --- | --- |
 | Immich returns different fields than expected | The scanner and detector need rework | Step 1 confirms the fields before anything is built on them |
 | Many photos have no GPS | Trips are missed or look thin | Attach photos by date, and report the count from the spike |
-| Detection misses or splits known trips | You lose trust in the inbox | Tune the defaults against the replay test before the inbox is built |
+| Detection misses or splits trips | You lose trust in the inbox | Tune the defaults against the review gate before the inbox is built |
 | An Immich request hangs | A scan stalls with no message | Every request has a timeout, and the scan resumes from the cursor |
 | The first scan is slow on a large library | Poor first impression | Scan in batches, show progress, and resume from the cursor |
 
@@ -121,7 +121,7 @@ Each one is recorded as an ADR when it's made. Three are decided:
 
 1. A read-only Immich API key in `.env` and the Immich version, for the spike.
    `IMMICH_EXTERNAL_URL` in `.env` is needed by step 3c.
-2. A list of five to ten known trips with rough dates, for the replay test.
+2. About an hour to review the inbox on the real library, and the names of three to five trips you remember, for the review gate.
 3. Where Immich runs (for example, Unraid, TrueNAS, or plain Docker), so the compose example
    matches.
 
