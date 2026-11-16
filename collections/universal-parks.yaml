@@ -1,7 +1,6 @@
 # Universal parks. Each place needs a boundary file in boundaries/ before it can be listed. To add a
 # park, export its outline (see README.md), save it as boundaries/<id>.geojson, and add its entry.
-# Still to add: Universal Studios Hollywood, Universal Studios Japan, Universal Studios Singapore, and
-# Universal Beijing Resort.
+# Still to add: Universal Studios Japan, Universal Studios Singapore, and Universal Beijing Resort.
 id: universal-parks
 name: Universal parks
 description: Every Universal theme park in the world
@@ -26,3 +25,9 @@ places:
     group: Universal Orlando Resort
     status: open
     boundary: boundaries/epic-universe.geojson
+
+  - id: universal-studios-hollywood
+    name: Universal Studios Hollywood
+    group: Universal Studios Hollywood
+    status: open
+    boundary: boundaries/universal-studios-hollywood.geojson
