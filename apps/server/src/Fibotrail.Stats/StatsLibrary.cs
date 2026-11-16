@@ -1,3 +1,4 @@
+using Fibotrail.Detection;
 using Fibotrail.Places;
 
 namespace Fibotrail.Stats;
@@ -54,12 +55,13 @@ public sealed record ContinentProgress(Continent Continent, int Visited, int Tot
 /// </summary>
 public sealed class StatsLibrary
 {
-    private StatsLibrary(IReadOnlyList<StatsTrip> trips, IReadOnlyList<CountryStats> countries, IReadOnlyDictionary<Continent, int> totals, int outlineCountries)
+    private StatsLibrary(IReadOnlyList<StatsTrip> trips, IReadOnlyList<CountryStats> countries, IReadOnlyDictionary<Continent, int> totals, int outlineCountries, GeoPoint? home)
     {
         Trips = trips;
         Countries = countries;
         ContinentTotals = totals;
         OutlineCountries = outlineCountries;
+        Home = home;
     }
 
     /// <summary>The added trips, earliest first.</summary>
@@ -74,8 +76,11 @@ public sealed class StatsLibrary
     /// <summary>The number of bundled outlines that have an id.</summary>
     public int OutlineCountries { get; }
 
+    /// <summary>The home location, or null before you confirm one. No route returns it.</summary>
+    public GeoPoint? Home { get; }
+
     /// <summary>Builds the library. Pass added trips only.</summary>
-    public static StatsLibrary Build(IEnumerable<StatsTrip> trips, CountryFinder finder, IEnumerable<CountryOutline> outlines)
+    public static StatsLibrary Build(IEnumerable<StatsTrip> trips, CountryFinder finder, IEnumerable<CountryOutline> outlines, GeoPoint? home = null)
     {
         ArgumentNullException.ThrowIfNull(trips);
         ArgumentNullException.ThrowIfNull(finder);
@@ -110,7 +115,7 @@ public sealed class StatsLibrary
             .ThenBy(country => country.Country.Name, StringComparer.Ordinal)
             .ToList();
 
-        return new StatsLibrary(ordered, countries, Continents.Totals(outlineList), outlineList.Count(outline => outline.Id is not null));
+        return new StatsLibrary(ordered, countries, Continents.Totals(outlineList), outlineList.Count(outline => outline.Id is not null), home);
     }
 
     /// <summary>The summary tiles.</summary>

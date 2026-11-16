@@ -319,3 +319,91 @@
     transform: scale(1);
   }
 }
+
+/* The distance rings: an abstract chart of home, rings, and one dot for each trip. */
+.rings {
+  display: grid;
+  gap: var(--fibo-space-3);
+  justify-items: center;
+}
+
+.rings__chart {
+  width: min(100%, calc(var(--fibo-space-7) * 7));
+  height: auto;
+}
+
+.rings__edge,
+.rings__ring {
+  fill: none;
+  stroke: var(--fibo-mist);
+}
+
+.rings__label,
+.rings__compass {
+  fill: var(--fibo-ink-muted);
+  font-size: var(--fibo-text-caption);
+}
+
+.rings__home {
+  fill: var(--fibo-ink);
+}
+
+.rings__dot {
+  transition: opacity var(--fibo-dur-base);
+  animation: rings-in var(--fibo-dur-signature) both;
+}
+
+.rings__dot--faded {
+  opacity: 0.18;
+}
+
+.rings__mark {
+  fill: var(--fibo-teal);
+}
+
+.rings__mark--selected {
+  fill: var(--fibo-gold);
+  stroke: var(--fibo-paper);
+  stroke-width: var(--fibo-border);
+}
+
+.rings__hit {
+  fill: transparent;
+  cursor: pointer;
+}
+
+.rings__bands {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--fibo-space-2);
+  justify-content: center;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rings__band {
+  min-height: var(--fibo-tap);
+  padding: 0 var(--fibo-space-3);
+  border: var(--fibo-border) solid var(--fibo-teal);
+  border-radius: var(--fibo-radius);
+  background: none;
+  color: var(--fibo-teal);
+  font: inherit;
+  cursor: pointer;
+}
+
+.rings__band[aria-pressed='true'] {
+  background: var(--fibo-teal);
+  color: var(--fibo-on-teal);
+}
+
+@keyframes rings-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}

@@ -15,6 +15,15 @@ version 0.1 and the per-line results of the accessibility checklist are also sti
 
 ## Completed
 
+- [#67](https://github.com/bradreimer/fibotrail/issues/67) The distance rings, a Stats view
+  ([spec](specs/distance-rings.md)). Each added trip is a dot at the bearing and the distance of its
+  farthest stop from home, on a log scale out to 20,000 km, with five distance bands, **Nearer** and
+  **Farther** buttons, and a text alternative. The home location is a new fact in the stats library,
+  and the route returns distances and bearings only. `Geo.BearingDegrees` is new in
+  `Fibotrail.Detection`. Checked in a desktop browser only, not yet on a phone. The two open
+  questions in the spec (the farthest stop versus the main destination, and a fixed outer edge)
+  are unanswered.
+
 - [#66](https://github.com/bradreimer/fibotrail/issues/66) The travel clock, a Stats view
   ([spec](specs/travel-clock.md)). A wheel of 12 months where each bar grows with the days you were
   away in that month, across every year, with a **Days** and **Trips** switch, **Earlier** and
@@ -188,7 +197,8 @@ The plan is in [roadmap.md](roadmap.md). Specs are in [specs/](specs/README.md).
   [season-wheel.md](specs/season-wheel.md)), the trip spiral
   ([#59](https://github.com/bradreimer/fibotrail/issues/59), [trip-spiral.md](specs/trip-spiral.md)),
   and the distance rings ([#67](https://github.com/bradreimer/fibotrail/issues/67),
-  [distance-rings.md](specs/distance-rings.md)). The travel clock is built. The others aren't.
+  [distance-rings.md](specs/distance-rings.md)). The travel clock and the distance rings are built.
+  The others aren't.
 - Answer the remaining open questions in the
   [design and branding document](knowledge/design-and-branding.md#risks-open-questions-and-next-steps).
   The server language is settled: see [ADR-004](adr/ADR-004-technology-stack.md).

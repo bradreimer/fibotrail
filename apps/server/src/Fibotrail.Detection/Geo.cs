@@ -25,6 +25,21 @@ public static class Geo
     }
 
     /// <summary>
+    /// The initial great-circle bearing from one point to another, in degrees from 0 (north) to just
+    /// under 360, clockwise. It follows the shorter way around the globe, so a trip across the
+    /// antimeridian points the short way.
+    /// </summary>
+    public static double BearingDegrees(GeoPoint from, GeoPoint to)
+    {
+        var latitude1 = double.DegreesToRadians(from.Latitude);
+        var latitude2 = double.DegreesToRadians(to.Latitude);
+        var deltaLongitude = double.DegreesToRadians(to.Longitude - from.Longitude);
+        var y = Math.Sin(deltaLongitude) * Math.Cos(latitude2);
+        var x = (Math.Cos(latitude1) * Math.Sin(latitude2)) - (Math.Sin(latitude1) * Math.Cos(latitude2) * Math.Cos(deltaLongitude));
+        return (double.RadiansToDegrees(Math.Atan2(y, x)) + 360) % 360;
+    }
+
+    /// <summary>
     /// Groups points that are within a radius of each other. Points are taken in the order given.
     /// Each joins the first group whose first point is within the radius, or starts a group. The
     /// same input always gives the same groups, in the order their first points appeared.

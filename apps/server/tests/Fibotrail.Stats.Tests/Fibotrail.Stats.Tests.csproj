@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Fibotrail.Stats\Fibotrail.Stats.csproj" />
+    <ProjectReference Include="..\..\src\Fibotrail.Detection\Fibotrail.Detection.csproj" />
     <ProjectReference Include="..\..\src\Fibotrail.Places\Fibotrail.Places.csproj" />
   </ItemGroup>
 
