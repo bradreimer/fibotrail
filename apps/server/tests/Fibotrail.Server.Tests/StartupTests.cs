@@ -152,6 +152,41 @@ public class ServerSettingsTests
     }
 
     [Fact]
+    public void A_data_folder_that_can_be_written_to_passes_the_check()
+    {
+        var folder = Directory.CreateTempSubdirectory("fibotrail-data-").FullName;
+        var settings = new ServerSettings(folder, new Uri("http://immich_server:2283"), "abc");
+
+        Assert.Null(DataFolderCheck.Verify(settings));
+        Assert.Empty(Directory.GetFileSystemEntries(folder));
+    }
+
+    [Fact]
+    public async Task A_data_folder_that_cannot_be_used_stops_the_server_with_one_plain_line()
+    {
+        // A file where the folder should be fails on every platform and for every user, root included.
+        var blocker = Path.Combine(Directory.CreateTempSubdirectory("fibotrail-data-").FullName, "not-a-folder");
+        await File.WriteAllTextAsync(blocker, "x");
+        using var error = new StringWriter();
+
+        var exitCode = await EntryPoint.RunAsync([], error, configuration =>
+        {
+            configuration.Sources.Clear();
+            configuration.AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["IMMICH_URL"] = "http://immich_server:2283",
+                ["IMMICH_API_KEY"] = "abc",
+                ["FIBOTRAIL_DATA_DIR"] = blocker,
+            });
+        });
+
+        var text = error.ToString();
+        Assert.Equal(1, exitCode);
+        Assert.Contains($"Fibotrail can't write to {blocker}", text, StringComparison.Ordinal);
+        Assert.DoesNotContain("   at ", text, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public async Task An_unknown_command_is_refused()
     {
         using var error = new StringWriter();
