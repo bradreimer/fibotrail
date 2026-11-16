@@ -132,7 +132,7 @@ The MVP plan is in [roadmap.md](roadmap.md#mvp-version-01). Its specs are in
   country's trips and days. Its charts are self-contained views, per
   [ADR-012](adr/ADR-012-stats-views-are-self-contained-modules.md), accepted. Four views have their
   own specs and stories: the season wheel ([#58](https://github.com/bradreimer/fibotrail/issues/58),
-  [season-wheel.md](specs/season-wheel.md)) and the trip spiral
+  [season-wheel.md](specs/season-wheel.md)), the trip spiral
   ([#59](https://github.com/bradreimer/fibotrail/issues/59), [trip-spiral.md](specs/trip-spiral.md)),
   the travel clock ([#66](https://github.com/bradreimer/fibotrail/issues/66),
   [travel-clock.md](specs/travel-clock.md)), and the distance rings
