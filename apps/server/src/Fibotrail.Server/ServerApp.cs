@@ -226,9 +226,12 @@ public static partial class ServerApp
 
     private static void MapRoutes(WebApplication app)
     {
+        // The release image sets FIBOTRAIL_VERSION. A build from source reports "dev".
+        var version = app.Configuration["FIBOTRAIL_VERSION"] is { Length: > 0 } configured ? configured : "dev";
+
         app.MapGet("/healthz", async (FibotrailDbContext db, CancellationToken cancellationToken) =>
             await db.Database.CanConnectAsync(cancellationToken)
-                ? Results.Text("ok")
+                ? Results.Text($"ok {version}")
                 : Results.Text("The database didn't open.", statusCode: StatusCodes.Status503ServiceUnavailable))
             .AllowAnonymous();
 

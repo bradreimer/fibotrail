@@ -60,6 +60,10 @@ any request that isn't on the list.
   scan of a real library is what shows it. Settings warns when the Immich version isn't 3.4.
 - The OpenAPI file isn't in the repository. The script downloads it from the pinned tag, so
   running the script needs network access to `raw.githubusercontent.com`.
-- Not known: whether the generated files, which repeat field descriptions from Immich's AGPL
-  licensed OpenAPI file, need a license note of their own. Fibotrail is MIT licensed. The
-  maintainer should decide before version 0.1 is published.
+- Decided on 2026-11-15: the generated files get an attribution note, and Fibotrail stays MIT
+  licensed. Immich is AGPL-3.0, and the generated files repeat names and descriptions from its
+  OpenAPI file, so `scripts/generate-immich-client.sh` writes
+  `apps/server/src/Fibotrail.Immich/Generated/NOTICE.md` each time it runs. The note says where the
+  names come from, that no Immich source code is included, and that Fibotrail talks to Immich only
+  over HTTP. This is a project decision, not legal advice. If the maintainer later decides the
+  generated folder should carry the AGPL itself, only that folder changes.

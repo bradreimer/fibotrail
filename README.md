@@ -1,9 +1,148 @@
-# fibotrail
-A personal travel journal for organizing vacation photo albums, journeys, and memories.
+# Fibotrail
+
+Fibotrail turns your Immich photo library into a travel journal. It finds your trips, maps them,
+and counts them. Immich supplies the photos and the GPS. Fibotrail adds trips, places, and
+statistics on top, and keeps them in its own database. **Fibotrail only reads from Immich. It
+never changes your library.**
+
+```text
+Immich → Scanner → Trip detector → Database → Web server → Phone or iPad
+```
+
+Version 0.1 finds trips, lets you review them in an inbox, and shows each trip with a route map,
+key numbers, and photos by day. The life map, collections, and statistics come later. See the
+[roadmap](docs/roadmap.md).
+
+## Install
+
+You need a running Immich server and Docker with Compose. Fibotrail runs as one container on the
+same Docker network as Immich.
+
+1. Create a read-only API key in Immich. The permissions are in
+   [API key permissions](#api-key-permissions).
+2. Copy `.env.example` to `.env` and fill in `IMMICH_API_KEY`. Check the other values in
+   [Configuration](#configuration).
+3. Open `docker/compose.example.yml`. Set the network name at the bottom to the network your
+   Immich containers use. `docker network ls` lists the networks.
+4. Start Fibotrail:
+
+   ```bash
+   docker compose -f docker/compose.example.yml up -d
+   ```
+
+5. Open `http://localhost:11235` on the host. Fibotrail asks you to set a password. This is the
+   first run, and the page is plain HTML from the server.
+6. For any other address, put your reverse proxy in front of port 11235. Sign-in needs HTTPS, and
+   Fibotrail shows a message when you open it over plain HTTP at an address that isn't
+   `localhost`.
+7. Choose **Scan now**, then confirm your home location when asked. Fibotrail needs it to know
+   when you're away.
+
+On a phone or iPad, open the HTTPS address in Safari and choose **Share**, then **Add to Home
+Screen**. The app then opens full screen, like a native app.
+
+The image is `ghcr.io/bradreimer/fibotrail`. It's built for amd64 and arm64. Its tags are:
+
+| Tag | What it is |
+| --- | --- |
+| `latest` | The newest release. Use this in production |
+| `0.1.0` | One release, pinned. Use this to stay on a version |
+| `edge` | The newest commit on `main`. For testing, and it can be broken |
+
+The example compose file uses `latest`. The first scan of a
+large library takes a while. Fibotrail shows progress, and you can keep using the app.
+
+## Configuration
+
+Every setting is an environment variable. Docker Compose reads them from `.env`. Never commit
+`.env`.
+
+| Variable | Default | What it does |
+| --- | --- | --- |
+| `IMMICH_URL` | `http://immich_server:2283` | The address of Immich as the Fibotrail container sees it |
+| `IMMICH_EXTERNAL_URL` | none | The address of Immich as your browser sees it. Fibotrail uses it only to build **Open in Immich** links. Leave it empty to hide them |
+| `IMMICH_TIMEOUT_SECONDS` | `30` | Seconds to wait for one Immich request before it fails and is retried |
+| `IMMICH_API_KEY` | none | The read-only API key. Fibotrail never shows it in the browser or in logs |
+| `FIBOTRAIL_DATA_DIR` | `/data` | The folder for Fibotrail's data. Leave it alone in Docker |
+| `TZ` | `America/Vancouver` | The time zone of the container, which sets the times in logs |
+
+## API key permissions
+
+Create the key in Immich under **Account Settings**, then **API Keys**. Give it only these
+permissions:
+
+| Permission | Why Fibotrail needs it |
+| --- | --- |
+| `asset.read` | Search your photos for capture time, place, and GPS |
+| `asset.view` | Fetch thumbnails to show in the app |
+| `asset.statistics` | Read the total photo count, for scan progress |
+| `album.read` | Not used by version 0.1. Later versions read albums, so add it now to avoid making a new key |
+
+No write permission is needed, and Fibotrail never asks for one. It makes exactly four requests to
+Immich: `GET /api/server/version`, `POST /api/search/metadata`, `GET /api/assets/statistics`, and
+`GET /api/assets/{id}/thumbnail`. A guard in the code refuses any other request. See
+[ADR-008](docs/adr/ADR-008-a-generated-immich-client-limited-to-allowed-reads.md).
+
+To check this yourself, read the Immich access log after a scan. It shows only those four
+requests from Fibotrail.
+
+## Backup
+
+Everything Fibotrail stores is in the `/data` volume, which is `fibotrail-data` in the example
+compose file:
+
+| Path | What it is | Back it up? |
+| --- | --- | --- |
+| `fibotrail.db` | Your trips, decisions, and settings | Yes |
+| `keys/` | The keys that keep your sign-in sessions valid | Yes |
+| `thumbnails/` | A cache of thumbnails | No. Fibotrail rebuilds it |
+| `fibotrail-backup-<time>.db` | A copy that Fibotrail makes before it changes the database for a new version | Optional |
+
+Your decisions, such as added, ignored, and renamed trips, live in `fibotrail.db`, and they
+always win over detection. A backup keeps them.
+
+To back up, stop the container, then copy the volume to a tar file:
+
+```bash
+docker compose -f docker/compose.example.yml stop fibotrail
+docker run --rm --volumes-from fibotrail -v "$PWD":/backup alpine \
+  tar czf /backup/fibotrail-data.tar.gz -C /data .
+docker compose -f docker/compose.example.yml start fibotrail
+```
+
+To restore, stop the container and untar the file into `/data` in the same way, with
+`tar xzf /backup/fibotrail-data.tar.gz -C /data`.
+
+Your photos are in Immich, not in Fibotrail. Back up Immich the way Immich describes.
+
+## Privacy
+
+Fibotrail makes no request to any outside service by default. It talks only to your Immich server.
+It never writes to Immich, and it never sends photo data or location data anywhere. The base map
+is bundled in the image.
+
+## Updating and resetting
+
+To update, pull the new image and restart:
+
+```bash
+docker compose -f docker/compose.example.yml pull
+docker compose -f docker/compose.example.yml up -d
+```
+
+Fibotrail copies the database to `fibotrail-backup-<time>.db` in `/data` before it applies a
+change to it.
+
+If you forget your password, reset it:
+
+```bash
+docker exec -it fibotrail fibotrail reset-password
+```
 
 ## Documentation
 
-- [Design and branding document](docs/knowledge/design-and-branding.md): the brand, the experience, and the architecture for version 1.
+- [Design and branding document](docs/knowledge/design-and-branding.md): the brand, the
+  experience, and the architecture for version 1.
 - [Project guidelines](docs/guidelines.md): the seven rules every change follows.
 - [Documentation map](docs/README.md): where specs, decisions, and knowledge live.
 - [Roadmap](docs/roadmap.md) and [status](docs/status.md): the plan and the current state.
@@ -12,3 +151,10 @@ A personal travel journal for organizing vacation photo albums, journeys, and me
 
 Fibotrail follows spec-driven, work-item-driven development, and unit tests enforce the project
 organization. See [CONTRIBUTING.md](CONTRIBUTING.md). Run the checks with `./scripts/check.sh`.
+
+## License
+
+Fibotrail is MIT licensed. See [LICENSE](LICENSE). Immich is licensed under the AGPL-3.0. Fibotrail
+includes no Immich source code, but its generated client repeats names from Immich's API
+description. See
+[the notice](apps/server/src/Fibotrail.Immich/Generated/NOTICE.md).

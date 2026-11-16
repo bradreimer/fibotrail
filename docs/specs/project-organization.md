@@ -53,6 +53,20 @@ that the repository stays organized without me policing it.
 - `.env.example` lists variables as `NAME=value` lines. A variable whose name contains `KEY`,
   `SECRET`, `TOKEN`, or `PASSWORD` has an empty value.
 
+### The README
+
+- `README.md` has the level-2 sections Install, Configuration, API key permissions, Backup,
+  Privacy, and Updating and resetting, in that order.
+- It documents, in code format, every variable in `.env.example` (including commented ones) and
+  every Immich permission named there.
+
+### The release workflow
+
+- `.github/workflows/release.yml` runs only for tags that match `v*.*.*`. It checks that the
+  tagged commit is on `main` and has a passing CI run, builds amd64 and arm64, and pushes the
+  version and `latest`, with the version passed to the build. `.github/workflows/publish-image.yml`
+  pushes `edge` and `sha-<commit>` and never `latest`.
+
 ### The docs folder
 
 - `docs/` holds exactly five files and three folders: `README.md`, `development-workflow.md`,

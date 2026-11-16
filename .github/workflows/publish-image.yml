@@ -1,8 +1,9 @@
 name: Publish image
 
-# Intention: every commit on main that passes CI becomes ghcr.io/bradreimer/fibotrail:latest.
+# Intention: every commit on main that passes CI becomes ghcr.io/bradreimer/fibotrail:edge, for
+# testing. The tag "latest" is for releases only and is pushed by release.yml.
 # Method: wait for the CI workflow to succeed on main, then build docker/Dockerfile for amd64 and
-# arm64 and push it with the tags "latest" and "sha-<commit>".
+# arm64 and push it with the tags "edge" and "sha-<commit>".
 
 on:
   workflow_run:
@@ -54,7 +55,7 @@ jobs:
           platforms: linux/amd64,linux/arm64
           push: true
           tags: |
-            ${{ env.IMAGE }}:latest
+            ${{ env.IMAGE }}:edge
             ${{ env.IMAGE }}:sha-${{ github.event.workflow_run.head_sha || github.sha }}
           labels: |
             org.opencontainers.image.source=https://github.com/${{ github.repository }}

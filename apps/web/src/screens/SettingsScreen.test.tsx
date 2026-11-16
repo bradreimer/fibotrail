@@ -1,4 +1,5 @@
 import { act, render, screen, waitFor } from '@testing-library/react';
+import { expectNoAccessibilityProblems } from '../accessibility/accessibility';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -56,6 +57,7 @@ describe('the Immich connection in Settings', () => {
     renderSettings();
     expect(await screen.findByText('Connected to Immich 3.4.1.')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Check again' })).not.toBeInTheDocument();
+    expectNoAccessibilityProblems();
   });
 
   it('shows the plain message and a way to check again when Immich is unreachable', async () => {

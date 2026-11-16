@@ -26,6 +26,9 @@ import {
   checkIssueTemplate,
   checkKnowledgeName,
   checkMentions,
+  checkReadme,
+  checkPublishWorkflow,
+  checkReleaseWorkflow,
   checkSpec,
   checkStatus,
   checkTestProjects,
@@ -72,6 +75,30 @@ describe('secrets', () => {
 
   it('.env.example holds no secret values', () => {
     assertNoProblems(checkEnvExample(read('.env.example')).map((p) => `.env.example: ${p}`));
+  });
+});
+
+describe('README', () => {
+  it('has the release sections and documents every variable and permission', () => {
+    assertNoProblems(checkReadme(read('README.md'), read('.env.example')).map((p) => `README.md: ${p}`));
+  });
+});
+
+describe('publish workflow', () => {
+  it('moves edge on main and leaves latest to releases', () => {
+    assertNoProblems(
+      checkPublishWorkflow(read('.github/workflows/publish-image.yml')).map(
+        (p) => `publish-image.yml: ${p}`,
+      ),
+    );
+  });
+});
+
+describe('release workflow', () => {
+  it('publishes a version only from a checked tag', () => {
+    assertNoProblems(
+      checkReleaseWorkflow(read('.github/workflows/release.yml')).map((p) => `release.yml: ${p}`),
+    );
   });
 });
 

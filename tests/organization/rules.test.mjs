@@ -17,6 +17,9 @@ import {
   checkIssueTemplate,
   checkKnowledgeName,
   checkMentions,
+  checkReadme,
+  checkPublishWorkflow,
+  checkReleaseWorkflow,
   checkSpec,
   checkStatus,
   checkTestProjects,
@@ -275,5 +278,76 @@ describe('checkTestProjects', () => {
   it('requires a .Tests project for each source project', () => {
     assert.deepEqual(checkTestProjects(['Fibotrail.Core'], ['Fibotrail.Core.Tests']), []);
     assert.equal(checkTestProjects(['Fibotrail.Core', 'Fibotrail.Api'], ['Fibotrail.Core.Tests']).length, 1);
+  });
+});
+
+describe('checkReadme', () => {
+  const env = '# asset.read only\nIMMICH_URL=x\n# FIBOTRAIL_DATA_DIR=/data\n';
+  const readme = (titles, extra = '') =>
+    titles.map((title) => `## ${title}\n`).join('\n') + extra;
+  const all = [
+    'Install',
+    'Configuration',
+    'API key permissions',
+    'Backup',
+    'Privacy',
+    'Updating and resetting',
+  ];
+  const full = readme(all, '`IMMICH_URL` `FIBOTRAIL_DATA_DIR` `asset.read`');
+
+  it('passes a README with every section, variable, and permission', () => {
+    assert.deepEqual(checkReadme(full, env), []);
+  });
+
+  it('rejects a missing or misordered section', () => {
+    assert.match(checkReadme(readme(all.slice(1), '`IMMICH_URL` `FIBOTRAIL_DATA_DIR` `asset.read`'), env).join(), /sections must include/);
+    assert.match(checkReadme(readme([...all].reverse()), env).join(), /sections must include/);
+  });
+
+  it('rejects an undocumented variable or permission', () => {
+    const problems = checkReadme(readme(all), env).join();
+    assert.match(problems, /variable IMMICH_URL/);
+    assert.match(problems, /variable FIBOTRAIL_DATA_DIR/);
+    assert.match(problems, /permission asset\.read/);
+  });
+});
+
+describe('checkReleaseWorkflow', () => {
+  const good = [
+    'on:\n  push:\n    tags: ["v*.*.*"]',
+    'git merge-base --is-ancestor "$GITHUB_SHA" origin/main',
+    'gh run list --workflow CI --commit "$SHA" \\\n  --status success',
+    'platforms: linux/amd64,linux/arm64',
+    'VERSION=${{ steps.version.outputs.version }}',
+    'tags: |\n  img:${{ steps.version.outputs.version }}\n  img:latest',
+  ].join('\n');
+
+  it('passes a workflow with every safeguard', () => {
+    assert.deepEqual(checkReleaseWorkflow(good), []);
+  });
+
+  it('names each missing safeguard', () => {
+    assert.match(checkReleaseWorkflow(good.replace('merge-base --is-ancestor', 'true')).join(), /on main/);
+    assert.match(checkReleaseWorkflow(good.replace('--status success', '')).join(), /CI passed/);
+    assert.match(checkReleaseWorkflow(good.replace(',linux/arm64', '')).join(), /arm64/);
+    assert.match(checkReleaseWorkflow(good.replace('img:latest', '')).join(), /latest/);
+  });
+
+  it('rejects a branch trigger', () => {
+    assert.match(checkReleaseWorkflow(good + '\n    branches: [main]').join(), /branches/);
+  });
+});
+
+describe('checkPublishWorkflow', () => {
+  const good = 'tags: |\n  img:edge\n  img:sha-${{ github.sha }}';
+
+  it('passes edge and the commit tag, and ignores a comment about latest', () => {
+    assert.deepEqual(checkPublishWorkflow(good + '\n# "latest" is for releases'), []);
+  });
+
+  it('rejects latest and a missing tag', () => {
+    assert.match(checkPublishWorkflow(good + '\n  img:latest').join(), /not push latest/);
+    assert.match(checkPublishWorkflow('img:sha-1').join(), /push edge/);
+    assert.match(checkPublishWorkflow('img:edge').join(), /commit tag/);
   });
 });

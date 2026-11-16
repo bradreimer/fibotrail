@@ -32,9 +32,13 @@ RUN dotnet publish src/Fibotrail.Server -c Release -a "$TARGETARCH" --no-restore
 # Stage 3 is the image that runs. It holds the ASP.NET Core runtime only.
 FROM mcr.microsoft.com/dotnet/aspnet:10.0
 
+# The release workflow passes the version, such as 0.1.0. /healthz reports it.
+ARG VERSION=dev
+
 # Inside the container, the server listens on port 8080.
 ENV ASPNETCORE_HTTP_PORTS=8080 \
-    DOTNET_EnableDiagnostics=0
+    DOTNET_EnableDiagnostics=0 \
+    FIBOTRAIL_VERSION=$VERSION
 
 WORKDIR /app
 COPY --from=build /app ./

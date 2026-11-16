@@ -63,3 +63,4 @@ None.
 | [trip-inbox.md](trip-inbox.md) | Reviewing suggested trips with Add trip, Not a trip, and Later |
 | [trip-library.md](trip-library.md) | The grid of cards for the trips you've added |
 | [trip-page.md](trip-page.md) | One trip's route map, stat tiles, photo timeline, and photo viewer |
+| [release.md](release.md) | The accessibility checks, README, and tagged image for version 0.1 |
