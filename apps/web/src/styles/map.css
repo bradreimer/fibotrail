@@ -132,22 +132,6 @@ button.map-marker::after {
   gap: var(--fibo-space-5);
 }
 
-.life-map__routes {
-  display: flex;
-  align-items: center;
-  gap: var(--fibo-space-3);
-  min-height: var(--fibo-tap);
-  cursor: pointer;
-}
-
-.life-map__routes input {
-  flex: none;
-  width: var(--fibo-space-5);
-  height: var(--fibo-space-5);
-  margin: 0;
-  accent-color: var(--fibo-teal);
-}
-
 .life-map__heading {
   margin: 0 0 var(--fibo-space-3);
   font-family: var(--fibo-font-body);

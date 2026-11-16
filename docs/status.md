@@ -15,6 +15,11 @@ version 0.1 and the per-line results of the accessibility checklist are also sti
 
 ## Completed
 
+- [#61](https://github.com/bradreimer/fibotrail/issues/61) Trips with no location. Rule 3b finds
+  runs of 3 or more days with 30 or more photos a day and no position, which catches March 2006,
+  March 2007, and March 2012. On the maintainer's library it adds about 29 Low confidence
+  suggestions, and how many are real isn't known yet.
+
 - Image publishing. After CI passes on a push to `main`,
   `.github/workflows/publish-image.yml` builds `docker/Dockerfile` for amd64 and arm64 and pushes
   `ghcr.io/bradreimer/fibotrail:edge` and `:sha-<commit>`, for testing. `:latest` is for releases
@@ -108,6 +113,13 @@ version 0.1 and the per-line results of the accessibility checklist are also sti
   carries `FIBOTRAIL_VERSION=0.2.0` and runs as user 1654. On the maintainer's upgrade, Fibotrail
   copied the database to `fibotrail-backup-<time>.db` before applying the new table.
 
+- [#60](https://github.com/bradreimer/fibotrail/issues/60) Measuring the on-the-way stop rule, the
+  first step of [#32](https://github.com/bradreimer/fibotrail/issues/32). `fibotrail stops` reports
+  which stops of each added trip the candidate rule flags, and why, and changes nothing. It was
+  merged on 2026-11-16 and is tested on made-up trips only. It hasn't been run on the maintainer's
+  library yet, and the rule's thresholds stay untuned until it is. See
+  [on-the-way.md](specs/on-the-way.md#measuring-the-rule).
+
 ## In progress
 
 Nothing is in progress.
@@ -127,9 +139,14 @@ The plan is in [roadmap.md](roadmap.md). Specs are in [specs/](specs/README.md).
 - Zoom the life map to regions and cities
   ([#48](https://github.com/bradreimer/fibotrail/issues/48)). It needs boundary data below country
   level and a decision on how cities are named and counted, so it starts with an ADR.
+- Make the switches look like iOS switches: **Hide from map** in the photo viewer
+  ([#52](https://github.com/bradreimer/fibotrail/issues/52)) and **Show routes** on the life map,
+  and keep the photo viewer dark in dark mode
+  ([#51](https://github.com/bradreimer/fibotrail/issues/51)). Built and checked in a desktop browser
+  at phone size, not yet on a phone.
 - Suggest stops that are on the way ([#32](https://github.com/bradreimer/fibotrail/issues/32)), the
   second part of the idea in [on-the-way.md](specs/on-the-way.md). Its rule needs real examples
-  first.
+  first, which `fibotrail stops` ([#60](https://github.com/bradreimer/fibotrail/issues/60)) produces.
 - Phase 5: collections, such as Disney and Universal parks, and the Stats screen. The tab bar then
   gains Collections and Stats, per ADR-007. Collections are specified in
   [collections.md](specs/collections.md)

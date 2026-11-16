@@ -36,6 +36,40 @@ const PAIRS: { text: string; fill: string; minimum: number; what: string }[] = [
     what: 'the focus ring on its halo',
   },
   { text: '--fibo-on-coral', fill: '--fibo-coral', minimum: TEXT, what: 'text on Coral' },
+  { text: '--fibo-switch-on', fill: '--fibo-paper', minimum: CONTROL, what: 'a switch that is on' },
+  { text: '--fibo-switch-on', fill: '--fibo-mist', minimum: CONTROL, what: 'a switch on Mist' },
+  {
+    text: '--fibo-switch-track',
+    fill: '--fibo-paper',
+    minimum: CONTROL,
+    what: 'a switch that is off',
+  },
+  {
+    text: '--fibo-switch-track',
+    fill: '--fibo-mist',
+    minimum: CONTROL,
+    what: 'a switch that is off, on Mist',
+  },
+  { text: '--fibo-on-viewer', fill: '--fibo-viewer', minimum: TEXT, what: 'text in the viewer' },
+  {
+    text: '--fibo-on-viewer-muted',
+    fill: '--fibo-viewer',
+    minimum: TEXT,
+    what: 'the hint in the viewer',
+  },
+  { text: '--fibo-on-viewer', fill: '--fibo-viewer-row', minimum: TEXT, what: 'a viewer row' },
+  {
+    text: '--fibo-viewer-accent',
+    fill: '--fibo-viewer-row',
+    minimum: CONTROL,
+    what: 'a viewer switch that is on',
+  },
+  {
+    text: '--fibo-viewer-track',
+    fill: '--fibo-viewer-row',
+    minimum: CONTROL,
+    what: 'a viewer switch that is off',
+  },
 ];
 
 describe.each([
@@ -60,6 +94,28 @@ describe.each([
         `Paper on the scrim over ${photo} is ${ratio.toFixed(2)}:1`,
       ).toBeGreaterThanOrEqual(TEXT);
     }
+  });
+});
+
+describe('the photo viewer', () => {
+  it('keeps the same colors in dark mode, so it stays dark', () => {
+    for (const name of [
+      '--fibo-viewer',
+      '--fibo-on-viewer',
+      '--fibo-on-viewer-muted',
+      '--fibo-viewer-row',
+      '--fibo-viewer-accent',
+      '--fibo-viewer-track',
+    ]) {
+      expect(resolve(name, dark), name).toEqual(resolve(name, light));
+    }
+  });
+
+  it('takes its colors from the viewer tokens, not from Ink and Paper, which swap', () => {
+    const trip = readFileSync(path.join(stylesDir, 'trip.css'), 'utf8');
+    const viewer = trip.match(/\n\.viewer \{([^}]*)\}/)?.[1] ?? '';
+    expect(viewer).toMatch(/background: var\(--fibo-viewer\)/);
+    expect(viewer).toMatch(/color: var\(--fibo-on-viewer\)/);
   });
 });
 

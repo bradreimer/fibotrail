@@ -408,11 +408,11 @@ describe('hiding a photo from the map', () => {
     return screen.getByRole('dialog', { name: 'Photo 3 of 6' });
   }
 
-  it('shows a Hide checkbox with its hint under the place, clear for a photo that is on the map', async () => {
+  it('shows a Hide from map switch with its hint under the place, off for a photo that is on the map', async () => {
     fakeServer({ 'GET /api/trips/7': trip });
     const viewer = await openViewer();
 
-    const box = within(viewer).getByRole('checkbox', { name: 'Hide' });
+    const box = within(viewer).getByRole('switch', { name: 'Hide from map' });
     expect(box).not.toBeChecked();
     expect(box).toHaveAccessibleDescription('Keeps this photo in the trip but off the map.');
     expectNoAccessibilityProblems();
@@ -429,12 +429,12 @@ describe('hiding a photo from the map', () => {
     });
     const viewer = await openViewer();
 
-    await userEvent.click(within(viewer).getByRole('checkbox', { name: 'Hide' }));
+    await userEvent.click(within(viewer).getByRole('switch', { name: 'Hide from map' }));
 
     const sent = server.sent('PUT', '/api/photos/b1/on-the-way')[0]!;
     expect(sent.body).toEqual({ onTheWay: true });
     expect(sent.headers['X-CSRF-Token']).toBe('token-1');
-    expect(within(viewer).getByRole('checkbox', { name: 'Hide' })).toBeChecked();
+    expect(within(viewer).getByRole('switch', { name: 'Hide from map' })).toBeChecked();
     // The page read the trip again: Sanford is gone from the pins, and the stop tile says 3.
     await waitFor(() =>
       expect(screen.queryByRole('button', { name: /^Stop \d: Sanford/ })).not.toBeInTheDocument(),
@@ -445,8 +445,8 @@ describe('hiding a photo from the map', () => {
         .getAllByRole('listitem')
         .map((tile) => tile.textContent),
     ).toEqual(['4Days', '6Photos', '3Stops', '90 kmDistance', '4,182 kmFarthest from home']);
-    // The photo is still in the trip, and the checkbox still says it's hidden.
-    expect(within(viewer).getByRole('checkbox', { name: 'Hide' })).toBeChecked();
+    // The photo is still in the trip, and the switch still says it's hidden.
+    expect(within(viewer).getByRole('switch', { name: 'Hide from map' })).toBeChecked();
   });
 
   it('shows a mark on the thumbnail, and its name says the photo is hidden from the map', async () => {
@@ -477,25 +477,44 @@ describe('hiding a photo from the map', () => {
       }),
     );
     const viewer = screen.getByRole('dialog', { name: 'Photo 3 of 6' });
-    expect(within(viewer).getByRole('checkbox', { name: 'Hide' })).toBeChecked();
+    expect(within(viewer).getByRole('switch', { name: 'Hide from map' })).toBeChecked();
 
-    await userEvent.click(within(viewer).getByRole('checkbox', { name: 'Hide' }));
+    await userEvent.click(within(viewer).getByRole('switch', { name: 'Hide from map' }));
 
     expect(server.sent('PUT', '/api/photos/b1/on-the-way')[0]!.body).toEqual({ onTheWay: false });
     expect(await screen.findByRole('button', { name: /Stop 2: Sanford/ })).toBeInTheDocument();
-    expect(within(viewer).getByRole('checkbox', { name: 'Hide' })).not.toBeChecked();
+    expect(within(viewer).getByRole('switch', { name: 'Hide from map' })).not.toBeChecked();
+  });
+
+  it('turns on from a tap anywhere on its row, and from the Space key', async () => {
+    let hidden = false;
+    const server = fakeServer({
+      'GET /api/trips/7': () => hiddenTrip('b1', hidden),
+      'PUT /api/photos/b1/on-the-way': () => {
+        hidden = !hidden;
+        return hiddenTrip('b1', hidden);
+      },
+    });
+    const viewer = await openViewer();
+
+    await userEvent.click(within(viewer).getByText('Hide from map'));
+    expect(server.sent('PUT', '/api/photos/b1/on-the-way')[0]!.body).toEqual({ onTheWay: true });
+
+    within(viewer).getByRole('switch', { name: 'Hide from map' }).focus();
+    await userEvent.keyboard(' ');
+    expect(server.sent('PUT', '/api/photos/b1/on-the-way')[1]!.body).toEqual({ onTheWay: false });
   });
 
   it('puts the box back and says so when the save fails', async () => {
     fakeServer({ 'GET /api/trips/7': trip, 'PUT /api/photos/b1/on-the-way': status(500) });
     const viewer = await openViewer();
 
-    await userEvent.click(within(viewer).getByRole('checkbox', { name: 'Hide' }));
+    await userEvent.click(within(viewer).getByRole('switch', { name: 'Hide from map' }));
 
     expect(await within(viewer).findByRole('alert')).toHaveTextContent(
       "We couldn't save that. Try again.",
     );
-    expect(within(viewer).getByRole('checkbox', { name: 'Hide' })).not.toBeChecked();
+    expect(within(viewer).getByRole('switch', { name: 'Hide from map' })).not.toBeChecked();
     expect(screen.getByRole('button', { name: /Stop 2: Sanford/ })).toBeInTheDocument();
   });
 });
