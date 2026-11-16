@@ -51,7 +51,7 @@ Each card shows:
 - A sentence in the voice of the design and branding document, such as "We found a possible trip:
   Orlando, Mar 15–24, 2027. 312 photos." The year is always shown, because a library holds trips
   from many years.
-- The main places: up to three city names, by days spent, then by photo count.
+- The main places: up to three city names, by days spent, then by photo count (see [main destination](main-destination.md)).
 - A confidence label with an icon and a word: High, Medium, or Low.
 - A strip of up to eight photos, spread evenly across the trip's days.
 - A small route preview: the stops and the lines between them, drawn with the trip page's map
@@ -63,7 +63,7 @@ Each card shows:
 
 | Action | Result |
 | --- | --- |
-| **Add trip** | Opens a sheet with the suggested name, a choice of other names, and the cover photo. You can pick another name from the options, type your own, and choose another cover from the trip's photos. See [trip names](trip-names.md). **Add** saves the trip with the status "added" and removes the card |
+| **Add trip** | Opens a sheet with the suggested name and cover photo. You can change the name and choose another cover from the trip's photos. **Add** saves the trip with the status "added" and removes the card |
 | **Not a trip** | Sets the status "ignored" and moves the card to the **Ignored** tab |
 | **Later** | Sets the status "later". The card stays in the inbox, below the new suggestions |
 

@@ -218,7 +218,7 @@ public class TripDetectorTests
     }
 
     [Fact]
-    public void The_name_is_the_city_with_the_most_photos_then_the_month_and_year()
+    public void The_name_is_the_city_with_the_most_days_then_the_month_and_year()
     {
         var orlando = At(Park, 30, Time(2027, 3, 15), Time(2027, 3, 20), "Orlando", "Florida", "United States of America");
         var kissimmee = At(North(Park, -15), 10, Time(2027, 3, 21), Time(2027, 3, 24), "Kissimmee", "Florida", "United States of America");
@@ -228,6 +228,56 @@ public class TripDetectorTests
         Assert.Equal("Orlando, March 2027", trip.Name);
         Assert.Equal("Orlando", trip.MainPlace);
         Assert.Equal("United States of America", trip.Country);
+    }
+
+    [Fact]
+    public void A_city_with_more_days_beats_a_city_with_one_busy_day()
+    {
+        var orlando = At(Park, 12, Time(2027, 3, 15), Time(2027, 3, 17), "Orlando", "Florida", "United States of America");
+        var kissimmee = At(North(Park, -15), 300, Time(2027, 3, 18, 9), Time(2027, 3, 18, 20), "Kissimmee", "Florida", "United States of America");
+
+        var trip = Assert.Single(TripDetector.Detect([.. orlando, .. kissimmee], Home));
+
+        Assert.Equal("Orlando", trip.MainPlace);
+        Assert.Equal("Orlando, March 2027", trip.Name);
+    }
+
+    [Fact]
+    public void A_tie_in_days_goes_to_the_city_with_more_photos()
+    {
+        var orlando = At(Park, 10, Time(2027, 3, 15, 9), Time(2027, 3, 16, 18), "Orlando", "Florida", "United States of America");
+        var kissimmee = At(North(Park, -15), 20, Time(2027, 3, 15, 10), Time(2027, 3, 16, 19), "Kissimmee", "Florida", "United States of America");
+
+        Assert.Equal("Kissimmee", Assert.Single(TripDetector.Detect([.. orlando, .. kissimmee], Home)).MainPlace);
+    }
+
+    [Fact]
+    public void A_day_with_photos_in_two_cities_counts_for_both()
+    {
+        var orlando = At(Park, 10, Time(2027, 3, 15, 9), Time(2027, 3, 16, 12), "Orlando", "Florida", "United States of America");
+        var kissimmee = At(North(Park, -15), 10, Time(2027, 3, 16, 13), Time(2027, 3, 17, 18), "Kissimmee", "Florida", "United States of America");
+
+        var ranked = TripDetector.RankPlaces([.. orlando, .. kissimmee], photo => photo.LocalDay, photo => photo.City);
+
+        // Both have 2 days and 10 photos, so the earlier first photo decides.
+        Assert.Equal(["Orlando", "Kissimmee"], ranked);
+    }
+
+    [Fact]
+    public void With_no_city_the_state_is_chosen_by_days_too()
+    {
+        var georgia = At(Park, 12, Time(2027, 3, 15), Time(2027, 3, 17), null, "Georgia", "United States of America");
+        var florida = At(North(Park, -100), 300, Time(2027, 3, 18, 9), Time(2027, 3, 18, 20), null, "Florida", "United States of America");
+
+        Assert.Equal("Georgia, March 2027", Assert.Single(TripDetector.Detect([.. georgia, .. florida], Home)).Name);
+    }
+
+    [Fact]
+    public void Ranking_skips_photos_with_no_place_and_returns_nothing_for_no_places()
+    {
+        var photos = At(Park, 5, Time(2027, 3, 15), Time(2027, 3, 16));
+
+        Assert.Empty(TripDetector.RankPlaces(photos, photo => photo.LocalDay, photo => photo.City));
     }
 
     [Theory]

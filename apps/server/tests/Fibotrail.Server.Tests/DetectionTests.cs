@@ -1,4 +1,5 @@
 using System.Net;
+using Fibotrail.Detection;
 using Fibotrail.Immich.Tests;
 using Fibotrail.Server.Cli;
 using Fibotrail.Server.Data;
@@ -333,6 +334,32 @@ public class DetectionAndDecisionTests
         // The decision followed the trip, so the next rescan matches it by fingerprint.
         var decision = await app.WithDbAsync(db => db.Decisions.AsNoTracking().SingleAsync());
         Assert.Equal(trip.Fingerprint, decision.Fingerprint);
+    }
+
+    [Fact]
+    public async Task A_trip_keeps_its_status_name_and_cover_when_the_main_place_rule_moves_its_fingerprint()
+    {
+        await using var app = await StartWithOrlandoAsync();
+        var cover = (await TripLibrary.TripsAsync(app))[0].Photos[3].PhotoId;
+        await DecideAsync(app, TripStatus.Added, "Disney with the kids", cover);
+        var before = (await TripLibrary.TripsAsync(app))[0];
+
+        // Give the trip and its decision the fingerprint that a different main place produced, the
+        // way a trip stored before a change of the rule has it.
+        var old = TripDetector.Fingerprint(before.StartDate, "Kissimmee");
+        await app.WithDbAsync(async db =>
+        {
+            await db.Trips.ExecuteUpdateAsync(set => set.SetProperty(trip => trip.Fingerprint, old));
+            return await db.Decisions.ExecuteUpdateAsync(set => set.SetProperty(decision => decision.Fingerprint, old));
+        });
+
+        await app.WithServicesAsync(services => services.GetRequiredService<DetectionService>().RunAsync(CancellationToken.None));
+
+        var trip = Assert.Single(await TripLibrary.TripsAsync(app));
+        Assert.Equal(before.Fingerprint, trip.Fingerprint);
+        Assert.Equal((before.Id, TripStatus.Added, "Disney with the kids", cover), (trip.Id, trip.Status, trip.Name, trip.CoverPhotoId));
+        var decision = await app.WithDbAsync(db => db.Decisions.AsNoTracking().SingleAsync());
+        Assert.Equal(before.Fingerprint, decision.Fingerprint);
     }
 
     [Fact]

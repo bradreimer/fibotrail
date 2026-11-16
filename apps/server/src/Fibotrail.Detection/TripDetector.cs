@@ -153,7 +153,7 @@ public static class TripDetector
         var distance = stops.Zip(stops.Skip(1), (from, to) => Geo.DistanceKm(from.Center, to.Center)).Sum();
         var farthest = stops.Max(stop => Geo.DistanceKm(home, stop.Center));
 
-        var mainPlace = MostCommon(away, photo => photo.City) ?? MostCommon(away, photo => photo.State) ?? MostCommon(away, photo => photo.Country);
+        var mainPlace = MainPlace(away);
         var start = away[0].LocalDay;
         var end = away[^1].LocalDay;
         var photos = away.Concat(attached).OrderBy(photo => photo.LocalTime).ThenBy(photo => photo.Id, StringComparer.Ordinal).ToList();
@@ -177,6 +177,42 @@ public static class TripDetector
             farthest,
             Score(photos.Count, away.Count, end.DayNumber - start.DayNumber + 1, farthest, settings),
             cover);
+    }
+
+    /// <summary>The city with the most days, or the state, or the country, when no photo has a city.</summary>
+    private static string? MainPlace(IReadOnlyList<PhotoPoint> away)
+    {
+        foreach (var place in new Func<PhotoPoint, string?>[] { photo => photo.City, photo => photo.State, photo => photo.Country })
+        {
+            var ranked = RankPlaces(away, photo => photo.LocalDay, place);
+            if (ranked.Count > 0)
+            {
+                return ranked[0];
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Ranks places by the number of distinct days with a photo there, most first. A day with photos in
+    /// two places counts for both. A tie goes to the place with more photos, then to the one whose
+    /// first photo comes earlier, so the photos must be in time order. Photos with no place are
+    /// skipped. This is the main destination rule of docs/specs/main-destination.md.
+    /// </summary>
+    public static IReadOnlyList<string> RankPlaces<T>(IEnumerable<T> photos, Func<T, DateOnly> day, Func<T, string?> place)
+    {
+        ArgumentNullException.ThrowIfNull(photos);
+        ArgumentNullException.ThrowIfNull(day);
+        ArgumentNullException.ThrowIfNull(place);
+        return [.. photos
+            .Select((photo, index) => (Place: place(photo), Day: day(photo), Index: index))
+            .Where(item => !string.IsNullOrWhiteSpace(item.Place))
+            .GroupBy(item => item.Place!, StringComparer.Ordinal)
+            .OrderByDescending(group => group.Select(item => item.Day).Distinct().Count())
+            .ThenByDescending(group => group.Count())
+            .ThenBy(group => group.Min(item => item.Index))
+            .Select(group => group.Key)];
     }
 
     /// <summary>The value that the most photos share. A tie goes to the value seen first.</summary>

@@ -93,8 +93,7 @@ home is, so that I review suggestions and don't build my travel history by hand.
    the greatest distance from home to a stop.
 9. **Name.** The suggested name is the main place, then the month and year of the first day, such
    as "Orlando, March 2027". The main place is the city where the most days were spent, with the
-   state and then the country as fallbacks. The options for other names, and the rule for the main
-   place, are in [trip names](trip-names.md).
+   state and then the country as fallbacks. See [main destination](main-destination.md).
 10. **Score.** Label each suggestion High, Medium, or Low confidence from its photo count, days,
     and distance from home. High needs at least 50 photos, 3 days, and 150 km from home. Low is
     a trip with fewer than 25 away photos, which clears the minimum photos by less than 25
@@ -107,7 +106,8 @@ right day.
 ### Reconciliation and decisions
 
 - A trip's fingerprint is a hash of its start date and its main place. The main place is the
-  city, or the state or country when no city is known, with the most photos.
+  city, or the state or country when no city is known, with the most days, per
+  [main destination](main-destination.md).
 - A detected trip with the fingerprint of a stored trip is the same trip. Its photos, stops, and
   route are updated. Its status, name, and cover aren't.
 - New photos that continue an added trip extend it, without a new suggestion.
