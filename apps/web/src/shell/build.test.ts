@@ -147,6 +147,14 @@ describe('iOS behavior', () => {
     expect(found).toEqual([]);
   });
 
+  it('never lets a photo tile grow to fill its row, which would distort its proportions', () => {
+    // #41: with flex-grow, every tile in a row got the same width and the photos were cropped wide.
+    const css = read('src/styles/trip.css').replace(/\/\*[\s\S]*?\*\//g, '');
+    const rule = css.match(/\.photo-tile\s*\{([^}]*)\}/)?.[1] ?? '';
+    expect(rule).toMatch(/flex:\s*none/);
+    expect(rule).not.toMatch(/flex-grow|flex:\s*[1-9]/);
+  });
+
   it('respects the safe area at every edge', () => {
     for (const edge of ['top', 'right', 'bottom', 'left']) {
       expect(shell).toContain(`env(safe-area-inset-${edge})`);
