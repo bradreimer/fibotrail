@@ -184,6 +184,11 @@ want a number after a rule change.
 
 ## Open questions
 
+The review gate was met on 2026-11-16: 10 of the first 10 High-confidence suggestions were
+accepted, and 5 of 5 remembered trips were found. No split trip showed among those 10, and no
+remembered trip was missed. The causes weren't recorded, and Medium and Low suggestions weren't
+reviewed, so the questions below stay open until a case turns up.
+
 1. Are the thresholds for High, Medium, and Low confidence right? Rule 10 has the starting
    point. The Low margin applies to the photo count only: with a minimum of 2 days, a quarter of
    a day can't be measured, and every weekend trip would be Low. The review gate on the real

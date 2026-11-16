@@ -2,11 +2,10 @@
 
 ## Current milestone
 
-MVP step 3d, the release. Every work item of the MVP is built: steps 2a, 2b, 3a, 3b, and 3c.
-**Two gates aren't met yet.** The gate of step 3a, the review gate on the real library, is being
-run: the first scan finished and found 34 suggestions. Every UI work item still needs the ADR-007 run-through on a real iPhone. Both need the
-maintainer's library and phone, and are listed under Next. See
-[roadmap.md](roadmap.md#mvp-version-01).
+MVP step 3d, the release. Every work item of the MVP is built: steps 2a, 2b, 3a, 3b, and 3c. The
+review gate of step 3a is met (2026-11-16). **One gate isn't met yet:** the ADR-007 run-through on
+a real iPhone is partly done, and the manual accessibility checklist hasn't been run. Both need the
+maintainer's phone, and are listed under Next. See [roadmap.md](roadmap.md#mvp-version-01).
 
 ## Completed
 
@@ -58,59 +57,60 @@ maintainer's library and phone, and are listed under Next. See
   the photo viewer with swipe, arrow keys, and **Open in Immich**, and **Rename or change
   cover**.
 
+- [#31](https://github.com/bradreimer/fibotrail/issues/31) The main destination by days. A trip's
+  main place is the city where the most days were spent, not the most photos. See the
+  [main destination spec](specs/main-destination.md). A choice of names
+  ([#30](https://github.com/bradreimer/fibotrail/issues/30)) was set aside on 2026-11-16: a name
+  can already be typed, and a better first guess matters more.
+- [#28](https://github.com/bradreimer/fibotrail/issues/28) The data folder check. A `/data` bind
+  mount that the container can't write to now stops the server with one line that names the fix,
+  not a repeating SQLite stack trace.
+- [#36](https://github.com/bradreimer/fibotrail/issues/36) The README's backup and restore steps,
+  fixed after running them on a real container. Builds of `main` report `edge-<commit>` on
+  `/healthz`.
+- [#38](https://github.com/bradreimer/fibotrail/issues/38) On an iPhone, the Add trip sheet was
+  under the tab bar and **Add** was hidden. The cause was `-webkit-overflow-scrolling: touch` on the
+  scroll area. It's removed, with a test, and the maintainer confirmed on the phone that the Add
+  sheet, the photo viewer, and the map overlays now cover the tab bar.
+- The review gate of step 3a, met on 2026-11-16 on the maintainer's library of 71,318 photos: 10 of
+  the first 10 High-confidence suggestions accepted, and 5 of 5 remembered trips found. It replaced
+  the replay test as the gate. See the [trip detection spec](specs/trip-detection.md#review-gate).
+- The first real scan, on 2026-11-15. A full scan of the 71,318 photos finished, and detection
+  found 34 suggestions. The Immich access log was checked for an incremental scan and for browsing
+  thumbnails: only `GET /api/server/version`, `POST /api/search/metadata`, and
+  `GET /api/assets/{id}/thumbnail` appeared, with no other path and no write method. The first full
+  scan ran before logging was on, so `GET /api/assets/statistics` (read only at the start of a full
+  scan) wasn't seen.
+
 ## In progress
 
-- [#38](https://github.com/bradreimer/fibotrail/issues/38) On an iPhone, the Add trip sheet was
-  under the tab bar and **Add** was hidden. Found in the ADR-007 run-through on 2026-11-16. The
-  cause was `-webkit-overflow-scrolling: touch` on the scroll area, which makes an iOS stacking
-  layer. It's removed, with a test. Not yet confirmed on the phone. The photo viewer, the stop
-  sheet, and the full-screen map had the same risk, and need the same check.
-- [#28](https://github.com/bradreimer/fibotrail/issues/28) A `/data` bind mount the container
-  can't write to. Found on the first real run: the host folder was owned by root, and the log was a
-  repeating SQLite stack trace. Startup now checks the folder and prints one line with the fix, and
-  the README explains the `chown`.
-- [#24](https://github.com/bradreimer/fibotrail/issues/24) The release, step 3d. The
-  [release spec](specs/release.md) and the README are written, and a test keeps the README's
-  sections, variables, and permissions in step with the code. The automated accessibility checks are in (contrast, alt text, accessible names, reduce motion, and
-  the focus ring), and they found two failures that are fixed: text on Coral was 4.4:1, and the
-  Gold focus ring was 2:1 on Paper. The manual checklist is written in
-  [accessibility-checklist.md](knowledge/accessibility-checklist.md) and hasn't been run. The tag
-  workflow is written (`.github/workflows/release.yml`): a `vX.Y.Z` tag on a `main` commit with a
-  passing CI run pushes `:X.Y.Z` and `:latest` for amd64 and arm64, and `/healthz` reports the
-  version. It hasn't run on GitHub, and the image build with the `VERSION` argument hasn't run
-  locally. The generated client's license note is written
-  (ADR-008). The name `fibotrail` was checked on 2026-11-15: it's free on Docker Hub and the App
-  Store, and `ghcr.io/bradreimer/fibotrail` already pulls without signing in. The README's commands haven't been run against a
-  real Immich yet.
+- [#24](https://github.com/bradreimer/fibotrail/issues/24) The release, step 3d. Done: the
+  [release spec](specs/release.md); the README, whose backup, restore, reset-password, and health
+  commands were run on a real container on 2026-11-16; the automated accessibility checks (contrast,
+  alt text, accessible names, reduce motion, and the focus ring), which found and fixed two
+  failures; the generated client's license note (ADR-008); the name check (`fibotrail` is free on
+  Docker Hub and the App Store, and `ghcr.io/bradreimer/fibotrail` pulls without signing in); and
+  the tag workflow (`.github/workflows/release.yml`). The tag workflow hasn't run on GitHub: its
+  first run is the `v0.1.0` tag. Still open: the rest of the iPhone run-through and the manual
+  accessibility checklist, then the tag.
 
 ## Next
 
-The MVP plan is in [roadmap.md](roadmap.md#mvp-version-01). Its seven specs are in
-[specs/](specs/README.md), with work items [#5](https://github.com/bradreimer/fibotrail/issues/5) through [#11](https://github.com/bradreimer/fibotrail/issues/11).
+The MVP plan is in [roadmap.md](roadmap.md#mvp-version-01). Its specs are in
+[specs/](specs/README.md).
 
-- Run through the ADR-007 table on a real iPhone, with the app installed to the home screen. Every
-  screen was checked in a desktop browser at phone and iPad sizes only, with made-up touch events
-  for the swipes. This check is still open for
-  [#6](https://github.com/bradreimer/fibotrail/issues/6),
+- Finish the ADR-007 run-through on a real iPhone, with the app installed to the home screen. So
+  far the Add trip sheet, the photo viewer, and the map overlays are confirmed. The rest of the
+  table is open for [#6](https://github.com/bradreimer/fibotrail/issues/6),
   [#9](https://github.com/bradreimer/fibotrail/issues/9),
   [#10](https://github.com/bradreimer/fibotrail/issues/10), and
   [#11](https://github.com/bradreimer/fibotrail/issues/11).
-- Scan the real library once. The scanner was tested against a stand-in for Immich that answers
-  in the shapes the spike recorded, and never against a real Immich server. The criteria "a full
-  scan of the maintainer's library finishes" and "the Immich access log shows only requests on
-  the allowed list" are still open for [#7](https://github.com/bradreimer/fibotrail/issues/7).
-- Pass the review gate, which is the gate of step 3a. Review the first 10 High-confidence
-  suggestions in the Inbox (accept at least 8), and check that 3 to 5 trips you remember appear (at
-  most 1 missing). The rules are in the
-  [trip detection spec](specs/trip-detection.md#review-gate). It replaced the replay test as the
-  gate on 2026-11-16, because writing a list of known trips is the work the app is meant to do.
-  The three open questions in that spec wait for this result.
-- [#31](https://github.com/bradreimer/fibotrail/issues/31), the main destination by days (see the
-  [main destination spec](specs/main-destination.md)), is built. The trips on the maintainer's
-  library change their main place and fingerprint on the next detection run. A choice of names
-  ([#30](https://github.com/bradreimer/fibotrail/issues/30)) was set aside on 2026-11-16: you can
-  already type a name, and a better first guess matters more. The idea of marking airports and
-  layovers is [#32](https://github.com/bradreimer/fibotrail/issues/32).
+- Run the manual lines of the [accessibility checklist](knowledge/accessibility-checklist.md) on the
+  iPhone, including VoiceOver, the largest text size, reduce motion, the Coral badge, and the focus
+  ring. A failed line is fixed, or recorded as a known gap, before the tag.
+- Tag `v0.1.0` when both are done, and check that the release workflow publishes `:0.1.0` and
+  `:latest` for amd64 and arm64.
+- The idea of marking airports and layovers is [#32](https://github.com/bradreimer/fibotrail/issues/32).
 - Answer the remaining open questions in the
   [design and branding document](knowledge/design-and-branding.md#risks-open-questions-and-next-steps).
   The server language is settled: see [ADR-004](adr/ADR-004-technology-stack.md).
