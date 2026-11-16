@@ -193,8 +193,9 @@ version 0.1 and the per-line results of the accessibility checklist are also sti
   server and the web screens are built: the park lookup and day count, the collection file loader and
   its startup checks, the Collections destination with its list, stamp book, and park sheet, the
   Theme parks Stats view, and the [Theme parks view spec](specs/theme-parks-view.md). Collections and
-  the view read the same park days, and a test checks they agree. **Boundaries:** Magic Kingdom (OpenStreetMap way 297428432) and EPCOT (way 805298160) ship in
-  `collections/disney-parks.yaml`. The other Disney parks are commented out in that file, and the Universal parks aren't
+  the view read the same park days, and a test checks they agree. **Boundaries:** The four Walt Disney World parks ship in `collections/disney-parks.yaml`: Magic Kingdom (OpenStreetMap
+  way 297428432), EPCOT (805298160), Disney's Hollywood Studios (806728401), and Disney's Animal
+  Kingdom (297441457). The other Disney parks are commented out in that file, and the Universal parks aren't
   added yet, so the issue stays open for them. They need OpenStreetMap outlines checked by hand
   against satellite imagery, and they couldn't be fetched from this environment on 2026-11-16 (three
   Overpass hosts refused or timed out), so the maintainer exports them. ADR-013 planned new `trip_photo` columns, but the `photo` table

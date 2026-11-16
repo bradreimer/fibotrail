@@ -156,5 +156,9 @@ public sealed class CollectionFilesTests : IDisposable
         Assert.Contains(disney.Places, place => place.Park.Id == "epcot");
         Assert.Equal("epcot", catalog.Lookup.Find(28.3700, -81.5490)?.Id);
         Assert.Equal("magic-kingdom", catalog.Lookup.Find(28.4195, -81.5810)?.Id);
+        // All four Walt Disney World parks resolve to themselves, and the resort's roads resolve to none.
+        Assert.Equal("hollywood-studios", catalog.Lookup.Find(28.3590, -81.5620)?.Id);
+        Assert.Equal("animal-kingdom", catalog.Lookup.Find(28.3600, -81.5910)?.Id);
+        Assert.Null(catalog.Lookup.Find(28.3830, -81.5200));
     }
 }
