@@ -31,7 +31,7 @@ describe('the view registry', () => {
       'distance-rings',
       'records',
     ]);
-    expect(viewsFor('country')).toEqual([]);
+    expect(viewsFor('country').map((view) => view.id)).toEqual(['season-wheel']);
   });
 
   it("is the only thing outside a view's folder that imports it", () => {

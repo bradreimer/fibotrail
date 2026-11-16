@@ -46,6 +46,12 @@ export const VIEWS: readonly StatsView[] = [
     component: lazy(() => import('./views/distance-rings')),
   },
   {
+    id: 'season-wheel',
+    slot: 'country',
+    title: 'Seasons',
+    component: lazy(() => import('./views/season-wheel')),
+  },
+  {
     id: 'records',
     slot: 'stats',
     title: 'Records',
