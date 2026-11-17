@@ -4,6 +4,7 @@ import { Link, useParams } from 'react-router-dom';
 import { useApi } from '../api/useApi';
 import { type CollectionPlace, PlaceSheet } from '../collections/PlaceSheet';
 import { ProgressRing } from '../stats/ProgressRing';
+import { BackLink } from '../shell/BackLink';
 import { EmptyState } from '../states/EmptyState';
 import { ErrorState } from '../states/ErrorState';
 import { countOf } from '../trips/dates';
@@ -61,9 +62,7 @@ export function StampBookScreen() {
   const sheet = data.places.find((place) => place.id === open) ?? null;
   return (
     <div className="stats-screen">
-      <p>
-        <Link to={`/collections/${encodeURIComponent(id)}`}>{data.summary.name}</Link>
-      </p>
+      <BackLink to={`/collections/${encodeURIComponent(id)}`}>{data.summary.name}</BackLink>
       <h2 className="stats-page__title">Stamp book</h2>
       <p className="stats-page__lead stamp-book__summary">
         <ProgressRing visited={data.summary.visited} total={data.summary.total} />

@@ -1,6 +1,7 @@
 import { Link, useParams } from 'react-router-dom';
 
 import { useApi } from '../api/useApi';
+import { BackLink } from '../shell/BackLink';
 import { EmptyState } from '../states/EmptyState';
 import { ErrorState } from '../states/ErrorState';
 import { TripCard } from '../trips/TripCard';
@@ -45,9 +46,7 @@ export function ResortScreen() {
 
   return (
     <div className="stats-screen">
-      <p>
-        <Link to={`/collections/${encodeURIComponent(id)}`}>{data.summary.name}</Link>
-      </p>
+      <BackLink to={`/collections/${encodeURIComponent(id)}`}>{data.summary.name}</BackLink>
       <h2 className="stats-page__title">{info.name}</h2>
       <p className="stats-page__lead">{tripsText(info.trips)}</p>
       <ul className="resort-trips">

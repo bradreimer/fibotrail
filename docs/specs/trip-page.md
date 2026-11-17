@@ -47,7 +47,7 @@ At 600 px and wider, the map sits beside the timeline in two columns.
 
 ### Back link
 
-- A link above the header shows a back arrow and the word **Trips**. It goes to the trip library
+- The shared `BackLink` component draws it. A link above the header shows a back arrow and the word **Trips**. It goes to the trip library
   at `/trips`, and it has a tap target at least 44 px high.
 - It shows while the trip loads and on the loaded page. The arrow is decoration, so a screen
   reader reads "Trips". Tracking issue: [#126](https://github.com/bradreimer/fibotrail/issues/126).

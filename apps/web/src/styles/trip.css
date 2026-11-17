@@ -405,18 +405,3 @@
   padding: 0;
   border: 0;
 }
-
-.back-link {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--fibo-space-3);
-  min-height: var(--fibo-tap);
-  color: var(--fibo-teal);
-  font-weight: 600;
-  text-decoration: none;
-}
-
-.back-link__arrow {
-  width: var(--fibo-space-4);
-  height: var(--fibo-space-5);
-}

@@ -61,6 +61,16 @@ const views = {
   },
 };
 
+/** The back link is the first thing on the page, and its arrow is hidden from a screen reader. */
+function expectBackLink(container: HTMLElement, name: string, href: string) {
+  const page = container.querySelector('.stats-screen') as HTMLElement;
+  const link = within(page).getByRole('link', { name });
+  expect(link).toHaveAttribute('href', href);
+  expect(link).toHaveClass('back-link');
+  expect(link.querySelector('svg')).toHaveAttribute('aria-hidden', 'true');
+  expect(page.firstElementChild).toBe(link);
+}
+
 beforeEach(() => installMatchMedia(390));
 
 describe('the Stats screen', () => {
@@ -157,6 +167,29 @@ describe('the Stats screen', () => {
     renderAt('/stats');
 
     expect(await screen.findByRole('button', { name: 'Try again' })).toBeInTheDocument();
+  });
+
+  it('shows a back arrow on a continent and a country', async () => {
+    fakeServer({
+      'GET /api/stats/continents/europe': {
+        id: 'europe',
+        name: 'Europe',
+        visited: 1,
+        total: 49,
+        countries: [{ id: '752', name: 'Sweden', trips: 3, days: 19 }],
+      },
+      'GET /api/stats/countries/752': stockholm,
+      ...views,
+    });
+
+    const continent = renderAt('/stats/continents/europe');
+    await screen.findByRole('heading', { name: 'Europe' });
+    expectBackLink(continent.container, 'Stats', '/stats');
+    continent.unmount();
+
+    const country = renderAt('/stats/countries/752');
+    await screen.findByRole('heading', { name: 'Sweden' });
+    expectBackLink(country.container, 'Europe', '/stats/continents/europe');
   });
 
   it('has no accessibility problems', async () => {
