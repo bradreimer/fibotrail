@@ -26,6 +26,7 @@ them.
 ## Non-goals
 
 - Scheduled scans. The MVP scans when you select **Scan now**.
+- Limiting a rescan to a date range. The command rereads the whole library.
 - Trip detection. See [trip-detection.md](trip-detection.md).
 - A settings screen for the Immich address or key. Both come from `.env`.
 - Copies of original photos or videos, and video playback. A video plays in Immich.
@@ -130,6 +131,33 @@ them.
 - The app stays usable during a scan. Screens show the data scanned so far.
 - Settings shows the time and result of the last scan.
 
+### Rescan command
+
+Tracking issue: [#120](https://github.com/bradreimer/fibotrail/issues/120).
+
+A normal scan reads only the assets that Immich says changed. If you edit a photo's location in
+Immich and Immich doesn't change the photo's `updatedAt`, a normal scan never sees the edit. The
+rescan command reads everything, so it always does. It is the command-line form of the
+**Rebuild from Immich** button, minus the removal of deleted photos.
+
+- The command is `docker exec -it fibotrail fibotrail rescan`. It takes no arguments and needs the
+  same `IMMICH_URL` and `IMMICH_API_KEY` as the server.
+- It runs a new scan with no `updatedAt` filter, pages and retries as in the Scanner section, and
+  stores each asset by ID. A changed position or place name replaces the old one.
+- When the scan completes, trip detection runs, as after any scan. Your decisions are kept, per
+  [ADR-002](../adr/ADR-002-decisions-are-stored-separately-from-detected-data.md). A trip marked
+  **Not a trip** stays hidden.
+- It prints a progress line about every 5,000 photos, then the photos read, the rows changed, and
+  how many new suggestions reached the inbox.
+- It refuses to start when the latest scan is "running", and exits with 1. If no scan is really
+  running, for example because the command's terminal was killed, restarting the container resumes
+  the scan.
+- Ctrl+C stops it after the page in hand. The scan is marked "failed" with its progress saved, and
+  the next scan, normal or rescan, can continue.
+- Exit codes: 0 when the scan completes, 1 when it fails or can't start, 2 for arguments.
+- Not covered: a photo deleted from Immich for good stays in Fibotrail until **Rebuild from
+  Immich** exists, and **Scan now** isn't blocked while the command runs, so don't select it then.
+
 ### Thumbnail proxy
 
 - The browser requests images from Fibotrail, and Fibotrail fetches them from
@@ -153,6 +181,11 @@ them.
 - The key appears in no log line, no API response, and no file served to the browser.
 - A thumbnail request for an ID that isn't in the `photo` table returns 404.
 - A video taken away from home counts toward the minimum photos of a trip.
+- After a photo's position changes in Immich without a new `updatedAt`, `fibotrail rescan` stores
+  the new position and **Scan now** doesn't.
+- `fibotrail rescan` on an unchanged library reports 0 changed.
+- `fibotrail rescan` sends no `updatedAt` filter, refuses while a scan runs, and exits with 1 and
+  the "Can't reach Immich" message when Immich rejects the key.
 
 ## Open questions
 

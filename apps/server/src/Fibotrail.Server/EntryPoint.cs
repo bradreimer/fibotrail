@@ -2,6 +2,7 @@ using Fibotrail.Server.Collections;
 using Fibotrail.Server.Auth;
 using Fibotrail.Server.Cli;
 using Fibotrail.Server.Data;
+using Fibotrail.Server.Immich;
 using Fibotrail.Server.Trips;
 
 namespace Fibotrail.Server;
@@ -37,6 +38,8 @@ public static class EntryPoint
                 return await StopsAsync(builder.Configuration, args[1..]);
             case PlacesCommand.Name:
                 return await PlacesAsync(builder.Configuration, args[1..]);
+            case RescanCommand.Name:
+                return await RescanAsync(builder.Configuration, error, args[1..]);
             case HealthCheckCommand.Name:
                 var port = builder.Configuration["ASPNETCORE_HTTP_PORTS"]?.Split(';')[0] ?? "8080";
                 using (var client = new HttpClient { Timeout = TimeSpan.FromSeconds(5) })
@@ -45,7 +48,7 @@ public static class EntryPoint
                 }
 
             default:
-                await error.WriteLineAsync($"Fibotrail doesn't know the command \"{command}\". The commands are: {ResetPasswordCommand.Name}, {ReplayCommand.Name}, {StopsCommand.Name}, {PlacesCommand.Name}, {HealthCheckCommand.Name}.");
+                await error.WriteLineAsync($"Fibotrail doesn't know the command \"{command}\". The commands are: {ResetPasswordCommand.Name}, {ReplayCommand.Name}, {StopsCommand.Name}, {PlacesCommand.Name}, {RescanCommand.Name}, {HealthCheckCommand.Name}.");
                 return 2;
         }
     }
@@ -133,6 +136,45 @@ public static class EntryPoint
             new SystemConsoleIo(),
             scope.ServiceProvider.GetRequiredService<FibotrailDbContext>(),
             settings!);
+    }
+
+    private static async Task<int> RescanAsync(IConfiguration configuration, TextWriter error, string[] arguments)
+    {
+        // Unlike the other commands, this one reads from Immich, so the Immich variables are required.
+        var (settings, problems) = ServerSettings.Load(configuration, requireImmich: true);
+        if (settings is null)
+        {
+            foreach (var problem in problems)
+            {
+                await error.WriteLineAsync($"Fibotrail can't start: {problem}");
+            }
+
+            return 1;
+        }
+
+        var services = new ServiceCollection();
+        services.AddLogging();
+        services.AddFibotrailCore(settings);
+        services.AddFibotrailImmich(settings);
+        services.AddSingleton<IHostApplicationLifetime, CommandLifetime>();
+        await using var provider = services.BuildServiceProvider();
+        await using var scope = provider.CreateAsyncScope();
+
+        // Ctrl+C stops the scan after the page in hand and saves its place.
+        using var stop = new CancellationTokenSource();
+        Console.CancelKeyPress += (_, eventArgs) =>
+        {
+            eventArgs.Cancel = true;
+            stop.Cancel();
+        };
+
+        return await RescanCommand.RunAsync(
+            arguments,
+            new SystemConsoleIo(),
+            scope.ServiceProvider.GetRequiredService<FibotrailDbContext>(),
+            provider.GetRequiredService<ScanService>(),
+            settings,
+            stop.Token);
     }
 
     private static async Task<int> PlacesAsync(IConfiguration configuration, string[] arguments)

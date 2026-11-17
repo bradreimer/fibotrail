@@ -237,6 +237,15 @@ version 0.1 and the per-line results of the accessibility checklist are also sti
   ([#32](https://github.com/bradreimer/fibotrail/issues/32), closed as not planned) in favor of
   hiding photos by hand. See [on-the-way.md](specs/on-the-way.md#result-of-the-first-run).
 
+- [#120](https://github.com/bradreimer/fibotrail/issues/120) `fibotrail rescan`. It rereads every
+  photo from Immich with no changed-since filter, then runs trip detection, so photos whose
+  location you edited in Immich are picked up even when Immich doesn't change their update time.
+  Tested with a stand-in Immich only. Not known yet: whether a location edit changes `updatedAt` in
+  a real Immich, and so whether **Scan now** already finds such photos. Check it on the
+  maintainer's library the first time the command is run, and record the answer in
+  [immich-api-findings.md](knowledge/immich-api-findings.md). See
+  [immich-scanning.md](specs/immich-scanning.md#rescan-command).
+
 ## In progress
 
 Nothing is in progress.
