@@ -62,6 +62,9 @@ namespace Fibotrail.Server.Data.Migrations
                     b.Property<string>("Status")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("VisitedParks")
+                        .HasColumnType("TEXT");
+
                     b.HasKey("Id");
 
                     b.HasIndex("Fingerprint")

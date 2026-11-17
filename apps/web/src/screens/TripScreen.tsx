@@ -13,6 +13,7 @@ import { ErrorState } from '../states/ErrorState';
 import { dayHeading } from '../trip/format';
 import { PhotoTile, type TripPhoto } from '../trip/PhotoTile';
 import { PhotoViewer } from '../trip/PhotoViewer';
+import { ParksSheet } from '../trip/ParksSheet';
 import { StatTiles } from '../trip/StatTiles';
 import { countOf, formatDateRange } from '../trips/dates';
 
@@ -23,6 +24,7 @@ export function TripScreen() {
   const [version, setVersion] = useState(0);
   const trip = useApi('/api/trips/{id}', `/api/trips/${id}`, version);
   const [editing, setEditing] = useState(false);
+  const [markingParks, setMarkingParks] = useState(false);
   const [saving, setSaving] = useState(false);
   const [problem, setProblem] = useState<string | null>(null);
   const [stop, setStop] = useState<number | null>(null);
@@ -112,6 +114,22 @@ export function TripScreen() {
     }
   }
 
+  /** Saves the parks you marked. The trip is read again, so the list follows. */
+  async function saveParks(parks: string[]) {
+    if (!session) return;
+    setSaving(true);
+    setProblem(null);
+    try {
+      await apiSend('PUT', `/api/trips/${data!.id}/parks`, session.csrfToken, { parks });
+      setMarkingParks(false);
+      setVersion((current) => current + 1);
+    } catch (error) {
+      setProblem(error instanceof Error ? error.message : 'The change wasn’t saved.');
+    } finally {
+      setSaving(false);
+    }
+  }
+
   /** Puts a photo on the way, or brings it back. The trip is read again, so the map and the numbers follow. */
   async function hide(photoId: string, onTheWay: boolean) {
     if (!session) throw new Error('Sign in to continue.');
@@ -185,6 +203,35 @@ export function TripScreen() {
             </ol>
           </details>
           <StatTiles stats={data.stats} />
+          <section className="trip-parks" aria-labelledby="trip-parks">
+            <h3 className="trip-parks__heading" id="trip-parks">
+              Parks
+            </h3>
+            {data.parks.length === 0 ? (
+              <p className="trip-parks__empty">No Disney or Universal parks on this trip yet.</p>
+            ) : (
+              <ul className="trip-parks__list">
+                {data.parks.map((park) => (
+                  <li key={park.id}>
+                    <span>{park.name}</span>
+                    <span className="trip-parks__source">
+                      {park.source === 'photos' ? 'From photos' : 'Marked by you'}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+            <button
+              type="button"
+              className="button button--secondary"
+              onClick={() => {
+                setProblem(null);
+                setMarkingParks(true);
+              }}
+            >
+              Mark parks visited
+            </button>
+          </section>
         </section>
 
         <section className="trip-page__timeline" aria-labelledby="trip-photos">
@@ -260,6 +307,20 @@ export function TripScreen() {
           onIndexChange={setViewing}
           onClose={() => setViewing(null)}
           onHideChange={hide}
+        />
+      )}
+
+      {markingParks && (
+        <ParksSheet
+          fromPhotos={data.parks.filter((park) => park.source === 'photos').map((park) => park.id)}
+          marked={data.parks.filter((park) => park.source === 'you').map((park) => park.id)}
+          busy={saving}
+          problem={problem}
+          onCancel={() => {
+            setMarkingParks(false);
+            setProblem(null);
+          }}
+          onSave={(parks) => void saveParks(parks)}
         />
       )}
 

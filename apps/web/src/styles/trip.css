@@ -359,3 +359,49 @@
     animation: none;
   }
 }
+
+/* The parks of a trip, and the sheet that marks them. */
+.trip-parks {
+  display: grid;
+  gap: var(--fibo-space-3);
+}
+
+.trip-parks__heading {
+  margin: 0;
+}
+
+.trip-parks__empty {
+  margin: 0;
+  color: var(--fibo-ink-muted);
+}
+
+.trip-parks__list {
+  display: grid;
+  gap: var(--fibo-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.trip-parks__list li {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--fibo-space-3);
+}
+
+.trip-parks__source,
+.parks-sheet__note {
+  font-size: var(--fibo-text-caption);
+  color: var(--fibo-ink-muted);
+}
+
+.parks-sheet {
+  max-height: 85vh;
+  overflow-y: auto;
+}
+
+.parks-sheet__group {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}

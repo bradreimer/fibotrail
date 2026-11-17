@@ -214,6 +214,12 @@ public sealed class Decision
 
     public DateOnly EndDate { get; set; }
 
+    /// <summary>
+    /// The parks you marked as visited on this trip, as place ids joined by commas. Null when you
+    /// marked none. For trips whose photos have no position. See docs/specs/collections.md.
+    /// </summary>
+    public string? VisitedParks { get; set; }
+
     public DateTime DecidedAt { get; set; }
 }
 

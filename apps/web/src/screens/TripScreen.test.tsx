@@ -57,6 +57,7 @@ const trip: TripDetail = {
     farthestFromHomeKm: 4182.4,
     unplaced: 1,
   },
+  parks: [],
   stops: places.map((place, index) => ({
     index,
     latitude: 28.4 + index * 0.27,
@@ -373,6 +374,93 @@ describe('rename and change cover', () => {
     expect(sent.body).toEqual({ name: 'Spring in Florida', coverPhotoId: 'd1' });
     expect(sent.headers['X-CSRF-Token']).toBe('token-1');
     expect(await screen.findByRole('heading', { name: 'Spring in Florida' })).toBeInTheDocument();
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+});
+
+describe('the parks of a trip', () => {
+  const parkChoices = [
+    {
+      id: 'magic-kingdom',
+      name: 'Magic Kingdom',
+      group: 'Walt Disney World Resort',
+      collection: 'Disney parks',
+    },
+    { id: 'epcot', name: 'EPCOT', group: 'Walt Disney World Resort', collection: 'Disney parks' },
+    {
+      id: 'disneyland',
+      name: 'Disneyland Park',
+      group: 'Disneyland Resort',
+      collection: 'Disney parks',
+    },
+  ];
+
+  it('says so when a trip has no park, and lists the parks it has with where each came from', async () => {
+    fakeServer({ 'GET /api/trips/7': trip });
+    const { unmount } = renderTrip();
+    expect(
+      await screen.findByText('No Disney or Universal parks on this trip yet.'),
+    ).toBeInTheDocument();
+    unmount();
+
+    fakeServer({
+      'GET /api/trips/7': {
+        ...trip,
+        parks: [
+          { id: 'epcot', name: 'EPCOT', group: 'Walt Disney World Resort', source: 'photos' },
+          {
+            id: 'magic-kingdom',
+            name: 'Magic Kingdom',
+            group: 'Walt Disney World Resort',
+            source: 'you',
+          },
+        ],
+      },
+    });
+    renderTrip();
+    const list = within(await screen.findByRole('region', { name: 'Parks' }));
+    expect(list.getByText('From photos')).toBeInTheDocument();
+    expect(list.getByText('Marked by you')).toBeInTheDocument();
+  });
+
+  it('marks the parks you tick, and shows the ones from photos as on and fixed', async () => {
+    const marked = {
+      ...trip,
+      parks: [
+        {
+          id: 'magic-kingdom',
+          name: 'Magic Kingdom',
+          group: 'Walt Disney World Resort',
+          source: 'you',
+        },
+      ],
+    };
+    const server = fakeServer({
+      'GET /api/trips/7': {
+        ...trip,
+        parks: [
+          { id: 'epcot', name: 'EPCOT', group: 'Walt Disney World Resort', source: 'photos' },
+        ],
+      },
+      'GET /api/parks': parkChoices,
+      'PUT /api/trips/7/parks': marked,
+    });
+    const { container } = renderTrip();
+    await userEvent.click(await screen.findByRole('button', { name: 'Mark parks visited' }));
+    const sheet = await screen.findByRole('dialog', { name: 'Parks you visited' });
+    const epcot = await within(sheet).findByRole('switch', { name: /EPCOT/ });
+    expect(epcot).toBeChecked();
+    expect(epcot).toBeDisabled();
+
+    await userEvent.click(within(sheet).getByRole('switch', { name: 'Magic Kingdom' }));
+    expectNoAccessibilityProblems(container);
+    server.set('GET /api/trips/7', marked);
+    await userEvent.click(within(sheet).getByRole('button', { name: 'Save' }));
+
+    const sent = server.sent('PUT', '/api/trips/7/parks')[0]!;
+    expect(sent.body).toEqual({ parks: ['magic-kingdom'] });
+    expect(sent.headers['X-CSRF-Token']).toBe('token-1');
+    expect(await screen.findByText('Marked by you')).toBeInTheDocument();
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 });

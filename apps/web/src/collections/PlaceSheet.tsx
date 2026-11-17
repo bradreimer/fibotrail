@@ -49,7 +49,9 @@ export function PlaceSheet({ place, onClose }: { place: CollectionPlace; onClose
             <li key={trip.tripId}>
               <Link className="country-trips__link" to={`/trips/${trip.tripId}`}>
                 <span className="country-trips__name">{trip.name}</span>
-                <span className="country-trips__dates">{countOf(trip.days, 'day')} here</span>
+                <span className="country-trips__dates">
+                  {trip.marked ? 'Marked by you' : `${countOf(trip.days, 'day')} here`}
+                </span>
               </Link>
             </li>
           ))}

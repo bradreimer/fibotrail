@@ -24,7 +24,8 @@ public sealed record StatsTrip(
     double FarthestFromHomeKm,
     IReadOnlyList<(double Latitude, double Longitude)> Stops,
     IReadOnlyList<PhotoPosition> Photos,
-    IReadOnlyList<NamedStop>? NamedStops = null)
+    IReadOnlyList<NamedStop>? NamedStops = null,
+    IReadOnlyList<string>? MarkedParks = null)
 {
     /// <summary>True when the trip has fewer positioned local days than days.</summary>
     public bool HasUnpositionedDays => Photos.Select(photo => photo.Day).Distinct().Count() < Days;
@@ -135,7 +136,7 @@ public sealed class StatsLibrary
 
         var parks = parkLookup is null
             ? []
-            : ParkDays.Count(ordered.Select(trip => new ParkTrip(trip.Id, trip.Name, [.. trip.Photos.Select(photo => new ParkPhoto(photo.Day, photo.Latitude, photo.Longitude))])), parkLookup);
+            : ParkDays.Count(ordered.Select(trip => new ParkTrip(trip.Id, trip.Name, [.. trip.Photos.Select(photo => new ParkPhoto(photo.Day, photo.Latitude, photo.Longitude))], trip.StartDate, trip.MarkedParks)), parkLookup);
 
         var places = CityPlaces.Find(
             ordered.SelectMany(trip => (trip.NamedStops ?? []).Select(stop =>

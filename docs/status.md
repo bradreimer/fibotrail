@@ -15,6 +15,13 @@ version 0.1 and the per-line results of the accessibility checklist are also sti
 
 ## Completed
 
+- [#118](https://github.com/bradreimer/fibotrail/issues/118) and
+  [#119](https://github.com/bradreimer/fibotrail/issues/119) Two fixes found on the Disney
+  collection, which showed 8 trips for 10 real ones. A run of 2 or fewer photos at home between
+  two away photos less than 24 hours apart no longer splits a trip (March 2023 was counted twice).
+  **Mark parks visited** on the trip page counts trips with no photo positions (March 2006, 2007,
+  and 2012) in a collection, as a decision. Their park days stay 0. Neither is deployed yet.
+
 - [#111](https://github.com/bradreimer/fibotrail/issues/111) The Stats screen is simpler. Five
   views were removed, each by the four steps of ADR-014: Trips per year, Trip length, Theme parks,
   Travel clock, and Distance rings. Their specs went with them. The stats library lost the two

@@ -1,4 +1,6 @@
 using System.Globalization;
+using Fibotrail.Detection.Parks;
+using Fibotrail.Server.Collections;
 using Fibotrail.Server.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -37,6 +39,11 @@ public sealed record TripStopInfo(int Index, double Latitude, double Longitude, 
 /// <param name="Unplaced">Photos with no position. They belong to the trip and to no stop.</param>
 public sealed record TripStats(int Days, int Photos, int Stops, double DistanceKm, double FarthestFromHomeKm, int Unplaced);
 
+/// <summary>A park the trip visited.</summary>
+/// <param name="Group">The resort, such as "Walt Disney World Resort".</param>
+/// <param name="Source">"photos" when at least 3 photos of the trip are in the park, or "you" when you marked it.</param>
+public sealed record TripParkInfo(string Id, string Name, string Group, string Source);
+
 /// <summary>Everything the trip page shows for one trip.</summary>
 public sealed record TripDetail(
     int Id,
@@ -50,7 +57,8 @@ public sealed record TripDetail(
     string CoverPhotoId,
     TripStats Stats,
     IReadOnlyList<TripStopInfo> Stops,
-    IReadOnlyList<TripDay> Days);
+    IReadOnlyList<TripDay> Days,
+    IReadOnlyList<TripParkInfo> Parks);
 
 /// <summary>Builds the trip page from the stored trip and its photos.</summary>
 public static class TripPage
@@ -62,7 +70,7 @@ public static class TripPage
         return externalUrl is null ? null : $"{externalUrl.AbsoluteUri.TrimEnd('/')}/photos/{Uri.EscapeDataString(photoId)}";
     }
 
-    public static async Task<TripDetail?> LoadAsync(FibotrailDbContext db, ServerSettings settings, int id, CancellationToken cancellationToken)
+    public static async Task<TripDetail?> LoadAsync(FibotrailDbContext db, ServerSettings settings, int id, CancellationToken cancellationToken, CollectionCatalog? catalog = null)
     {
         ArgumentNullException.ThrowIfNull(db);
         ArgumentNullException.ThrowIfNull(settings);
@@ -104,6 +112,18 @@ public static class TripPage
                     onTheWay.Contains(photo.Id)))]))
             .ToList();
 
+        // Parks come from the photos' positions, then from the ones you marked. Photos on the way don't count.
+        catalog ??= CollectionCatalog.Empty;
+        var fromPhotos = ParkDays.VisitedByPhotos(
+            photos.Where(photo => photo.Latitude is not null && photo.Longitude is not null && !onTheWay.Contains(photo.Id))
+                .Select(photo => new ParkPhoto(DateOnly.FromDateTime(photo.LocalTime), photo.Latitude!.Value, photo.Longitude!.Value)),
+            catalog.Lookup).Select(item => item.Place.Id).ToHashSet(StringComparer.Ordinal);
+        var marked = TripDecisions.ReadParks((await db.Decisions.AsNoTracking().FirstOrDefaultAsync(decision => decision.Fingerprint == trip.Fingerprint, cancellationToken))?.VisitedParks);
+        var parks = catalog.Collections.SelectMany(collection => collection.Places).Where(place => !place.Planned)
+            .Where(place => fromPhotos.Contains(place.Park.Id) || marked.Contains(place.Park.Id))
+            .Select(place => new TripParkInfo(place.Park.Id, place.Park.Name, place.Park.Group, fromPhotos.Contains(place.Park.Id) ? "photos" : "you"))
+            .ToList();
+
         return new TripDetail(
             trip.Id,
             trip.Status,
@@ -122,7 +142,8 @@ public static class TripPage
                 Math.Round(trip.FarthestFromHomeKm, 1),
                 photos.Count(photo => photo.Latitude is null)),
             [.. stops.Select((stop, index) => new TripStopInfo(index, stop.Latitude, stop.Longitude, stop.Place, stop.PhotoCount))],
-            days);
+            days,
+            parks);
     }
 
     /// <summary>A day heading, such as "Day 3 · Wed, Mar 17 · Orlando". The web app builds its own; this is for tests and logs.</summary>

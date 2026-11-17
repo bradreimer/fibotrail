@@ -16,7 +16,8 @@ public sealed record CollectionSummary(string Id, string Name, string Descriptio
 public sealed record ResortInfo(string Name, int Visited, int Total, int Days, int Trips);
 
 /// <summary>A trip that visited a place, with how many of its days were there.</summary>
-public sealed record PlaceTrip(int TripId, string Name, int Days);
+/// <param name="Marked">True when you marked the visit by hand. The trip has no photo with a position in the park, so its days are 0.</param>
+public sealed record PlaceTrip(int TripId, string Name, int Days, bool Marked = false);
 
 /// <summary>A place in a collection.</summary>
 /// <param name="Status">"open" or "planned".</param>
@@ -94,7 +95,7 @@ public static class CollectionRoutes
                     place.Planned ? 0 : found?.Days ?? 0,
                     place.Planned ? 0 : found?.Trips.Count ?? 0,
                     place.Planned ? null : found?.FirstVisit,
-                    place.Planned ? [] : [.. (found?.Trips ?? []).Select(visit => new PlaceTrip(visit.TripId, visit.Name, visit.Days))]);
+                    place.Planned ? [] : [.. (found?.Trips ?? []).Select(visit => new PlaceTrip(visit.TripId, visit.Name, visit.Days, visit.Marked))]);
             })],
             Attribution);
     }
