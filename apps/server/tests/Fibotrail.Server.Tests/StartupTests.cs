@@ -267,4 +267,22 @@ public class HealthCheckTests
         Assert.Equal(0, await HealthCheckCommand.RunAsync(client, new Uri("http://localhost/healthz")));
         Assert.Equal(1, await HealthCheckCommand.RunAsync(client, new Uri("http://localhost/no-such-route")));
     }
+
+    [Fact]
+    public async Task The_places_command_starts_from_the_real_entry_point_and_reports_a_missing_database()
+    {
+        // The command builds its own services, so this catches a service that only the web server registers.
+        var folder = Directory.CreateTempSubdirectory("fibotrail-places-").FullName;
+        using var error = new StringWriter();
+
+        var exitCode = await EntryPoint.RunAsync(["places"], error, configuration =>
+        {
+            configuration.Sources.Clear();
+            configuration.AddInMemoryCollection(new Dictionary<string, string?> { ["FIBOTRAIL_DATA_DIR"] = folder });
+        });
+
+        Assert.Equal(1, exitCode);
+        Assert.Empty(error.ToString());
+        Directory.Delete(folder, recursive: true);
+    }
 }
