@@ -78,8 +78,13 @@ describe('privacy', () => {
       'public/manifest.webmanifest',
       ...filesIn('src').filter((file) => !/\.test\.tsx?$/.test(file) && !file.endsWith('.json')),
     ];
-    // The SVG namespace is a name, not an address that is requested.
-    const allowed = ['http://www.w3.org/2000/svg', 'http://localhost'];
+    // The SVG namespace is a name, not an address that is requested. The support link in
+    // Settings opens in a new tab when you tap it. The app itself never requests it.
+    const allowed = [
+      'http://www.w3.org/2000/svg',
+      'http://localhost',
+      'https://www.buymeacoffee.com/bradreimer',
+    ];
     const found = sources.flatMap((file) =>
       (read(file).match(/(https?:)?\/\/[a-z0-9.-]+\.[a-z]{2,}[^\s"'`)]*/gi) ?? [])
         .filter((url) => !allowed.some((prefix) => url.startsWith(prefix)))

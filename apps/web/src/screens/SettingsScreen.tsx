@@ -7,6 +7,9 @@ import { HomeSetup, type SetHomeResponse } from '../home/HomeSetup';
 import { Skeleton } from '../states/Skeleton';
 import { foundText } from './InboxScreen';
 
+/** A plain link, not the Buy Me a Coffee widget script, so the Content-Security-Policy stays 'self'. */
+const SUPPORT_URL = 'https://www.buymeacoffee.com/bradreimer';
+
 const count = new Intl.NumberFormat('en-US');
 const dateTime = new Intl.DateTimeFormat('en-US', { dateStyle: 'medium', timeStyle: 'short' });
 
@@ -131,6 +134,23 @@ export function SettingsScreen() {
         <p className="settings__hint">
           Fibotrail finds trips by how far from home your photos were taken. A new home location
           looks for every trip again, and your choices stay.
+        </p>
+      </section>
+
+      <section className="settings__section" aria-labelledby="settings-support">
+        <h2 className="state__title" id="settings-support">
+          Support
+        </h2>
+        <a
+          className="button button--secondary"
+          href={SUPPORT_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Give Fibs and Hermann a treat
+        </a>
+        <p className="settings__hint">
+          Opens Buy Me a Coffee in a new tab. Fibotrail sends nothing about your library.
         </p>
       </section>
 

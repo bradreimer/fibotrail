@@ -90,7 +90,9 @@ behave like an app, so that browsing my trips feels as comfortable as a native i
 | Continent | Stats |
 | Country | Its continent's name |
 - The MVP Settings screen shows the Immich connection status, the home location, the **Scan now**
-  button, and **Sign out**. Other specs define each of these, and each appears on the screen when
+  button, a **Give Fibs and Hermann a treat** link, and **Sign out**. The link opens the Buy Me a
+  Coffee page in a new tab. It is a plain link, not the Buy Me a Coffee widget script, so the
+  Content-Security-Policy stays `default-src 'self'`. Other specs define each of these, and each appears on the screen when
   its spec is built. **Sign out** is there from the start.
 - The header is Deep Ocean in light and dark mode, so the white status bar text of an installed
   app stays readable.
