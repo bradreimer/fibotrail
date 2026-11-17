@@ -73,6 +73,28 @@ public sealed class TripDecisions(FibotrailDbContext db, TimeProvider time)
             cancellationToken);
     }
 
+    /// <summary>The place ids stored on a decision, in order. Empty for none.</summary>
+    public static IReadOnlyList<string> ReadParks(string? stored) =>
+        string.IsNullOrEmpty(stored) ? [] : [.. stored.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)];
+
+    /// <summary>
+    /// Marks the parks you visited on a trip, for a trip whose photos have no position. The list
+    /// replaces the old one. Every id must be an open park of a collection.
+    /// </summary>
+    public async Task<DecisionResult> SetParksAsync(int tripId, IReadOnlyList<string> parkIds, IReadOnlySet<string> knownParkIds, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(parkIds);
+        ArgumentNullException.ThrowIfNull(knownParkIds);
+        var unknown = parkIds.FirstOrDefault(id => !knownParkIds.Contains(id));
+        if (unknown is not null)
+        {
+            return new DecisionResult(DecisionOutcome.Rejected, $"\"{unknown}\" isn't a park in a collection.");
+        }
+
+        var ids = parkIds.Distinct(StringComparer.Ordinal).Order(StringComparer.Ordinal).ToList();
+        return await ChangeAsync(tripId, (_, decision) => decision.VisitedParks = ids.Count == 0 ? null : string.Join(',', ids), cancellationToken);
+    }
+
     private async Task<DecisionResult> ChangeAsync(int tripId, Action<Trip, Decision> change, CancellationToken cancellationToken)
     {
         var trip = await db.Trips.FirstOrDefaultAsync(candidate => candidate.Id == tripId, cancellationToken);

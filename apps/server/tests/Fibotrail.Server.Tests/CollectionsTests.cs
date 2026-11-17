@@ -99,4 +99,62 @@ public class CollectionsTests
 
         Assert.Equal(HttpStatusCode.NotFound, (await browser.GetAsync("/api/collections/nope")).StatusCode);
     }
+
+    private static Task<HttpResponseMessage> MarkAsync(Browser browser, string path, params string[] parks) =>
+        browser.SendJsonAsync(HttpMethod.Put, path, new { parks });
+
+    [Fact]
+    public async Task A_park_you_mark_counts_the_trip_and_shows_on_the_trip_page()
+    {
+        var (app, browser, trip) = await StartAsync();
+        await using var _ = app;
+        await DecideAsync(browser, trip, "add");
+
+        var response = await MarkAsync(browser, $"/api/trips/{trip}/parks", "far");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var parks = (await browser.GetJsonAsync($"/api/trips/{trip}")).GetProperty("parks").EnumerateArray()
+            .ToDictionary(park => park.GetProperty("id").GetString()!, park => park.GetProperty("source").GetString());
+        Assert.Equal(new Dictionary<string, string?> { ["near"] = "photos", ["far"] = "you" }, parks);
+        var detail = await browser.GetJsonAsync("/api/collections/test-parks");
+        var far = detail.GetProperty("places").EnumerateArray().Single(place => place.GetProperty("id").GetString() == "far");
+        Assert.Equal((0, 1), (far.GetProperty("days").GetInt32(), far.GetProperty("trips").GetInt32()));
+        Assert.True(far.GetProperty("tripList")[0].GetProperty("marked").GetBoolean());
+        Assert.Equal(2, (await browser.GetJsonAsync("/api/collections"))[0].GetProperty("visited").GetInt32());
+    }
+
+    [Fact]
+    public async Task Clearing_the_marked_parks_takes_the_trip_out_of_the_park()
+    {
+        var (app, browser, trip) = await StartAsync();
+        await using var _ = app;
+        await DecideAsync(browser, trip, "add");
+        await MarkAsync(browser, $"/api/trips/{trip}/parks", "far");
+
+        await MarkAsync(browser, $"/api/trips/{trip}/parks");
+
+        Assert.Equal(1, (await browser.GetJsonAsync("/api/collections"))[0].GetProperty("visited").GetInt32());
+    }
+
+    [Fact]
+    public async Task A_planned_or_unknown_park_cannot_be_marked()
+    {
+        var (app, browser, trip) = await StartAsync();
+        await using var _ = app;
+
+        Assert.Equal(HttpStatusCode.BadRequest, (await MarkAsync(browser, $"/api/trips/{trip}/parks", "coming")).StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, (await MarkAsync(browser, $"/api/trips/{trip}/parks", "nowhere")).StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, (await MarkAsync(browser, "/api/trips/9999/parks", "far")).StatusCode);
+    }
+
+    [Fact]
+    public async Task The_parks_list_holds_the_open_parks_only()
+    {
+        var (app, browser, _) = await StartAsync();
+        await using var _app = app;
+
+        var ids = (await browser.GetJsonAsync("/api/parks")).EnumerateArray().Select(park => park.GetProperty("id").GetString()).ToList();
+
+        Assert.Equal(["near", "far"], ids);
+    }
 }

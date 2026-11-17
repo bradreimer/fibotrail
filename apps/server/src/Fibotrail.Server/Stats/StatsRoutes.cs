@@ -136,6 +136,9 @@ public static class StatsRoutes
                             select new { tripPhoto.TripId, photo.LocalTime, Latitude = photo.Latitude!.Value, Longitude = photo.Longitude!.Value })
             .ToListAsync(cancellationToken);
         var byTrip = photos.ToLookup(photo => photo.TripId);
+        var fingerprints = trips.Select(trip => trip.Fingerprint).ToList();
+        var marked = (await db.Decisions.AsNoTracking().Where(decision => fingerprints.Contains(decision.Fingerprint)).ToListAsync(cancellationToken))
+            .ToDictionary(decision => decision.Fingerprint, decision => Trips.TripDecisions.ReadParks(decision.VisitedParks), StringComparer.Ordinal);
 
         return StatsLibrary.Build(
             trips.Select(trip => new StatsTrip(
@@ -148,7 +151,8 @@ public static class StatsRoutes
                 trip.FarthestFromHomeKm,
                 [.. DetectionService.ReadStops(trip.StopsJson).Select(stop => (stop.Latitude, stop.Longitude))],
                 [.. byTrip[trip.Id].Select(photo => new PhotoPosition(DateOnly.FromDateTime(photo.LocalTime), photo.Latitude, photo.Longitude))],
-                [.. DetectionService.ReadStops(trip.StopsJson).Select(stop => new NamedStop(stop.Place, stop.Latitude, stop.Longitude, stop.PhotoCount))])),
+                [.. DetectionService.ReadStops(trip.StopsJson).Select(stop => new NamedStop(stop.Place, stop.Latitude, stop.Longitude, stop.PhotoCount))],
+                marked.GetValueOrDefault(trip.Fingerprint))),
             finder,
             outlines.Outlines,
             catalog.Lookup);

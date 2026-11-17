@@ -42,6 +42,9 @@ public sealed class ParkLookup
         })];
     }
 
+    /// <summary>A place by its id, or null.</summary>
+    public ParkPlace? Place(string id) => _entries.Select(entry => entry.Place).FirstOrDefault(place => place.Id == id);
+
     /// <summary>The place a position is in, or null.</summary>
     public ParkPlace? Find(double latitude, double longitude)
     {
