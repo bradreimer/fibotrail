@@ -53,6 +53,9 @@ public class CollectionsTests
         var resort = Assert.Single(detail.GetProperty("resorts").EnumerateArray());
         Assert.Equal(("Test Resort", 1, 2, 1), (resort.GetProperty("name").GetString(), resort.GetProperty("visited").GetInt32(), resort.GetProperty("total").GetInt32(), resort.GetProperty("trips").GetInt32()));
         Assert.Equal(summary.GetProperty("trips").GetInt32(), detail.GetProperty("summary").GetProperty("trips").GetInt32());
+        var resortTrip = Assert.Single(resort.GetProperty("tripList").EnumerateArray());
+        Assert.Equal(trip, resortTrip.GetProperty("tripId").GetInt32());
+        Assert.Equal(["NEAR"], resortTrip.GetProperty("parks").EnumerateArray().Select(name => name.GetString()));
         var places = detail.GetProperty("places").EnumerateArray().ToDictionary(place => place.GetProperty("id").GetString()!);
         Assert.InRange(places["near"].GetProperty("days").GetInt32(), 6, 7);
         Assert.Equal(1, places["near"].GetProperty("trips").GetInt32());

@@ -1,17 +1,14 @@
-import { useState } from 'react';
 import { Link } from 'react-router-dom';
 
 import { useApi } from '../api/useApi';
 import type { components } from '../api/schema';
-import { CollapsibleSection } from '../map/CollapsibleSection';
 import { ErrorState } from '../states/ErrorState';
 import { countOf } from '../trips/dates';
 import { tripsText } from '../screens/CollectionScreen';
-import { ParkList } from './ParkList';
 
 type Detail = components['schemas']['CollectionDetail'];
 
-/** One row for each resort, most trips first and then by name, with the note about shared trips. */
+/** One card for each resort, most trips first and then by name, with the note about shared trips. */
 export function ResortList({ id, detail }: { id: string; detail: Detail }) {
   const base = `/collections/${encodeURIComponent(id)}`;
   const resorts = [...detail.resorts].sort(
@@ -32,43 +29,6 @@ export function ResortList({ id, detail }: { id: string; detail: Detail }) {
           </li>
         ))}
       </ul>
-      {resorts.length > 1 && (
-        <p className="stats-page__note">A trip to two resorts counts once for each.</p>
-      )}
-    </>
-  );
-}
-
-/** The resorts of an open collection. Each opens to its parks, a second level. */
-function ResortSections({ id, detail }: { id: string; detail: Detail }) {
-  const [open, setOpen] = useState<ReadonlySet<string>>(new Set());
-  const resorts = [...detail.resorts].sort(
-    (a, b) => b.trips - a.trips || a.name.localeCompare(b.name),
-  );
-  return (
-    <>
-      <div className="collections">
-        {resorts.map((resort) => (
-          <CollapsibleSection
-            key={resort.name}
-            id={`resort-${id}-${resort.name.replace(/\W+/g, '-')}`}
-            level={4}
-            title={resort.name}
-            count={tripsText(resort.trips)}
-            open={open.has(resort.name)}
-            onToggle={(isOpen) =>
-              setOpen((before) => {
-                const next = new Set(before);
-                if (isOpen) next.add(resort.name);
-                else next.delete(resort.name);
-                return next;
-              })
-            }
-          >
-            {open.has(resort.name) && <ParkList places={detail.places} resort={resort.name} />}
-          </CollapsibleSection>
-        ))}
-      </div>
       {resorts.length > 1 && (
         <p className="stats-page__note">A trip to two resorts counts once for each.</p>
       )}
@@ -100,7 +60,7 @@ export function CollectionBody({ id }: { id: string }) {
         {summary.visited} / {summary.total} parks · {countOf(summary.totalDays, 'day')} ·{' '}
         {countOf(summary.trips, 'trip')}
       </p>
-      <ResortSections id={id} detail={detail} />
+      <ResortList id={id} detail={detail} />
       <p>
         <Link className="button" to={`/collections/${encodeURIComponent(id)}/stamps`}>
           Stamp book

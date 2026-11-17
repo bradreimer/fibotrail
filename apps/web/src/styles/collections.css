@@ -95,3 +95,34 @@
   font-size: var(--fibo-text-caption);
   font-variant-numeric: tabular-nums;
 }
+
+/* A trip in a resort, with one badge for each park it visited. Text and a check, never color alone. */
+.resort-trips {
+  display: grid;
+  gap: var(--fibo-space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.resort-trip {
+  display: grid;
+  gap: var(--fibo-space-2);
+}
+
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--fibo-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.badge {
+  padding: var(--fibo-space-1) var(--fibo-space-3);
+  border: calc(var(--fibo-border) * 2) solid var(--fibo-gold);
+  border-radius: var(--fibo-radius);
+  background: color-mix(in srgb, var(--fibo-gold) 18%, var(--fibo-paper));
+  font-size: var(--fibo-text-caption);
+}
