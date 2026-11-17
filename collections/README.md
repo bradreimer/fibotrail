@@ -5,11 +5,10 @@ this folder, and each place has a GeoJSON boundary in `boundaries/`. Adding a co
 code. The rules are in [docs/specs/collections.md](../docs/specs/collections.md) and
 [ADR-003](../docs/adr/ADR-003-collections-are-data-files.md).
 
-**Status:** `disney-parks.yaml` has all 12 Disney parks. `universal-parks.yaml` has the three Universal Orlando
-parks, Universal Studios Hollywood, Universal Studios Japan, and Universal Studios Singapore. Beijing is still to add. Each park
-needs a boundary from OpenStreetMap that is checked by hand against satellite imagery. To add a park,
-export its outline from [Overpass Turbo](https://overpass-turbo.eu) as GeoJSON, save it as
-`boundaries/<id>.geojson`, and add its entry to the YAML file.
+**Status:** `disney-parks.yaml` has all 12 Disney parks, and `universal-parks.yaml` has all 7 Universal
+parks. Each boundary comes from OpenStreetMap and should be checked by hand against satellite imagery.
+To add a park, export its outline from [Overpass Turbo](https://overpass-turbo.eu) as GeoJSON, save it
+as `boundaries/<id>.geojson`, and add its entry to the YAML file.
 
 ## File format
 

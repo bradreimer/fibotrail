@@ -15,6 +15,27 @@ version 0.1 and the per-line results of the accessibility checklist are also sti
 
 ## Completed
 
+- [#64](https://github.com/bradreimer/fibotrail/issues/64) Park days in Collections and Stats. The
+  park lookup and day count, the collection file loader and its startup checks, the Collections
+  destination with its list, stamp book, and park sheet, the Theme parks Stats view, and the
+  [Theme parks view spec](specs/theme-parks-view.md). Collections and the view read the same park
+  days, and a test checks they agree. All 19 launch parks ship, each from OpenStreetMap with a closed
+  ring. **Disney, 12:** Magic Kingdom (way 297428432), EPCOT (805298160), Disney's Hollywood Studios
+  (806728401), Disney's Animal Kingdom (297441457), Disneyland Park (relation 5586855), Disney
+  California Adventure (15626312), Tokyo Disneyland (1282875870), Tokyo DisneySea (203538370),
+  Disneyland Park in Paris (775180147), Disney Adventure World (205734843, formerly Walt Disney
+  Studios Park), Hong Kong Disneyland (377094298), and Shanghai Disneyland (494725605).
+  **Universal, 7:** Universal Studios Florida (449808332), Universal's Islands of Adventure
+  (relation 1124085), Universal Epic Universe (1372221500), Universal Studios Hollywood (1304528747),
+  Universal Studios Japan (relation 5695002), Universal Studios Singapore (95756945), and Universal
+  Studios Beijing (740165118, which OpenStreetMap names Universal Beijing Resort). The outlines
+  couldn't be fetched from this environment on 2026-11-16 (three Overpass hosts refused or timed out),
+  so the maintainer exported them and Claude typed them into the files by hand. **Not checked:** each
+  outline against satellite imagery, and each file's coordinates against its export. The Japan
+  outline comes from 2008 imagery and may be the roughest. ADR-013 planned new `trip_photo` columns,
+  but the `photo` table already holds each photo's position and local time, which the stats library
+  reads, so no migration was needed. Checked in a desktop browser only, not yet on a phone.
+
 - [#48](https://github.com/bradreimer/fibotrail/issues/48) Cities on the life map and on the Stats
   screen, decided in
   [ADR-015](adr/ADR-015-cities-are-merged-places-and-theme-parks-keep-their-own-identity.md)
@@ -189,26 +210,7 @@ version 0.1 and the per-line results of the accessibility checklist are also sti
 
 ## In progress
 
-- [#64](https://github.com/bradreimer/fibotrail/issues/64) Park days in Collections and Stats. The
-  server and the web screens are built: the park lookup and day count, the collection file loader and
-  its startup checks, the Collections destination with its list, stamp book, and park sheet, the
-  Theme parks Stats view, and the [Theme parks view spec](specs/theme-parks-view.md). Collections and
-  the view read the same park days, and a test checks they agree. **Boundaries:** all 12 Disney parks ship in `collections/disney-parks.yaml`, each from OpenStreetMap
-  and each ring closed. They are Magic Kingdom (way 297428432), EPCOT (805298160), Disney's
-  Hollywood Studios (806728401), and Disney's Animal Kingdom (297441457); Disneyland Park (relation
-  5586855) and Disney California Adventure (relation 15626312); Tokyo Disneyland (1282875870) and
-  Tokyo DisneySea (203538370); Disneyland Park in Paris (775180147) and Disney Adventure World
-  (205734843, formerly Walt Disney Studios Park); Hong Kong Disneyland (377094298); and Shanghai
-  Disneyland (494725605). The three Universal Orlando parks ship in `collections/universal-parks.yaml`: Universal Studios
-  Florida (way 449808332), Universal's Islands of Adventure (relation 1124085), and Universal Epic
-  Universe (way 1372221500), plus Universal Studios Hollywood (way 1304528747) and Universal Studios Japan (relation
-  5695002), and Universal Studios Singapore (way 95756945). Beijing isn't added yet, so the issue
-  stays open for them.
-  The outlines weren't diffed against satellite imagery, and they couldn't be fetched from this
-  environment on 2026-11-16 (three Overpass hosts refused or timed out), so the maintainer exported
-  them. ADR-013 planned new `trip_photo` columns, but the `photo` table
-  already holds each photo's position and local time, which the stats library reads, so no migration
-  was needed. Checked in a desktop browser only, not yet on a phone.
+Nothing is in progress.
 
 ## Next
 
@@ -234,7 +236,8 @@ The plan is in [roadmap.md](roadmap.md). Specs are in [specs/](specs/README.md).
   [collections.md](specs/collections.md)
   ([#64](https://github.com/bradreimer/fibotrail/issues/64)). Park days are derived from stored photo
   positions, per [ADR-013](adr/ADR-013-park-days-are-derived-from-stored-photo-positions.md). The
-  boundary files and the Theme parks view spec come next.
+  collections and the Theme parks view are built. What's left is checking the park outlines against
+  satellite imagery, and the run-through on a phone.
 - Answer the open questions in the [life map spec](specs/life-map.md) with real use: whether the
   home country should always fill in, and whether 25 km is the right distance for a stop just off a
   coast.
