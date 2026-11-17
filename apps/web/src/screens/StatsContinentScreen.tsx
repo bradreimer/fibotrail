@@ -1,6 +1,7 @@
 import { Link, useParams } from 'react-router-dom';
 
 import { useApi } from '../api/useApi';
+import { BackLink } from '../shell/BackLink';
 import { EmptyState } from '../states/EmptyState';
 import { ErrorState } from '../states/ErrorState';
 
@@ -39,9 +40,7 @@ export function StatsContinentScreen() {
 
   return (
     <div className="stats-screen">
-      <p>
-        <Link to="/stats">Stats</Link>
-      </p>
+      <BackLink to="/stats">Stats</BackLink>
       <h2 className="stats-page__title">{data.name}</h2>
       <p className="stats-page__lead">
         {data.visited} of {data.total} countries visited

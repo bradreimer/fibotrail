@@ -8,6 +8,7 @@ import { AddTripSheet } from '../inbox/AddTripSheet';
 import type { Suggestion } from '../inbox/SuggestionCard';
 import { LazyMap } from '../map/LazyMap';
 import type { MapMarker } from '../map/MapView';
+import { BackLink } from '../shell/BackLink';
 import { EmptyState } from '../states/EmptyState';
 import { ErrorState } from '../states/ErrorState';
 import { dayHeading } from '../trip/format';
@@ -16,24 +17,6 @@ import { PhotoViewer } from '../trip/PhotoViewer';
 import { ParksSheet } from '../trip/ParksSheet';
 import { StatTiles } from '../trip/StatTiles';
 import { countOf, formatDateRange } from '../trips/dates';
-
-function BackToTrips() {
-  return (
-    <Link className="back-link" to="/trips">
-      <svg className="back-link__arrow" viewBox="0 0 12 20" aria-hidden="true" focusable="false">
-        <path
-          d="M10 2 2 10l8 8"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-      Trips
-    </Link>
-  );
-}
 
 /** One trip: the header, the route map, the numbers, and the photos by day. See docs/specs/trip-page.md. */
 export function TripScreen() {
@@ -83,7 +66,7 @@ export function TripScreen() {
   if (trip.loading && !data) {
     return (
       <div className="trip-page" role="status" aria-busy="true">
-        <BackToTrips />
+        <BackLink to="/trips">Trips</BackLink>
         <span className="visually-hidden">Loading the trip</span>
         <span className="skeleton trip-page__cover" aria-hidden="true" />
         <span className="skeleton map-frame" aria-hidden="true" />
@@ -158,7 +141,7 @@ export function TripScreen() {
 
   return (
     <article className="trip-page">
-      <BackToTrips />
+      <BackLink to="/trips">Trips</BackLink>
       <header className="trip-page__header">
         <img
           className="trip-page__cover"

@@ -15,6 +15,11 @@ version 0.1 and the per-line results of the accessibility checklist are also sti
 
 ## Completed
 
+- [#131](https://github.com/bradreimer/fibotrail/issues/131) A back arrow on every detail page.
+  A UX review of all 13 routes found the arrow only on the trip page. The collection, resort,
+  stamp book, continent, and country pages had a small text link with no arrow. They now share
+  one `BackLink` component with the trip page. The button on a "not found" page is unchanged.
+  Checked in tests only, not yet on a phone.
 - [#118](https://github.com/bradreimer/fibotrail/issues/118) and
   [#119](https://github.com/bradreimer/fibotrail/issues/119) Two fixes found on the Disney
   collection, which showed 8 trips for 10 real ones. A run of 2 or fewer photos at home between

@@ -100,6 +100,16 @@ function renderAt(path: string) {
   );
 }
 
+/** The back link is the first thing on the page, and its arrow is hidden from a screen reader. */
+function expectBackLink(container: HTMLElement, name: string, href: string) {
+  const page = container.querySelector('.stats-screen') as HTMLElement;
+  const link = within(page).getByRole('link', { name });
+  expect(link).toHaveAttribute('href', href);
+  expect(link).toHaveClass('back-link');
+  expect(link.querySelector('svg')).toHaveAttribute('aria-hidden', 'true');
+  expect(page.firstElementChild).toBe(link);
+}
+
 beforeEach(() => installMatchMedia(390));
 
 describe('the Collections screens', () => {
@@ -258,6 +268,24 @@ describe('the Collections screens', () => {
     renderAt('/collections/nope');
 
     expect(await screen.findByText("That collection doesn't exist.")).toBeInTheDocument();
+  });
+
+  it('shows a back arrow on a collection, a resort, and the stamp book', async () => {
+    fakeServer({ 'GET /api/collections/universal-parks': detail, 'GET /api/trips': library });
+
+    const collection = renderAt('/collections/universal-parks');
+    await screen.findByRole('heading', { name: 'Universal parks' });
+    expectBackLink(collection.container, 'Collections', '/collections');
+    collection.unmount();
+
+    const resort = renderAt('/collections/universal-parks/resorts/Universal%20Orlando%20Resort');
+    await screen.findByRole('heading', { name: 'Universal Orlando Resort' });
+    expectBackLink(resort.container, 'Universal parks', '/collections/universal-parks');
+    resort.unmount();
+
+    const stamps = renderAt('/collections/universal-parks/stamps');
+    await screen.findByRole('heading', { name: 'Stamp book' });
+    expectBackLink(stamps.container, 'Universal parks', '/collections/universal-parks');
   });
 
   it('has no accessibility problems', async () => {

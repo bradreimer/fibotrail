@@ -2,6 +2,7 @@ import { Link, useParams } from 'react-router-dom';
 
 import { useApi } from '../api/useApi';
 import { ViewSlot } from '../stats/ViewSlot';
+import { BackLink } from '../shell/BackLink';
 import { EmptyState } from '../states/EmptyState';
 import { ErrorState } from '../states/ErrorState';
 import { formatDateRange } from '../trips/dates';
@@ -41,9 +42,7 @@ export function StatsCountryScreen() {
 
   return (
     <div className="stats-screen">
-      <p>
-        <Link to={`/stats/continents/${data.continentId}`}>{data.continentName}</Link>
-      </p>
+      <BackLink to={`/stats/continents/${data.continentId}`}>{data.continentName}</BackLink>
       <h2 className="stats-page__title">{data.name}</h2>
       <p className="stats-page__lead">
         First visit {formatDateRange(data.firstVisit, data.firstVisit)}

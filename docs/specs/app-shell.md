@@ -75,6 +75,20 @@ behave like an app, so that browsing my trips feels as comfortable as a native i
   design document, and the sidebar holds those four plus Inbox and Settings.
 - The active item is Trail Teal with a Golden Gold marker. Each item has an icon and a label.
 - Going back returns to the previous screen at the scroll position you left.
+- Every detail page opened from a list starts with a back link: a back arrow and the name of its
+  parent, such as **Disney parks** on a resort page. The `BackLink` component draws it. It goes
+  to the parent route, has a tap target at least 44 px high, and hides the arrow from a screen
+  reader. The six screens in the bottom bar and the top bar have no parent, so they have none.
+  Tracking issue: [#131](https://github.com/bradreimer/fibotrail/issues/131).
+
+| Page | Back link |
+| --- | --- |
+| Trip | Trips |
+| Collection | Collections |
+| Resort | The collection's name |
+| Stamp book | The collection's name |
+| Continent | Stats |
+| Country | Its continent's name |
 - The MVP Settings screen shows the Immich connection status, the home location, the **Scan now**
   button, and **Sign out**. Other specs define each of these, and each appears on the screen when
   its spec is built. **Sign out** is there from the start.

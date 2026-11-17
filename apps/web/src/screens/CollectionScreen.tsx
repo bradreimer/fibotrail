@@ -2,6 +2,7 @@ import { Link, useParams } from 'react-router-dom';
 
 import { useApi } from '../api/useApi';
 import { ResortList } from '../collections/CollectionBody';
+import { BackLink } from '../shell/BackLink';
 import { EmptyState } from '../states/EmptyState';
 import { ErrorState } from '../states/ErrorState';
 import { countOf } from '../trips/dates';
@@ -45,9 +46,7 @@ export function CollectionScreen() {
   const base = `/collections/${encodeURIComponent(id)}`;
   return (
     <div className="stats-screen">
-      <p>
-        <Link to="/collections">Collections</Link>
-      </p>
+      <BackLink to="/collections">Collections</BackLink>
       <h2 className="stats-page__title">{data.summary.name}</h2>
       <p className="stats-page__lead">{tripsText(data.summary.trips)}</p>
       {data.summary.trips === 0 && <p>Add a trip to start your stamp book.</p>}
