@@ -1,6 +1,11 @@
 /* The Stats screen: the host, the continent cards, and the views. */
 .stats-screen {
   display: grid;
+  /*
+   * One column that can shrink to the screen. A bare grid column is auto-sized, so it grows to fit
+   * its widest child (the continent row, the spiral) and pushes past a phone's width.
+   */
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--fibo-space-5);
 }
 
