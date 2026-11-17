@@ -30,9 +30,10 @@ version 0.1 and the per-line results of the accessibility checklist are also sti
   Universal Studios Japan (relation 5695002), Universal Studios Singapore (95756945), and Universal
   Studios Beijing (740165118, which OpenStreetMap names Universal Beijing Resort). The outlines
   couldn't be fetched from this environment on 2026-11-16 (three Overpass hosts refused or timed out),
-  so the maintainer exported them and Claude typed them into the files by hand. **Not checked:** each
-  outline against satellite imagery, and each file's coordinates against its export. The Japan
-  outline comes from 2008 imagery and may be the roughest. ADR-013 planned new `trip_photo` columns,
+  so the maintainer exported them and Claude typed them into the files by hand. **Validation:** the
+  maintainer checks each outline in production, on real trips. A wrong outline is fixed by replacing
+  its GeoJSON file, with no code change. The Japan outline comes from 2008 imagery and may be the
+  roughest. ADR-013 planned new `trip_photo` columns,
   but the `photo` table already holds each photo's position and local time, which the stats library
   reads, so no migration was needed. Checked in a desktop browser only, not yet on a phone.
 
@@ -236,8 +237,8 @@ The plan is in [roadmap.md](roadmap.md). Specs are in [specs/](specs/README.md).
   [collections.md](specs/collections.md)
   ([#64](https://github.com/bradreimer/fibotrail/issues/64)). Park days are derived from stored photo
   positions, per [ADR-013](adr/ADR-013-park-days-are-derived-from-stored-photo-positions.md). The
-  collections and the Theme parks view are built. What's left is checking the park outlines against
-  satellite imagery, and the run-through on a phone.
+  collections and the Theme parks view are built, and the park outlines are validated in production by
+  the maintainer. What's left is the run-through on a phone.
 - Answer the open questions in the [life map spec](specs/life-map.md) with real use: whether the
   home country should always fill in, and whether 25 km is the right distance for a stop just off a
   coast.
