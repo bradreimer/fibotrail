@@ -12,6 +12,9 @@ public static class Synthetic
     /// <summary>About 3,300 km from home.</summary>
     public static readonly GeoPoint Park = new(28.4, -81.55);
 
+    /// <summary>About 7,400 km from home.</summary>
+    public static readonly GeoPoint Stockholm = new(59.33, 18.07);
+
     private static int _next;
 
     /// <summary>Photos at one place, spread evenly from the first time to the last.</summary>

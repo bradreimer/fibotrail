@@ -147,6 +147,12 @@ version 0.1 and the per-line results of the accessibility checklist are also sti
   March 2007, and March 2012. On the maintainer's library it adds about 29 Low confidence
   suggestions, and how many are real isn't known yet.
 
+- [#133](https://github.com/bradreimer/fibotrail/issues/133) Short visits far from home. Rule 4b
+  suggests a visit with 2 or more photos in all, more than 1,000 km from home, with no minimum
+  days. It's always Low confidence. On the maintainer's library it adds 13 suggestions, among them
+  the five Stockholm visits that rule 4 dropped, and no day trip near home. How many of the others
+  are real isn't known yet.
+
 - Image publishing. After CI passes on a push to `main`,
   `.github/workflows/publish-image.yml` builds `docker/Dockerfile` for amd64 and arm64 and pushes
   `ghcr.io/bradreimer/fibotrail:edge` and `:sha-<commit>`, for testing. `:latest` is for releases

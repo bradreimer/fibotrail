@@ -318,6 +318,81 @@ public class TripDetectorTests
     }
 
     [Fact]
+    public void Three_photos_far_from_home_on_one_day_become_one_low_confidence_suggestion()
+    {
+        var photos = At(Stockholm, 3, Time(2027, 3, 12, 9), Time(2027, 3, 12, 18), "Stockholm", null, "Sweden");
+
+        var trip = Assert.Single(TripDetector.Detect(photos, Home));
+
+        Assert.Equal(Confidence.Low, trip.Confidence);
+        Assert.Equal("Stockholm, March 2027", trip.Name);
+        Assert.Equal(1, trip.Days);
+    }
+
+    [Fact]
+    public void One_photo_far_from_home_becomes_no_suggestion()
+    {
+        Assert.Empty(TripDetector.Detect(At(Stockholm, 1, Time(2027, 3, 12), Time(2027, 3, 12)), Home));
+    }
+
+    [Fact]
+    public void Photos_with_no_position_between_two_far_photos_make_the_visit_and_belong_to_it()
+    {
+        var photos = At(Stockholm, 1, Time(2027, 3, 12, 9), Time(2027, 3, 12, 9), "Stockholm", null, "Sweden");
+        photos.AddRange(At(Stockholm, 1, Time(2027, 3, 16, 15), Time(2027, 3, 16, 15), "Stockholm", null, "Sweden"));
+        var unplaced = At(null, 90, Time(2027, 3, 13, 9), Time(2027, 3, 15, 20));
+        photos.AddRange(unplaced);
+
+        var trip = Assert.Single(TripDetector.Detect(photos, Home));
+
+        Assert.Equal(Confidence.Low, trip.Confidence);
+        Assert.Equal(new DateOnly(2027, 3, 12), trip.StartDate);
+        Assert.Equal(new DateOnly(2027, 3, 16), trip.EndDate);
+        Assert.Equal(92, trip.PhotoIds.Count);
+        Assert.All(unplaced, photo => Assert.Contains(photo.Id, trip.PhotoIds));
+    }
+
+    [Fact]
+    public void A_day_trip_near_home_and_a_visit_just_under_the_far_distance_become_no_suggestion()
+    {
+        var near = At(Lake, 25, Time(2027, 3, 12, 9), Time(2027, 3, 12, 20));
+        var justUnder = At(North(Home, 900), 3, Time(2027, 4, 12, 9), Time(2027, 4, 12, 20));
+
+        Assert.Empty(TripDetector.Detect([.. near, .. justUnder], Home));
+    }
+
+    [Fact]
+    public void Far_photos_on_days_that_a_trip_covers_add_no_second_suggestion()
+    {
+        var trip = At(Park, 30, Time(2027, 3, 12, 9), Time(2027, 3, 15, 18), "Orlando", "Florida", "United States");
+
+        var found = Assert.Single(TripDetector.Detect(trip, Home));
+
+        Assert.NotEqual(Confidence.Low, found.Confidence);
+    }
+
+    [Fact]
+    public void Photos_at_home_in_the_middle_of_one_far_day_do_not_make_two_suggestions()
+    {
+        var photos = At(Stockholm, 2, Time(2027, 3, 12, 8), Time(2027, 3, 12, 9), "Stockholm", null, "Sweden");
+        photos.AddRange(At(Home, 3, Time(2027, 3, 12, 10), Time(2027, 3, 12, 11)));
+        photos.AddRange(At(Stockholm, 2, Time(2027, 3, 12, 14), Time(2027, 3, 12, 18), "Stockholm", null, "Sweden"));
+
+        var trip = Assert.Single(TripDetector.Detect(photos, Home));
+
+        Assert.Equal(4, trip.AwayPhotoCount);
+    }
+
+    [Fact]
+    public void Two_far_visits_8_days_apart_become_two_suggestions()
+    {
+        var first = At(Stockholm, 3, Time(2027, 3, 1, 9), Time(2027, 3, 1, 18), "Stockholm", null, "Sweden");
+        var second = At(Stockholm, 3, Time(2027, 3, 9, 9), Time(2027, 3, 9, 18), "Stockholm", null, "Sweden");
+
+        Assert.Equal(2, TripDetector.Detect([.. first, .. second], Home).Count);
+    }
+
+    [Fact]
     public void The_settings_change_the_rules()
     {
         var photos = At(North(Home, 30), 10, Time(2027, 3, 12, 9), Time(2027, 3, 12, 20));
@@ -337,6 +412,9 @@ public class TripDetectorTests
         Assert.Equal(20, defaults.MinimumPhotos);
         Assert.Equal(2, defaults.MinimumDays);
         Assert.Equal(1, defaults.StopRadiusKm);
+        Assert.Equal(1000, defaults.FarDistanceKm);
+        Assert.Equal(TimeSpan.FromDays(7), defaults.FarGapLimit);
+        Assert.Equal(2, defaults.FarMinimumPhotos);
     }
 
     [Fact]
