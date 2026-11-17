@@ -73,15 +73,51 @@ function renderAt(path: string) {
 beforeEach(() => installMatchMedia(390));
 
 describe('the Collections screens', () => {
-  it('leads each collection card with its trips', async () => {
+  it('lists each collection closed, with its trips and no days', async () => {
     fakeServer({ 'GET /api/collections': [summary] });
     renderAt('/collections');
 
-    const card = await screen.findByRole('link', { name: /Universal parks/ });
+    const row = (await screen.findByRole('heading', { name: 'Universal parks' })).closest(
+      'details',
+    )!;
+    expect(row).not.toHaveAttribute('open');
+    expect(row.textContent).toContain('2 trips');
+    expect(row.textContent).not.toContain('days');
+    expect(screen.queryByText('Universal Orlando Resort')).not.toBeInTheDocument();
+  });
 
-    expect(card.textContent).toContain('2 trips');
-    expect(card.textContent).not.toContain('days');
-    expect(card).toHaveAttribute('href', '/collections/universal-parks');
+  it('opens a collection in place to show its totals, resorts, and stamp book', async () => {
+    fakeServer({
+      'GET /api/collections': [summary],
+      'GET /api/collections/universal-parks': detail,
+    });
+    const { container } = renderAt('/collections');
+
+    await userEvent.click(await screen.findByText('Universal parks'));
+
+    expect(await screen.findByText(/1 \/ 2 parks · 6 days · 2 trips/)).toBeInTheDocument();
+    const resort = screen.getByRole('link', { name: /Universal Orlando Resort/ });
+    expect(resort).toHaveAttribute(
+      'href',
+      '/collections/universal-parks/resorts/Universal%20Orlando%20Resort',
+    );
+    expect(screen.getByRole('link', { name: 'Stamp book' })).toHaveAttribute(
+      'href',
+      '/collections/universal-parks/stamps',
+    );
+    await expectNoAccessibilityProblems(container);
+  });
+
+  it('shows Try again when an open collection fails to load', async () => {
+    fakeServer({
+      'GET /api/collections': [summary],
+      'GET /api/collections/universal-parks': status(500),
+    });
+    renderAt('/collections');
+
+    await userEvent.click(await screen.findByText('Universal parks'));
+
+    expect(await screen.findByRole('button', { name: 'Try again' })).toBeInTheDocument();
   });
 
   it('says so when there are no collection files', async () => {

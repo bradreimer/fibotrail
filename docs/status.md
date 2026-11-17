@@ -15,6 +15,10 @@ version 0.1 and the per-line results of the accessibility checklist are also sti
 
 ## Completed
 
+- [#116](https://github.com/bradreimer/fibotrail/issues/116) Collections expand in place. Each row
+  on the Collections list opens like a section under the map, and shows the parks visited, days,
+  trips, the resorts, and the Stamp book button. The detail loads on the first open. Checked in
+  tests only, not yet on a phone.
 - [#111](https://github.com/bradreimer/fibotrail/issues/111) The Stats screen is simpler. Five
   views were removed, each by the four steps of ADR-014: Trips per year, Trip length, Theme parks,
   Travel clock, and Distance rings. Their specs went with them. The stats library lost the two

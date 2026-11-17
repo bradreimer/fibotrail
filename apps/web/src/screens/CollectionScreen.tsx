@@ -1,6 +1,7 @@
 import { Link, useParams } from 'react-router-dom';
 
 import { useApi } from '../api/useApi';
+import { ResortList } from '../collections/CollectionBody';
 import { EmptyState } from '../states/EmptyState';
 import { ErrorState } from '../states/ErrorState';
 import { countOf } from '../trips/dates';
@@ -42,9 +43,6 @@ export function CollectionScreen() {
   if (!data) return null;
 
   const base = `/collections/${encodeURIComponent(id)}`;
-  const resorts = [...data.resorts].sort(
-    (a, b) => b.trips - a.trips || a.name.localeCompare(b.name),
-  );
   return (
     <div className="stats-screen">
       <p>
@@ -53,22 +51,7 @@ export function CollectionScreen() {
       <h2 className="stats-page__title">{data.summary.name}</h2>
       <p className="stats-page__lead">{tripsText(data.summary.trips)}</p>
       {data.summary.trips === 0 && <p>Add a trip to start your stamp book.</p>}
-      <ul className="collections">
-        {resorts.map((resort) => (
-          <li key={resort.name}>
-            <Link
-              className="collection-card"
-              to={`${base}/resorts/${encodeURIComponent(resort.name)}`}
-            >
-              <span className="collection-card__name">{resort.name}</span>
-              <span className="collection-card__count">{tripsText(resort.trips)}</span>
-            </Link>
-          </li>
-        ))}
-      </ul>
-      {resorts.length > 1 && (
-        <p className="stats-page__note">A trip to two resorts counts once for each.</p>
-      )}
+      <ResortList id={id} detail={data} />
       <p>
         <Link className="button" to={`${base}/stamps`}>
           Stamp book

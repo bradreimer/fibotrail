@@ -1,6 +1,8 @@
-import { Link } from 'react-router-dom';
+import { useState } from 'react';
 
 import { useApi } from '../api/useApi';
+import { CollectionBody } from '../collections/CollectionBody';
+import { CollapsibleSection } from '../map/CollapsibleSection';
 import { EmptyState } from '../states/EmptyState';
 import { ErrorState } from '../states/ErrorState';
 import { tripsText } from './CollectionScreen';
@@ -8,6 +10,7 @@ import { tripsText } from './CollectionScreen';
 /** The collections: one card for each, led by the trips taken to its places. */
 export function CollectionsScreen() {
   const collections = useApi('/api/collections');
+  const [open, setOpen] = useState<ReadonlySet<string>>(new Set());
 
   if (collections.loading && !collections.data) {
     return (
@@ -34,16 +37,27 @@ export function CollectionsScreen() {
   return (
     <div className="stats-screen">
       {noTrips && <p className="stats-page__lead">Add a trip to start your stamp book.</p>}
-      <ul className="collections">
+      <div className="collections">
         {collections.data.map((item) => (
-          <li key={item.id}>
-            <Link className="collection-card" to={`/collections/${item.id}`}>
-              <span className="collection-card__name">{item.name}</span>
-              <span className="collection-card__count">{tripsText(item.trips)}</span>
-            </Link>
-          </li>
+          <CollapsibleSection
+            key={item.id}
+            id={`collection-${item.id}`}
+            title={item.name}
+            count={tripsText(item.trips)}
+            open={open.has(item.id)}
+            onToggle={(isOpen) =>
+              setOpen((before) => {
+                const next = new Set(before);
+                if (isOpen) next.add(item.id);
+                else next.delete(item.id);
+                return next;
+              })
+            }
+          >
+            {open.has(item.id) && <CollectionBody id={item.id} />}
+          </CollapsibleSection>
         ))}
-      </ul>
+      </div>
     </div>
   );
 }

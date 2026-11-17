@@ -155,8 +155,14 @@ visit, such as a day your phone died after one photo. See open question 1.
   [ADR-007](../adr/ADR-007-native-ios-feel-through-a-progressive-web-app.md). The
   [app shell spec](app-shell.md) is updated in the same change.
 - Collections drill down in three levels, then a stamp book:
-  1. **List.** One card per collection: the name and its trips, such as "9 trips". The card has no
-     ring and no days. A collection with no trips reads "0 trips · Not visited yet".
+  1. **List.** One row per collection: the name and its trips, such as "9 trips". The row has no
+     ring and no days. A collection with no trips reads "0 trips · Not visited yet". Each row
+     opens and closes in place, like a section under the map on the
+     [life map](life-map.md), per [#116](https://github.com/bradreimer/fibotrail/issues/116).
+     Rows start closed, and several can be open at once. An open row loads the collection the
+     first time it opens, and shows "7 / 12 parks · 34 days · 9 trips", the resort rows of level
+     2, the shared-trip note, and the **Stamp book** button. A failed load shows the error and
+     **Try again**.
   2. **Collection.** The trips again, then one row for each resort, most trips first and then by
      name, such as "Walt Disney World Resort, 5 trips". A note says "A trip to two resorts counts
      once for each." A **Stamp book** button opens the stamp book.
@@ -226,8 +232,10 @@ visit, such as a day your phone died after one photo. See open question 1.
 - A trip with only 2 photos in a park adds no trip at any level.
 - A resort never shows more trips than its collection. A park's trips equal its trips in the Theme
   parks view.
-- The list card shows trips and no days. The ring, the total days, and the stamps are in the stamp
+- The list row shows trips and no days. The ring, the total days, and the stamps are in the stamp
   book, one tap from the collection.
+- A collection row on the list starts closed. Tapping it opens it in place, with its totals, its
+  resorts, and the **Stamp book** button. Tapping again closes it.
 
 ## Open questions
 
