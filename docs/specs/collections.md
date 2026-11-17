@@ -27,6 +27,9 @@ Added trips ─▶ Photos with a position ─▶ Park boundaries ─▶ Park day
                                                                        └─▶ Stats: Theme parks view
 ```
 
+The Collections screens lead with trips, per
+[#110](https://github.com/bradreimer/fibotrail/issues/110).
+
 The Stats screen shows park days in a self-contained view, following the stats views decision
 tracked in [#54](https://github.com/bradreimer/fibotrail/issues/54). That view has its own spec. This spec covers the data files, the counting rule, the shared
 numbers, and the Collections screens.
@@ -39,6 +42,8 @@ spent in Universal Studios Florida?"
 
 ## Goals
 
+- The Collections list leads with trips: "How many separate trips have I taken to Disney parks?"
+  Resorts and parks answer the same question one tap deeper.
 - Each park shows its days and its trips as numbers, not only as a stamp.
 - A park day uses the same rule as a day in a country, so "6 days in Universal Studios Florida"
   reads like "19 days in Sweden."
@@ -126,6 +131,12 @@ opens.
 - **Trips in a park** is the number of added trips that visit it.
 - The first visit is the earliest local day with a photo in the park.
 - A park always shows both numbers, such as "6 days · 2 trips".
+- **Collection trips** is the number of distinct added trips that visit at least one open park in
+  the collection. **Resort trips** is the same for the parks of one resort, the `group` of the
+  place. A trip that visits two parks counts once. A trip that visits two resorts counts once in
+  the collection and once in each resort, so the resort numbers can add up to more than the
+  collection's. Every level reads the visits that the park already has, so a park's trips, its
+  resort's trips, and the collection's trips can't disagree.
 
 The first rule keeps one stray photo from creating a park. The second keeps a quiet day in a real
 visit, such as a day your phone died after one photo. See open question 1.
@@ -146,11 +157,19 @@ visit, such as a day your phone died after one photo. See open question 1.
 - **Collections** is a destination, per the four destinations of the design document and
   [ADR-007](../adr/ADR-007-native-ios-feel-through-a-progressive-web-app.md). The
   [app shell spec](app-shell.md) is updated in the same change.
-- The list shows one card per collection: a progress ring with the visited count over the open
-  total, such as "7 / 12", the name, and the total days, such as "31 days across 7 parks."
-- Tapping a card opens the collection detail: a grid of stamps, grouped by resort. A visited stamp
-  is gold, with the name, "6 days", and "2 trips." A stamp that isn't visited has a gray outline
-  and "Not visited yet."
+- Collections drill down in three levels, then a stamp book:
+  1. **List.** One card per collection: the name and its trips, such as "9 trips". The card has no
+     ring and no days. A collection with no trips reads "0 trips · Not visited yet".
+  2. **Collection.** The trips again, then one row for each resort, most trips first and then by
+     name, such as "Walt Disney World Resort, 5 trips". A note says "A trip to two resorts counts
+     once for each." A **Stamp book** button opens the stamp book.
+  3. **Resort.** One row for each open park, most trips first and then by name, such as
+     "Magic Kingdom, 5 trips · 11 days". A park with no trips reads "0 trips · Not visited yet".
+     Tapping a visited park opens the park sheet.
+- The **stamp book** holds what the list used to show: the progress ring with the visited count
+  over the open total, such as "7 / 12", the total days, such as "34 days across 8 parks", and the
+  grid of stamps grouped by resort. A visited stamp is gold, with the name, "6 days", and "2 trips."
+  A stamp that isn't visited has a gray outline and "Not visited yet."
 - The stamp states differ by text and shape, never by color alone.
 - Tapping a visited stamp opens a sheet with the park's days, trips, and first visit. Each trip
   links to its trip page and shows how many of that trip's days were in the park.
@@ -162,10 +181,11 @@ visit, such as a day your phone died after one photo. See open question 1.
 ### API
 
 - Every route needs a session.
-- `GET /api/collections` returns each collection with its name, visited count, open total, and
-  total days.
-- `GET /api/collections/{id}` returns each place with its name, group, status, days, trips, first
-  visit, and trip IDs.
+- `GET /api/collections` returns each collection with its name, visited count, open total, total
+  days, and trips.
+- `GET /api/collections/{id}` returns the summary, each resort with its visited count, open total,
+  days, and trips, and each place with its name, group, status, days, trips, first visit, and trip
+  IDs.
 - The OpenAPI document and the TypeScript types are updated, per
   [web-app-development.md](../knowledge/web-app-development.md).
 
@@ -201,6 +221,17 @@ visit, such as a day your phone died after one photo. See open question 1.
 - A test loads every collection file and checks that each park has a valid, closed boundary and
   that no two parks in a collection overlap.
 - `./scripts/check.sh` passes.
+
+- A trip with photos in Magic Kingdom and EPCOT shows **1 trip** for the collection, **1 trip** for
+  Walt Disney World Resort, and **1 trip** for each park.
+- A trip to Walt Disney World and Disneyland Resort shows **1 trip** for the collection and **1
+  trip** for each resort.
+- Three added trips to Magic Kingdom show **3 trips** for the collection, the resort, and the park.
+- A trip with only 2 photos in a park adds no trip at any level.
+- A resort never shows more trips than its collection. A park's trips equal its trips in the Theme
+  parks view.
+- The list card shows trips and no days. The ring, the total days, and the stamps are in the stamp
+  book, one tap from the collection.
 
 ## Open questions
 

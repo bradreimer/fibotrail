@@ -1,12 +1,11 @@
 import { Link } from 'react-router-dom';
 
 import { useApi } from '../api/useApi';
-import { ProgressRing } from '../stats/ProgressRing';
 import { EmptyState } from '../states/EmptyState';
 import { ErrorState } from '../states/ErrorState';
-import { countOf } from '../trips/dates';
+import { tripsText } from './CollectionScreen';
 
-/** The collections: one card for each, with the parks visited and the days across them. */
+/** The collections: one card for each, led by the trips taken to its places. */
 export function CollectionsScreen() {
   const collections = useApi('/api/collections');
 
@@ -31,7 +30,7 @@ export function CollectionsScreen() {
     );
   }
 
-  const noTrips = collections.data.every((item) => item.visited === 0);
+  const noTrips = collections.data.every((item) => item.trips === 0);
   return (
     <div className="stats-screen">
       {noTrips && <p className="stats-page__lead">Add a trip to start your stamp book.</p>}
@@ -39,12 +38,8 @@ export function CollectionsScreen() {
         {collections.data.map((item) => (
           <li key={item.id}>
             <Link className="collection-card" to={`/collections/${item.id}`}>
-              <ProgressRing visited={item.visited} total={item.total} />
               <span className="collection-card__name">{item.name}</span>
-              <span className="collection-card__count">
-                {item.visited} / {item.total} · {countOf(item.totalDays, 'day')} across{' '}
-                {countOf(item.visited, 'park')}
-              </span>
+              <span className="collection-card__count">{tripsText(item.trips)}</span>
             </Link>
           </li>
         ))}
