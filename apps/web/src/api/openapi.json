@@ -730,6 +730,7 @@
       "CollectionDetail": {
         "required": [
           "summary",
+          "resorts",
           "places",
           "attribution"
         ],
@@ -737,6 +738,12 @@
         "properties": {
           "summary": {
             "$ref": "#/components/schemas/CollectionSummary"
+          },
+          "resorts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ResortInfo"
+            }
           },
           "places": {
             "type": "array",
@@ -804,7 +811,8 @@
           "description",
           "visited",
           "total",
-          "totalDays"
+          "totalDays",
+          "trips"
         ],
         "type": "object",
         "properties": {
@@ -826,6 +834,10 @@
             "format": "int32"
           },
           "totalDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "trips": {
             "type": "integer",
             "format": "int32"
           }
@@ -1436,6 +1448,37 @@
                 "$ref": "#/components/schemas/GapRecord"
               }
             ]
+          }
+        }
+      },
+      "ResortInfo": {
+        "required": [
+          "name",
+          "visited",
+          "total",
+          "days",
+          "trips"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "visited": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "days": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "trips": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },

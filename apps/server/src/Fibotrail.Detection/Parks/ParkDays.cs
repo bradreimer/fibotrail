@@ -18,8 +18,8 @@ public sealed record ParkStats(ParkPlace Place, int Days, IReadOnlyList<ParkVisi
 /// <summary>
 /// Counts park days. A trip visits a park when at least the park's <c>MinPhotos</c> photos of that
 /// trip are in it. A park day is a distinct local day with a photo in a park that the trip visits,
-/// and a day with photos in two parks counts for both. This one function feeds Collections and the
-/// Stats Theme parks view, so they can't disagree. See docs/specs/collections.md and ADR-013.
+/// and a day with photos in two parks counts for both. This one function feeds Collections, so every
+/// screen that shows park days agrees. See docs/specs/collections.md and ADR-013.
 /// </summary>
 public static class ParkDays
 {

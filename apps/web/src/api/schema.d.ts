@@ -378,6 +378,7 @@ export interface components {
     schemas: {
         CollectionDetail: {
             summary: components["schemas"]["CollectionSummary"];
+            resorts: components["schemas"]["ResortInfo"][];
             places: components["schemas"]["CollectionPlaceInfo"][];
             attribution: string;
         };
@@ -404,6 +405,8 @@ export interface components {
             total: number;
             /** Format: int32 */
             totalDays: number;
+            /** Format: int32 */
+            trips: number;
         };
         CountryRecord: {
             countryId: string;
@@ -559,6 +562,17 @@ export interface components {
             mostCountriesTrip: null | components["schemas"]["TripRecord"];
             mostVisitedCountry: null | components["schemas"]["CountryRecord"];
             longestGap: null | components["schemas"]["GapRecord"];
+        };
+        ResortInfo: {
+            name: string;
+            /** Format: int32 */
+            visited: number;
+            /** Format: int32 */
+            total: number;
+            /** Format: int32 */
+            days: number;
+            /** Format: int32 */
+            trips: number;
         };
         RoutePoint: {
             /** Format: double */

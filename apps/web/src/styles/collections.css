@@ -9,12 +9,10 @@
 
 .collection-card {
   display: grid;
-  grid-template-columns: auto 1fr;
   grid-template-areas:
-    'ring name'
-    'ring count';
+    'name'
+    'count';
   align-items: center;
-  column-gap: var(--fibo-space-4);
   min-height: var(--fibo-tap);
   padding: var(--fibo-space-3) var(--fibo-space-4);
   border: var(--fibo-border) solid var(--fibo-mist);
@@ -23,8 +21,18 @@
   text-decoration: none;
 }
 
-.collection-card .ring {
-  grid-area: ring;
+.collection-card--button {
+  width: 100%;
+  background: none;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+.stamp-book__summary {
+  display: flex;
+  align-items: center;
+  gap: var(--fibo-space-4);
 }
 
 .collection-card__name {

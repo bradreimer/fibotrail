@@ -23,6 +23,11 @@ version 0.1 and the per-line results of the accessibility checklist are also sti
   the park days from the stats library. The Stats screen now shows the summary tiles, the continents,
   the Trip spiral, and Records. [ADR-013](adr/ADR-013-park-days-are-derived-from-stored-photo-positions.md)
   still says the Theme parks view shares the park-day function. It is history until someone edits it.
+- [#110](https://github.com/bradreimer/fibotrail/issues/110) Collections lead with trips. The list
+  card shows the trips to the collection, such as "9 trips". Tapping it lists the resorts with
+  their trips, and tapping a resort lists its parks with trips and days. The progress ring, total
+  days, and stamps moved to a stamp book one tap deeper. A trip to two parks counts once, and a
+  trip to two resorts counts once for each. See the [collections spec](specs/collections.md).
 - [#102](https://github.com/bradreimer/fibotrail/issues/102) and
   [#103](https://github.com/bradreimer/fibotrail/issues/103) City counts and names fixed from the
   first `fibotrail places` run on 52 trips. 25 km stays (89 cities; 10 km gave 116 and 50 km gave

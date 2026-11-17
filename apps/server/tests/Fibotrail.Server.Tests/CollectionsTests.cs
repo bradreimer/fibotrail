@@ -6,7 +6,7 @@ using Fibotrail.Server.Collections;
 
 namespace Fibotrail.Server.Tests;
 
-/// <summary>Collections and the Stats Theme parks view, on a made-up park around the test Orlando trip. See docs/specs/collections.md.</summary>
+/// <summary>Collections, on a made-up park around the test Orlando trip. See docs/specs/collections.md.</summary>
 public class CollectionsTests
 {
     private static ParkPlace Park(string id, double south, double west, double size = 0.02) =>
@@ -49,6 +49,10 @@ public class CollectionsTests
 
         var summary = Assert.Single(list.EnumerateArray());
         Assert.Equal((1, 2), (summary.GetProperty("visited").GetInt32(), summary.GetProperty("total").GetInt32()));
+        Assert.Equal(1, summary.GetProperty("trips").GetInt32());
+        var resort = Assert.Single(detail.GetProperty("resorts").EnumerateArray());
+        Assert.Equal(("Test Resort", 1, 2, 1), (resort.GetProperty("name").GetString(), resort.GetProperty("visited").GetInt32(), resort.GetProperty("total").GetInt32(), resort.GetProperty("trips").GetInt32()));
+        Assert.Equal(summary.GetProperty("trips").GetInt32(), detail.GetProperty("summary").GetProperty("trips").GetInt32());
         var places = detail.GetProperty("places").EnumerateArray().ToDictionary(place => place.GetProperty("id").GetString()!);
         Assert.InRange(places["near"].GetProperty("days").GetInt32(), 6, 7);
         Assert.Equal(1, places["near"].GetProperty("trips").GetInt32());
