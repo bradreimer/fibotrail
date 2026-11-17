@@ -102,4 +102,12 @@ public class CityPlacesTests
 
     [Fact]
     public void No_stops_give_no_places() => Assert.Empty(CityPlaces.Find([]));
+
+    [Fact]
+    public void A_place_remembers_the_names_of_its_stops_most_photos_first()
+    {
+        var places = CityPlaces.Find([Stop(1, "Ginza", 35.67, 139.76, 12), Stop(1, "Shibuya", 35.66, 139.70, 80), Stop(1, "Shinjuku", 35.69, 139.70, 30), Stop(1, null, 35.68, 139.72, 5)]);
+
+        Assert.Equal(["Shibuya", "Shinjuku", "Ginza"], Assert.Single(places).StopNames);
+    }
 }
