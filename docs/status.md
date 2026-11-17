@@ -15,6 +15,11 @@ version 0.1 and the per-line results of the accessibility checklist are also sti
 
 ## Completed
 
+- [#110](https://github.com/bradreimer/fibotrail/issues/110) Collections lead with trips. The list
+  card shows the trips to the collection, such as "9 trips". Tapping it lists the resorts with
+  their trips, and tapping a resort lists its parks with trips and days. The progress ring, total
+  days, and stamps moved to a stamp book one tap deeper. A trip to two parks counts once, and a
+  trip to two resorts counts once for each. See the [collections spec](specs/collections.md).
 - [#102](https://github.com/bradreimer/fibotrail/issues/102) and
   [#103](https://github.com/bradreimer/fibotrail/issues/103) City counts and names fixed from the
   first `fibotrail places` run on 52 trips. 25 km stays (89 cities; 10 km gave 116 and 50 km gave

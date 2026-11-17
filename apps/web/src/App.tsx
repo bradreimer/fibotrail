@@ -5,6 +5,8 @@ import { ScanProvider } from './api/scan';
 import { SessionProvider } from './api/session';
 import { CollectionScreen } from './screens/CollectionScreen';
 import { CollectionsScreen } from './screens/CollectionsScreen';
+import { ResortScreen } from './screens/ResortScreen';
+import { StampBookScreen } from './screens/StampBookScreen';
 import { InboxScreen } from './screens/InboxScreen';
 import { MapScreen } from './screens/MapScreen';
 import { SettingsScreen } from './screens/SettingsScreen';
@@ -28,6 +30,8 @@ export function App() {
               <Route path="/map" element={<MapScreen />} />
               <Route path="/collections" element={<CollectionsScreen />} />
               <Route path="/collections/:id" element={<CollectionScreen />} />
+              <Route path="/collections/:id/resorts/:resort" element={<ResortScreen />} />
+              <Route path="/collections/:id/stamps" element={<StampBookScreen />} />
               <Route path="/stats" element={<StatsScreen />} />
               <Route path="/stats/continents/:continent" element={<StatsContinentScreen />} />
               <Route path="/stats/countries/:id" element={<StatsCountryScreen />} />
