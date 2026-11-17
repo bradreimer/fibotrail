@@ -191,13 +191,14 @@ counting rule above can't see the trip. You mark the parks yourself.
      page. The header shows the resort's trips, such as "5 trips". A trip that visits two parks of
      the resort appears once, so the list length equals the resort's trip count, per
      [#127](https://github.com/bradreimer/fibotrail/issues/127).
-- A **resort card** (levels 1 and 2) shows the resort name, its trips, such as "5 trips", and one
-  **badge** for each visited park, such as "Magic Kingdom". A park with no trips has no badge. A
-  resort with no trips reads "0 trips · Not visited yet" and has no badges. Tapping the card opens
-  the resort's trip list. Tapping a badge opens that park's sheet (days, first visit, and per-trip
-  days) and doesn't open the list. A badge is text with a check shape, never color alone, and has a
-  tap target of at least 44 by 44 points. The card reads once to a screen reader, such as "Walt
-  Disney World Resort, 5 trips, visited Magic Kingdom and EPCOT".
+- A **resort card** (levels 1 and 2) shows the resort name and its trips, such as "5 trips". A
+  resort with no trips reads "0 trips · Not visited yet". Tapping the card opens the resort's trip
+  list. The card has no park cards under it. A park's days and first visit are in the stamp book.
+- A **trip row** in the resort list shows the trip and one **badge** for each park of the resort
+  that the trip visited, such as "Magic Kingdom" and "EPCOT". A park the trip didn't visit has no
+  badge. A badge is text with a check shape, never color alone, and wraps on a narrow phone. A
+  park marked by hand has a badge too. The row reads once to a screen reader, such as "Spring
+  2024, visited Magic Kingdom and EPCOT".
 - The **stamp book** holds what the list used to show: the progress ring with the visited count
   over the open total, such as "7 / 12", the total days, such as "34 days across 8 parks", and the
   grid of stamps grouped by resort. A visited stamp is gold, with the name, "6 days", and "2 trips."
@@ -273,9 +274,9 @@ counting rule above can't see the trip. You mark the parks yourself.
   parks view.
 - The list row shows trips and no days. The ring, the total days, and the stamps are in the stamp
   book, one tap from the collection.
-- A resort card shows its trips and a badge for each visited park. Tapping the card lists every
-  added trip at the resort once, and the list length equals the card's count. Tapping a badge
-  opens the park sheet and not the list. A park marked by hand has a badge too.
+- A resort card shows its trips. Tapping it lists every added trip at the resort once, and the
+  list length equals the card's count. Each trip row has a badge for each park of the resort that
+  the trip visited.
 - A collection row on the list starts closed. Tapping it opens it in place, with its totals, its
   resorts, and the **Stamp book** button. Tapping again closes it.
 
