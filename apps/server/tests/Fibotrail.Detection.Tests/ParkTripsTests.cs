@@ -57,4 +57,45 @@ public class ParkTripsTests
 
     [Fact]
     public void No_parks_means_no_trips() => Assert.Equal(0, ParkTrips.Distinct([]));
+
+    [Fact]
+    public void A_park_you_marked_counts_the_trip_with_no_days_and_starts_on_the_trip_start()
+    {
+        var start = new DateOnly(2006, 3, 11);
+        var trip = new ParkTrip(1, "Trip 1", [], start, ["A"]);
+
+        var park = Assert.Single(Count(trip));
+
+        Assert.Equal(("A", 0, start), (park.Place.Id, park.Days, park.FirstVisit));
+        var visit = Assert.Single(park.Trips);
+        Assert.True(visit.Marked);
+        Assert.Equal(0, visit.Days);
+        Assert.Equal(1, ParkTrips.Distinct([park]));
+    }
+
+    [Fact]
+    public void A_park_you_marked_that_photos_already_place_is_one_trip_with_its_photo_days()
+    {
+        var trip = new ParkTrip(1, "Trip 1", [.. At(A, 3)], new DateOnly(2026, 3, 10), ["A"]);
+
+        var park = Assert.Single(Count(trip));
+
+        Assert.Equal(3, park.Days);
+        Assert.False(Assert.Single(park.Trips).Marked);
+    }
+
+    [Fact]
+    public void A_marked_park_and_a_photo_park_on_two_trips_count_two_trips()
+    {
+        var stats = Count(Trip(1, At(A, 3)), new ParkTrip(2, "Trip 2", [], new DateOnly(2006, 3, 11), ["A"]));
+
+        var park = Assert.Single(In(stats, "A"));
+        Assert.Equal((3, 2), (park.Days, park.Trips.Count));
+    }
+
+    [Fact]
+    public void A_marked_park_that_is_not_in_any_collection_is_ignored()
+    {
+        Assert.Empty(Count(new ParkTrip(1, "Trip 1", [], new DateOnly(2006, 3, 11), ["nowhere"])));
+    }
 }

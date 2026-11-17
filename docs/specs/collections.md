@@ -56,8 +56,8 @@ spent in Universal Studios Florida?"
 - Anything inside a park: rides, lines, shows, restaurants.
 - Water parks, resort hotels, and shopping districts, such as Disney Springs and CityWalk.
 - Other brands. The file format allows them later, and each needs only a data file.
-- **Mark as visited** and **Not a visit** overrides from the design document. They need their own
-  decision storage, per [ADR-002](../adr/ADR-002-decisions-are-stored-separately-from-detected-data.md).
+- **Not a visit**, the override that removes a park a photo placed. Only **Mark as visited** is in
+  this spec, per [#119](https://github.com/bradreimer/fibotrail/issues/119).
 - Adding or removing a park day by hand.
 - A park view on the Stats screen.
 - National parks, countries, and regions as collections. They follow the same format later.
@@ -140,6 +140,27 @@ opens.
 The first rule keeps one stray photo from creating a park. The second keeps a quiet day in a real
 visit, such as a day your phone died after one photo. See open question 1.
 
+### Marking a park by hand
+
+Photos from before cameras recorded a position have no location, so no photo is in a park, and the
+counting rule above can't see the trip. You mark the parks yourself.
+
+- The trip page has a **Parks** section. It lists the parks the trip visited, each with its source:
+  "From photos" when at least `min_photos` photos of the trip are in the park, or "Marked by you".
+  **Mark parks visited** opens a sheet with one switch for each open park, grouped by collection
+  and resort. A park that photos place stays on and can't be turned off.
+- A park you mark is saved as a decision on the trip, in the `decision` table, so it survives every
+  rescan, per
+  [ADR-002](../adr/ADR-002-decisions-are-stored-separately-from-detected-data.md). It follows the
+  trip when detection changes the trip's fingerprint.
+- A marked park counts the trip: it adds the trip to the park, its resort, and the collection, and
+  it makes the park visited. It adds **no days**, because with no position no day is known. A park
+  that photos also place counts once, with its photo days.
+- The first visit of a park that only you marked is the first day of the trip.
+- The park sheet shows "Marked by you" for such a trip, where it shows "3 days here" for others.
+- Only an open park of a collection can be marked. A planned or unknown id is refused.
+- It counts only for added trips, like everything else here.
+
 ### Shared numbers
 
 - The park days are computed on the server, on each request, from the stored position and local
@@ -186,6 +207,10 @@ visit, such as a day your phone died after one photo. See open question 1.
 ### API
 
 - Every route needs a session.
+- `GET /api/parks` returns every open park with its id, name, resort, and collection.
+- `PUT /api/trips/{id}/parks` takes `{ "parks": ["magic-kingdom"] }`, replaces the trip's marked
+  parks, and answers with the trip page. An empty list clears them. `GET /api/trips/{id}` has a
+  `parks` list with each park's `source`, `photos` or `you`.
 - `GET /api/collections` returns each collection with its name, visited count, open total, total
   days, and trips.
 - `GET /api/collections/{id}` returns the summary, each resort with its visited count, open total,
@@ -213,6 +238,12 @@ visit, such as a day your phone died after one photo. See open question 1.
 - A suggested, later, or ignored trip adds no days, and no stamp.
 - A photo on the way, such as one from a train inside a resort, adds no day.
 - A photo taken at 11:30 pm local time counts for that day, not the next.
+- An added trip with no photo positions, with Magic Kingdom marked, shows **1 trip** and **0 days**
+  for that park, **1 trip** for its resort and the collection, and "Marked by you" in the park
+  sheet. Clearing the mark removes it.
+- A park that photos place can't be turned off on the trip page, and marking it too adds no second
+  trip.
+- A marked park survives a rescan.
 - A new collection file with a valid boundary shows up after a restart, with no code change. A
   file with a missing boundary stops the app with a message that names the file.
 - The collection list and detail give the same days for every park.
