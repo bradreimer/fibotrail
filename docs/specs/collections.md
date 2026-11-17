@@ -181,17 +181,23 @@ counting rule above can't see the trip. You mark the parks yourself.
      opens and closes in place, like a section under the map on the
      [life map](life-map.md), per [#116](https://github.com/bradreimer/fibotrail/issues/116).
      Rows start closed, and several can be open at once. An open row loads the collection the
-     first time it opens, and shows "7 / 12 parks · 34 days · 9 trips", one row for each
-     resort, the shared-trip note, and the **Stamp book** button. Each resort row opens in place
-     too, a second level, and lists its open parks as level 3 does. A visited park opens the park
-     sheet. A failed load shows the error and
-     **Try again**.
-  2. **Collection.** The trips again, then one row for each resort, most trips first and then by
+     first time it opens, and shows "7 / 12 parks · 34 days · 9 trips", one card for each
+     resort, the shared-trip note, and the **Stamp book** button. A failed load shows the error
+     and **Try again**.
+  2. **Collection.** The trips again, then one card for each resort, most trips first and then by
      name, such as "Walt Disney World Resort, 5 trips". A note says "A trip to two resorts counts
      once for each." A **Stamp book** button opens the stamp book.
-  3. **Resort.** One row for each open park, most trips first and then by name, such as
-     "Magic Kingdom, 5 trips · 11 days". A park with no trips reads "0 trips · Not visited yet".
-     Tapping a visited park opens the park sheet.
+  3. **Resort.** Every added trip that visits the resort, newest first, each opening its trip
+     page. The header shows the resort's trips, such as "5 trips". A trip that visits two parks of
+     the resort appears once, so the list length equals the resort's trip count, per
+     [#127](https://github.com/bradreimer/fibotrail/issues/127).
+- A **resort card** (levels 1 and 2) shows the resort name, its trips, such as "5 trips", and one
+  **badge** for each visited park, such as "Magic Kingdom". A park with no trips has no badge. A
+  resort with no trips reads "0 trips · Not visited yet" and has no badges. Tapping the card opens
+  the resort's trip list. Tapping a badge opens that park's sheet (days, first visit, and per-trip
+  days) and doesn't open the list. A badge is text with a check shape, never color alone, and has a
+  tap target of at least 44 by 44 points. The card reads once to a screen reader, such as "Walt
+  Disney World Resort, 5 trips, visited Magic Kingdom and EPCOT".
 - The **stamp book** holds what the list used to show: the progress ring with the visited count
   over the open total, such as "7 / 12", the total days, such as "34 days across 8 parks", and the
   grid of stamps grouped by resort. A visited stamp is gold, with the name, "6 days", and "2 trips."
@@ -214,7 +220,7 @@ counting rule above can't see the trip. You mark the parks yourself.
 - `GET /api/collections` returns each collection with its name, visited count, open total, total
   days, and trips.
 - `GET /api/collections/{id}` returns the summary, each resort with its visited count, open total,
-  days, and trips, and each place with its name, group, status, days, trips, first visit, and trip
+  days, trips, and trip IDs, and each place with its name, group, status, days, trips, first visit, and trip
   IDs.
 - The OpenAPI document and the TypeScript types are updated, per
   [web-app-development.md](../knowledge/web-app-development.md).
@@ -267,6 +273,9 @@ counting rule above can't see the trip. You mark the parks yourself.
   parks view.
 - The list row shows trips and no days. The ring, the total days, and the stamps are in the stamp
   book, one tap from the collection.
+- A resort card shows its trips and a badge for each visited park. Tapping the card lists every
+  added trip at the resort once, and the list length equals the card's count. Tapping a badge
+  opens the park sheet and not the list. A park marked by hand has a badge too.
 - A collection row on the list starts closed. Tapping it opens it in place, with its totals, its
   resorts, and the **Stamp book** button. Tapping again closes it.
 
