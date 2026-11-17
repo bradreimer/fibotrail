@@ -104,6 +104,21 @@ describe('Scan now', () => {
     expect(button).toBeDisabled();
   });
 
+  it('Rescan everything posts to the rescan route and shows the banner', async () => {
+    const server = fakeServer({ 'POST /api/rescan': () => startScan(server) });
+    renderSettings();
+    const button = await screen.findByRole('button', { name: 'Rescan everything' });
+    await waitFor(() => expect(button).toBeEnabled());
+
+    await userEvent.click(button);
+
+    expect(server.sent('POST', '/api/rescan')[0]!.headers['X-CSRF-Token']).toBe('token-1');
+    expect(
+      await screen.findByText('Scanning your library: 12,400 of 48,000 photos.'),
+    ).toBeInTheDocument();
+    expect(button).toBeDisabled();
+  });
+
   it('is disabled while a scan runs, and the rest of the app stays usable', async () => {
     fakeServer({ 'GET /api/scan': running });
     renderSettings();

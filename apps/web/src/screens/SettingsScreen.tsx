@@ -89,9 +89,19 @@ export function SettingsScreen() {
         >
           Scan now
         </button>
+        <button
+          type="button"
+          className="button"
+          disabled={!session || !scan.status || scan.status.state === 'running'}
+          onClick={() => void scan.rescan()}
+        >
+          Rescan everything
+        </button>
         {scan.startProblem && <p role="alert">{scan.startProblem}</p>}
         <p className="settings__hint">
-          The first scan reads your whole library. Later scans read only what changed.
+          The first scan reads your whole library. Later scans read only what changed. If you edited
+          photo locations in Immich and a trip is missing, use Rescan everything. It rereads every
+          photo and takes as long as the first scan.
         </p>
       </section>
 

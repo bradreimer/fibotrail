@@ -46,9 +46,11 @@ public sealed partial class ScanService(
 
     public bool IsRunning => !Current.IsCompleted;
 
-    /// <summary>Starts a scan in the background.</summary>
+    /// <summary>
+    /// Starts a scan in the background. A full pass rereads every photo, as <c>fibotrail rescan</c> does.
+    /// </summary>
     /// <returns>False when a scan is already running.</returns>
-    public bool TryStart()
+    public bool TryStart(bool fullPass = false)
     {
         lock (_gate)
         {
@@ -57,7 +59,7 @@ public sealed partial class ScanService(
                 return false;
             }
 
-            _current = Task.Run(() => RunAsync(fullPass: false, onPage: null, lifetime.ApplicationStopping));
+            _current = Task.Run(() => RunAsync(fullPass, onPage: null, lifetime.ApplicationStopping));
             return true;
         }
     }
@@ -123,7 +125,7 @@ public sealed partial class ScanService(
         {
             // The server is stopping. The run stays "running", and the next start resumes it. A command
             // that was stopped has no restart to resume it, so its run is marked failed and the next scan resumes it.
-            if (fullPass)
+            if (fullPass && !lifetime.ApplicationStopping.IsCancellationRequested)
             {
                 await FailAsync(db, run, StoppedMessage);
                 return new ScanOutcome(ScanState.Failed, run?.PhotosSeen ?? 0, rowsChanged, StoppedMessage);

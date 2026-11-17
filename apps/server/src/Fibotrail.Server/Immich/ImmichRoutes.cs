@@ -37,18 +37,14 @@ public static class ImmichRoutes
             TypedResults.Ok(await ReadStatusAsync(scans, db, cancellationToken)))
             .WithName("GetScanStatus");
 
-        api.MapPost("/scan", async Task<Results<Accepted<ScanStatus>, Conflict<ProblemDetail>>> (ScanService scans, FibotrailDbContext db, CancellationToken cancellationToken) =>
-        {
-            // A run that is "running" while this server isn't scanning belongs to `fibotrail rescan`, which
-            // runs in its own process. Starting here would resume that run and write it from two places.
-            var latest = await db.ScanRuns.AsNoTracking().OrderByDescending(run => run.Id).Select(run => (ScanState?)run.State).FirstOrDefaultAsync(cancellationToken);
-            if (latest == ScanState.Running || !scans.TryStart())
-            {
-                return TypedResults.Conflict(new ProblemDetail("A scan is already running."));
-            }
+        api.MapPost("/scan", (ScanService scans, FibotrailDbContext db, CancellationToken cancellationToken) =>
+            StartAsync(fullPass: false, scans, db, cancellationToken))
+            .WithName("StartScan");
 
-            return TypedResults.Accepted("/api/scan", await ReadStatusAsync(scans, db, cancellationToken));
-        }).WithName("StartScan");
+        // The button form of `fibotrail rescan`: it rereads every photo, so it sees a location edited in Immich.
+        api.MapPost("/rescan", (ScanService scans, FibotrailDbContext db, CancellationToken cancellationToken) =>
+            StartAsync(fullPass: true, scans, db, cancellationToken))
+            .WithName("StartRescan");
 
         api.MapGet("/photos/{id}/thumbnail", (string id, ThumbnailStore store, HttpContext context) =>
             ImageAsync(id, ImmichImageSize.Thumbnail, store, context))
@@ -57,6 +53,19 @@ public static class ImmichRoutes
         api.MapGet("/photos/{id}/preview", (string id, ThumbnailStore store, HttpContext context) =>
             ImageAsync(id, ImmichImageSize.Preview, store, context))
             .WithName("GetPhotoPreview");
+    }
+
+    private static async Task<Results<Accepted<ScanStatus>, Conflict<ProblemDetail>>> StartAsync(bool fullPass, ScanService scans, FibotrailDbContext db, CancellationToken cancellationToken)
+    {
+        // A run that is "running" while this server isn't scanning belongs to `fibotrail rescan`, which
+        // runs in its own process. Starting here would resume that run and write it from two places.
+        var latest = await db.ScanRuns.AsNoTracking().OrderByDescending(run => run.Id).Select(run => (ScanState?)run.State).FirstOrDefaultAsync(cancellationToken);
+        if (latest == ScanState.Running || !scans.TryStart(fullPass))
+        {
+            return TypedResults.Conflict(new ProblemDetail("A scan is already running."));
+        }
+
+        return TypedResults.Accepted("/api/scan", await ReadStatusAsync(scans, db, cancellationToken));
     }
 
     private static async Task<ScanStatus> ReadStatusAsync(ScanService scans, FibotrailDbContext db, CancellationToken cancellationToken)

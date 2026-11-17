@@ -93,6 +93,36 @@
         }
       }
     },
+    "/api/rescan": {
+      "post": {
+        "tags": [
+          "Fibotrail"
+        ],
+        "operationId": "StartRescan",
+        "responses": {
+          "202": {
+            "description": "Accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScanStatus"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/photos/{id}/thumbnail": {
       "get": {
         "tags": [
