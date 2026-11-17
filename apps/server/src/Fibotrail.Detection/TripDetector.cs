@@ -149,15 +149,29 @@ public static class TripDetector
             }
         }
 
-        foreach (var photo in photosByTime)
+        // Only photos with a position matter here. A photo with no position joins a trip later, by rule 5.
+        var placed = photosByTime.Where(photo => photo.Position is not null).ToList();
+        for (var index = 0; index < placed.Count; index++)
         {
-            if (photo.Position is not { } position)
-            {
-                continue;
-            }
-
+            var photo = placed[index];
+            var position = photo.Position!.Value;
             if (Geo.DistanceKm(home, position) <= settings.HomeRadiusKm)
             {
+                // A short run at home between two close away photos is a stray photo, such as a
+                // household phone syncing. It doesn't end the trip. See open question 2 of the spec.
+                var next = index;
+                while (next < placed.Count && Geo.DistanceKm(home, placed[next].Position!.Value) <= settings.HomeRadiusKm)
+                {
+                    next++;
+                }
+
+                if (current.Count > 0 && next < placed.Count && next - index <= settings.HomeBlipPhotos
+                    && placed[next].LocalTime - current[^1].LocalTime <= settings.HomeBlipSpan)
+                {
+                    index = next - 1;
+                    continue;
+                }
+
                 Close();
                 continue;
             }

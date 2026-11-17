@@ -42,6 +42,12 @@ public sealed record DetectionSettings
     /// <summary>Photos this close together form one stop.</summary>
     public double StopRadiusKm { get; init; } = 1;
 
+    /// <summary>A run of at most this many photos at home, between two away photos, doesn't end a trip.</summary>
+    public int HomeBlipPhotos { get; init; } = 2;
+
+    /// <summary>A blip at home only bridges away photos that are no more than this far apart in time.</summary>
+    public TimeSpan HomeBlipSpan { get; init; } = TimeSpan.FromHours(24);
+
     /// <summary>A day with at least this many photos that have no position counts as a burst day.</summary>
     public int BurstPhotosPerDay { get; init; } = 30;
 
