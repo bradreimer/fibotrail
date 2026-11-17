@@ -85,7 +85,7 @@ spent in Universal Studios Florida?"
 | `disney-parks` | Walt Disney World Resort, Orlando | Magic Kingdom, EPCOT, Disney's Hollywood Studios, Disney's Animal Kingdom |
 | `disney-parks` | Disneyland Resort, Anaheim | Disneyland Park, Disney California Adventure |
 | `disney-parks` | Tokyo Disney Resort | Tokyo Disneyland, Tokyo DisneySea |
-| `disney-parks` | Disneyland Paris | Disneyland Park, Walt Disney Studios Park |
+| `disney-parks` | Disneyland Paris | Disneyland Park, Disney Adventure World (formerly Walt Disney Studios Park) |
 | `disney-parks` | Hong Kong Disneyland Resort | Hong Kong Disneyland |
 | `disney-parks` | Shanghai Disney Resort | Shanghai Disneyland |
 | `universal-parks` | Universal Orlando Resort | Universal Studios Florida, Universal's Islands of Adventure, Universal Epic Universe |

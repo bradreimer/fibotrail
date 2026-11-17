@@ -1,6 +1,5 @@
 # Universal parks. Each place needs a boundary file in boundaries/ before it can be listed. To add a
 # park, export its outline (see README.md), save it as boundaries/<id>.geojson, and add its entry.
-# Still to add: Universal Beijing Resort.
 id: universal-parks
 name: Universal parks
 description: Every Universal theme park in the world
@@ -43,3 +42,10 @@ places:
     group: Universal Studios Singapore
     status: open
     boundary: boundaries/universal-studios-singapore.geojson
+
+  # OpenStreetMap names this outline "Universal Beijing Resort". Its edge is the theme park's.
+  - id: universal-studios-beijing
+    name: Universal Studios Beijing
+    group: Universal Beijing Resort
+    status: open
+    boundary: boundaries/universal-studios-beijing.geojson
