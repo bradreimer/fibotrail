@@ -96,16 +96,33 @@ describe('the Collections screens', () => {
     await userEvent.click(await screen.findByText('Universal parks'));
 
     expect(await screen.findByText(/1 \/ 2 parks · 6 days · 2 trips/)).toBeInTheDocument();
-    const resort = screen.getByRole('link', { name: /Universal Orlando Resort/ });
-    expect(resort).toHaveAttribute(
-      'href',
-      '/collections/universal-parks/resorts/Universal%20Orlando%20Resort',
-    );
+    expect(screen.getByRole('heading', { name: 'Universal Orlando Resort' })).toBeInTheDocument();
+    expect(screen.queryByText('Universal Studios Florida')).not.toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Stamp book' })).toHaveAttribute(
       'href',
       '/collections/universal-parks/stamps',
     );
     await expectNoAccessibilityProblems(container);
+  });
+
+  it('opens a resort inside a collection to list its parks, and a visited park to its trips', async () => {
+    fakeServer({
+      'GET /api/collections': [summary],
+      'GET /api/collections/universal-parks': detail,
+    });
+    renderAt('/collections');
+
+    await userEvent.click(await screen.findByText('Universal parks'));
+    await userEvent.click(await screen.findByText('Universal Orlando Resort'));
+
+    expect(
+      screen.getByRole('group', { name: "Universal's Islands of Adventure, not visited yet" }),
+    ).toBeInTheDocument();
+    expect(screen.queryByText('Epic Universe')).not.toBeInTheDocument();
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Universal Studios Florida, 2 trips, 6 days' }),
+    );
+    expect(screen.getByRole('dialog', { name: 'Universal Studios Florida' })).toBeInTheDocument();
   });
 
   it('shows Try again when an open collection fails to load', async () => {

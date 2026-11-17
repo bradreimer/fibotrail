@@ -160,8 +160,10 @@ visit, such as a day your phone died after one photo. See open question 1.
      opens and closes in place, like a section under the map on the
      [life map](life-map.md), per [#116](https://github.com/bradreimer/fibotrail/issues/116).
      Rows start closed, and several can be open at once. An open row loads the collection the
-     first time it opens, and shows "7 / 12 parks · 34 days · 9 trips", the resort rows of level
-     2, the shared-trip note, and the **Stamp book** button. A failed load shows the error and
+     first time it opens, and shows "7 / 12 parks · 34 days · 9 trips", one row for each
+     resort, the shared-trip note, and the **Stamp book** button. Each resort row opens in place
+     too, a second level, and lists its open parks as level 3 does. A visited park opens the park
+     sheet. A failed load shows the error and
      **Try again**.
   2. **Collection.** The trips again, then one row for each resort, most trips first and then by
      name, such as "Walt Disney World Resort, 5 trips". A note says "A trip to two resorts counts
