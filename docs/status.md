@@ -109,6 +109,11 @@ version 0.1 and the per-line results of the accessibility checklist are also sti
   region outlines add 132 KB gzipped. The Washington Monument falls in Virginia at 1:50 million, so
   DC can be missed. It is checked in a desktop browser only, not yet on a phone or an iPad.
 
+- [#105](https://github.com/bradreimer/fibotrail/issues/105) Map tab navigation. Canada and the
+  USA in the progress lines link to their region lists, and the sections under the map are
+  collapsed until opened ([spec](specs/life-map.md#the-map-screen)). Checked in tests only, not yet
+  on a phone.
+
 - [#61](https://github.com/bradreimer/fibotrail/issues/61) Trips with no location. Rule 3b finds
   runs of 3 or more days with 30 or more photos a day and no position, which catches March 2006,
   March 2007, and March 2012. On the maintainer's library it adds about 29 Low confidence

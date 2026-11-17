@@ -135,6 +135,20 @@ describe('the Map screen', () => {
     ).toEqual(['SwedenOct 31, 2022', 'FranceMar 14, 2026', 'KosovoApr 2, 2026']);
   });
 
+  it('starts with the First visits section collapsed, and opens it from its summary', async () => {
+    fakeServer({ 'GET /api/map': map });
+    renderMap();
+    const heading = await screen.findByRole('heading', { name: 'First visits' });
+    const section = heading.closest('details')!;
+
+    expect(section).not.toHaveAttribute('open');
+    expect(within(heading.closest('summary')!).getByText('3')).toBeInTheDocument();
+
+    await userEvent.click(heading);
+
+    expect(section).toHaveAttribute('open');
+  });
+
   it('draws no routes until the switch is turned on, and draws them all when it is', async () => {
     fakeServer({ 'GET /api/map': map });
     renderMap();
@@ -300,6 +314,37 @@ describe('the Map screen', () => {
       expect(screen.getByRole('dialog', { name: 'Sweden' })).toBeInTheDocument();
     });
 
+    it('links each country name in the progress lines to its region list', async () => {
+      fakeServer({ 'GET /api/map': detail });
+      renderMap();
+
+      const links = await screen.findAllByRole('link', { name: /^(Canada|United States)/ });
+
+      expect(links.map((link) => link.getAttribute('href'))).toEqual([
+        '#regions-124',
+        '#regions-840',
+      ]);
+    });
+
+    it('opens a collapsed region list, and moves focus to it, when its country link is followed', async () => {
+      fakeServer({ 'GET /api/map': detail });
+      renderMap();
+      const section = (
+        await screen.findByRole('heading', { name: 'Canada: 2 of 13 provinces and territories' })
+      ).closest('details')!;
+      expect(section).not.toHaveAttribute('open');
+
+      await userEvent.click(screen.getByRole('link', { name: 'Canada' }));
+
+      expect(section).toHaveAttribute('open');
+      expect(section.querySelector('summary')).toHaveFocus();
+      expect(
+        screen
+          .getByRole('heading', { name: 'United States of America: 0 of 51 states' })
+          .closest('details'),
+      ).not.toHaveAttribute('open');
+    });
+
     it('has an accessible name on every control', async () => {
       fakeServer({ 'GET /api/map': detail });
       renderMap();
@@ -395,7 +440,9 @@ describe('the Map screen', () => {
         { key: '0', latitude: 59.33, longitude: 18.07, isPark: false },
         { key: '1', latitude: 28.42, longitude: -81.58, isPark: true },
       ]);
-      const list = screen.getByRole('heading', { name: 'Cities and parks' }).closest('section')!;
+      const heading = screen.getByRole('heading', { name: 'Cities and parks' });
+      expect(heading.closest('details')).not.toHaveAttribute('open');
+      const list = heading.closest('section')!;
       expect(
         within(list)
           .getAllByRole('listitem')

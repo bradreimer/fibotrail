@@ -133,10 +133,29 @@ button.map-marker::after {
 }
 
 .life-map__heading {
-  margin: 0 0 var(--fibo-space-3);
+  margin: 0;
   font-family: var(--fibo-font-body);
   font-size: var(--fibo-text-body);
   font-weight: 700;
+}
+
+/* The sections under the map. Each opens and closes, and starts closed. */
+.life-map__summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--fibo-space-4);
+  min-height: var(--fibo-tap);
+  cursor: pointer;
+}
+
+.life-map__count {
+  color: var(--fibo-ink-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.life-map__body {
+  padding-top: var(--fibo-space-3);
 }
 
 .first-visits,
@@ -204,6 +223,10 @@ button.map-marker::after {
 }
 
 .region-progress__country {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--fibo-tap);
+  color: var(--fibo-teal);
   font-weight: 700;
 }
 

@@ -96,6 +96,9 @@ states: the 50 states and the District of Columbia.
   regions with the date of the first visit, oldest first. It is the text alternative to the region
   fills: a screen reader reads the visited regions from it, and "visited" is never shown by color
   alone.
+- **Country links.** In the progress lines, each country's name is a link to its region list under
+  the map. Following it opens the list if it is closed, scrolls to it, and moves focus to its
+  summary. Tracking issue: [#105](https://github.com/bradreimer/fibotrail/issues/105).
 - **Other countries** behave as before.
 
 ### The Map screen
@@ -116,6 +119,12 @@ states: the 50 states and the District of Columbia.
 - **The routes switch** is an iOS-style switch in a settings row: **Show routes** on the left and
   the switch on the right, on a Mist fill. It is the same switch as **Hide from map** in the photo
   viewer, per [on-the-way.md](on-the-way.md#photo-viewer).
+- **Collapsible sections.** Each section under the map is collapsed until you open it: First
+  visits, the region list of each detail country, and Cities and parks. A summary row shows the
+  section's name and a count, at least 44 points tall, and opens and closes with a tap, Enter, or
+  Space. The map, the numbers, and the routes switch stay as they are. Which sections are open isn't
+  remembered between visits. It is a native `details` element, so a screen reader announces the
+  state. Tracking issue: [#105](https://github.com/bradreimer/fibotrail/issues/105).
 - **No outside request.** The map uses no tile source, font host, or image host, per ADR-009.
 
 ### States
@@ -199,6 +208,9 @@ states: the 50 states and the District of Columbia.
 - Each detail country lists its visited regions once, oldest first, and a screen reader reads the
   list.
 - A country that isn't a detail country shows no region progress line and no region list.
+- Each section under the map starts collapsed, and a tap on its summary opens it.
+- Following "Canada" or "United States of America" in the progress lines opens that country's region
+  list, scrolls to it, and moves focus to its summary.
 - Under 600 px, the tab bar shows Trips and Map. Inbox and Settings are in the top bar, and the
   Inbox button shows the badge. From 600 px, the sidebar shows all four.
 - The screen passes the ADR-007 run-through on an iPhone.
