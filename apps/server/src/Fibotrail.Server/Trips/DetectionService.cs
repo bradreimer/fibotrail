@@ -51,7 +51,13 @@ public sealed partial class DetectionService(FibotrailDbContext db, HomeLocation
         // Photos you put on the way stay in their trips and add no stop. The decision table is read, never changed.
         var onTheWay = (await db.OnTheWayPhotos.AsNoTracking().Select(photo => photo.PhotoId).ToListAsync(cancellationToken)).ToHashSet(StringComparer.Ordinal);
         var joins = (await db.TripJoins.AsNoTracking().ToListAsync(cancellationToken)).Select(join => new DateRange(join.StartDate, join.EndDate)).ToList();
-        var detected = TripDetector.Detect(photos, new GeoPoint(confirmed.Latitude, confirmed.Longitude), onTheWay: onTheWay, joins: joins);
+        var homePoint = new GeoPoint(confirmed.Latitude, confirmed.Longitude);
+        var detected = AddManualTrips(
+            TripDetector.Detect(photos, homePoint, onTheWay: onTheWay, joins: joins),
+            await db.ManualTrips.AsNoTracking().ToListAsync(cancellationToken),
+            photos,
+            homePoint,
+            onTheWay);
 
         await using var transaction = await db.Database.BeginTransactionAsync(cancellationToken);
         var trips = await db.Trips.ToListAsync(cancellationToken);
@@ -109,6 +115,37 @@ public sealed partial class DetectionService(FibotrailDbContext db, HomeLocation
 
         LogDetected(logger, detected.Count, newSuggestions);
         return new DetectionResult(true, detected.Count, newSuggestions);
+    }
+
+    /// <summary>
+    /// Trips you entered by hand win over what the rules found: a detected trip that shares a day with
+    /// one is dropped, and its decision stays. A manual trip with no photo in its days adds nothing.
+    /// </summary>
+    private static IReadOnlyList<DetectedTrip> AddManualTrips(
+        IReadOnlyList<DetectedTrip> detected,
+        List<ManualTrip> manual,
+        IReadOnlyList<PhotoPoint> photos,
+        GeoPoint home,
+        IReadOnlySet<string> onTheWay)
+    {
+        if (manual.Count == 0)
+        {
+            return detected;
+        }
+
+        var built = manual
+            .Select(trip => ManualTrips.Build(
+                photos,
+                new ManualTripSpec(trip.StartDate, trip.EndDate, trip.Name, trip.Place, trip.Country, trip.Latitude is { } latitude && trip.Longitude is { } longitude ? new GeoPoint(latitude, longitude) : null),
+                home,
+                onTheWay: onTheWay))
+            .OfType<DetectedTrip>()
+            .ToList();
+        return [.. detected
+            .Where(trip => !built.Any(entered => trip.StartDate <= entered.EndDate && entered.StartDate <= trip.EndDate))
+            .Concat(built)
+            .OrderBy(trip => trip.StartDate)
+            .ThenBy(trip => trip.Fingerprint, StringComparer.Ordinal)];
     }
 
     /// <summary>Writes the detected data, then the decision on top. The decision always wins.</summary>

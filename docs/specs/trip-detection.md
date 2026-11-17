@@ -27,7 +27,8 @@ home is, so that I review suggestions and don't build my travel history by hand.
 
 - The screens that show suggestions. See [trip-inbox.md](trip-inbox.md).
 - A settings screen for the detection rules. The MVP uses the defaults.
-- Day trips, and splitting or changing the dates of a trip. Joining two trips is covered by rule 3c.
+- Day trips, and splitting or changing the dates of a trip. Joining two trips is covered by rule 3c,
+  and adding a trip by hand by the manual trip command.
 - Places, visits, and collections.
 - Real GPS tracks. A route connects the places where photos were taken.
 
@@ -145,8 +146,9 @@ right day.
 - A detected trip that matches nothing becomes a new suggestion.
 - Detected data can be deleted and rebuilt from the `photo` table at any time. The `decision`
   table is never rebuilt.
-- The tables are `trip`, `trip_photo`, `decision`, `on_the_way_photo`, and `setting`. A row in
-  `on_the_way_photo` is a decision about one photo, and detection never changes it. Rules 6 to 8
+- The tables are `trip`, `trip_photo`, `decision`, `on_the_way_photo`, `trip_join`, `manual_trip`,
+  and `setting`. A row in `on_the_way_photo` is a decision about one photo, and detection never
+  changes it. Rules 6 to 8
   skip those photos: see [on the way](on-the-way.md). Stops and the route are stored
   with the trip.
 - When no fingerprint matches, a detected trip matches the stored trip or decision whose dates
@@ -200,6 +202,37 @@ Detection can't know the days were one trip, so you tell it, and the choice is a
   same trip. Any other arguments print the usage and exit with 2.
 - A join survives every scan and detection run.
 
+### Manual trip command
+
+Tracking issue: [#140](https://github.com/bradreimer/fibotrail/issues/140).
+
+Intention: add a trip that no rule can find, because its photos have no position, such as a trip
+photographed in 2005. You say which days it covered and where, and the choice is a decision per
+[ADR-017](../adr/ADR-017-a-manual-trip-is-a-decision-that-detection-builds-from-photos.md). There
+is no web screen for it.
+
+- `docker exec -it fibotrail fibotrail trip add --start 2005-07-31 --end 2005-08-06 --place "San
+  Francisco" --country "United States" --lat 37.7749 --lon -122.4194` adds a trip. `--start` and
+  `--end` are required, and the last day is included. `--name`, `--place`, `--country`, and the
+  pair `--lat` and `--lon` are optional. Without `--name`, the name is the place and the month,
+  such as "San Francisco, July 2005". It needs no Immich variables.
+- The trip holds every photo whose local day falls in the range, with or without a position. With
+  no photo position in the range, the trip has one stop at `--lat` and `--lon`, which holds every
+  photo. With photo positions, the stops come from them, as in rule 6. With neither, the trip has
+  no stop, and the map and the statistics don't place it.
+- The trip is added, as if you chose **Add trip**, with High confidence. It's stored in
+  `manual_trip` with an Added decision. Detection builds it from the photos on every run, and a
+  rescan keeps it, with no new suggestion. Photos that arrive later join it.
+- A detected trip that shares a day with a manual trip is dropped. Its decision stays.
+- The command runs detection and prints the trip's name, dates, days, photos, and status. When no
+  home location is confirmed, it saves the trip and says detection runs once you confirm one.
+- `fibotrail trip list` shows each trip with its ID. `fibotrail trip remove <id>` deletes the trip
+  and its decision, and runs detection. To change a trip, remove it and add it again.
+- It refuses, with exit code 1 and no change, when no photo was taken in the days, or when an
+  added trip or another manual trip shares a day. A missing or badly formed option, `--lat`
+  without `--lon`, a position out of range, or an end before the start prints a message and exits
+  with 2.
+
 ### Replay command
 
 The replay command is a tuning tool and no longer a gate. Use it when you have a list of trips and
@@ -243,6 +276,11 @@ want a number after a rule change.
   keeps its added status and name. A later detection run keeps it, with no new suggestion.
 - Two groups of 12 photos each, 6 days apart, become no trip. With a join they become one.
 - `fibotrail join --remove` splits the trips again.
+- `fibotrail trip add` turns a week of photos with no position into one added trip with every
+  photo and one stop at the position you gave. A later detection run keeps it, with no new
+  suggestion. `fibotrail trip remove` removes it and its decision.
+- A manual trip replaces a suggested trip that shares its days. It's refused when no photo falls
+  in its days or an added trip shares a day.
 - The review gate is met on the maintainer's library: at least 8 of the first 10 High-confidence
   suggestions are accepted, and at most 1 of 3 to 5 remembered trips is missing. This is the gate
   for MVP step 3a.

@@ -42,6 +42,8 @@ public static class EntryPoint
                 return await RescanAsync(builder.Configuration, error, args[1..]);
             case JoinCommand.Name:
                 return await JoinAsync(builder.Configuration, args[1..]);
+            case TripCommand.Name:
+                return await TripAsync(builder.Configuration, args[1..]);
             case HealthCheckCommand.Name:
                 var port = builder.Configuration["ASPNETCORE_HTTP_PORTS"]?.Split(';')[0] ?? "8080";
                 using (var client = new HttpClient { Timeout = TimeSpan.FromSeconds(5) })
@@ -50,7 +52,7 @@ public static class EntryPoint
                 }
 
             default:
-                await error.WriteLineAsync($"Fibotrail doesn't know the command \"{command}\". The commands are: {ResetPasswordCommand.Name}, {ReplayCommand.Name}, {StopsCommand.Name}, {PlacesCommand.Name}, {RescanCommand.Name}, {JoinCommand.Name}, {HealthCheckCommand.Name}.");
+                await error.WriteLineAsync($"Fibotrail doesn't know the command \"{command}\". The commands are: {ResetPasswordCommand.Name}, {ReplayCommand.Name}, {StopsCommand.Name}, {PlacesCommand.Name}, {RescanCommand.Name}, {JoinCommand.Name}, {TripCommand.Name}, {HealthCheckCommand.Name}.");
                 return 2;
         }
     }
@@ -190,6 +192,25 @@ public static class EntryPoint
         await using var provider = services.BuildServiceProvider();
         await using var scope = provider.CreateAsyncScope();
         return await JoinCommand.RunAsync(
+            arguments,
+            new SystemConsoleIo(),
+            scope.ServiceProvider.GetRequiredService<FibotrailDbContext>(),
+            scope.ServiceProvider.GetRequiredService<DetectionService>(),
+            settings!,
+            provider.GetRequiredService<TimeProvider>());
+    }
+
+    private static async Task<int> TripAsync(IConfiguration configuration, string[] arguments)
+    {
+        // The command reads and writes the database only, so the Immich variables aren't required here.
+        var (settings, _) = ServerSettings.Load(configuration, requireImmich: false);
+        var services = new ServiceCollection();
+        services.AddLogging();
+        services.AddFibotrailCore(settings!);
+        services.AddScoped<DetectionService>();
+        await using var provider = services.BuildServiceProvider();
+        await using var scope = provider.CreateAsyncScope();
+        return await TripCommand.RunAsync(
             arguments,
             new SystemConsoleIo(),
             scope.ServiceProvider.GetRequiredService<FibotrailDbContext>(),

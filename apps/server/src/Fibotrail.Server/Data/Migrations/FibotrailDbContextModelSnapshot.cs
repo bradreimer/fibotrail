@@ -73,6 +73,41 @@ namespace Fibotrail.Server.Data.Migrations
                     b.ToTable("decision", (string)null);
                 });
 
+            modelBuilder.Entity("Fibotrail.Server.Data.ManualTrip", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Country")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("DecidedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateOnly>("EndDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<double?>("Latitude")
+                        .HasColumnType("REAL");
+
+                    b.Property<double?>("Longitude")
+                        .HasColumnType("REAL");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Place")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateOnly>("StartDate")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("manual_trip", (string)null);
+                });
+
             modelBuilder.Entity("Fibotrail.Server.Data.OnTheWayPhoto", b =>
                 {
                     b.Property<string>("PhotoId")

@@ -242,6 +242,36 @@ public sealed class TripJoin
 }
 
 /// <summary>
+/// A trip you entered by hand with <c>fibotrail trip add</c>, for photos that carry no position.
+/// It's a decision, so detection reads this table and never changes it. Detection builds the trip
+/// from the photos in the days, and the trip wins over any detected trip that covers the same days.
+/// See docs/specs/trip-detection.md and ADR-017.
+/// </summary>
+public sealed class ManualTrip
+{
+    public int Id { get; set; }
+
+    /// <summary>The name you gave the trip. Null gives the name that detection would suggest.</summary>
+    public string? Name { get; set; }
+
+    public DateOnly StartDate { get; set; }
+
+    public DateOnly EndDate { get; set; }
+
+    /// <summary>The main place, such as "San Francisco".</summary>
+    public string? Place { get; set; }
+
+    public string? Country { get; set; }
+
+    /// <summary>Where the trip was. It becomes the one stop when no photo in the days has a position.</summary>
+    public double? Latitude { get; set; }
+
+    public double? Longitude { get; set; }
+
+    public DateTime DecidedAt { get; set; }
+}
+
+/// <summary>
 /// A photo you put on the way: it stays in its trip, but it adds no stop, line, or distance to the
 /// map. A row here is a decision, keyed by the Immich asset ID, so it belongs to the photo and not to
 /// a trip. Detection reads this table and never changes it. See docs/specs/on-the-way.md and ADR-002.

@@ -15,6 +15,12 @@ version 0.1 and the per-line results of the accessibility checklist are also sti
 
 ## Completed
 
+- [#140](https://github.com/bradreimer/fibotrail/issues/140) `fibotrail trip add` adds a trip by
+  hand, for photos with no position that no rule can find. The trip is a decision in the new
+  `manual_trip` table
+  ([ADR-017](adr/ADR-017-a-manual-trip-is-a-decision-that-detection-builds-from-photos.md)). The
+  motivating case is the 310 photos from 2005-07-31 to 2005-08-06, which Immich holds with no GPS
+  and which rule 3b misses. Checked in tests only, not yet run on the maintainer's library.
 - [#138](https://github.com/bradreimer/fibotrail/issues/138) A **Rescan everything** button in
   Settings, the button form of `fibotrail rescan`. It starts a full pass in the server through
   `POST /api/rescan`. Checked in tests only, not yet on a phone.
