@@ -39,7 +39,10 @@ public static class ImmichRoutes
 
         api.MapPost("/scan", async Task<Results<Accepted<ScanStatus>, Conflict<ProblemDetail>>> (ScanService scans, FibotrailDbContext db, CancellationToken cancellationToken) =>
         {
-            if (!scans.TryStart())
+            // A run that is "running" while this server isn't scanning belongs to `fibotrail rescan`, which
+            // runs in its own process. Starting here would resume that run and write it from two places.
+            var latest = await db.ScanRuns.AsNoTracking().OrderByDescending(run => run.Id).Select(run => (ScanState?)run.State).FirstOrDefaultAsync(cancellationToken);
+            if (latest == ScanState.Running || !scans.TryStart())
             {
                 return TypedResults.Conflict(new ProblemDetail("A scan is already running."));
             }

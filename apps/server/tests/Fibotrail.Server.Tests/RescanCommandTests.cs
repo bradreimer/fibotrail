@@ -202,6 +202,37 @@ public class RescanCommandTests
     }
 
     [Fact]
+    public async Task Scan_now_is_refused_while_a_rescan_run_is_running_and_allowed_after()
+    {
+        await using var app = await TestApp.StartAsync();
+        var browser = await app.SignedInBrowserAsync();
+        await browser.GetJsonAsync("/api/session");
+        await app.ScanAsync();
+        await app.WithDbAsync(async db =>
+        {
+            db.ScanRuns.Add(new ScanRun { State = ScanState.Running, StartedAt = DateTime.UtcNow });
+            return await db.SaveChangesAsync();
+        });
+        var requestsBefore = app.Immich.Requests.Count;
+
+        var refused = await browser.SendJsonAsync(HttpMethod.Post, "/api/scan");
+
+        Assert.Equal(System.Net.HttpStatusCode.Conflict, refused.StatusCode);
+        Assert.Equal(requestsBefore, app.Immich.Requests.Count);
+
+        await app.WithDbAsync(async db =>
+        {
+            var run = await db.ScanRuns.OrderByDescending(candidate => candidate.Id).FirstAsync();
+            run.State = ScanState.Completed;
+            return await db.SaveChangesAsync();
+        });
+        var allowed = await browser.SendJsonAsync(HttpMethod.Post, "/api/scan");
+        await app.Scans.Current;
+
+        Assert.Equal(System.Net.HttpStatusCode.Accepted, allowed.StatusCode);
+    }
+
+    [Fact]
     public async Task The_command_takes_no_arguments()
     {
         await using var app = await TestApp.StartAsync();

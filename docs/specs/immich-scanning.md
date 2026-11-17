@@ -155,8 +155,11 @@ rescan command reads everything, so it always does. It is the command-line form 
 - Ctrl+C stops it after the page in hand. The scan is marked "failed" with its progress saved, and
   the next scan, normal or rescan, can continue.
 - Exit codes: 0 when the scan completes, 1 when it fails or can't start, 2 for arguments.
+- **Scan now** is refused with 409 "A scan is already running." while the latest scan is "running"
+  and the server isn't scanning itself, which is the command's case
+  ([#124](https://github.com/bradreimer/fibotrail/issues/124)).
 - Not covered: a photo deleted from Immich for good stays in Fibotrail until **Rebuild from
-  Immich** exists, and **Scan now** isn't blocked while the command runs, so don't select it then.
+  Immich** exists.
 
 ### Thumbnail proxy
 
@@ -184,6 +187,7 @@ rescan command reads everything, so it always does. It is the command-line form 
 - After a photo's position changes in Immich without a new `updatedAt`, `fibotrail rescan` stores
   the new position and **Scan now** doesn't.
 - `fibotrail rescan` on an unchanged library reports 0 changed.
+- While a rescan's run is "running", **Scan now** returns 409 and makes no request to Immich.
 - `fibotrail rescan` sends no `updatedAt` filter, refuses while a scan runs, and exits with 1 and
   the "Can't reach Immich" message when Immich rejects the key.
 

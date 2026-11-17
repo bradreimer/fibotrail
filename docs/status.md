@@ -251,7 +251,8 @@ version 0.1 and the per-line results of the accessibility checklist are also sti
   a real Immich, and so whether **Scan now** already finds such photos. Check it on the
   maintainer's library the first time the command is run, and record the answer in
   [immich-api-findings.md](knowledge/immich-api-findings.md). See
-  [immich-scanning.md](specs/immich-scanning.md#rescan-command).
+  [immich-scanning.md](specs/immich-scanning.md#rescan-command). **Scan now** is refused while the
+  command runs ([#124](https://github.com/bradreimer/fibotrail/issues/124)).
 
 ## In progress
 
