@@ -165,6 +165,17 @@ describe('Scan now', () => {
   });
 });
 
+describe('the support link in Settings', () => {
+  it('opens Buy Me a Coffee in a new tab', async () => {
+    fakeServer();
+    renderSettings();
+    const link = await screen.findByRole('link', { name: 'Give Fibs and Hermann a treat' });
+    expect(link).toHaveAttribute('href', 'https://www.buymeacoffee.com/bradreimer');
+    expect(link).toHaveAttribute('target', '_blank');
+    expect(link).toHaveAttribute('rel', 'noopener noreferrer');
+  });
+});
+
 describe('lastScanText', () => {
   it('covers each state', () => {
     expect(lastScanText(idle as never)).toBe('Fibotrail hasn’t scanned your library yet.');
