@@ -429,4 +429,49 @@ public class TripDetectorTests
         Assert.Equal(new DateOnly(2007, 3, 23), trip.EndDate);
         Assert.Equal(267, trip.PhotoIds.Count);
     }
+
+    [Fact]
+    public void One_photo_at_home_in_the_middle_of_a_trip_does_not_split_it()
+    {
+        var photos = At(Park, 30, Time(2023, 3, 19, 9), Time(2023, 3, 20, 10));
+        photos.AddRange(At(Home, 1, Time(2023, 3, 20, 11, 36), Time(2023, 3, 20, 11, 36)));
+        photos.AddRange(At(Park, 30, Time(2023, 3, 20, 12), Time(2023, 3, 21, 20)));
+
+        var trip = Assert.Single(TripDetector.Detect(photos, Home));
+
+        Assert.Equal(new DateOnly(2023, 3, 19), trip.StartDate);
+        Assert.Equal(new DateOnly(2023, 3, 21), trip.EndDate);
+        Assert.Equal(60, trip.AwayPhotoCount);
+    }
+
+    [Fact]
+    public void Three_photos_at_home_between_two_away_days_end_the_trip()
+    {
+        var photos = At(Park, 25, Time(2023, 3, 19, 9), Time(2023, 3, 20, 10));
+        photos.AddRange(At(Home, 3, Time(2023, 3, 20, 11), Time(2023, 3, 20, 12)));
+        photos.AddRange(At(Park, 25, Time(2023, 3, 20, 14), Time(2023, 3, 21, 20)));
+
+        Assert.Equal(2, TripDetector.Detect(photos, Home).Count);
+    }
+
+    [Fact]
+    public void A_photo_at_home_between_away_photos_more_than_a_day_apart_ends_the_trip()
+    {
+        var photos = At(Park, 25, Time(2023, 3, 19, 9), Time(2023, 3, 20, 10));
+        photos.AddRange(At(Home, 1, Time(2023, 3, 21, 12), Time(2023, 3, 21, 12)));
+        photos.AddRange(At(Park, 25, Time(2023, 3, 22, 9), Time(2023, 3, 23, 20)));
+
+        Assert.Equal(2, TripDetector.Detect(photos, Home).Count);
+    }
+
+    [Fact]
+    public void One_photo_at_home_overnight_between_two_close_away_photos_keeps_one_trip()
+    {
+        var photos = At(Park, 25, Time(2023, 3, 19, 9), Time(2023, 3, 21, 10));
+        photos.AddRange(At(Home, 1, Time(2023, 3, 21, 22), Time(2023, 3, 21, 22)));
+        photos.AddRange(At(Park, 25, Time(2023, 3, 22, 9), Time(2023, 3, 24, 20)));
+
+        // The away photos on both sides are 23 hours apart, inside the 24 hour span of a blip.
+        Assert.Single(TripDetector.Detect(photos, Home));
+    }
 }

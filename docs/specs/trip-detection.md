@@ -72,6 +72,7 @@ home is, so that I review suggestions and don't build my travel history by hand.
 | Minimum photos | 20 | Fewer photos than this isn't a trip |
 | Minimum days | 2 calendar days | Shorter outings aren't trips |
 | Stop radius | 1 km | Photos this close together form one stop |
+| Home blip | 2 photos, 24 hours | A run of at most 2 photos at home doesn't end a trip when the away photos on both sides are at most 24 hours apart |
 | Burst photos per day | 30 | A day with this many photos with no position can be part of a trip with no location |
 | Burst minimum days | 3 | Consecutive burst days that make a trip with no location |
 | Burst edge photos per day | 10 | A lighter day next to a burst joins it, for up to 2 days at each end |
@@ -190,6 +191,8 @@ want a number after a rule change.
 - 4 days of 90 photos each with no position, taken far from any home photo, become one Low
   confidence trip. 2 such days, or 4 days of 25 photos, become none.
 - A day with a photo at home, or inside a trip that rule 3 found, is never a burst day.
+- One photo at home in the middle of a 3 day trip doesn't split it. 3 photos at home, or one
+  photo with the away photos on each side more than 24 hours apart, do.
 - After **Not a trip**, a rescan that adds photos to the same trip creates no suggestion.
 - After a rename, a rescan keeps the new name.
 - The review gate is met on the maintainer's library: at least 8 of the first 10 High-confidence
@@ -209,7 +212,9 @@ reviewed, so the questions below stay open until a case turns up.
    point. The Low margin applies to the photo count only: with a minimum of 2 days, a quarter of
    a day can't be measured, and every weekend trip would be Low. The review gate on the real
    library settles it, and it hasn't run yet.
-2. Does a photo at home split too many trips? A photo inside the home radius ends a trip, per
+2. Does a photo at home split too many trips? The blip rule was added on 2026-11-17, after one
+   photo at home split the March 2023 Disneyland trip. The original question stays open for
+   longer runs at home. A photo inside the home radius ends a trip, per
    rule 3. If someone else in the household adds photos at home to the same library while you're
    away, your trip is split in two. The review gate shows how often this happens.
 3. Should photos with no position count toward the minimum photos? 84.5 percent of the
