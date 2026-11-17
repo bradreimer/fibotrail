@@ -158,6 +158,11 @@ rescan command reads everything, so it always does. It is the command-line form 
 - **Scan now** is refused with 409 "A scan is already running." while the latest scan is "running"
   and the server isn't scanning itself, which is the command's case
   ([#124](https://github.com/bradreimer/fibotrail/issues/124)).
+- Settings has a **Rescan everything** button next to **Scan now**
+  ([#138](https://github.com/bradreimer/fibotrail/issues/138)). It calls `POST /api/rescan`, which
+  starts the same full pass in the server. The banner shows the progress. It is disabled while a scan
+  runs, and the route returns 409 "A scan is already running." in the same cases as **Scan now**.
+  If the server stops during the pass, the run stays "running" and resumes at the next start.
 - Not covered: a photo deleted from Immich for good stays in Fibotrail until **Rebuild from
   Immich** exists.
 
@@ -188,6 +193,8 @@ rescan command reads everything, so it always does. It is the command-line form 
   the new position and **Scan now** doesn't.
 - `fibotrail rescan` on an unchanged library reports 0 changed.
 - While a rescan's run is "running", **Scan now** returns 409 and makes no request to Immich.
+- **Rescan everything** stores a position edited in Immich without a new `updatedAt`, sends no
+  `updatedAt` filter, and returns 409 while a scan runs.
 - `fibotrail rescan` sends no `updatedAt` filter, refuses while a scan runs, and exits with 1 and
   the "Can't reach Immich" message when Immich rejects the key.
 

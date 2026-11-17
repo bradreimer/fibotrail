@@ -15,6 +15,9 @@ version 0.1 and the per-line results of the accessibility checklist are also sti
 
 ## Completed
 
+- [#138](https://github.com/bradreimer/fibotrail/issues/138) A **Rescan everything** button in
+  Settings, the button form of `fibotrail rescan`. It starts a full pass in the server through
+  `POST /api/rescan`. Checked in tests only, not yet on a phone.
 - [#136](https://github.com/bradreimer/fibotrail/issues/136) `fibotrail join` joins two trips that
   detection split by a pause of 3 days or more. The join is a decision in the new `trip_join`
   table ([ADR-016](adr/ADR-016-a-join-is-a-decision-over-a-range-of-days.md)), and it keeps the

@@ -21,6 +21,8 @@ interface Scan {
   status: ScanStatus | null;
   /** Starts a scan, or resumes one that failed. */
   start: () => Promise<void>;
+  /** Rereads every photo from Immich, so it sees a location edited there. */
+  rescan: () => Promise<void>;
   /** Why the scan couldn't be started. */
   startProblem: string | null;
 }
@@ -28,6 +30,7 @@ interface Scan {
 const ScanContext = createContext<Scan>({
   status: null,
   start: async () => undefined,
+  rescan: async () => undefined,
   startProblem: null,
 });
 
@@ -54,18 +57,26 @@ export function ScanProvider({ children }: { children: ReactNode }) {
     return () => clearInterval(timer);
   }, [running, refresh]);
 
-  const start = useCallback(async () => {
-    if (!session) return;
-    setStartProblem(null);
-    try {
-      setStatus(await apiSend<ScanStatus>('POST', '/api/scan', session.csrfToken));
-    } catch (error) {
-      setStartProblem(error instanceof Error ? error.message : 'The scan could not start.');
-      await refresh();
-    }
-  }, [session, refresh]);
+  const begin = useCallback(
+    async (path: '/api/scan' | '/api/rescan') => {
+      if (!session) return;
+      setStartProblem(null);
+      try {
+        setStatus(await apiSend<ScanStatus>('POST', path, session.csrfToken));
+      } catch (error) {
+        setStartProblem(error instanceof Error ? error.message : 'The scan could not start.');
+        await refresh();
+      }
+    },
+    [session, refresh],
+  );
+  const start = useCallback(() => begin('/api/scan'), [begin]);
+  const rescan = useCallback(() => begin('/api/rescan'), [begin]);
 
-  const value = useMemo(() => ({ status, start, startProblem }), [status, start, startProblem]);
+  const value = useMemo(
+    () => ({ status, start, rescan, startProblem }),
+    [status, start, rescan, startProblem],
+  );
   return <ScanContext.Provider value={value}>{children}</ScanContext.Provider>;
 }
 

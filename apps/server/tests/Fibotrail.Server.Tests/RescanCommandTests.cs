@@ -242,4 +242,47 @@ public class RescanCommandTests
         Assert.Equal(2, exitCode);
         Assert.Contains("takes no arguments", output, StringComparison.Ordinal);
     }
+
+    [Fact]
+    public async Task The_rescan_route_finds_photos_whose_location_was_edited_and_a_scan_now_does_not()
+    {
+        var (app, browser) = await StartWithUnplacedTripAsync();
+        await using (app)
+        {
+            EditLocationsInImmich(app);
+
+            var scan = await browser.SendJsonAsync(HttpMethod.Post, "/api/scan");
+            await app.Scans.Current;
+            Assert.Equal(System.Net.HttpStatusCode.Accepted, scan.StatusCode);
+            Assert.Empty(await TripLibrary.TripsAsync(app));
+
+            var rescan = await browser.SendJsonAsync(HttpMethod.Post, "/api/rescan");
+            await app.Scans.Current;
+
+            Assert.Equal(System.Net.HttpStatusCode.Accepted, rescan.StatusCode);
+            Assert.Equal("Orlando", Assert.Single(await TripLibrary.TripsAsync(app)).MainPlace);
+            var run = await app.WithDbAsync(db => db.ScanRuns.AsNoTracking().OrderByDescending(r => r.Id).FirstAsync());
+            Assert.Equal(ScanState.Completed, run.State);
+            Assert.Null(run.ChangedSince);
+        }
+    }
+
+    [Fact]
+    public async Task The_rescan_route_is_refused_while_a_scan_runs()
+    {
+        var (app, browser) = await StartWithUnplacedTripAsync();
+        await using (app)
+        {
+            var release = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+            app.Immich.BeforeSearch = _ => release.Task;
+
+            var first = await browser.SendJsonAsync(HttpMethod.Post, "/api/rescan");
+            var second = await browser.SendJsonAsync(HttpMethod.Post, "/api/rescan");
+            release.SetResult();
+            await app.Scans.Current;
+
+            Assert.Equal(System.Net.HttpStatusCode.Accepted, first.StatusCode);
+            Assert.Equal(System.Net.HttpStatusCode.Conflict, second.StatusCode);
+        }
+    }
 }
