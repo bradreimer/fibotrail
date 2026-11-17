@@ -19,18 +19,18 @@ country to see its trips and days.
 The screen is a **host**. Its charts are self-contained **views**, per
 [ADR-014](../adr/ADR-014-stats-views-are-self-contained-modules.md), so each one can be added or
 removed on its own. This spec covers the host, the shared stats library, the drill-down, and the
-first three views. Other views have their own specs:
+Records view. Other views have their own specs:
 
 | View | Slot | Spec | Work item |
 | --- | --- | --- | --- |
-| Trips per year | Stats screen | This spec | [#54](https://github.com/bradreimer/fibotrail/issues/54) |
-| Trip length | Stats screen | This spec | [#54](https://github.com/bradreimer/fibotrail/issues/54) |
 | Records | Stats screen | This spec | [#54](https://github.com/bradreimer/fibotrail/issues/54) |
 | Season wheel | Country page | [season-wheel.md](season-wheel.md) | [#58](https://github.com/bradreimer/fibotrail/issues/58) |
 | Fibonacci spiral of trips | Stats screen | [trip-spiral.md](trip-spiral.md) | [#59](https://github.com/bradreimer/fibotrail/issues/59) |
-| Travel clock | Stats screen | [travel-clock.md](travel-clock.md) | [#66](https://github.com/bradreimer/fibotrail/issues/66) |
-| Theme parks | Stats screen | [theme-parks-view.md](theme-parks-view.md) | [#64](https://github.com/bradreimer/fibotrail/issues/64) |
-| Distance rings | Stats screen | [distance-rings.md](distance-rings.md) | [#67](https://github.com/bradreimer/fibotrail/issues/67) |
+
+Five views were removed in [#111](https://github.com/bradreimer/fibotrail/issues/111), because
+they weren't worth their space on real data: Trips per year, Trip length, Theme parks, Travel
+clock, and Distance rings. Their code, tests, and specs are gone. The git history keeps them if you
+want one back.
 
 ## User story
 
@@ -49,8 +49,8 @@ went.
 
 ## Non-goals
 
-- Collections such as Disney parks. They have their own spec, [collections.md](collections.md). Their
-  days appear on this screen in the [Theme parks view](theme-parks-view.md).
+- Collections such as Disney parks. They have their own spec, [collections.md](collections.md).
+  Their days don't appear on this screen.
 - Regions, and a count of them. Only Canada and the USA have regions, per
   [ADR-015](../adr/ADR-015-cities-are-merged-places-and-theme-parks-keep-their-own-identity.md).
 - Filters by year or by collection.
@@ -65,7 +65,7 @@ went.
   once per request, from the database and `Fibotrail.Places`, and it is read-only.
 - It holds the added trips with their ID, name, start and end dates, days, stops, and distance, and
   for each local day of each trip, the countries of its positioned away photos with their
-  latitudes. It also holds the home location, which no route returns.
+  latitudes.
 - Only trips with the status "added" are in it. Suggested, later, and ignored trips aren't.
 
 ### What counts
@@ -124,15 +124,11 @@ From top to bottom:
 - When any of those trips has photos with no position, a line says so, such as "Days count only
   photos with a location."
 
-### The first three views
+### Records
 
-- **Trips per year.** A bar chart in Teal, with the current year in Gold, each bar labeled with its
-  count. Tapping a bar lists that year's trips. Route: `GET /api/stats/trips-per-year`.
-- **Trip length.** A histogram of trips by days, in five bins: 2, 3, 4 to 5, 6 to 8, and 9 or more.
-  Route: `GET /api/stats/trip-length`.
-- **Records.** The longest trip, the farthest trip from home, the trip with the most countries, the
-  most-visited country (by trips, then by days), and the longest gap between two trips. Each record
-  opens its trip or country. Route: `GET /api/stats/records`.
+The longest trip, the farthest trip from home, the trip with the most countries, the
+most-visited country (by trips, then by days), and the longest gap between two trips. Each record
+opens its trip or country. Route: `GET /api/stats/records`.
 
 ### API
 

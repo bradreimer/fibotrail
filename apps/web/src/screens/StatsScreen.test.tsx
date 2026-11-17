@@ -52,8 +52,6 @@ function renderAt(path: string) {
 }
 
 const views = {
-  'GET /api/stats/trips-per-year': [],
-  'GET /api/stats/trip-length': [],
   'GET /api/stats/records': {
     longestTrip: null,
     farthestTrip: null,

@@ -9,9 +9,6 @@ public sealed record ParkTrip(int TripId, string Name, IReadOnlyList<ParkPhoto> 
 /// <summary>A trip that visited a park, with how many of its days were there.</summary>
 public sealed record ParkVisit(int TripId, string Name, int Days, DateOnly FirstDay);
 
-/// <summary>A collection of open places, such as "Disney parks". Planned places aren't in it.</summary>
-public sealed record ParkSet(string Id, string Name, IReadOnlyList<ParkPlace> Places);
-
 /// <summary>The numbers for one visited park.</summary>
 /// <param name="Days">Distinct local days, across all added trips, with at least one photo in the park.</param>
 /// <param name="Trips">The trips that visit the park, earliest first.</param>

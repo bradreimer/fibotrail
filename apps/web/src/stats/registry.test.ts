@@ -24,15 +24,7 @@ describe('the view registry', () => {
   });
 
   it('picks the views of a slot, in order', () => {
-    expect(viewsFor('stats').map((view) => view.id)).toEqual([
-      'trips-per-year',
-      'trip-length',
-      'theme-parks',
-      'trip-spiral',
-      'travel-clock',
-      'distance-rings',
-      'records',
-    ]);
+    expect(viewsFor('stats').map((view) => view.id)).toEqual(['trip-spiral', 'records']);
     expect(viewsFor('country').map((view) => view.id)).toEqual(['season-wheel']);
   });
 

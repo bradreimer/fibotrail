@@ -22,8 +22,8 @@ public sealed record CollectionPlaceInfo(string Id, string Name, string Group, s
 public sealed record CollectionDetail(CollectionSummary Summary, IReadOnlyList<CollectionPlaceInfo> Places, string Attribution);
 
 /// <summary>
-/// The Collections screens' data. The park days come from the stats library, the same ones the Stats
-/// Theme parks view reads. See docs/specs/collections.md and ADR-013.
+/// The Collections screens' data. The park days come from the stats library. See
+/// docs/specs/collections.md and ADR-013.
 /// </summary>
 public static class CollectionRoutes
 {
@@ -33,16 +33,16 @@ public static class CollectionRoutes
     {
         ArgumentNullException.ThrowIfNull(api);
 
-        api.MapGet("/collections", async (FibotrailDbContext db, Places.CountryFinder finder, CountryOutlinesCache outlines, Trips.HomeLocation home, CollectionCatalog catalog, CancellationToken cancellationToken) =>
+        api.MapGet("/collections", async (FibotrailDbContext db, Places.CountryFinder finder, CountryOutlinesCache outlines, CollectionCatalog catalog, CancellationToken cancellationToken) =>
         {
-            var library = await StatsRoutes.LoadAsync(db, finder, outlines, home, catalog, cancellationToken);
+            var library = await StatsRoutes.LoadAsync(db, finder, outlines, catalog, cancellationToken);
             return TypedResults.Ok(catalog.Collections.Select(collection => Summarize(collection, library)).ToList());
         }).WithName("GetCollections");
 
-        api.MapGet("/collections/{id}", async (string id, FibotrailDbContext db, Places.CountryFinder finder, CountryOutlinesCache outlines, Trips.HomeLocation home, CollectionCatalog catalog, CancellationToken cancellationToken) =>
+        api.MapGet("/collections/{id}", async (string id, FibotrailDbContext db, Places.CountryFinder finder, CountryOutlinesCache outlines, CollectionCatalog catalog, CancellationToken cancellationToken) =>
         {
             if (catalog.Collections.FirstOrDefault(collection => collection.Id == id) is not { } collection) return Results.NotFound();
-            var library = await StatsRoutes.LoadAsync(db, finder, outlines, home, catalog, cancellationToken);
+            var library = await StatsRoutes.LoadAsync(db, finder, outlines, catalog, cancellationToken);
             return Results.Ok(Detail(collection, library));
         }).WithName("GetCollection").Produces<CollectionDetail>();
     }

@@ -22,40 +22,10 @@ export interface StatsView {
  */
 export const VIEWS: readonly StatsView[] = [
   {
-    id: 'trips-per-year',
-    slot: 'stats',
-    title: 'Trips per year',
-    component: lazy(() => import('./views/trips-per-year')),
-  },
-  {
-    id: 'trip-length',
-    slot: 'stats',
-    title: 'Trip length',
-    component: lazy(() => import('./views/trip-length')),
-  },
-  {
-    id: 'theme-parks',
-    slot: 'stats',
-    title: 'Theme parks',
-    component: lazy(() => import('./views/theme-parks')),
-  },
-  {
     id: 'trip-spiral',
     slot: 'stats',
     title: 'Trip spiral',
     component: lazy(() => import('./views/trip-spiral')),
-  },
-  {
-    id: 'travel-clock',
-    slot: 'stats',
-    title: 'Travel clock',
-    component: lazy(() => import('./views/travel-clock')),
-  },
-  {
-    id: 'distance-rings',
-    slot: 'stats',
-    title: 'Distance rings',
-    component: lazy(() => import('./views/distance-rings')),
   },
   {
     id: 'season-wheel',

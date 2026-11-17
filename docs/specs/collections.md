@@ -16,20 +16,19 @@ adds three things they don't cover:
 1. **Days.** Each place counts the days you spent in it, so you can ask "How many days have I
    spent in Universal Studios Florida?"
 2. **Universal.** Universal parks join Disney parks as the two launch collections.
-3. **One source for the numbers.** Collections and the Theme parks view of the Stats screen read
-   the same park days, so the two screens never disagree.
+3. **One source for the numbers.** The park days come from one function, so every screen that
+   shows them gives the same answer.
 
 Think of a country on the life map as a big room. A park is a smaller room inside a city, and
 the same rule for counting days works for both.
 
 ```text
-Added trips ─▶ Photos with a position ─▶ Park boundaries ─▶ Park days ─┬─▶ Collections: stamps
-                                                                       └─▶ Stats: Theme parks view
+Added trips ─▶ Photos with a position ─▶ Park boundaries ─▶ Park days ─▶ Collections: stamps
 ```
 
-The Stats screen shows park days in a self-contained view, following the stats views decision
-tracked in [#54](https://github.com/bradreimer/fibotrail/issues/54). That view has its own spec. This spec covers the data files, the counting rule, the shared
-numbers, and the Collections screens.
+The Stats screen once had a Theme parks view of these days. It was removed in
+[#111](https://github.com/bradreimer/fibotrail/issues/111). This spec covers the data files, the
+counting rule, the shared numbers, and the Collections screens.
 
 ## User story
 
@@ -55,7 +54,7 @@ spent in Universal Studios Florida?"
 - **Mark as visited** and **Not a visit** overrides from the design document. They need their own
   decision storage, per [ADR-002](../adr/ADR-002-decisions-are-stored-separately-from-detected-data.md).
 - Adding or removing a park day by hand.
-- The Stats screen's Theme parks view. It has its own spec.
+- A park view on the Stats screen.
 - National parks, countries, and regions as collections. They follow the same format later.
 - Filters by year.
 
@@ -138,8 +137,6 @@ visit, such as a day your phone died after one photo. See open question 1.
   [ADR-011](../adr/ADR-011-visits-are-derived-from-added-trips-on-the-server.md).
 - The lookup and the day count are pure functions in the detection project, so they test with plain
   data and no running Immich.
-- Collections and the Theme parks view call the same function. A test checks that both return the
-  same days for the same trips.
 
 ### Collections screens
 
@@ -178,8 +175,7 @@ visit, such as a day your phone died after one photo. See open question 1.
 ## Acceptance criteria
 
 - An added trip with photos in Universal Studios Florida on 3 different local days, at least 3
-  photos in all, shows **3 days** and **1 trip** for that park, on the collection detail and in
-  the Theme parks view.
+  photos in all, shows **3 days** and **1 trip** for that park, on the collection detail.
 - Two added trips with 3 and 2 park days in Universal Studios Florida show **5 days** and
   **2 trips**.
 - Photos in Universal Studios Florida and Islands of Adventure on one day add 1 day to each park.
@@ -191,7 +187,7 @@ visit, such as a day your phone died after one photo. See open question 1.
 - A photo taken at 11:30 pm local time counts for that day, not the next.
 - A new collection file with a valid boundary shows up after a restart, with no code change. A
   file with a missing boundary stops the app with a message that names the file.
-- The collection list and detail give the same days as the Theme parks view, for every park.
+- The collection list and detail give the same days for every park.
 - The browser's network log shows no request to a host other than Fibotrail.
 - The collection screens pass the ADR-007 run-through on an iPhone, and the accessibility
   checklist.

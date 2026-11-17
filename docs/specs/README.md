@@ -68,9 +68,6 @@ None.
 | [on-the-way.md](on-the-way.md) | Photos and stops that belong to a trip but not to its map: hide a photo, and a set-aside idea for suggested stops |
 | [collections.md](collections.md) | Collections of places, such as Disney and Universal parks, with a stamp, days, and trips for each place |
 | [stats-screen.md](stats-screen.md) | The Stats screen: the host for stats views, totals, continents, and countries with trips and days |
-| [theme-parks-view.md](theme-parks-view.md) | A stats view: days and trips in each Disney and Universal park, grouped by collection |
 | [season-wheel.md](season-wheel.md) | A stats view: the months and seasons you have spent in a country |
 | [trip-spiral.md](trip-spiral.md) | A stats view: every trip along a Fibonacci spiral in date order |
-| [travel-clock.md](travel-clock.md) | A stats view: days away and trips in each month of the year |
-| [distance-rings.md](distance-rings.md) | A stats view: every trip on rings around home, by distance and direction |
 | [release.md](release.md) | The accessibility checks, README, and tagged image for version 0.1 |

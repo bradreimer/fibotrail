@@ -59,25 +59,6 @@ public class CollectionsTests
     }
 
     [Fact]
-    public async Task Collections_and_the_theme_parks_view_give_the_same_days_for_every_park()
-    {
-        var (app, browser, trip) = await StartAsync();
-        await using var _ = app;
-        await DecideAsync(browser, trip, "add");
-
-        var detail = await browser.GetJsonAsync("/api/collections/test-parks");
-        var view = await browser.GetJsonAsync("/api/stats/theme-parks");
-
-        var fromCollections = detail.GetProperty("places").EnumerateArray()
-            .Where(place => place.GetProperty("status").GetString() == "open")
-            .ToDictionary(place => place.GetProperty("id").GetString()!, place => place.GetProperty("days").GetInt32());
-        var fromView = view.EnumerateArray().SelectMany(group => group.GetProperty("parks").EnumerateArray())
-            .ToDictionary(park => park.GetProperty("id").GetString()!, park => park.GetProperty("days").GetInt32());
-        Assert.Equal(fromCollections, fromView);
-        Assert.True(fromView["near"] > 0);
-    }
-
-    [Fact]
     public async Task A_suggested_or_ignored_trip_adds_no_park_day()
     {
         var (app, browser, trip) = await StartAsync();

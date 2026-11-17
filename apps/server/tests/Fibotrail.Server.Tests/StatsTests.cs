@@ -110,25 +110,7 @@ public class StatsTests
         var (app, browser, _, _, _) = await StartAsync();
         await using var _ = app;
 
-        Assert.Equal(0, (await browser.GetJsonAsync("/api/stats/trips-per-year")).GetArrayLength());
-        Assert.Equal(5, (await browser.GetJsonAsync("/api/stats/trip-length")).GetArrayLength());
         Assert.Equal(JsonValueKind.Null, (await browser.GetJsonAsync("/api/stats/records")).GetProperty("longestTrip").ValueKind);
-    }
-
-    [Fact]
-    public async Task The_distance_rings_place_an_added_trip_and_never_return_the_home_coordinates()
-    {
-        var (app, browser, orlando, _, _) = await StartAsync();
-        await using var _ = app;
-        await DecideAsync(browser, orlando, "add");
-
-        var rings = await browser.GetJsonAsync("/api/stats/distance-rings");
-
-        var ring = Assert.Single(rings.EnumerateArray());
-        Assert.Equal(orlando, ring.GetProperty("trip").GetProperty("id").GetInt32());
-        Assert.True(ring.GetProperty("distanceKm").GetDouble() > 0);
-        var names = ring.EnumerateObject().Select(property => property.Name).Order().ToList();
-        Assert.Equal(["bearingDegrees", "distanceKm", "trip"], names);
     }
 
     [Fact]
@@ -147,13 +129,12 @@ public class StatsTests
     }
 
     [Fact]
-    public async Task With_no_collection_files_the_collections_and_the_theme_parks_view_are_empty()
+    public async Task With_no_collection_files_the_collections_are_empty()
     {
         var (app, browser, _, _, _) = await StartAsync();
         await using var _ = app;
 
         Assert.Equal(0, (await browser.GetJsonAsync("/api/collections")).GetArrayLength());
-        Assert.Equal(0, (await browser.GetJsonAsync("/api/stats/theme-parks")).GetArrayLength());
         Assert.Equal(HttpStatusCode.NotFound, (await browser.GetAsync("/api/collections/disney-parks")).StatusCode);
     }
 
