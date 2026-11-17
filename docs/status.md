@@ -236,9 +236,6 @@ The plan is in [roadmap.md](roadmap.md). Specs are in [specs/](specs/README.md).
   [#11](https://github.com/bradreimer/fibotrail/issues/11). A failed line is fixed in a patch
   release, or recorded as a known gap. Also record the per-line results of the
   [accessibility checklist](knowledge/accessibility-checklist.md).
-- Run `docker exec -it fibotrail fibotrail places` again after the city naming change and check
-  that each metro area has the name you'd expect (Paris, Washington, Victoria), and that no
-  country name is left as a city.
 - Make the switches look like iOS switches: **Hide from map** in the photo viewer
   ([#52](https://github.com/bradreimer/fibotrail/issues/52)) and **Show routes** on the life map,
   and keep the photo viewer dark in dark mode

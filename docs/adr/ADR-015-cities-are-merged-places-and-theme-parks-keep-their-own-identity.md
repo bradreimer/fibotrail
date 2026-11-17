@@ -109,3 +109,26 @@ stops. The grouping took 4.9 ms at 25 km, so speed isn't a concern.
   `fibotrail places` is run again.
 - **The merge list is by name.** Two stops with the same name far apart, such as the two
   Williamsburgs, show up as one name in the report.
+
+### Result of the second run
+
+Run on 2026-11-17 after the two rules above: 52 trips, 288 stops.
+
+| Radius | Cities | Parks | Time |
+| --- | --- | --- | --- |
+| 10 km | 104 | 10 | 8.8 ms |
+| 25 km | 80 | 10 | 5.3 ms |
+| 50 km | 60 | 10 | 4.0 ms |
+
+- **Country names are gone.** No "Canada", "United States", or "Unnamed place" is left as a city.
+- **Naming is better in some places and not others.** Victoria was "Metchosin" and is now
+  "Victoria". Washington is "Downtown DC", not "Washington". Paris is still "Neuilly-sur-Seine" and
+  Saskatoon is still "Central Business District". Orlando got worse: it is now "Celebration",
+  because the maintainer stayed there on more trips than in Orlando itself.
+- **Why.** Trips and photos don't say which stop is the main city. Only outside data, such as
+  population, would. About 5 of 80 names are off.
+- **Decision.** On 2026-11-17 the maintainer chose to leave the names as they are. A rename by hand
+  (stored apart from detected data, as in ADR-002) and a bundled city list stay open if the names
+  bother anyone later.
+- **Same name, two places.** Assiniboia, Kindersley, and Maple Creek each appear twice, and so does
+  Williamsburg. These are the same name at places more than 25 km apart, so they stay separate.
