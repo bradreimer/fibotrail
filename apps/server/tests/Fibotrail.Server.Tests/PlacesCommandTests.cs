@@ -20,7 +20,8 @@ public class PlacesCommandTests
             console,
             services.GetRequiredService<FibotrailDbContext>(),
             app.Settings,
-            CollectionCatalog.Empty));
+            CollectionCatalog.Empty,
+            services.GetRequiredService<Fibotrail.Places.CountryFinder>()));
         return (exitCode, string.Join('\n', console.Lines));
     }
 

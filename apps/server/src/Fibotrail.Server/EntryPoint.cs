@@ -148,6 +148,7 @@ public static class EntryPoint
             new SystemConsoleIo(),
             scope.ServiceProvider.GetRequiredService<FibotrailDbContext>(),
             settings!,
-            catalog);
+            catalog,
+            scope.ServiceProvider.GetRequiredService<Fibotrail.Places.CountryFinder>());
     }
 }

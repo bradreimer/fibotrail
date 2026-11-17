@@ -210,8 +210,9 @@ states: the 50 states and the District of Columbia.
    travel to. The default is to count it only after a domestic trip.
 2. **Is 25 km the right distance for a stop outside every outline?** It is a starting value, not
    tested on real trips.
-3. **Is 25 km the right distance to merge two stops into one city?** It is a starting value, not
-   tested on real trips. Cities and parks are decided in
+3. **Is 25 km the right distance to merge two stops into one city?** Answered on 2026-11-17: yes
+   for now. On 52 trips it gave 89 cities, where 10 km gave 116 and 50 km gave 68, and it merged
+   each metro area without joining separate towns. The result is in ADR-015. Cities and parks are decided in
    [ADR-015](../adr/ADR-015-cities-are-merged-places-and-theme-parks-keep-their-own-identity.md).
 4. **How big is the region file?** Measured: about 132 KB gzipped for Canada and the USA at
    1:50 million. [ADR-012](../adr/ADR-012-detail-regions-are-bundled-outlines-for-a-short-list-of-countries.md)

@@ -147,7 +147,7 @@ public sealed class StatsLibrary
 
         var places = CityPlaces.Find(
             ordered.SelectMany(trip => (trip.NamedStops ?? []).Select(stop =>
-                new PlaceStop(trip.Id, trip.Name, trip.StartDate, trip.EndDate, stop.Name, stop.Latitude, stop.Longitude, stop.PhotoCount))),
+                new PlaceStop(trip.Id, trip.Name, trip.StartDate, trip.EndDate, stop.Name, stop.Latitude, stop.Longitude, stop.PhotoCount, finder.Find(stop.Latitude, stop.Longitude)?.Country.Name))),
             parkLookup);
 
         return new StatsLibrary(ordered, countries, Continents.Totals(outlineList), outlineList.Count(outline => outline.Id is not null), home, parks, parkCollections ?? [], places);

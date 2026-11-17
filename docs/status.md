@@ -15,6 +15,12 @@ version 0.1 and the per-line results of the accessibility checklist are also sti
 
 ## Completed
 
+- [#102](https://github.com/bradreimer/fibotrail/issues/102) and
+  [#103](https://github.com/bradreimer/fibotrail/issues/103) City counts and names fixed from the
+  first `fibotrail places` run on 52 trips. 25 km stays (89 cities; 10 km gave 116 and 50 km gave
+  68). A stop with no city name, such as "Canada", no longer counts as a city, and a merged city
+  takes the name found on the most trips. See
+  [ADR-015](adr/ADR-015-cities-are-merged-places-and-theme-parks-keep-their-own-identity.md).
 - [#64](https://github.com/bradreimer/fibotrail/issues/64) Park days in Collections and Stats. The
   park lookup and day count, the collection file loader and its startup checks, the Collections
   destination with its list, stamp book, and park sheet, the Theme parks Stats view, and the
@@ -225,12 +231,9 @@ The plan is in [roadmap.md](roadmap.md). Specs are in [specs/](specs/README.md).
   [#11](https://github.com/bradreimer/fibotrail/issues/11). A failed line is fixed in a patch
   release, or recorded as a known gap. Also record the per-line results of the
   [accessibility checklist](knowledge/accessibility-checklist.md).
-- Run `docker exec -it fibotrail fibotrail places` on the maintainer's library: how many cities 10,
-  25, and 50 km give for the 46 added trips, which cities merge, and how long the grouping takes.
-  Then record the result in
-  [ADR-015](adr/ADR-015-cities-are-merged-places-and-theme-parks-keep-their-own-identity.md) and the
-  [life map spec](specs/life-map.md). The command is built
-  ([#99](https://github.com/bradreimer/fibotrail/issues/99)); the run is not done yet.
+- Run `docker exec -it fibotrail fibotrail places` again after the city naming change and check
+  that each metro area has the name you'd expect (Paris, Washington, Victoria), and that no
+  country name is left as a city.
 - Make the switches look like iOS switches: **Hide from map** in the photo viewer
   ([#52](https://github.com/bradreimer/fibotrail/issues/52)) and **Show routes** on the life map,
   and keep the photo viewer dark in dark mode

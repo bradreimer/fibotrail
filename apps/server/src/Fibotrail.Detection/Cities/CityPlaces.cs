@@ -4,7 +4,20 @@ namespace Fibotrail.Detection.Cities;
 
 /// <summary>A stop of an added trip, with the trip it belongs to.</summary>
 /// <param name="Name">The place name stored with the stop, from Immich, or null.</param>
-public sealed record PlaceStop(int TripId, string TripName, DateOnly TripStart, DateOnly TripEnd, string? Name, double Latitude, double Longitude, int PhotoCount);
+/// <param name="Country">The name of the country the stop is in, or null when not known. Used to spot a "city" that is only the country's name.</param>
+public sealed record PlaceStop(int TripId, string TripName, DateOnly TripStart, DateOnly TripEnd, string? Name, double Latitude, double Longitude, int PhotoCount, string? Country = null)
+{
+    /// <summary>
+    /// True when the name can name a city. Immich leaves the city empty in open country and then
+    /// gives the country, such as "Canada" or "United States", so a blank name, or a name that is the
+    /// country's name or its first words ("United States" for "United States of America"), doesn't count.
+    /// </summary>
+    public bool HasCityName =>
+        !string.IsNullOrWhiteSpace(Name)
+        && (string.IsNullOrWhiteSpace(Country)
+            || !(Country.Equals(Name.Trim(), StringComparison.OrdinalIgnoreCase)
+                || Country.StartsWith(Name.Trim() + " ", StringComparison.OrdinalIgnoreCase)));
+}
 
 /// <summary>A trip that visited a place.</summary>
 public sealed record PlaceTrip(int TripId, string Name, DateOnly StartDate, DateOnly EndDate);
@@ -20,15 +33,14 @@ public sealed record VisitedPlace(string Name, double Latitude, double Longitude
 
 /// <summary>
 /// Works out the places of added trips. Stops within a radius merge into one city, named by the stop
-/// with the most photos. A stop inside an open park is a place of its own, never merged into a city.
+/// name found on the most trips, then the most photos. A group with no stop that has a city name,
+/// such as a stop in open country, isn't a city. A stop inside an open park is a place of its own, never merged into a city.
 /// Pure: the caller passes the stops of added trips only. See ADR-015.
 /// </summary>
 public static class CityPlaces
 {
     /// <summary>How near two stops must be to merge into one city. A first guess, to be checked on real data.</summary>
     public const double MergeRadiusKm = 25;
-
-    private const string Unnamed = "Unnamed place";
 
     public static IReadOnlyList<VisitedPlace> Find(IEnumerable<PlaceStop> stops, ParkLookup? parks = null, double radiusKm = MergeRadiusKm)
     {
@@ -63,14 +75,21 @@ public static class CityPlaces
 
         foreach (var group in Geo.Group(cityStops, stop => new GeoPoint(stop.Latitude, stop.Longitude), radiusKm))
         {
-            // The stop with the most photos names the place. The earliest wins a tie.
-            var main = group.Select((stop, index) => (Stop: stop, Index: index))
-                .OrderByDescending(item => item.Stop.PhotoCount).ThenBy(item => item.Index)
-                .First().Stop;
-            var name = !string.IsNullOrWhiteSpace(main.Name)
-                ? main.Name!
-                : group.Select(stop => stop.Name).FirstOrDefault(candidate => !string.IsNullOrWhiteSpace(candidate)) ?? Unnamed;
-            places.Add(Build(name, main, group, null));
+            // Stops with no city name still join a nearby city, but they never name one.
+            var named = group.Where(stop => stop.HasCityName).ToList();
+            if (named.Count == 0) continue;
+
+            // The name found on the most distinct trips wins, because one long stay shouldn't
+            // outvote a name you keep coming back to. Then the most photos, then the earliest.
+            var best = named
+                .Select((stop, index) => (Stop: stop, Index: index))
+                .GroupBy(item => item.Stop.Name!.Trim(), StringComparer.Ordinal)
+                .OrderByDescending(names => names.Select(item => item.Stop.TripId).Distinct().Count())
+                .ThenByDescending(names => names.Sum(item => item.Stop.PhotoCount))
+                .ThenBy(names => names.Min(item => item.Index))
+                .First();
+            var main = best.OrderByDescending(item => item.Stop.PhotoCount).ThenBy(item => item.Index).First().Stop;
+            places.Add(Build(best.Key, main, group, null));
         }
 
         return [.. places.OrderBy(place => place.FirstVisit).ThenBy(place => place.Name, StringComparer.Ordinal)];
@@ -86,8 +105,8 @@ public static class CityPlaces
             .ToList();
         var memberList = members.ToList();
         var stopNames = memberList
-            .Where(stop => !string.IsNullOrWhiteSpace(stop.Name))
-            .GroupBy(stop => stop.Name!, StringComparer.Ordinal)
+            .Where(stop => stop.HasCityName)
+            .GroupBy(stop => stop.Name!.Trim(), StringComparer.Ordinal)
             .OrderByDescending(group => group.Sum(stop => stop.PhotoCount))
             .ThenBy(group => group.Key, StringComparer.Ordinal)
             .Select(group => group.Key)
