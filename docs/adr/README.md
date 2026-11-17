@@ -63,3 +63,4 @@ What becomes easier, what becomes harder, and what must stay true?
 | [ADR-014](ADR-014-stats-views-are-self-contained-modules.md) | Stats views are self-contained modules, joined only by their routes and a registry | Accepted |
 | [ADR-015](ADR-015-cities-are-merged-places-and-theme-parks-keep-their-own-identity.md) | Cities are merged places, and theme parks keep their own identity | Accepted |
 | [ADR-016](ADR-016-a-join-is-a-decision-over-a-range-of-days.md) | A join is a decision over a range of days | Accepted |
+| [ADR-017](ADR-017-a-manual-trip-is-a-decision-that-detection-builds-from-photos.md) | A manual trip is a decision that detection builds from photos | Accepted |
