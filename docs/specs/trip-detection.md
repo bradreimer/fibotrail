@@ -27,7 +27,7 @@ home is, so that I review suggestions and don't build my travel history by hand.
 
 - The screens that show suggestions. See [trip-inbox.md](trip-inbox.md).
 - A settings screen for the detection rules. The MVP uses the defaults.
-- Day trips, and merging, splitting, or changing the dates of a trip.
+- Day trips, and splitting or changing the dates of a trip. Joining two trips is covered by rule 3c.
 - Places, visits, and collections.
 - Real GPS tracks. A route connects the places where photos were taken.
 
@@ -95,6 +95,11 @@ home is, so that I review suggestions and don't build my travel history by hand.
    stops, no route, and no main place, so it's named "Trip, March 2006", and it's always Low
    confidence. Only its dates and photos are known. Count only the photos with no position on
    those days.
+3c. **Apply joins.** A join is a range of days that you chose with `fibotrail join`. The groups of
+   away photos from rule 3 that touch the range become one group, in time order, even when the
+   pause between them is longer than the gap limit. Rule 4 then applies to the joined group, so two
+   groups that are each too small can pass together. A join changes rule 3 groups only: a trip
+   from rule 3b or 4b isn't joined. A range that touches fewer than two groups changes nothing.
 4. **Filter.** Keep a trip that has at least the minimum photos and the minimum days. Only away
    photos count toward the minimum photos. Days run from the first day to the last, counting
    both.
@@ -174,6 +179,27 @@ The numbers are a start. If a gate fails, tune one default at a time, scan again
 try, the way the
 [first scan and replay checklist](../knowledge/first-scan-and-replay-checklist.md) describes.
 
+### Join command
+
+Tracking issue: [#136](https://github.com/bradreimer/fibotrail/issues/136).
+
+Intention: repair a trip that detection split because you took no pictures for 3 days or more.
+Detection can't know the days were one trip, so you tell it, and the choice is a decision per
+[ADR-016](../adr/ADR-016-a-join-is-a-decision-over-a-range-of-days.md).
+
+- `docker exec -it fibotrail fibotrail join 2027-03-16 2027-03-24` takes one day in each trip. The
+  order doesn't matter. It needs no Immich variables.
+- It stores a join from the first day of the earlier trip to the last day of the later trip, runs
+  detection, and prints the joined trip's name, dates, days, photos, and status.
+- The joined trip keeps your decision. When one of the two trips was added, the joined trip is
+  added, with that trip's name. Otherwise it takes the earlier trip's decision. The other decision
+  is set aside, not deleted, and applies again if you remove the join.
+- `fibotrail join --list` shows each join with its ID. `fibotrail join --remove <id>` deletes the
+  join and runs detection, and the trips split again.
+- It refuses, with exit code 1 and no change, when a day is in no trip or both days are in the
+  same trip. Any other arguments print the usage and exit with 2.
+- A join survives every scan and detection run.
+
 ### Replay command
 
 The replay command is a tuning tool and no longer a gate. Use it when you have a list of trips and
@@ -213,6 +239,10 @@ want a number after a rule change.
   one Low confidence suggestion, and the 90 photos belong to it.
 - 25 photos 200 km from home on one day, or 3 photos 900 km from home, become no suggestion.
 - Photos 3,000 km from home on days that a rule 4 trip covers add no second suggestion.
+- `fibotrail join` turns two trips 6 days apart into one trip that holds every photo. The trip
+  keeps its added status and name. A later detection run keeps it, with no new suggestion.
+- Two groups of 12 photos each, 6 days apart, become no trip. With a join they become one.
+- `fibotrail join --remove` splits the trips again.
 - The review gate is met on the maintainer's library: at least 8 of the first 10 High-confidence
   suggestions are accepted, and at most 1 of 3 to 5 remembered trips is missing. This is the gate
   for MVP step 3a.

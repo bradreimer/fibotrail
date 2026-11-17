@@ -23,6 +23,8 @@ public sealed class FibotrailDbContext(DbContextOptions<FibotrailDbContext> opti
 
     public DbSet<OnTheWayPhoto> OnTheWayPhotos => Set<OnTheWayPhoto>();
 
+    public DbSet<TripJoin> TripJoins => Set<TripJoin>();
+
     public DbSet<Setting> Settings => Set<Setting>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -74,6 +76,8 @@ public sealed class FibotrailDbContext(DbContextOptions<FibotrailDbContext> opti
             entity.HasIndex(decision => decision.Fingerprint).IsUnique();
             entity.Property(decision => decision.Status).HasConversion<string>();
         });
+
+        modelBuilder.Entity<TripJoin>(entity => entity.ToTable("trip_join"));
 
         modelBuilder.Entity<OnTheWayPhoto>(entity =>
         {

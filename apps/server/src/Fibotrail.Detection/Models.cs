@@ -22,6 +22,9 @@ public sealed record PhotoPoint(
     public DateOnly LocalDay => DateOnly.FromDateTime(LocalTime);
 }
 
+/// <summary>A run of calendar days, first and last day included.</summary>
+public readonly record struct DateRange(DateOnly Start, DateOnly End);
+
 /// <summary>The detection rules that can be tuned. The defaults are the ones in the trip detection spec.</summary>
 public sealed record DetectionSettings
 {
