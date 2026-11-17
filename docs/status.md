@@ -202,7 +202,7 @@ version 0.1 and the per-line results of the accessibility checklist are also sti
   Disneyland (494725605). The three Universal Orlando parks ship in `collections/universal-parks.yaml`: Universal Studios
   Florida (way 449808332), Universal's Islands of Adventure (relation 1124085), and Universal Epic
   Universe (way 1372221500), plus Universal Studios Hollywood (way 1304528747) and Universal Studios Japan (relation
-  5695002). Singapore and Beijing aren't added yet, so the issue
+  5695002), and Universal Studios Singapore (way 95756945). Beijing isn't added yet, so the issue
   stays open for them.
   The outlines weren't diffed against satellite imagery, and they couldn't be fetched from this
   environment on 2026-11-16 (three Overpass hosts refused or timed out), so the maintainer exported
