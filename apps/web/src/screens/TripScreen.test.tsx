@@ -139,6 +139,18 @@ describe('the trip page', () => {
     expectNoAccessibilityProblems(container);
   });
 
+  it('has a back arrow to Trips at the top', async () => {
+    fakeServer({ 'GET /api/trips/7': trip });
+    const { container } = renderTrip();
+    await screen.findByRole('heading', { name: 'Florida road trip' });
+    const link = within(container.querySelector('.trip-page') as HTMLElement).getByRole('link', {
+      name: 'Trips',
+    });
+    expect(link).toHaveAttribute('href', '/trips');
+    expect(link.querySelector('svg')).toHaveAttribute('aria-hidden', 'true');
+    expect(container.querySelector('.trip-page')!.firstElementChild).toBe(link);
+  });
+
   it('draws four pins and a gold start dot for four stops, with the route in order', async () => {
     fakeServer({ 'GET /api/trips/7': trip });
     renderTrip();

@@ -45,6 +45,15 @@ trip.
 
 At 600 px and wider, the map sits beside the timeline in two columns.
 
+### Back link
+
+- A link above the header shows a back arrow and the word **Trips**. It goes to the trip library
+  at `/trips`, and it has a tap target at least 44 px high.
+- It shows while the trip loads and on the loaded page. The arrow is decoration, so a screen
+  reader reads "Trips". Tracking issue: [#126](https://github.com/bradreimer/fibotrail/issues/126).
+- Opening a trip from Collections or Stats still returns to Trips. Returning to where you came
+  from is a later change.
+
 ### Route map
 
 - The map is drawn with MapLibre GL JS and opens fitted to the route.
@@ -125,6 +134,7 @@ At 600 px and wider, the map sits beside the timeline in two columns.
 
 ## Acceptance criteria
 
+- The trip page has a **Trips** link with a back arrow, and it goes to `/trips`.
 - The page shows the header, route map, stat tiles, and photo timeline, in that order.
 - A trip with four stops shows four pins, three lines, and a gold dot on the first stop.
 - Tapping a pin shows the photos of that stop.
