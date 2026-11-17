@@ -42,19 +42,27 @@ public static partial class ServerApp
         services.AddScoped<HomeLocation>();
     }
 
+    /// <summary>The Immich client, the scanner, and trip detection after a scan. The rescan command uses the same set.</summary>
+    public static void AddFibotrailImmich(this IServiceCollection services, ServerSettings settings)
+    {
+        ArgumentNullException.ThrowIfNull(settings);
+        services.TryAddSingleton(new ImmichOptions(settings.ImmichUrl!, settings.ImmichApiKey!, settings.ImmichTimeout));
+        services.TryAddSingleton<IImmichClient>(provider =>
+            new ImmichClient(provider.GetRequiredService<ImmichOptions>(), provider.GetService<ImmichTransport>()?.Handler));
+        services.TryAddSingleton<ScanService>();
+        services.AddScoped<DetectionService>();
+        services.AddScoped<IScanCompletedHandler>(provider => provider.GetRequiredService<DetectionService>());
+    }
+
     public static WebApplication Create(WebApplicationBuilder builder, ServerSettings settings, Argon2Cost? cost = null)
     {
         var services = builder.Services;
         services.AddFibotrailCore(settings, cost);
 
         // Immich. A test registers its own options and a stand-in transport before this runs.
-        services.TryAddSingleton(new ImmichOptions(settings.ImmichUrl!, settings.ImmichApiKey!, settings.ImmichTimeout));
-        services.TryAddSingleton<IImmichClient>(provider =>
-            new ImmichClient(provider.GetRequiredService<ImmichOptions>(), provider.GetService<ImmichTransport>()?.Handler));
-        services.AddSingleton<ScanService>();
+        services.AddFibotrailImmich(settings);
         services.AddScoped<ImmichConnection>();
         services.AddScoped<ThumbnailStore>();
-        services.AddScoped<DetectionService>();
         services.AddScoped<TripDecisions>();
         services.AddScoped<OnTheWayPhotos>();
 
@@ -65,9 +73,6 @@ public static partial class ServerApp
 
         // The collection files are checked at startup, so a bad file stops the app with its name.
         services.TryAddSingleton(_ => CollectionFiles.Load(CollectionFiles.DefaultDirectory));
-
-        // When a scan completes, trip detection runs.
-        services.AddScoped<IScanCompletedHandler>(provider => provider.GetRequiredService<DetectionService>());
 
         // Enums travel as words, such as "running", so the web app's types name each value.
         // Numbers travel as numbers only, so the types say "number" and not "number or string".
