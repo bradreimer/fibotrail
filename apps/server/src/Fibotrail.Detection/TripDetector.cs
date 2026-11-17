@@ -20,9 +20,10 @@ public static class TripDetector
     /// <summary>
     /// Runs rules 1 to 10 and returns the trips, oldest first. A photo whose ID is in
     /// <paramref name="onTheWay"/> still belongs to its trip, but rules 6 to 8 skip it: it adds no
-    /// stop, no line, and no distance. See docs/specs/on-the-way.md.
+    /// stop, no line, and no distance. See docs/specs/on-the-way.md. Each range in
+    /// <paramref name="joins"/> makes the trips that touch it one trip: see <see cref="JoinGroups"/>.
     /// </summary>
-    public static IReadOnlyList<DetectedTrip> Detect(IEnumerable<PhotoPoint> photos, GeoPoint home, DetectionSettings? settings = null, IReadOnlySet<string>? onTheWay = null)
+    public static IReadOnlyList<DetectedTrip> Detect(IEnumerable<PhotoPoint> photos, GeoPoint home, DetectionSettings? settings = null, IReadOnlySet<string>? onTheWay = null, IReadOnlyList<DateRange>? joins = null)
     {
         ArgumentNullException.ThrowIfNull(photos);
         settings ??= DetectionSettings.Default;
@@ -32,7 +33,7 @@ public static class TripDetector
         var unplaced = all.Where(photo => photo.Position is null).ToList();
 
         var trips = new List<DetectedTrip>();
-        foreach (var away in SplitIntoTrips(all, home, settings).Where(group => PassesFilter(group, settings)))
+        foreach (var away in JoinGroups(SplitIntoTrips(all, home, settings), joins).Where(group => PassesFilter(group, settings)))
         {
             // Rule 5: a photo with no position joins the trip that was under way when it was taken.
             var first = away[0].LocalTime;
@@ -240,6 +241,44 @@ public static class TripDetector
 
         Close();
         return trips;
+    }
+
+    /// <summary>
+    /// Rule 3c: a join you chose. The groups of away photos that touch a joined date range become one
+    /// group, in time order, even when no photo was taken for longer than the gap limit. The minimums of
+    /// rule 4 then apply to the joined group. A range that touches fewer than two groups changes
+    /// nothing. It joins the groups of rule 3 only: a trip found by rule 3b or 4b isn't joined.
+    /// </summary>
+    public static IReadOnlyList<IReadOnlyList<PhotoPoint>> JoinGroups(IReadOnlyList<IReadOnlyList<PhotoPoint>> groups, IReadOnlyList<DateRange>? joins)
+    {
+        ArgumentNullException.ThrowIfNull(groups);
+        if (joins is null or { Count: 0 })
+        {
+            return groups;
+        }
+
+        var result = groups.ToList();
+        foreach (var join in joins.OrderBy(range => range.Start))
+        {
+            var touched = result.Where(group => group[0].LocalDay <= join.End && group[^1].LocalDay >= join.Start).ToList();
+            if (touched.Count < 2)
+            {
+                continue;
+            }
+
+            var merged = touched
+                .SelectMany(group => group)
+                .OrderBy(photo => photo.LocalTime)
+                .ThenBy(photo => photo.Id, StringComparer.Ordinal)
+                .ToList();
+            result[result.IndexOf(touched[0])] = merged;
+            foreach (var other in touched.Skip(1))
+            {
+                result.Remove(other);
+            }
+        }
+
+        return result;
     }
 
     /// <summary>Rule 4: enough away photos, over enough calendar days.</summary>

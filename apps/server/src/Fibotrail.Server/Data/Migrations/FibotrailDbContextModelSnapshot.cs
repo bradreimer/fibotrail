@@ -296,6 +296,26 @@ namespace Fibotrail.Server.Data.Migrations
                     b.ToTable("trip", (string)null);
                 });
 
+            modelBuilder.Entity("Fibotrail.Server.Data.TripJoin", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("DecidedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateOnly>("EndDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateOnly>("StartDate")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("trip_join", (string)null);
+                });
+
             modelBuilder.Entity("Fibotrail.Server.Data.TripPhoto", b =>
                 {
                     b.Property<int>("TripId")

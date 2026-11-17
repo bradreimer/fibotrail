@@ -15,6 +15,10 @@ version 0.1 and the per-line results of the accessibility checklist are also sti
 
 ## Completed
 
+- [#136](https://github.com/bradreimer/fibotrail/issues/136) `fibotrail join` joins two trips that
+  detection split by a pause of 3 days or more. The join is a decision in the new `trip_join`
+  table ([ADR-016](adr/ADR-016-a-join-is-a-decision-over-a-range-of-days.md)), and it keeps the
+  added status and name. Checked in tests only, not yet on the maintainer's library.
 - [#131](https://github.com/bradreimer/fibotrail/issues/131) A back arrow on every detail page.
   A UX review of all 13 routes found the arrow only on the trip page. The collection, resort,
   stamp book, continent, and country pages had a small text link with no arrow. They now share

@@ -50,7 +50,8 @@ public sealed partial class DetectionService(FibotrailDbContext db, HomeLocation
 
         // Photos you put on the way stay in their trips and add no stop. The decision table is read, never changed.
         var onTheWay = (await db.OnTheWayPhotos.AsNoTracking().Select(photo => photo.PhotoId).ToListAsync(cancellationToken)).ToHashSet(StringComparer.Ordinal);
-        var detected = TripDetector.Detect(photos, new GeoPoint(confirmed.Latitude, confirmed.Longitude), onTheWay: onTheWay);
+        var joins = (await db.TripJoins.AsNoTracking().ToListAsync(cancellationToken)).Select(join => new DateRange(join.StartDate, join.EndDate)).ToList();
+        var detected = TripDetector.Detect(photos, new GeoPoint(confirmed.Latitude, confirmed.Longitude), onTheWay: onTheWay, joins: joins);
 
         await using var transaction = await db.Database.BeginTransactionAsync(cancellationToken);
         var trips = await db.Trips.ToListAsync(cancellationToken);

@@ -224,6 +224,24 @@ public sealed class Decision
 }
 
 /// <summary>
+/// A join you chose: the trips that touch these days are one trip, even when no photo was taken for
+/// longer than the gap limit. It's a decision, so a rescan keeps it, and removing it splits the trips
+/// again. Detection reads this table and never changes it. See docs/specs/trip-detection.md and ADR-016.
+/// </summary>
+public sealed class TripJoin
+{
+    public int Id { get; set; }
+
+    /// <summary>The first day of the joined trip.</summary>
+    public DateOnly StartDate { get; set; }
+
+    /// <summary>The last day of the joined trip.</summary>
+    public DateOnly EndDate { get; set; }
+
+    public DateTime DecidedAt { get; set; }
+}
+
+/// <summary>
 /// A photo you put on the way: it stays in its trip, but it adds no stop, line, or distance to the
 /// map. A row here is a decision, keyed by the Immich asset ID, so it belongs to the photo and not to
 /// a trip. Detection reads this table and never changes it. See docs/specs/on-the-way.md and ADR-002.
