@@ -190,6 +190,8 @@ version 0.1 and the per-line results of the accessibility checklist are also sti
   route map with pins and the stop sheet, the five stat tiles, the photo timeline by local day,
   the photo viewer with swipe, arrow keys, and **Open in Immich**, and **Rename or change
   cover**.
+- [#126](https://github.com/bradreimer/fibotrail/issues/126) A back arrow. The trip page has a
+  **Trips** link with an arrow at the top, so one tap returns to the trip library.
 
 - [#31](https://github.com/bradreimer/fibotrail/issues/31) The main destination by days. A trip's
   main place is the city where the most days were spent, not the most photos. See the

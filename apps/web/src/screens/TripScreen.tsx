@@ -17,6 +17,24 @@ import { ParksSheet } from '../trip/ParksSheet';
 import { StatTiles } from '../trip/StatTiles';
 import { countOf, formatDateRange } from '../trips/dates';
 
+function BackToTrips() {
+  return (
+    <Link className="back-link" to="/trips">
+      <svg className="back-link__arrow" viewBox="0 0 12 20" aria-hidden="true" focusable="false">
+        <path
+          d="M10 2 2 10l8 8"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+      Trips
+    </Link>
+  );
+}
+
 /** One trip: the header, the route map, the numbers, and the photos by day. See docs/specs/trip-page.md. */
 export function TripScreen() {
   const { id } = useParams();
@@ -65,6 +83,7 @@ export function TripScreen() {
   if (trip.loading && !data) {
     return (
       <div className="trip-page" role="status" aria-busy="true">
+        <BackToTrips />
         <span className="visually-hidden">Loading the trip</span>
         <span className="skeleton trip-page__cover" aria-hidden="true" />
         <span className="skeleton map-frame" aria-hidden="true" />
@@ -139,6 +158,7 @@ export function TripScreen() {
 
   return (
     <article className="trip-page">
+      <BackToTrips />
       <header className="trip-page__header">
         <img
           className="trip-page__cover"
