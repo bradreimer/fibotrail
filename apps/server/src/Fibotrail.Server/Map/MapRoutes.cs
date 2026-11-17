@@ -87,7 +87,7 @@ public static class MapRoutes
 
         var places = CityPlaces.Find(
             trips.SelectMany(trip => stops[trip.Id].Select(stop =>
-                new PlaceStop(trip.Id, trip.Name, trip.StartDate, trip.EndDate, stop.Place, stop.Latitude, stop.Longitude, stop.PhotoCount))),
+                new PlaceStop(trip.Id, trip.Name, trip.StartDate, trip.EndDate, stop.Place, stop.Latitude, stop.Longitude, stop.PhotoCount, finder.Find(stop.Latitude, stop.Longitude)?.Country.Name))),
             catalog.Lookup);
 
         return new MapInfo(

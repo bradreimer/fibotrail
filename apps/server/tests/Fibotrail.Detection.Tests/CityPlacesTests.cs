@@ -68,7 +68,7 @@ public class CityPlacesTests
     public void A_stop_with_no_name_takes_a_name_from_its_group_or_is_unnamed()
     {
         Assert.Equal("Rome", Assert.Single(CityPlaces.Find([Stop(1, null, 41.9, 12.5, 90), Stop(1, "Rome", 41.91, 12.51, 5)])).Name);
-        Assert.Equal("Unnamed place", Assert.Single(CityPlaces.Find([Stop(1, null, 0, 0)])).Name);
+        Assert.Empty(CityPlaces.Find([Stop(1, null, 0, 0)]));
     }
 
     [Fact]
@@ -109,5 +109,54 @@ public class CityPlacesTests
         var places = CityPlaces.Find([Stop(1, "Ginza", 35.67, 139.76, 12), Stop(1, "Shibuya", 35.66, 139.70, 80), Stop(1, "Shinjuku", 35.69, 139.70, 30), Stop(1, null, 35.68, 139.72, 5)]);
 
         Assert.Equal(["Shibuya", "Shinjuku", "Ginza"], Assert.Single(places).StopNames);
+    }
+
+    private static PlaceStop InCountry(string? name, string country, double latitude, double longitude, int photos = 10, int trip = 1) =>
+        new(trip, $"Trip {trip}", new DateOnly(2024, 5, 1), new DateOnly(2024, 5, 5), name, latitude, longitude, photos, country);
+
+    [Fact]
+    public void A_stop_named_for_its_country_is_not_a_city()
+    {
+        var places = CityPlaces.Find([
+            InCountry("Canada", "Canada", 50.0, -107.0),
+            InCountry("United States", "United States of America", 40.0, -100.0),
+            InCountry("Ottawa", "Canada", 45.42, -75.69)]);
+
+        Assert.Equal("Ottawa", Assert.Single(places).Name);
+    }
+
+    [Fact]
+    public void A_stop_with_no_name_joins_a_nearby_city_but_never_names_it()
+    {
+        var places = CityPlaces.Find([InCountry(null, "Canada", 45.45, -75.70, 90), InCountry("Ottawa", "Canada", 45.42, -75.69, 5)]);
+
+        var city = Assert.Single(places);
+        Assert.Equal("Ottawa", city.Name);
+    }
+
+    [Fact]
+    public void A_city_name_that_is_not_the_country_is_kept_when_the_country_is_unknown()
+    {
+        Assert.Equal("Canada", Assert.Single(CityPlaces.Find([Stop(1, "Canada", 50.0, -107.0)])).Name);
+    }
+
+    [Fact]
+    public void The_name_found_on_the_most_trips_names_the_city()
+    {
+        // Neuilly has the most photos, but Paris is the name on two trips.
+        var places = CityPlaces.Find([
+            InCountry("Neuilly-sur-Seine", "France", 48.885, 2.26, 200, trip: 1),
+            InCountry("Paris", "France", 48.857, 2.352, 20, trip: 1),
+            InCountry("Paris", "France", 48.858, 2.353, 20, trip: 2)]);
+
+        Assert.Equal("Paris", Assert.Single(places).Name);
+    }
+
+    [Fact]
+    public void With_equal_trips_the_name_with_more_photos_names_the_city()
+    {
+        var places = CityPlaces.Find([InCountry("Neuilly-sur-Seine", "France", 48.885, 2.26, 200), InCountry("Paris", "France", 48.857, 2.352, 20)]);
+
+        Assert.Equal("Neuilly-sur-Seine", Assert.Single(places).Name);
     }
 }

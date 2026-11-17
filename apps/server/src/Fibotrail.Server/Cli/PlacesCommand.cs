@@ -1,6 +1,7 @@
 using System.Globalization;
 using Fibotrail.Detection;
 using Fibotrail.Detection.Cities;
+using Fibotrail.Places;
 using Fibotrail.Server.Collections;
 using Fibotrail.Server.Data;
 using Fibotrail.Server.Trips;
@@ -26,6 +27,7 @@ public static class PlacesCommand
         FibotrailDbContext db,
         ServerSettings settings,
         CollectionCatalog catalog,
+        CountryFinder finder,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(arguments);
@@ -33,6 +35,7 @@ public static class PlacesCommand
         ArgumentNullException.ThrowIfNull(db);
         ArgumentNullException.ThrowIfNull(settings);
         ArgumentNullException.ThrowIfNull(catalog);
+        ArgumentNullException.ThrowIfNull(finder);
 
         if (arguments.Count > 0)
         {
@@ -65,7 +68,7 @@ public static class PlacesCommand
             try
             {
                 stops.AddRange(DetectionService.ReadStops(trip.StopsJson).Select(stop =>
-                    new PlaceStop(trip.Id, trip.Name, trip.StartDate, trip.EndDate, stop.Place, stop.Latitude, stop.Longitude, stop.PhotoCount)));
+                    new PlaceStop(trip.Id, trip.Name, trip.StartDate, trip.EndDate, stop.Place, stop.Latitude, stop.Longitude, stop.PhotoCount, finder.Find(stop.Latitude, stop.Longitude)?.Country.Name)));
             }
             catch (System.Text.Json.JsonException)
             {

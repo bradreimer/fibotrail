@@ -35,8 +35,14 @@ its own and is never grouped with a city.
   stops, `Geo.Group`, with a radius of **25 km**. The stops are taken oldest first, so the same
   input always gives the same groups. The radius starts at 25 km, the same distance the life map
   uses for a stop just off a coast, and is checked on real data before release. It isn't a setting.
-- **Naming.** A place takes the name of the stop in its group with the most photos, and the earliest
-  one on a tie. No outside list of cities is used and nothing leaves the device.
+- **Naming.** A place takes the stop name found on the most distinct trips in its group, then the
+  name with the most photos, then the earliest. No outside list of cities is used and nothing leaves
+  the device. The first rule was "the stop with the most photos", and the first run on real data
+  showed it names a metro area after a suburb (see the result below).
+- **Stops with no city name.** Immich leaves the city empty in open country and gives the country
+  instead, such as "Canada". A stop whose name is blank, or is the country's name or its first words
+  ("United States" for "United States of America"), has no city name. It still joins a nearby city
+  but never names one, and a group made only of such stops isn't a city.
 - **Counting.** A place's trips are the distinct added trips with a stop in it, and its first visit
   is the start date of the earliest of those trips. The count of cities is the number of places that
   aren't parks.
@@ -81,3 +87,25 @@ its own and is never grouped with a city.
 - Collection files decide what is a park, so adding a collection changes which stops are parks
   without a code change. A stop right on a boundary can go either way, and the buffer is the only
   tolerance.
+
+### Result of the first run
+
+Run on 2026-11-17 on the maintainer's library with `fibotrail places`: 52 added trips and 288
+stops. The grouping took 4.9 ms at 25 km, so speed isn't a concern.
+
+| Radius | Cities | Parks | Time |
+| --- | --- | --- | --- |
+| 10 km | 116 | 10 | 11.8 ms |
+| 25 km | 89 | 10 | 4.9 ms |
+| 50 km | 68 | 10 | 3.1 ms |
+
+- **25 km stays.** It merges one metro area correctly (London, San Francisco, Washington DC,
+  Colmar). 10 km splits them, such as Etobicoke from Toronto. 50 km merges separate towns, such as
+  Whistler with Squamish.
+- **Two problems that aren't about the radius.** About 10 of the 89 cities were country names
+  ("Canada" five times, "United States") or "Unnamed place". And the most-photos rule named Paris
+  "Neuilly-sur-Seine", Washington "Woodley Park", and Victoria "Metchosin". The two rules above
+  answer them. Whether the new naming rule picks the right name for every city isn't known until
+  `fibotrail places` is run again.
+- **The merge list is by name.** Two stops with the same name far apart, such as the two
+  Williamsburgs, show up as one name in the report.
