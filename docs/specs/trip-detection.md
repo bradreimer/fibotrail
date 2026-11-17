@@ -76,6 +76,9 @@ home is, so that I review suggestions and don't build my travel history by hand.
 | Burst photos per day | 30 | A day with this many photos with no position can be part of a trip with no location |
 | Burst minimum days | 3 | Consecutive burst days that make a trip with no location |
 | Burst edge photos per day | 10 | A lighter day next to a burst joins it, for up to 2 days at each end |
+| Far distance | 1,000 km | Photos this far from home can form a trip with fewer photos and days |
+| Far gap limit | 7 days | A pause this long between far photos ends a far visit |
+| Far minimum photos | 2 | Fewer photos than this, counting photos with no position, isn't a far visit |
 
 ### Rules
 
@@ -95,6 +98,15 @@ home is, so that I review suggestions and don't build my travel history by hand.
 4. **Filter.** Keep a trip that has at least the minimum photos and the minimum days. Only away
    photos count toward the minimum photos. Days run from the first day to the last, counting
    both.
+4b. **Find far visits.** Rule 4 drops a short visit with few photos, such as a weekend abroad with
+   a handful of geotagged photos. Day trips near home are a non-goal, so this rule looks only at
+   the away photos farther from home than the far distance, and only at days that no trip from
+   rule 4 or rule 3b covers. Sort those photos by time. Start a new visit when a photo appears
+   inside the home radius, or when no far photo appears for the far gap limit. Add the photos with
+   no position taken between the visit's first and last day, the way rule 5 does. Keep a visit
+   with at least the far minimum photos in all. It has no minimum days, so one day is enough. The
+   visit is always Low confidence, because it clears neither minimum. Rules 6 to 11 treat it like
+   any other trip.
 5. **Attach photos without a position.** A photo with no position joins a trip when its capture
    time falls between the trip's first and last photo.
 6. **Find stops.** Group a trip's photos into stops with the stop radius, and order the stops by
@@ -195,6 +207,12 @@ want a number after a rule change.
   photo with the away photos on each side more than 24 hours apart, do.
 - After **Not a trip**, a rescan that adds photos to the same trip creates no suggestion.
 - After a rename, a rescan keeps the new name.
+- 3 photos 3,000 km from home on one day become one Low confidence suggestion. 1 photo becomes
+  none.
+- 2 photos 3,000 km from home 4 days apart, with 90 photos with no position between them, become
+  one Low confidence suggestion, and the 90 photos belong to it.
+- 25 photos 200 km from home on one day, or 3 photos 900 km from home, become no suggestion.
+- Photos 3,000 km from home on days that a rule 4 trip covers add no second suggestion.
 - The review gate is met on the maintainer's library: at least 8 of the first 10 High-confidence
   suggestions are accepted, and at most 1 of 3 to 5 remembered trips is missing. This is the gate
   for MVP step 3a.

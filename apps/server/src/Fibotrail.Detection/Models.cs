@@ -59,6 +59,15 @@ public sealed record DetectionSettings
 
     /// <summary>The most days that can join each end of a burst.</summary>
     public int BurstEdgeDays { get; init; } = 2;
+
+    /// <summary>Photos farther from home than this can form a trip with fewer photos and days. See rule 4b.</summary>
+    public double FarDistanceKm { get; init; } = 1000;
+
+    /// <summary>A pause this long between far photos ends a far visit.</summary>
+    public TimeSpan FarGapLimit { get; init; } = TimeSpan.FromDays(7);
+
+    /// <summary>A far visit needs at least this many photos in all, counting photos with no position.</summary>
+    public int FarMinimumPhotos { get; init; } = 2;
 }
 
 public enum Confidence

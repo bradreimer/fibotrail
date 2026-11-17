@@ -42,6 +42,7 @@ public static class TripDetector
         }
 
         trips.AddRange(DetectUnlocated(all, trips, home, settings, onTheWay));
+        trips.AddRange(DetectFar(all, trips, home, settings, onTheWay));
         return [.. trips.OrderBy(trip => trip.StartDate).ThenBy(trip => trip.Fingerprint, StringComparer.Ordinal)];
     }
 
@@ -126,6 +127,59 @@ public static class TripDetector
         }
 
         Close();
+        return trips;
+    }
+
+    /// <summary>
+    /// Rule 4b, for a short visit far from home that rule 4 drops. Only photos farther than
+    /// <see cref="DetectionSettings.FarDistanceKm"/>, on days that no other trip covers, are
+    /// considered. They're split like rule 3, with <see cref="DetectionSettings.FarGapLimit"/> as the
+    /// gap. A visit needs <see cref="DetectionSettings.FarMinimumPhotos"/> photos in all, counting the
+    /// photos with no position taken on its days, and no minimum days. It's always Low confidence.
+    /// Visits that share a calendar day are merged into one.
+    /// </summary>
+    public static IReadOnlyList<DetectedTrip> DetectFar(IReadOnlyList<PhotoPoint> allByTime, IReadOnlyList<DetectedTrip> found, GeoPoint home, DetectionSettings settings, IReadOnlySet<string>? onTheWay = null)
+    {
+        ArgumentNullException.ThrowIfNull(allByTime);
+        ArgumentNullException.ThrowIfNull(found);
+        ArgumentNullException.ThrowIfNull(settings);
+
+        bool Covered(DateOnly day) => found.Any(trip => trip.StartDate <= day && day <= trip.EndDate);
+
+        // Photos at home stay in the pool, so they end a visit. Photos between the home radius and the
+        // far distance are left out: they neither join a far visit nor end one.
+        var pool = allByTime.Where(photo => photo.Position is { } position
+            && (Geo.DistanceKm(home, position) <= settings.HomeRadiusKm
+                || (Geo.DistanceKm(home, position) > settings.FarDistanceKm && !Covered(photo.LocalDay))));
+        var unplaced = allByTime.Where(photo => photo.Position is null && !Covered(photo.LocalDay)).ToList();
+
+        // Two visits on one calendar day are one visit: they would share a start date and a place, so
+        // they'd share a fingerprint. Photos at home, such as a household phone syncing, can split a day.
+        var visits = new List<List<PhotoPoint>>();
+        foreach (var group in SplitIntoTrips(pool, home, settings with { GapLimit = settings.FarGapLimit }))
+        {
+            if (visits.Count > 0 && group[0].LocalDay <= visits[^1][^1].LocalDay)
+            {
+                visits[^1].AddRange(group);
+            }
+            else
+            {
+                visits.Add([.. group]);
+            }
+        }
+
+        var trips = new List<DetectedTrip>();
+        foreach (var visit in visits)
+        {
+            var first = visit[0].LocalDay;
+            var last = visit[^1].LocalDay;
+            var attached = unplaced.Where(photo => photo.LocalDay >= first && photo.LocalDay <= last).ToList();
+            if (visit.Count + attached.Count >= settings.FarMinimumPhotos)
+            {
+                trips.Add(Describe(visit, attached, home, settings, onTheWay) with { Confidence = Confidence.Low });
+            }
+        }
+
         return trips;
     }
 
