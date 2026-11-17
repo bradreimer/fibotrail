@@ -12,7 +12,8 @@ public sealed record PlaceTrip(int TripId, string Name, DateOnly StartDate, Date
 /// <summary>A place you've been: a merged city, or a theme park.</summary>
 /// <param name="ParkId">The id of the park when this is a park place, otherwise null.</param>
 /// <param name="Trips">The distinct added trips with a stop in the place, earliest first.</param>
-public sealed record VisitedPlace(string Name, double Latitude, double Longitude, string? ParkId, DateOnly FirstVisit, IReadOnlyList<PlaceTrip> Trips)
+/// <param name="StopNames">The names of the stops that make up the place, most photos first. Used by the radius report.</param>
+public sealed record VisitedPlace(string Name, double Latitude, double Longitude, string? ParkId, DateOnly FirstVisit, IReadOnlyList<PlaceTrip> Trips, IReadOnlyList<string>? StopNames = null)
 {
     public bool IsPark => ParkId is not null;
 }
@@ -83,6 +84,14 @@ public static class CityPlaces
             .OrderBy(stop => stop.TripStart).ThenBy(stop => stop.TripId)
             .Select(stop => new PlaceTrip(stop.TripId, stop.TripName, stop.TripStart, stop.TripEnd))
             .ToList();
-        return new VisitedPlace(name, at.Latitude, at.Longitude, parkId, trips[0].StartDate, trips);
+        var memberList = members.ToList();
+        var stopNames = memberList
+            .Where(stop => !string.IsNullOrWhiteSpace(stop.Name))
+            .GroupBy(stop => stop.Name!, StringComparer.Ordinal)
+            .OrderByDescending(group => group.Sum(stop => stop.PhotoCount))
+            .ThenBy(group => group.Key, StringComparer.Ordinal)
+            .Select(group => group.Key)
+            .ToList();
+        return new VisitedPlace(name, at.Latitude, at.Longitude, parkId, trips[0].StartDate, trips, stopNames);
     }
 }

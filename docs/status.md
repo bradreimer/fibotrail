@@ -225,8 +225,12 @@ The plan is in [roadmap.md](roadmap.md). Specs are in [specs/](specs/README.md).
   [#11](https://github.com/bradreimer/fibotrail/issues/11). A failed line is fixed in a patch
   release, or recorded as a known gap. Also record the per-line results of the
   [accessibility checklist](knowledge/accessibility-checklist.md).
-- Check the city merge on the maintainer's library: how many cities 25 km gives for the 46 added
-  trips, and how long the Map takes ([ADR-015](adr/ADR-015-cities-are-merged-places-and-theme-parks-keep-their-own-identity.md)).
+- Run `docker exec -it fibotrail fibotrail places` on the maintainer's library: how many cities 10,
+  25, and 50 km give for the 46 added trips, which cities merge, and how long the grouping takes.
+  Then record the result in
+  [ADR-015](adr/ADR-015-cities-are-merged-places-and-theme-parks-keep-their-own-identity.md) and the
+  [life map spec](specs/life-map.md). The command is built
+  ([#99](https://github.com/bradreimer/fibotrail/issues/99)); the run is not done yet.
 - Make the switches look like iOS switches: **Hide from map** in the photo viewer
   ([#52](https://github.com/bradreimer/fibotrail/issues/52)) and **Show routes** on the life map,
   and keep the photo viewer dark in dark mode

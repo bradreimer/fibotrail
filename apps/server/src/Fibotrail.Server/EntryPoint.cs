@@ -35,6 +35,8 @@ public static class EntryPoint
                 return await ReplayAsync(builder.Configuration, args[1..]);
             case StopsCommand.Name:
                 return await StopsAsync(builder.Configuration, args[1..]);
+            case PlacesCommand.Name:
+                return await PlacesAsync(builder.Configuration, args[1..]);
             case HealthCheckCommand.Name:
                 var port = builder.Configuration["ASPNETCORE_HTTP_PORTS"]?.Split(';')[0] ?? "8080";
                 using (var client = new HttpClient { Timeout = TimeSpan.FromSeconds(5) })
@@ -43,7 +45,7 @@ public static class EntryPoint
                 }
 
             default:
-                await error.WriteLineAsync($"Fibotrail doesn't know the command \"{command}\". The commands are: {ResetPasswordCommand.Name}, {ReplayCommand.Name}, {StopsCommand.Name}, {HealthCheckCommand.Name}.");
+                await error.WriteLineAsync($"Fibotrail doesn't know the command \"{command}\". The commands are: {ResetPasswordCommand.Name}, {ReplayCommand.Name}, {StopsCommand.Name}, {PlacesCommand.Name}, {HealthCheckCommand.Name}.");
                 return 2;
         }
     }
@@ -131,5 +133,21 @@ public static class EntryPoint
             new SystemConsoleIo(),
             scope.ServiceProvider.GetRequiredService<FibotrailDbContext>(),
             settings!);
+    }
+
+    private static async Task<int> PlacesAsync(IConfiguration configuration, string[] arguments)
+    {
+        var (settings, _) = ServerSettings.Load(configuration, requireImmich: false);
+        var services = new ServiceCollection();
+        services.AddFibotrailCore(settings!);
+        await using var provider = services.BuildServiceProvider();
+        await using var scope = provider.CreateAsyncScope();
+        var catalog = CollectionFiles.Load(CollectionFiles.DefaultDirectory);
+        return await PlacesCommand.RunAsync(
+            arguments,
+            new SystemConsoleIo(),
+            scope.ServiceProvider.GetRequiredService<FibotrailDbContext>(),
+            settings!,
+            catalog);
     }
 }
