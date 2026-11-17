@@ -197,8 +197,8 @@ counting rule above can't see the trip. You mark the parks yourself.
 - A **trip row** in the resort list shows the trip and one **badge** for each park of the resort
   that the trip visited, such as "Magic Kingdom" and "EPCOT". A park the trip didn't visit has no
   badge. A badge is text with a check shape, never color alone, and wraps on a narrow phone. A
-  park marked by hand has a badge too. The row reads once to a screen reader, such as "Spring
-  2024, visited Magic Kingdom and EPCOT".
+  park marked by hand has a badge too. The badges are a list labeled "Parks on" and the trip's
+  name, so a screen reader reads the trip, then its parks.
 - The **stamp book** holds what the list used to show: the progress ring with the visited count
   over the open total, such as "7 / 12", the total days, such as "34 days across 8 parks", and the
   grid of stamps grouped by resort. A visited stamp is gold, with the name, "6 days", and "2 trips."

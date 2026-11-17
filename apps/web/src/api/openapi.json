@@ -1561,7 +1561,8 @@
           "visited",
           "total",
           "days",
-          "trips"
+          "trips",
+          "tripList"
         ],
         "type": "object",
         "properties": {
@@ -1583,6 +1584,35 @@
           "trips": {
             "type": "integer",
             "format": "int32"
+          },
+          "tripList": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ResortTrip"
+            }
+          }
+        }
+      },
+      "ResortTrip": {
+        "required": [
+          "tripId",
+          "name",
+          "parks"
+        ],
+        "type": "object",
+        "properties": {
+          "tripId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "name": {
+            "type": "string"
+          },
+          "parks": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         }
       },

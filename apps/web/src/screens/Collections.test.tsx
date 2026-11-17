@@ -18,11 +18,41 @@ const summary = {
   trips: 2,
 };
 
+const trip = (id: number, name: string, startDate: string) => ({
+  id,
+  name,
+  startDate,
+  endDate: startDate,
+  days: 1,
+  place: 'Orlando',
+  coverPhotoId: `p${id}`,
+});
+
+const library = [
+  trip(9, 'Orlando, June 2025', '2025-06-01'),
+  trip(5, 'Lisbon', '2024-09-01'),
+  trip(4, 'Orlando, March 2024', '2024-03-10'),
+];
+
 const detail = {
   summary,
   resorts: [
-    { name: 'Universal Orlando Resort', visited: 1, total: 2, days: 6, trips: 2 },
-    { name: 'Universal Studios Hollywood', visited: 0, total: 1, days: 0, trips: 0 },
+    {
+      name: 'Universal Orlando Resort',
+      visited: 1,
+      total: 2,
+      days: 6,
+      trips: 2,
+      tripList: [
+        {
+          tripId: 9,
+          name: 'Orlando, June 2025',
+          parks: ['Universal Studios Florida', 'Epic Universe'],
+        },
+        { tripId: 4, name: 'Orlando, March 2024', parks: ['Universal Studios Florida'] },
+      ],
+    },
+    { name: 'Universal Studios Hollywood', visited: 0, total: 1, days: 0, trips: 0, tripList: [] },
   ],
   attribution: 'Park boundaries © OpenStreetMap contributors',
   places: [
@@ -96,33 +126,15 @@ describe('the Collections screens', () => {
     await userEvent.click(await screen.findByText('Universal parks'));
 
     expect(await screen.findByText(/1 \/ 2 parks · 6 days · 2 trips/)).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'Universal Orlando Resort' })).toBeInTheDocument();
+    const card = screen.getByRole('link', { name: /Universal Orlando Resort/ });
+    expect(card.textContent).toContain('2 trips');
+    expect(screen.queryByText('Universal Studios Florida')).not.toBeInTheDocument();
     expect(screen.queryByText('Universal Studios Florida')).not.toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Stamp book' })).toHaveAttribute(
       'href',
       '/collections/universal-parks/stamps',
     );
     await expectNoAccessibilityProblems(container);
-  });
-
-  it('opens a resort inside a collection to list its parks, and a visited park to its trips', async () => {
-    fakeServer({
-      'GET /api/collections': [summary],
-      'GET /api/collections/universal-parks': detail,
-    });
-    renderAt('/collections');
-
-    await userEvent.click(await screen.findByText('Universal parks'));
-    await userEvent.click(await screen.findByText('Universal Orlando Resort'));
-
-    expect(
-      screen.getByRole('group', { name: "Universal's Islands of Adventure, not visited yet" }),
-    ).toBeInTheDocument();
-    expect(screen.queryByText('Epic Universe')).not.toBeInTheDocument();
-    await userEvent.click(
-      screen.getByRole('button', { name: 'Universal Studios Florida, 2 trips, 6 days' }),
-    );
-    expect(screen.getByRole('dialog', { name: 'Universal Studios Florida' })).toBeInTheDocument();
   });
 
   it('shows Try again when an open collection fails to load', async () => {
@@ -168,24 +180,30 @@ describe('the Collections screens', () => {
     );
   });
 
-  it('lists the parks of a resort, and opens a visited park into its trips', async () => {
-    fakeServer({ 'GET /api/collections/universal-parks': detail });
+  it('opens a resort to every trip there, newest first, with a badge for each park visited', async () => {
+    fakeServer({
+      'GET /api/collections/universal-parks': detail,
+      'GET /api/trips': library,
+    });
     renderAt('/collections/universal-parks/resorts/Universal%20Orlando%20Resort');
 
-    await userEvent.click(
-      await screen.findByRole('button', { name: 'Universal Studios Florida, 2 trips, 6 days' }),
-    );
-
-    expect(screen.getByRole('dialog', { name: 'Universal Studios Florida' })).toBeInTheDocument();
-    await userEvent.click(screen.getByRole('button', { name: 'Close' }));
-    expect(
-      screen.getByRole('group', { name: "Universal's Islands of Adventure, not visited yet" }),
-    ).toBeInTheDocument();
-    expect(screen.queryByText('Epic Universe')).not.toBeInTheDocument();
+    const june = await screen.findByRole('link', { name: /Orlando, June 2025/ });
+    expect(june).toHaveAttribute('href', '/trips/9');
+    expect(screen.queryByText('Lisbon')).not.toBeInTheDocument();
+    const links = screen.getAllByRole('link', { name: /^Orlando, / });
+    expect(links.map((link) => link.getAttribute('href'))).toEqual(['/trips/9', '/trips/4']);
+    const both = within(screen.getByRole('list', { name: 'Parks on Orlando, June 2025' }));
+    expect(both.getAllByRole('listitem').map((item) => item.textContent)).toEqual([
+      '✓ Universal Studios Florida',
+      '✓ Epic Universe',
+    ]);
+    const one = within(screen.getByRole('list', { name: 'Parks on Orlando, March 2024' }));
+    expect(one.getAllByRole('listitem')).toHaveLength(1);
+    expect(screen.queryByText("Universal's Islands of Adventure")).not.toBeInTheDocument();
   });
 
   it('says so for a resort that is not in the collection', async () => {
-    fakeServer({ 'GET /api/collections/universal-parks': detail });
+    fakeServer({ 'GET /api/collections/universal-parks': detail, 'GET /api/trips': library });
     renderAt('/collections/universal-parks/resorts/Nowhere');
 
     expect(await screen.findByText("That resort isn't in this collection.")).toBeInTheDocument();
@@ -243,7 +261,7 @@ describe('the Collections screens', () => {
   });
 
   it('has no accessibility problems', async () => {
-    fakeServer({ 'GET /api/collections/universal-parks': detail });
+    fakeServer({ 'GET /api/collections/universal-parks': detail, 'GET /api/trips': library });
     for (const path of [
       '/collections/universal-parks',
       '/collections/universal-parks/resorts/Universal%20Orlando%20Resort',

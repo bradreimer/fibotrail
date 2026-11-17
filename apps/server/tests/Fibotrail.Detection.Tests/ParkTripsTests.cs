@@ -98,4 +98,35 @@ public class ParkTripsTests
     {
         Assert.Empty(Count(new ParkTrip(1, "Trip 1", [], new DateOnly(2006, 3, 11), ["nowhere"])));
     }
+
+    [Fact]
+    public void By_trip_lists_a_trip_to_two_parks_once_with_both_park_names()
+    {
+        var stats = Count(Trip(1, At(A, 3), At(B, 3)));
+
+        var trip = Assert.Single(ParkTrips.ByTrip(In(stats, "A", "B")));
+        Assert.Equal(1, trip.TripId);
+        Assert.Equal(["A", "B"], trip.Parks.Order());
+        Assert.Equal(1, ParkTrips.Distinct(In(stats, "A", "B")));
+    }
+
+    [Fact]
+    public void By_trip_leaves_out_a_park_the_trip_did_not_visit_and_a_park_with_two_photos()
+    {
+        var stats = Count(Trip(1, At(A, 3), At(B, 2)));
+
+        var trip = Assert.Single(ParkTrips.ByTrip(In(stats, "A", "B")));
+        Assert.Equal(["A"], trip.Parks);
+    }
+
+    [Fact]
+    public void By_trip_lists_the_newest_trip_first_and_matches_the_distinct_count()
+    {
+        var later = new ParkPhoto(Day.AddDays(100), A.Polygons[0][0][0].Latitude + 0.005, A.Polygons[0][0][0].Longitude + 0.005);
+        var stats = Count(Trip(1, At(A, 3)), Trip(2, [later, later, later]));
+
+        var trips = ParkTrips.ByTrip(In(stats, "A"));
+        Assert.Equal([2, 1], trips.Select(trip => trip.TripId));
+        Assert.Equal(ParkTrips.Distinct(In(stats, "A")), trips.Count);
+    }
 }

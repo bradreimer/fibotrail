@@ -13,7 +13,11 @@ public sealed record CollectionSummary(string Id, string Name, string Descriptio
 
 /// <summary>A resort in a collection, such as "Walt Disney World Resort".</summary>
 /// <param name="Trips">Distinct added trips that visit at least one open park of the resort. A trip to two resorts counts once for each.</param>
-public sealed record ResortInfo(string Name, int Visited, int Total, int Days, int Trips);
+/// <param name="TripList">The same trips, each with the parks of the resort it visited, newest first.</param>
+public sealed record ResortInfo(string Name, int Visited, int Total, int Days, int Trips, IReadOnlyList<ResortTrip> TripList);
+
+/// <summary>A trip that visits a resort, with the parks of the resort it visited, in the order of the collection file.</summary>
+public sealed record ResortTrip(int TripId, string Name, IReadOnlyList<string> Parks);
 
 /// <summary>A trip that visited a place, with how many of its days were there.</summary>
 /// <param name="Marked">True when you marked the visit by hand. The trip has no photo with a position in the park, so its days are 0.</param>
@@ -72,7 +76,7 @@ public static class CollectionRoutes
             .Select(group =>
             {
                 var visited = group.Where(place => stats.ContainsKey(place.Park.Id)).Select(place => stats[place.Park.Id]).ToList();
-                return new ResortInfo(group.Key, visited.Count, group.Count(), visited.Sum(item => item.Days), ParkTrips.Distinct(visited));
+                return new ResortInfo(group.Key, visited.Count, group.Count(), visited.Sum(item => item.Days), ParkTrips.Distinct(visited), [.. ParkTrips.ByTrip(visited).Select(trip => new ResortTrip(trip.TripId, trip.Name, trip.Parks))]);
             })];
     }
 

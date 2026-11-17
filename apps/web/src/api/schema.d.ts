@@ -613,6 +613,13 @@ export interface components {
             days: number;
             /** Format: int32 */
             trips: number;
+            tripList: components["schemas"]["ResortTrip"][];
+        };
+        ResortTrip: {
+            /** Format: int32 */
+            tripId: number;
+            name: string;
+            parks: string[];
         };
         RoutePoint: {
             /** Format: double */
