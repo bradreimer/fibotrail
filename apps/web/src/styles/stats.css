@@ -1,4 +1,4 @@
-/* The Stats screen: the host, the continent cards, and the three first views. */
+/* The Stats screen: the host, the continent cards, and the views. */
 .stats-screen {
   display: grid;
   gap: var(--fibo-space-5);
@@ -121,97 +121,6 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* Trips per year: a bar for each year, each a button of at least 44 pt. */
-.bars {
-  display: flex;
-  align-items: flex-end;
-  gap: var(--fibo-space-1);
-  height: calc(var(--fibo-space-7) * 3);
-  margin: 0;
-  padding: 0;
-  overflow-x: auto;
-  list-style: none;
-}
-
-.bars__item {
-  flex: 1 0 var(--fibo-tap);
-  height: 100%;
-}
-
-.bars__button {
-  display: grid;
-  grid-template-rows: auto 1fr auto;
-  justify-items: center;
-  width: 100%;
-  height: 100%;
-  padding: 0;
-  border: 0;
-  background: none;
-  color: inherit;
-  font: inherit;
-  cursor: pointer;
-}
-
-.bars__button:disabled {
-  cursor: default;
-}
-
-.bars__bar {
-  align-self: end;
-  width: 60%;
-  min-height: var(--fibo-border);
-  border-radius: var(--fibo-space-1) var(--fibo-space-1) 0 0;
-  background: var(--fibo-teal);
-}
-
-.bars__button--current .bars__bar {
-  background: var(--fibo-gold);
-}
-
-.bars__button[aria-pressed='true'] .bars__bar {
-  outline: var(--fibo-border) solid var(--fibo-ink);
-}
-
-.bars__count,
-.bars__label {
-  font-size: var(--fibo-text-caption);
-  font-variant-numeric: tabular-nums;
-}
-
-/* Trip length: one horizontal bar for each bin. */
-.hbars {
-  display: grid;
-  gap: var(--fibo-space-2);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.hbars__row {
-  display: grid;
-  grid-template-columns: calc(var(--fibo-space-7) * 2) 1fr var(--fibo-space-6);
-  align-items: center;
-  gap: var(--fibo-space-2);
-}
-
-.hbars__track {
-  height: var(--fibo-space-4);
-  border-radius: var(--fibo-space-1);
-  background: var(--fibo-mist);
-}
-
-.hbars__bar {
-  display: block;
-  height: 100%;
-  border-radius: var(--fibo-space-1);
-  background: var(--fibo-teal);
-}
-
-.hbars__count {
-  text-align: end;
-  font-variant-numeric: tabular-nums;
-}
-
 /* Records. */
 .records {
   display: grid;
@@ -226,186 +135,6 @@
 
 .records dd {
   margin: 0;
-}
-
-/* The travel clock: twelve wedges, January at the top. The bars grow out from the center. */
-.clock {
-  display: grid;
-  gap: var(--fibo-space-3);
-  justify-items: center;
-}
-
-.clock__switch {
-  display: inline-flex;
-  border: var(--fibo-border) solid var(--fibo-teal);
-  border-radius: var(--fibo-radius);
-  overflow: hidden;
-}
-
-.clock__option {
-  min-width: calc(var(--fibo-space-7) * 1.5);
-  min-height: var(--fibo-tap);
-  border: 0;
-  background: none;
-  color: var(--fibo-teal);
-  font: inherit;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.clock__option[aria-pressed='true'] {
-  background: var(--fibo-teal);
-  color: var(--fibo-on-teal);
-}
-
-.clock__wheel {
-  width: min(100%, calc(var(--fibo-space-7) * 7));
-  height: auto;
-}
-
-.clock__core {
-  fill: var(--fibo-paper);
-  stroke: var(--fibo-mist);
-}
-
-.clock__line {
-  fill: var(--fibo-mist);
-}
-
-.clock__bar {
-  fill: var(--fibo-teal);
-  transform-box: view-box;
-  transform-origin: center;
-  animation: clock-grow var(--fibo-dur-signature) both;
-  animation-delay: calc(var(--i) * var(--fibo-stagger));
-}
-
-.clock__bar--selected {
-  fill: var(--fibo-gold);
-}
-
-.clock__hit {
-  fill: transparent;
-  cursor: pointer;
-}
-
-.clock__month {
-  fill: var(--fibo-ink-muted);
-  font-size: var(--fibo-text-caption);
-}
-
-.clock__center,
-.clock__center-value {
-  fill: var(--fibo-ink);
-  font-weight: 700;
-  font-size: var(--fibo-text-caption);
-}
-
-.clock__steps {
-  display: flex;
-  gap: var(--fibo-space-3);
-}
-
-.clock__card {
-  width: 100%;
-}
-
-@keyframes clock-grow {
-  from {
-    transform: scale(0);
-  }
-
-  to {
-    transform: scale(1);
-  }
-}
-
-/* The distance rings: an abstract chart of home, rings, and one dot for each trip. */
-.rings {
-  display: grid;
-  gap: var(--fibo-space-3);
-  justify-items: center;
-}
-
-.rings__chart {
-  width: min(100%, calc(var(--fibo-space-7) * 7));
-  height: auto;
-}
-
-.rings__edge,
-.rings__ring {
-  fill: none;
-  stroke: var(--fibo-mist);
-}
-
-.rings__label,
-.rings__compass {
-  fill: var(--fibo-ink-muted);
-  font-size: var(--fibo-text-caption);
-}
-
-.rings__home {
-  fill: var(--fibo-ink);
-}
-
-.rings__dot {
-  transition: opacity var(--fibo-dur-base);
-  animation: rings-in var(--fibo-dur-signature) both;
-}
-
-.rings__dot--faded {
-  opacity: 0.18;
-}
-
-.rings__mark {
-  fill: var(--fibo-teal);
-}
-
-.rings__mark--selected {
-  fill: var(--fibo-gold);
-  stroke: var(--fibo-paper);
-  stroke-width: var(--fibo-border);
-}
-
-.rings__hit {
-  fill: transparent;
-  cursor: pointer;
-}
-
-.rings__bands {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--fibo-space-2);
-  justify-content: center;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.rings__band {
-  min-height: var(--fibo-tap);
-  padding: 0 var(--fibo-space-3);
-  border: var(--fibo-border) solid var(--fibo-teal);
-  border-radius: var(--fibo-radius);
-  background: none;
-  color: var(--fibo-teal);
-  font: inherit;
-  cursor: pointer;
-}
-
-.rings__band[aria-pressed='true'] {
-  background: var(--fibo-teal);
-  color: var(--fibo-on-teal);
-}
-
-@keyframes rings-in {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
 }
 
 /* The season wheel: a ring of 12 months with the four seasons as arcs around it. */
@@ -604,4 +333,30 @@
 
 .spiral__mark--antarctica {
   fill: var(--fibo-continent-antarctica);
+}
+
+/* The trip spiral's trip card and the buttons that step through the trips. */
+.spiral__steps {
+  display: flex;
+  gap: var(--fibo-space-3);
+}
+
+.spiral__card {
+  width: 100%;
+}
+
+.spiral__band {
+  min-height: var(--fibo-tap);
+  padding: 0 var(--fibo-space-3);
+  border: var(--fibo-border) solid var(--fibo-teal);
+  border-radius: var(--fibo-radius);
+  background: none;
+  color: var(--fibo-teal);
+  font: inherit;
+  cursor: pointer;
+}
+
+.spiral__band[aria-pressed='true'] {
+  background: var(--fibo-teal);
+  color: var(--fibo-on-teal);
 }

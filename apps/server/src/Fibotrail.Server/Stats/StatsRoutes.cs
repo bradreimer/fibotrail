@@ -5,14 +5,9 @@ using Fibotrail.Places;
 using Fibotrail.Server.Data;
 using Fibotrail.Server.Trips;
 using Fibotrail.Stats;
-using Fibotrail.Stats.Views.DistanceRings;
 using Fibotrail.Stats.Views.Records;
 using Fibotrail.Stats.Views.SeasonWheel;
-using Fibotrail.Stats.Views.ThemeParks;
-using Fibotrail.Stats.Views.TravelClock;
-using Fibotrail.Stats.Views.TripLength;
 using Fibotrail.Stats.Views.TripSpiral;
-using Fibotrail.Stats.Views.TripsPerYear;
 using Microsoft.EntityFrameworkCore;
 
 namespace Fibotrail.Server.Stats;
@@ -56,9 +51,9 @@ public static class StatsRoutes
 
         var stats = api.MapGroup("/stats");
 
-        stats.MapGet("/summary", async (FibotrailDbContext db, CountryFinder finder, CountryOutlinesCache outlines, HomeLocation home, CollectionCatalog catalog, CancellationToken cancellationToken) =>
+        stats.MapGet("/summary", async (FibotrailDbContext db, CountryFinder finder, CountryOutlinesCache outlines, CollectionCatalog catalog, CancellationToken cancellationToken) =>
         {
-            var library = await LoadAsync(db, finder, outlines, home, catalog, cancellationToken);
+            var library = await LoadAsync(db, finder, outlines, catalog, cancellationToken);
             var totals = library.Totals();
             return TypedResults.Ok(new StatsSummary(
                 totals.Trips,
@@ -71,10 +66,10 @@ public static class StatsRoutes
                 [.. library.Progress().Select(progress => new StatsContinent(Continents.Slug(progress.Continent), Continents.Name(progress.Continent), progress.Visited, progress.Total))]));
         }).WithName("GetStatsSummary");
 
-        stats.MapGet("/continents/{continent}", async (string continent, FibotrailDbContext db, CountryFinder finder, CountryOutlinesCache outlines, HomeLocation home, CollectionCatalog catalog, CancellationToken cancellationToken) =>
+        stats.MapGet("/continents/{continent}", async (string continent, FibotrailDbContext db, CountryFinder finder, CountryOutlinesCache outlines, CollectionCatalog catalog, CancellationToken cancellationToken) =>
         {
             if (Continents.FromSlug(continent) is not { } found) return Results.NotFound();
-            var library = await LoadAsync(db, finder, outlines, home, catalog, cancellationToken);
+            var library = await LoadAsync(db, finder, outlines, catalog, cancellationToken);
             var countries = library.CountriesOn(found);
             return Results.Ok(new StatsContinentPage(
                 Continents.Slug(found),
@@ -84,9 +79,9 @@ public static class StatsRoutes
                 [.. countries.Select(Row)]));
         }).WithName("GetStatsContinent").Produces<StatsContinentPage>();
 
-        stats.MapGet("/countries/{id}", async (string id, FibotrailDbContext db, CountryFinder finder, CountryOutlinesCache outlines, HomeLocation home, CollectionCatalog catalog, CancellationToken cancellationToken) =>
+        stats.MapGet("/countries/{id}", async (string id, FibotrailDbContext db, CountryFinder finder, CountryOutlinesCache outlines, CollectionCatalog catalog, CancellationToken cancellationToken) =>
         {
-            var library = await LoadAsync(db, finder, outlines, home, catalog, cancellationToken);
+            var library = await LoadAsync(db, finder, outlines, catalog, cancellationToken);
             if (library.Country(id) is not { } country) return Results.NotFound();
             var tripIds = country.Trips.Select(trip => trip.TripId).ToHashSet();
             var trips = library.Trips.Where(trip => tripIds.Contains(trip.Id)).OrderByDescending(trip => trip.StartDate).ThenByDescending(trip => trip.Id).ToList();
@@ -103,41 +98,33 @@ public static class StatsRoutes
         }).WithName("GetStatsCountry").Produces<StatsCountryPage>();
 
         // The one list of view routes. Adding or removing a view is one line here.
-        stats.MapViewRoute("/trips-per-year", "GetStatsTripsPerYear", TripsPerYearView.Compute);
-        stats.MapViewRoute("/theme-parks", "GetStatsThemeParks", ThemeParksView.Compute);
         stats.MapViewRoute("/trip-spiral", "GetStatsTripSpiral", TripSpiralView.Compute);
-        stats.MapViewRoute("/trip-length", "GetStatsTripLength", TripLengthView.Compute);
-        stats.MapViewRoute("/distance-rings", "GetStatsDistanceRings", DistanceRingsView.Compute);
-        stats.MapViewRoute("/travel-clock", "GetStatsTravelClock", TravelClockView.Compute);
         stats.MapCountryViewRoute("/countries/{id}/season-wheel", "GetStatsSeasonWheel", SeasonWheelView.Compute);
         stats.MapViewRoute("/records", "GetStatsRecords", RecordsView.Compute);
     }
 
     private static void MapViewRoute<T>(this RouteGroupBuilder stats, string pattern, string name, Func<StatsLibrary, T> compute) =>
-        stats.MapGet(pattern, async (FibotrailDbContext db, CountryFinder finder, CountryOutlinesCache outlines, HomeLocation home, CollectionCatalog catalog, CancellationToken cancellationToken) =>
-            TypedResults.Ok(compute(await LoadAsync(db, finder, outlines, home, catalog, cancellationToken))))
+        stats.MapGet(pattern, async (FibotrailDbContext db, CountryFinder finder, CountryOutlinesCache outlines, CollectionCatalog catalog, CancellationToken cancellationToken) =>
+            TypedResults.Ok(compute(await LoadAsync(db, finder, outlines, catalog, cancellationToken))))
             .WithName(name);
 
     /// <summary>A view of one country. An unvisited country answers 404.</summary>
     private static void MapCountryViewRoute<T>(this RouteGroupBuilder stats, string pattern, string name, Func<StatsLibrary, string, T?> compute)
         where T : class =>
-        stats.MapGet(pattern, async (string id, FibotrailDbContext db, CountryFinder finder, CountryOutlinesCache outlines, HomeLocation home, CollectionCatalog catalog, CancellationToken cancellationToken) =>
-            compute(await LoadAsync(db, finder, outlines, home, catalog, cancellationToken), id) is { } result ? Results.Ok(result) : Results.NotFound())
+        stats.MapGet(pattern, async (string id, FibotrailDbContext db, CountryFinder finder, CountryOutlinesCache outlines, CollectionCatalog catalog, CancellationToken cancellationToken) =>
+            compute(await LoadAsync(db, finder, outlines, catalog, cancellationToken), id) is { } result ? Results.Ok(result) : Results.NotFound())
             .WithName(name)
             .Produces<T>();
 
     private static StatsCountryRow Row(CountryStats country) => new(country.Country.Key, country.Country.Name, country.Trips.Count, country.Days);
 
     /// <summary>Reads the added trips and their positioned away photos, and builds the library.</summary>
-    public static async Task<StatsLibrary> LoadAsync(FibotrailDbContext db, CountryFinder finder, CountryOutlinesCache outlines, HomeLocation homeLocation, CollectionCatalog catalog, CancellationToken cancellationToken)
+    public static async Task<StatsLibrary> LoadAsync(FibotrailDbContext db, CountryFinder finder, CountryOutlinesCache outlines, CollectionCatalog catalog, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(db);
         ArgumentNullException.ThrowIfNull(finder);
         ArgumentNullException.ThrowIfNull(outlines);
-        ArgumentNullException.ThrowIfNull(homeLocation);
         ArgumentNullException.ThrowIfNull(catalog);
-
-        var home = await homeLocation.GetAsync(cancellationToken);
 
         // Only added trips count. A suggested, later, or ignored trip never changes a number.
         var trips = await db.Trips.AsNoTracking().Where(trip => trip.Status == TripStatus.Added).ToListAsync(cancellationToken);
@@ -164,9 +151,7 @@ public static class StatsRoutes
                 [.. DetectionService.ReadStops(trip.StopsJson).Select(stop => new NamedStop(stop.Place, stop.Latitude, stop.Longitude, stop.PhotoCount))])),
             finder,
             outlines.Outlines,
-            home is null ? null : new GeoPoint(home.Latitude, home.Longitude),
-            catalog.Lookup,
-            [.. catalog.Collections.Select(collection => new ParkSet(collection.Id, collection.Name, [.. collection.Places.Where(place => !place.Planned).Select(place => place.Park)]))]);
+            catalog.Lookup);
     }
 }
 

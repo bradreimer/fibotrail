@@ -6,7 +6,7 @@ using Fibotrail.Server.Collections;
 
 namespace Fibotrail.Server.Tests;
 
-/// <summary>Collections and the Stats Theme parks view, on a made-up park around the test Orlando trip. See docs/specs/collections.md.</summary>
+/// <summary>Collections, on a made-up park around the test Orlando trip. See docs/specs/collections.md.</summary>
 public class CollectionsTests
 {
     private static ParkPlace Park(string id, double south, double west, double size = 0.02) =>
@@ -60,25 +60,6 @@ public class CollectionsTests
         Assert.Equal(0, places["far"].GetProperty("days").GetInt32());
         Assert.Equal(("planned", 0), (places["coming"].GetProperty("status").GetString(), places["coming"].GetProperty("days").GetInt32()));
         Assert.Contains("OpenStreetMap", detail.GetProperty("attribution").GetString(), StringComparison.Ordinal);
-    }
-
-    [Fact]
-    public async Task Collections_and_the_theme_parks_view_give_the_same_days_for_every_park()
-    {
-        var (app, browser, trip) = await StartAsync();
-        await using var _ = app;
-        await DecideAsync(browser, trip, "add");
-
-        var detail = await browser.GetJsonAsync("/api/collections/test-parks");
-        var view = await browser.GetJsonAsync("/api/stats/theme-parks");
-
-        var fromCollections = detail.GetProperty("places").EnumerateArray()
-            .Where(place => place.GetProperty("status").GetString() == "open")
-            .ToDictionary(place => place.GetProperty("id").GetString()!, place => place.GetProperty("days").GetInt32());
-        var fromView = view.EnumerateArray().SelectMany(group => group.GetProperty("parks").EnumerateArray())
-            .ToDictionary(park => park.GetProperty("id").GetString()!, park => park.GetProperty("days").GetInt32());
-        Assert.Equal(fromCollections, fromView);
-        Assert.True(fromView["near"] > 0);
     }
 
     [Fact]

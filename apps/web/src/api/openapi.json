@@ -651,52 +651,6 @@
         }
       }
     },
-    "/api/stats/trips-per-year": {
-      "get": {
-        "tags": [
-          "Fibotrail"
-        ],
-        "operationId": "GetStatsTripsPerYear",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/YearCount"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/stats/theme-parks": {
-      "get": {
-        "tags": [
-          "Fibotrail"
-        ],
-        "operationId": "GetStatsThemeParks",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/ThemeParkGroup"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/stats/trip-spiral": {
       "get": {
         "tags": [
@@ -712,75 +666,6 @@
                   "type": "array",
                   "items": {
                     "$ref": "#/components/schemas/SpiralTrip"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/stats/trip-length": {
-      "get": {
-        "tags": [
-          "Fibotrail"
-        ],
-        "operationId": "GetStatsTripLength",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/LengthBin"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/stats/distance-rings": {
-      "get": {
-        "tags": [
-          "Fibotrail"
-        ],
-        "operationId": "GetStatsDistanceRings",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/RingTrip"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/stats/travel-clock": {
-      "get": {
-        "tags": [
-          "Fibotrail"
-        ],
-        "operationId": "GetStatsTravelClock",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/ClockMonth"
                   }
                 }
               }
@@ -842,30 +727,6 @@
   },
   "components": {
     "schemas": {
-      "ClockMonth": {
-        "required": [
-          "month",
-          "days",
-          "trips"
-        ],
-        "type": "object",
-        "properties": {
-          "month": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "days": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "trips": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/TripRef"
-            }
-          }
-        }
-      },
       "CollectionDetail": {
         "required": [
           "summary",
@@ -1186,35 +1047,6 @@
         ],
         "type": "object",
         "properties": {
-          "count": {
-            "type": "integer",
-            "format": "int32"
-          }
-        }
-      },
-      "LengthBin": {
-        "required": [
-          "label",
-          "minDays",
-          "maxDays",
-          "count"
-        ],
-        "type": "object",
-        "properties": {
-          "label": {
-            "type": "string"
-          },
-          "minDays": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "maxDays": {
-            "type": [
-              "null",
-              "integer"
-            ],
-            "format": "int32"
-          },
           "count": {
             "type": "integer",
             "format": "int32"
@@ -1647,27 +1479,6 @@
           "trips": {
             "type": "integer",
             "format": "int32"
-          }
-        }
-      },
-      "RingTrip": {
-        "required": [
-          "trip",
-          "distanceKm",
-          "bearingDegrees"
-        ],
-        "type": "object",
-        "properties": {
-          "trip": {
-            "$ref": "#/components/schemas/TripRef"
-          },
-          "distanceKm": {
-            "type": "number",
-            "format": "double"
-          },
-          "bearingDegrees": {
-            "type": "number",
-            "format": "double"
           }
         }
       },
@@ -2108,75 +1919,6 @@
           }
         }
       },
-      "ThemePark": {
-        "required": [
-          "id",
-          "name",
-          "group",
-          "days",
-          "trips",
-          "firstVisit"
-        ],
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "group": {
-            "type": "string"
-          },
-          "days": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "trips": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "firstVisit": {
-            "type": [
-              "null",
-              "string"
-            ],
-            "format": "date"
-          }
-        }
-      },
-      "ThemeParkGroup": {
-        "required": [
-          "collectionId",
-          "name",
-          "totalDays",
-          "visited",
-          "parks"
-        ],
-        "type": "object",
-        "properties": {
-          "collectionId": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "totalDays": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "visited": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "parks": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ThemePark"
-            }
-          }
-        }
-      },
       "TripChange": {
         "type": "object",
         "properties": {
@@ -2590,29 +2332,6 @@
           },
           "seen": {
             "type": "boolean"
-          }
-        }
-      },
-      "YearCount": {
-        "required": [
-          "year",
-          "trips"
-        ],
-        "type": "object",
-        "properties": {
-          "year": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "trips": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/TripRef"
-            }
-          },
-          "count": {
-            "type": "integer",
-            "format": "int32"
           }
         }
       }

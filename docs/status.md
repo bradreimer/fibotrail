@@ -15,6 +15,14 @@ version 0.1 and the per-line results of the accessibility checklist are also sti
 
 ## Completed
 
+- [#111](https://github.com/bradreimer/fibotrail/issues/111) The Stats screen is simpler. Five
+  views were removed, each by the four steps of ADR-014: Trips per year, Trip length, Theme parks,
+  Travel clock, and Distance rings. Their specs went with them. The stats library lost the two
+  facts only they read (the home location and the park sets), and the Trip spiral keeps its own copy
+  of the styles it borrowed from the clock and the rings. Collections is unchanged and still reads
+  the park days from the stats library. The Stats screen now shows the summary tiles, the continents,
+  the Trip spiral, and Records. [ADR-013](adr/ADR-013-park-days-are-derived-from-stored-photo-positions.md)
+  still says the Theme parks view shares the park-day function. It is history until someone edits it.
 - [#110](https://github.com/bradreimer/fibotrail/issues/110) Collections lead with trips. The list
   card shows the trips to the collection, such as "9 trips". Tapping it lists the resorts with
   their trips, and tapping a resort lists its parks with trips and days. The progress ring, total
@@ -29,8 +37,8 @@ version 0.1 and the per-line results of the accessibility checklist are also sti
 - [#64](https://github.com/bradreimer/fibotrail/issues/64) Park days in Collections and Stats. The
   park lookup and day count, the collection file loader and its startup checks, the Collections
   destination with its list, stamp book, and park sheet, the Theme parks Stats view, and the
-  [Theme parks view spec](specs/theme-parks-view.md). Collections and the view read the same park
-  days, and a test checks they agree. All 19 launch parks ship, each from OpenStreetMap with a closed
+  Theme parks view and its spec (both removed in [#111](https://github.com/bradreimer/fibotrail/issues/111)).
+  Collections and the view read the same park days, and a test checked they agree. All 19 launch parks ship, each from OpenStreetMap with a closed
   ring. **Disney, 12:** Magic Kingdom (way 297428432), EPCOT (805298160), Disney's Hollywood Studios
   (806728401), Disney's Animal Kingdom (297441457), Disneyland Park (relation 5586855), Disney
   California Adventure (15626312), Tokyo Disneyland (1282875870), Tokyo DisneySea (203538370),
@@ -80,7 +88,7 @@ version 0.1 and the per-line results of the accessibility checklist are also sti
   seen, is unanswered: one day does.
 
 - [#67](https://github.com/bradreimer/fibotrail/issues/67) The distance rings, a Stats view
-  ([spec](specs/distance-rings.md)). Each added trip is a dot at the bearing and the distance of its
+  (removed in [#111](https://github.com/bradreimer/fibotrail/issues/111)). Each added trip is a dot at the bearing and the distance of its
   farthest stop from home, on a log scale out to 20,000 km, with five distance bands, **Nearer** and
   **Farther** buttons, and a text alternative. The home location is a new fact in the stats library,
   and the route returns distances and bearings only. `Geo.BearingDegrees` is new in
@@ -89,7 +97,7 @@ version 0.1 and the per-line results of the accessibility checklist are also sti
   are unanswered.
 
 - [#66](https://github.com/bradreimer/fibotrail/issues/66) The travel clock, a Stats view
-  ([spec](specs/travel-clock.md)). A wheel of 12 months where each bar grows with the days you were
+  (removed in [#111](https://github.com/bradreimer/fibotrail/issues/111)). A wheel of 12 months where each bar grows with the days you were
   away in that month, across every year, with a **Days** and **Trips** switch, **Earlier** and
   **Later** buttons, and the month's trips under the wheel. A wedge can be tapped on a touch screen,
   and the buttons cover the keyboard. It is checked in a desktop browser only, not yet on a phone.
@@ -251,15 +259,13 @@ The plan is in [roadmap.md](roadmap.md). Specs are in [specs/](specs/README.md).
   [collections.md](specs/collections.md)
   ([#64](https://github.com/bradreimer/fibotrail/issues/64)). Park days are derived from stored photo
   positions, per [ADR-013](adr/ADR-013-park-days-are-derived-from-stored-photo-positions.md). The
-  collections and the Theme parks view are built, and the park outlines are validated in production by
+  collections are built, and the park outlines are validated in production by
   the maintainer. What's left is the run-through on a phone.
 - Answer the open questions in the [life map spec](specs/life-map.md) with real use: whether the
   home country should always fill in, and whether 25 km is the right distance for a stop just off a
   coast.
-- Phase 5, the Stats views. The host and all six views with a spec are built: trips per year, trip
-  length, records ([#54](https://github.com/bradreimer/fibotrail/issues/54)), the travel clock
-  ([#66](https://github.com/bradreimer/fibotrail/issues/66)), the distance rings
-  ([#67](https://github.com/bradreimer/fibotrail/issues/67)), the season wheel
+- Phase 5, the Stats views. The host and the three views with a spec are built: records
+  ([#54](https://github.com/bradreimer/fibotrail/issues/54)), the season wheel
   ([#58](https://github.com/bradreimer/fibotrail/issues/58)), and the trip spiral
   ([#59](https://github.com/bradreimer/fibotrail/issues/59)). They need a look on real data and on a
   phone. Views are self-contained, per

@@ -122,7 +122,7 @@ export default function TripSpiral() {
           <li key={id || 'all'}>
             <button
               type="button"
-              className="rings__band"
+              className="spiral__band"
               aria-pressed={(continent ?? '') === id}
               onClick={() => setContinent(id === '' ? null : id)}
             >
@@ -131,7 +131,7 @@ export default function TripSpiral() {
           </li>
         ))}
       </ul>
-      <div className="clock__steps">
+      <div className="spiral__steps">
         <button
           type="button"
           className="button button--secondary"
@@ -149,7 +149,7 @@ export default function TripSpiral() {
           Later
         </button>
       </div>
-      <section className="clock__card" aria-live="polite" aria-label="Selected trip">
+      <section className="spiral__card" aria-live="polite" aria-label="Selected trip">
         <p className="stats-page__note">
           Trip {index + 1} of {trips.length}
         </p>

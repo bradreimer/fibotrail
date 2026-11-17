@@ -65,15 +65,13 @@ public sealed record ContinentProgress(Continent Continent, int Visited, int Tot
 /// </summary>
 public sealed class StatsLibrary
 {
-    private StatsLibrary(IReadOnlyList<StatsTrip> trips, IReadOnlyList<CountryStats> countries, IReadOnlyDictionary<Continent, int> totals, int outlineCountries, GeoPoint? home, IReadOnlyList<ParkStats> parks, IReadOnlyList<ParkSet> parkCollections, IReadOnlyList<VisitedPlace> places)
+    private StatsLibrary(IReadOnlyList<StatsTrip> trips, IReadOnlyList<CountryStats> countries, IReadOnlyDictionary<Continent, int> totals, int outlineCountries, IReadOnlyList<ParkStats> parks, IReadOnlyList<VisitedPlace> places)
     {
         Trips = trips;
         Countries = countries;
         ContinentTotals = totals;
         OutlineCountries = outlineCountries;
-        Home = home;
         Parks = parks;
-        ParkSets = parkCollections;
         Places = places;
     }
 
@@ -89,10 +87,7 @@ public sealed class StatsLibrary
     /// <summary>The number of bundled outlines that have an id.</summary>
     public int OutlineCountries { get; }
 
-    /// <summary>The home location, or null before you confirm one. No route returns it.</summary>
-    public GeoPoint? Home { get; }
-
-    /// <summary>The visited parks, most days first, by the rules of docs/specs/collections.md. Collections and the Theme parks view both read this.</summary>
+    /// <summary>The visited parks, most days first, by the rules of docs/specs/collections.md. Collections reads this.</summary>
     public IReadOnlyList<ParkStats> Parks { get; }
 
     /// <summary>The places of added trips: merged cities and parks, by the rules of ADR-015.</summary>
@@ -101,11 +96,8 @@ public sealed class StatsLibrary
     /// <summary>The number of cities: places that aren't parks.</summary>
     public int CityCount => Places.Count(place => !place.IsPark);
 
-    /// <summary>Every collection of parks, with its open places, visited or not.</summary>
-    public IReadOnlyList<ParkSet> ParkSets { get; }
-
     /// <summary>Builds the library. Pass added trips only.</summary>
-    public static StatsLibrary Build(IEnumerable<StatsTrip> trips, CountryFinder finder, IEnumerable<CountryOutline> outlines, GeoPoint? home = null, ParkLookup? parkLookup = null, IReadOnlyList<ParkSet>? parkCollections = null)
+    public static StatsLibrary Build(IEnumerable<StatsTrip> trips, CountryFinder finder, IEnumerable<CountryOutline> outlines, ParkLookup? parkLookup = null)
     {
         ArgumentNullException.ThrowIfNull(trips);
         ArgumentNullException.ThrowIfNull(finder);
@@ -150,7 +142,7 @@ public sealed class StatsLibrary
                 new PlaceStop(trip.Id, trip.Name, trip.StartDate, trip.EndDate, stop.Name, stop.Latitude, stop.Longitude, stop.PhotoCount, finder.Find(stop.Latitude, stop.Longitude)?.Country.Name))),
             parkLookup);
 
-        return new StatsLibrary(ordered, countries, Continents.Totals(outlineList), outlineList.Count(outline => outline.Id is not null), home, parks, parkCollections ?? [], places);
+        return new StatsLibrary(ordered, countries, Continents.Totals(outlineList), outlineList.Count(outline => outline.Id is not null), parks, places);
     }
 
     /// <summary>The summary tiles.</summary>
