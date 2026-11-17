@@ -1,5 +1,6 @@
 import type { components } from '../api/schema';
 import { formatDateRange } from '../trips/dates';
+import { CollapsibleSection } from './CollapsibleSection';
 
 export type MapDetailCountry = components['schemas']['MapDetailCountry'];
 export type MapRegion = components['schemas']['MapRegion'];
@@ -11,8 +12,22 @@ export function progressText(country: MapDetailCountry): string {
   return `${number.format(country.regions.length)} of ${number.format(country.totalRegions)} ${country.regionNoun}`;
 }
 
-/** One line under the numbers for each detail country, such as Canada's provinces and territories. */
-export function RegionProgress({ countries }: { countries: readonly MapDetailCountry[] }) {
+/** The anchor and key of a detail country's region list. */
+export function regionSectionId(country: MapDetailCountry): string {
+  return `regions-${country.id}`;
+}
+
+/**
+ * One line under the numbers for each detail country, such as Canada's provinces and territories.
+ * The country's name links to its region list below the map.
+ */
+export function RegionProgress({
+  countries,
+  onJump,
+}: {
+  countries: readonly MapDetailCountry[];
+  onJump: (sectionId: string) => void;
+}) {
   if (countries.length === 0) return null;
   return (
     <section aria-labelledby="region-progress">
@@ -22,7 +37,16 @@ export function RegionProgress({ countries }: { countries: readonly MapDetailCou
       <ul className="region-progress">
         {countries.map((country) => (
           <li key={country.id} className="region-progress__item">
-            <span className="region-progress__country">{country.name}</span>
+            <a
+              className="region-progress__country"
+              href={`#${regionSectionId(country)}`}
+              onClick={(event) => {
+                event.preventDefault();
+                onJump(regionSectionId(country));
+              }}
+            >
+              {country.name}
+            </a>
             <span className="region-progress__count">{progressText(country)}</span>
           </li>
         ))}
@@ -38,18 +62,25 @@ export function RegionProgress({ countries }: { countries: readonly MapDetailCou
  */
 export function RegionLists({
   countries,
+  isOpen,
+  onToggle,
   onSelect,
 }: {
   countries: readonly MapDetailCountry[];
+  isOpen: (sectionId: string) => boolean;
+  onToggle: (sectionId: string, open: boolean) => void;
   onSelect: (region: MapRegion) => void;
 }) {
   return (
     <>
       {countries.map((country) => (
-        <section key={country.id} aria-labelledby={`regions-${country.id}`}>
-          <h3 className="life-map__heading" id={`regions-${country.id}`}>
-            {`${country.name}: ${progressText(country)}`}
-          </h3>
+        <CollapsibleSection
+          key={country.id}
+          id={regionSectionId(country)}
+          title={`${country.name}: ${progressText(country)}`}
+          open={isOpen(regionSectionId(country))}
+          onToggle={(open) => onToggle(regionSectionId(country), open)}
+        >
           {country.regions.length === 0 ? (
             <p className="life-map__note">{`No ${country.regionNoun} yet.`}</p>
           ) : (
@@ -70,7 +101,7 @@ export function RegionLists({
               ))}
             </ol>
           )}
-        </section>
+        </CollapsibleSection>
       ))}
     </>
   );

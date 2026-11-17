@@ -1,7 +1,8 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 import { useApi } from '../api/useApi';
+import { CollapsibleSection } from '../map/CollapsibleSection';
 import { CountrySheet, type MapCountry } from '../map/CountrySheet';
 import { RegionLists, RegionProgress } from '../map/DetailRegions';
 import { LazyMap } from '../map/LazyMap';
@@ -25,6 +26,8 @@ export function MapScreen() {
   const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
   const [selectedCity, setSelectedCity] = useState<string | null>(null);
   const [showRoutes, setShowRoutes] = useState(false);
+  const [openSections, setOpenSections] = useState<ReadonlySet<string>>(new Set());
+  const pendingJump = useRef<string | null>(null);
 
   const data = map.data;
   const visited = useMemo(() => data?.countries.map(keyOf) ?? [], [data]);
@@ -47,6 +50,15 @@ export function MapScreen() {
     () => (showRoutes ? (data?.routes.map((route) => route.points) ?? []) : []),
     [data, showRoutes],
   );
+
+  // After a link opens a section, bring it into view and put focus on its summary.
+  useEffect(() => {
+    if (pendingJump.current === null) return;
+    const section = document.getElementById(pendingJump.current);
+    pendingJump.current = null;
+    section?.scrollIntoView?.({ block: 'start' });
+    section?.querySelector('summary')?.focus();
+  });
 
   if (map.loading && !data) {
     return (
@@ -83,6 +95,21 @@ export function MapScreen() {
       .find((item) => item.id === selectedRegion) ?? null;
   const hasDetail = data.detailCountries.length > 0;
   const city = selectedCity === null ? null : (data.cities[Number(selectedCity)] ?? null);
+  const isOpen = (sectionId: string) => openSections.has(sectionId);
+  const toggleSection = (sectionId: string, open: boolean) =>
+    setOpenSections((current) => {
+      if (current.has(sectionId) === open) return current;
+      const next = new Set(current);
+      if (open) next.add(sectionId);
+      else next.delete(sectionId);
+      return next;
+    });
+  const jumpToSection = (sectionId: string) => {
+    pendingJump.current = sectionId;
+    // Opening a section that is closed renders again, and the effect above then moves there. A
+    // section that is already open needs a render too, so the effect runs.
+    setOpenSections((current) => new Set(current).add(sectionId));
+  };
   const selectCountry = (key: string | null) => {
     setSelectedRegion(null);
     setSelectedCity(null);
@@ -101,7 +128,7 @@ export function MapScreen() {
   return (
     <div className="life-map">
       <MapSummary totals={data.totals} />
-      <RegionProgress countries={data.detailCountries} />
+      <RegionProgress countries={data.detailCountries} onJump={jumpToSection} />
       <LazyMap
         className="life-map__map"
         label={`World map. The countries you've visited are filled in green.${hasDetail ? " Zoom in to a country with regions to see the ones you've visited." : ''}`}
@@ -125,10 +152,13 @@ export function MapScreen() {
           onChange={(event) => setShowRoutes(event.target.checked)}
         />
       </label>
-      <section aria-labelledby="first-visits">
-        <h3 className="life-map__heading" id="first-visits">
-          First visits
-        </h3>
+      <CollapsibleSection
+        id="first-visits"
+        title="First visits"
+        count={String(data.countries.length)}
+        open={isOpen('first-visits')}
+        onToggle={(open) => toggleSection('first-visits', open)}
+      >
         <ol className="first-visits">
           {data.countries.map((item) => (
             <li key={keyOf(item)}>
@@ -145,13 +175,21 @@ export function MapScreen() {
             </li>
           ))}
         </ol>
-      </section>
-      <RegionLists countries={data.detailCountries} onSelect={(item) => selectRegion(item.id)} />
+      </CollapsibleSection>
+      <RegionLists
+        countries={data.detailCountries}
+        isOpen={isOpen}
+        onToggle={toggleSection}
+        onSelect={(item) => selectRegion(item.id)}
+      />
       {data.cities.length > 0 && (
-        <section aria-labelledby="visited-places">
-          <h3 className="life-map__heading" id="visited-places">
-            Cities and parks
-          </h3>
+        <CollapsibleSection
+          id="visited-places"
+          title="Cities and parks"
+          count={String(data.cities.length)}
+          open={isOpen('visited-places')}
+          onToggle={(open) => toggleSection('visited-places', open)}
+        >
           <ol className="first-visits">
             {data.cities.map((item, index) => (
               <li key={`${item.name}-${index}`}>
@@ -172,7 +210,7 @@ export function MapScreen() {
               </li>
             ))}
           </ol>
-        </section>
+        </CollapsibleSection>
       )}
       {country && <CountrySheet country={country} onClose={() => setSelected(null)} />}
       {city && (
