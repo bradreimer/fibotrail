@@ -30,7 +30,7 @@ public class VocabularyTests
         }
     }
 
-    public static TheoryData<string> ToolNames() => [.. McpTools.All.Select(tool => tool.Name)];
+    public static TheoryData<string> ToolNames() => new(McpTools.All.Select(tool => tool.Name));
 
     [Theory]
     [MemberData(nameof(ToolNames))]
