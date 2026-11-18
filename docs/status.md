@@ -2,16 +2,21 @@
 
 ## Current milestone
 
-Version 0.2.0 was tagged and published on 2026-11-16: the Map (phase 4, countries only), hiding a
-photo from a trip's map, and the new navigation. The release workflow's second run succeeded:
-`ghcr.io/bradreimer/fibotrail:0.2.0` and `:latest` are the same image, for linux/amd64 and
-linux/arm64, and `:0.1.0` is unchanged. See [roadmap.md](roadmap.md) and
-[the release](https://github.com/bradreimer/fibotrail/releases/tag/v0.2.0).
+Version 0.3.1 fixes `fibotrail join`, which saved a join over a trip with no photo positions and
+changed nothing ([#144](https://github.com/bradreimer/fibotrail/issues/144)). Version 0.3.0 was the
+release after 0.2.0 (55 commits): Collections (Disney and Universal parks, with park days counted
+on the server), cities and pins on the Map, the Fibonacci spiral on the Stats screen, a back arrow
+on every detail page, and the command line tools `fibotrail rescan`, `places`, `join`, and
+`trip add`, with a **Rescan everything** button in Settings. The release workflow publishes
+`ghcr.io/bradreimer/fibotrail:0.3.1` and `:latest`. See [roadmap.md](roadmap.md) and
+[the releases](https://github.com/bradreimer/fibotrail/releases).
 
-**What wasn't recorded before the tag:** the maintainer checked the Map in a desktop browser, where
-it looked right after the antimeridian fix. The Map on a phone and an iPad, the top bar buttons and
-the sidebar, and the **Hide** checkbox on a device weren't reported. The ADR-007 table lines for
-version 0.1 and the per-line results of the accessibility checklist are also still unrecorded.
+**What wasn't recorded before the tag:** `./scripts/check.sh` and CI pass on the tagged commit.
+`fibotrail join` ran on the maintainer's library on 2026-11-18 and joined trips 2 and 45 into one
+trip of 1,635 photos. `fibotrail trip add` and the **Rescan everything** button are checked in
+tests only, and haven't been run on the maintainer's library or a phone. The
+ADR-007 table lines for version 0.1 and the per-line results of the accessibility checklist are
+also still unrecorded.
 
 ## Completed
 
@@ -30,6 +35,14 @@ version 0.1 and the per-line results of the accessibility checklist are also sti
   turn the server on, the address, three ways to connect a client, and example questions that a test
   runs. Checked in tests only. The connection steps haven't been run against a real client yet
   (open question 1 of the spec), and the README privacy text now names the MCP exception.
+
+- [#144](https://github.com/bradreimer/fibotrail/issues/144) `fibotrail join` joins trips found
+  from photos with no position (rules 3b and 4b), not only rule 3 trips. Found on the maintainer's
+  library: trips 2 and 45, one Oregon Coast trip in July 2008, were a trip with GPS and a trip of
+  1,449 photos with none, and the join was saved and changed nothing. A step after every rule now
+  merges the trips that touch a joined range and rebuilds the merged trip from their photos
+  ([ADR-016](adr/ADR-016-a-join-is-a-decision-over-a-range-of-days.md)). Checked in tests only,
+  not yet run on the maintainer's library.
 
 - [#140](https://github.com/bradreimer/fibotrail/issues/140) `fibotrail trip add` adds a trip by
   hand, for photos with no position that no rule can find. The trip is a decision in the new
