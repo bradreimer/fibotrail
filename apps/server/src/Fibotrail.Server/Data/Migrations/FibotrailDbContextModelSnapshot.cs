@@ -162,6 +162,22 @@ namespace Fibotrail.Server.Data.Migrations
                     b.ToTable("photo", (string)null);
                 });
 
+            modelBuilder.Entity("Fibotrail.Server.Data.PinnedPhoto", b =>
+                {
+                    b.Property<string>("PhotoId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateOnly>("Day")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("DecidedAt")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("PhotoId");
+
+                    b.ToTable("pinned_photo", (string)null);
+                });
+
             modelBuilder.Entity("Fibotrail.Server.Data.ScanRun", b =>
                 {
                     b.Property<int>("Id")

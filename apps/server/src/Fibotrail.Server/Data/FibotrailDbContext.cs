@@ -23,6 +23,8 @@ public sealed class FibotrailDbContext(DbContextOptions<FibotrailDbContext> opti
 
     public DbSet<OnTheWayPhoto> OnTheWayPhotos => Set<OnTheWayPhoto>();
 
+    public DbSet<PinnedPhoto> PinnedPhotos => Set<PinnedPhoto>();
+
     public DbSet<TripJoin> TripJoins => Set<TripJoin>();
 
     public DbSet<ManualTrip> ManualTrips => Set<ManualTrip>();
@@ -86,6 +88,12 @@ public sealed class FibotrailDbContext(DbContextOptions<FibotrailDbContext> opti
         modelBuilder.Entity<OnTheWayPhoto>(entity =>
         {
             entity.ToTable("on_the_way_photo");
+            entity.HasKey(photo => photo.PhotoId);
+        });
+
+        modelBuilder.Entity<PinnedPhoto>(entity =>
+        {
+            entity.ToTable("pinned_photo");
             entity.HasKey(photo => photo.PhotoId);
         });
 

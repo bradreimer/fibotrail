@@ -246,4 +246,119 @@ public class TripCommandTests
         Assert.Equal(1, exitCode);
         Assert.Equal(trip.Name, Assert.Single(await TripsAsync(app)).Name);
     }
+
+    private const string StrayId = "00000000-0000-4000-8000-0000000fffff";
+
+    /// <summary>The Orlando trip of March 2027, and a photo with no position taken a month after it.</summary>
+    private static async Task<TestApp> StartWithStrayPhotoAsync()
+    {
+        var app = await TestApp.StartAsync();
+        app.Immich.Assets.AddRange(TripLibrary.AtHome());
+        app.Immich.Assets.AddRange(TripLibrary.Trip(new DateTime(2027, 3, 15, 9, 0, 0), 3, 30));
+        app.Immich.Assets.Add(TripLibrary.Asset(new DateTime(2027, 4, 20, 12, 0, 0), null, null, null, null, null) with { Id = Guid.Parse(StrayId) });
+        await TripLibrary.ScanAndConfirmHomeAsync(app);
+        return app;
+    }
+
+    private static string IdText(Trip trip) => trip.Id.ToString(System.Globalization.CultureInfo.InvariantCulture);
+
+    [Theory]
+    [InlineData(StrayId)]
+    [InlineData("https://immich.example.home/photos/" + StrayId)]
+    [InlineData("https://immich.example.home/photos/00000000-0000-4000-8000-0000000FFFFF?foo=bar")]
+    public async Task Pinning_a_photo_puts_it_in_the_trip_and_a_new_detection_run_keeps_it(string photo)
+    {
+        await using var app = await StartWithStrayPhotoAsync();
+        var trip = Assert.Single(await TripsAsync(app));
+        Assert.DoesNotContain(trip.Photos, link => link.PhotoId == StrayId);
+
+        var (exitCode, output) = await RunAsync(app, "pin", IdText(trip), photo);
+
+        Assert.Equal(0, exitCode);
+        Assert.Contains("Pinned photo " + StrayId + " to 2027-03-17", output, StringComparison.Ordinal);
+        Assert.Contains($"The photo is in trip {trip.Id}", output, StringComparison.Ordinal);
+        var after = Assert.Single(await TripsAsync(app));
+        Assert.Equal(trip.PhotoCount + 1, after.PhotoCount);
+        Assert.Contains(after.Photos, link => link.PhotoId == StrayId);
+
+        await app.WithServicesAsync(services => services.GetRequiredService<DetectionService>().RunAsync(CancellationToken.None));
+
+        Assert.Contains(Assert.Single(await TripsAsync(app)).Photos, link => link.PhotoId == StrayId);
+    }
+
+    [Fact]
+    public async Task Unpinning_a_photo_sends_it_back_to_where_its_own_time_puts_it()
+    {
+        await using var app = await StartWithStrayPhotoAsync();
+        var trip = Assert.Single(await TripsAsync(app));
+        await RunAsync(app, "pin", IdText(trip), StrayId);
+
+        var (exitCode, output) = await RunAsync(app, "unpin", StrayId);
+
+        Assert.Equal(0, exitCode);
+        Assert.Contains("Unpinned photo " + StrayId, output, StringComparison.Ordinal);
+        Assert.Contains("in no trip now", output, StringComparison.Ordinal);
+        Assert.Equal(trip.PhotoCount, Assert.Single(await TripsAsync(app)).PhotoCount);
+        Assert.Equal(0, await app.WithDbAsync(db => db.PinnedPhotos.CountAsync()));
+    }
+
+    [Fact]
+    public async Task Pinning_a_photo_again_moves_the_pin_and_leaves_one_row()
+    {
+        await using var app = await StartWithStrayPhotoAsync();
+        var trip = Assert.Single(await TripsAsync(app));
+
+        await RunAsync(app, "pin", IdText(trip), StrayId);
+        var (exitCode, _) = await RunAsync(app, "pin", IdText(trip), StrayId);
+
+        Assert.Equal(0, exitCode);
+        Assert.Equal(1, await app.WithDbAsync(db => db.PinnedPhotos.CountAsync()));
+    }
+
+    [Theory]
+    [InlineData("999", StrayId, "There is no trip 999")]
+    [InlineData("TRIP", "00000000-0000-4000-8000-00000000abcd", "Fibotrail has no photo")]
+    [InlineData("TRIP", "not-a-photo", "Immich asset ID")]
+    public async Task Pinning_that_cannot_be_done_exits_with_1_and_changes_nothing(string trip, string photo, string message)
+    {
+        await using var app = await StartWithStrayPhotoAsync();
+        var existing = Assert.Single(await TripsAsync(app));
+
+        var (exitCode, output) = await RunAsync(app, "pin", trip == "TRIP" ? IdText(existing) : trip, photo);
+
+        Assert.Equal(1, exitCode);
+        Assert.Contains(message, output, StringComparison.Ordinal);
+        Assert.Equal(0, await app.WithDbAsync(db => db.PinnedPhotos.CountAsync()));
+        Assert.Equal(existing.PhotoCount, Assert.Single(await TripsAsync(app)).PhotoCount);
+    }
+
+    [Theory]
+    [InlineData(StrayId)]
+    [InlineData("not-a-photo")]
+    public async Task Unpinning_a_photo_that_is_not_pinned_exits_with_1(string photo)
+    {
+        await using var app = await StartWithStrayPhotoAsync();
+
+        var (exitCode, _) = await RunAsync(app, "unpin", photo);
+
+        Assert.Equal(1, exitCode);
+    }
+
+    [Theory]
+    [InlineData("pin")]
+    [InlineData("pin", "1")]
+    [InlineData("pin", "abc", StrayId)]
+    [InlineData("pin", "1", StrayId, "extra")]
+    [InlineData("unpin")]
+    [InlineData("unpin", StrayId, "extra")]
+    public async Task Pin_and_unpin_with_the_wrong_arguments_exit_with_2(params string[] arguments)
+    {
+        await using var app = await StartWithStrayPhotoAsync();
+
+        var (exitCode, output) = await RunAsync(app, arguments);
+
+        Assert.Equal(2, exitCode);
+        Assert.Contains("fibotrail trip pin", output, StringComparison.Ordinal);
+        Assert.Equal(0, await app.WithDbAsync(db => db.PinnedPhotos.CountAsync()));
+    }
 }
