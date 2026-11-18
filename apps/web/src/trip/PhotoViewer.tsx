@@ -199,6 +199,7 @@ export function PhotoViewer({
             label={`Map of where this photo was taken${photo.place ? `, ${photo.place}` : ''}`}
             markers={markers}
             interactive={false}
+            detail="fine"
           />
         )}
         {photo.immichUrl && (

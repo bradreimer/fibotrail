@@ -176,6 +176,7 @@ export function TripScreen() {
                 markers={markers}
                 route={route}
                 onSelect={(selected) => setStop(Number(selected))}
+                detail="fine"
               />
               <button
                 type="button"

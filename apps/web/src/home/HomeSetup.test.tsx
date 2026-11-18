@@ -48,6 +48,8 @@ describe('the home location step', () => {
     ).toBeInTheDocument();
     const pin = await screen.findByRole('button', { name: `Home: ${vancouver.name}` });
     expect(pin).toHaveAttribute('data-position', '49.25,-123.1');
+    // The home location map keeps the 1:50 million outline (ADR-020).
+    expect(screen.getByRole('application')).toHaveAttribute('data-detail', 'coarse');
     expect(screen.getByRole('button', { name: 'Use this location' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Choose another' })).toBeInTheDocument();
     expect(server.sent('PUT', '/api/home')).toHaveLength(0);

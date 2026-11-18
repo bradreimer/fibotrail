@@ -154,6 +154,8 @@ describe('the Map screen', () => {
     renderMap();
     const worldMap = await screen.findByRole('application');
     const toggle = screen.getByRole('switch', { name: 'Show routes' });
+    // The world map keeps the 1:50 million outline. Only the trip page uses 1:10 million (ADR-020).
+    expect(worldMap).toHaveAttribute('data-detail', 'coarse');
 
     expect(toggle).not.toBeChecked();
     expect(JSON.parse(worldMap.dataset.routes!)).toEqual([]);

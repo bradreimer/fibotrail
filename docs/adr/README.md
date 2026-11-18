@@ -66,3 +66,4 @@ What becomes easier, what becomes harder, and what must stay true?
 | [ADR-017](ADR-017-a-manual-trip-is-a-decision-that-detection-builds-from-photos.md) | A manual trip is a decision that detection builds from photos | Accepted |
 | [ADR-018](ADR-018-an-mcp-server-answers-questions-with-coarse-read-only-data.md) | An MCP server answers questions with coarse, read-only data | Accepted |
 | [ADR-019](ADR-019-insights-replaces-the-stats-and-collections-tabs.md) | Insights replaces the Stats and Collections tabs | Accepted |
+| [ADR-020](ADR-020-trip-page-maps-use-the-1-10-million-outline.md) | Trip page maps use the 1:10 million outline | Accepted |

@@ -62,9 +62,13 @@ At 600 px and wider, the map sits beside the timeline in two columns.
 - Each stop has a 21 px Sunset Coral pin that shows its photo count.
 - Tapping a pin opens a sheet with that stop's photos and its place name.
 - A caption says "Photo route: lines connect the places where you took photos."
-- The base map is the bundled outline of
-  [ADR-009](../adr/ADR-009-a-bundled-natural-earth-base-map.md). A **Full screen** button opens
-  the map over the whole screen, inside the safe areas, and **Close map** returns.
+- The base map is the bundled Natural Earth country outline at 1:10 million scale, which shows
+  more islands and finer coasts than the 1:50 million outline of the other maps
+  ([ADR-020](../adr/ADR-020-trip-page-maps-use-the-1-10-million-outline.md), with the style of
+  [ADR-009](../adr/ADR-009-a-bundled-natural-earth-base-map.md)). The outline loads the first time
+  the page shows a map. Tracking issue: [#153](https://github.com/bradreimer/fibotrail/issues/153).
+- A **Full screen** button opens the map over the whole screen, inside the safe areas, and
+  **Close map** returns.
 - A pin stands above its place, so the gold dot of the first stop shows under its pin.
 - A text alternative, **Stops in order**, lists the stops with their place names and photo
   counts. Each entry opens the same sheet as its pin.
@@ -106,7 +110,8 @@ At 600 px and wider, the map sits beside the timeline in two columns.
 - A swipe left or right, or an arrow key, moves to the next or previous photo of the trip.
 - A swipe down, the **Close** button, or the Escape key returns to the page at the same position.
 - The viewer shows the date, the time, the place name, and a small map with a pin when the photo
-  has a position. The time is the local time where the photo was taken.
+  has a position. The time is the local time where the photo was taken. The map uses the same
+  1:10 million outline as the route map.
 - **Previous** and **Next** buttons do the same as a swipe, and the viewer shows "2 of 500".
 - **Open in Immich** opens the photo in Immich in a new tab. The address is
   `IMMICH_EXTERNAL_URL` followed by `/photos/` and the asset ID. The path was confirmed against
@@ -151,6 +156,10 @@ At 600 px and wider, the map sits beside the timeline in two columns.
 - After a rename and a rescan, the page shows the new name.
 - With the default base map, the browser's network log shows no request to a host other than
   Fibotrail.
+- A stop on Friday Harbor, San Juan Island, Washington (48.535, -123.015) is drawn on land on the
+  route map. On the 1:50 million outline it sits in the water.
+- The route map and the photo viewer map load the 1:10 million outline. The Map tab and the home
+  location step still load the 1:50 million outline.
 - The page passes the ADR-007 run-through on an iPhone.
 
 ## Open questions
