@@ -2,16 +2,18 @@
 
 ## Current milestone
 
-Version 0.2.0 was tagged and published on 2026-11-16: the Map (phase 4, countries only), hiding a
-photo from a trip's map, and the new navigation. The release workflow's second run succeeded:
-`ghcr.io/bradreimer/fibotrail:0.2.0` and `:latest` are the same image, for linux/amd64 and
-linux/arm64, and `:0.1.0` is unchanged. See [roadmap.md](roadmap.md) and
-[the release](https://github.com/bradreimer/fibotrail/releases/tag/v0.2.0).
+Version 0.3.0 is the release after 0.2.0 (55 commits). It adds Collections (Disney and Universal
+parks, with park days counted on the server), cities and pins on the Map, the Fibonacci spiral on
+the Stats screen, a back arrow on every detail page, and the command line tools `fibotrail
+rescan`, `places`, `join`, and `trip add`, with a **Rescan everything** button in Settings. The
+release workflow publishes `ghcr.io/bradreimer/fibotrail:0.3.0` and `:latest`. See
+[roadmap.md](roadmap.md) and [the releases](https://github.com/bradreimer/fibotrail/releases).
 
-**What wasn't recorded before the tag:** the maintainer checked the Map in a desktop browser, where
-it looked right after the antimeridian fix. The Map on a phone and an iPad, the top bar buttons and
-the sidebar, and the **Hide** checkbox on a device weren't reported. The ADR-007 table lines for
-version 0.1 and the per-line results of the accessibility checklist are also still unrecorded.
+**What wasn't recorded before the tag:** `./scripts/check.sh` and CI pass on the tagged commit. The
+items under Completed marked "checked in tests only" (`fibotrail join`, `fibotrail trip add`, and
+the **Rescan everything** button) haven't been run on the maintainer's library or a phone. The
+ADR-007 table lines for version 0.1 and the per-line results of the accessibility checklist are
+also still unrecorded.
 
 ## Completed
 
