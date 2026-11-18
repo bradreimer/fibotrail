@@ -28,6 +28,13 @@ checklist are also still unrecorded.
 
 ## Completed
 
+- [#157](https://github.com/bradreimer/fibotrail/issues/157) Search on the Trips screen
+  ([spec](specs/trip-library.md#search)). A search field above the grid finds trips by name,
+  destination, year, country, city, park, resort, or collection, so "disney" finds every trip to a
+  Disney park. `GET /api/trips` now returns `keywords` for each trip, worked out by the stats
+  library, so search agrees with the collections. Filtering happens on the device, and every word
+  of the search must match. The search stays in the address (`/trips?q=...`), so going back from a
+  trip page keeps it. Checked in tests only, not yet on a phone.
 - [#153](https://github.com/bradreimer/fibotrail/issues/153) Finer coasts and islands on the trip
   page maps. Decided in
   [ADR-020](adr/ADR-020-trip-page-maps-use-the-1-10-million-outline.md): the route map and the
@@ -67,6 +74,17 @@ checklist are also still unrecorded.
   turn the server on, the address, three ways to connect a client, and example questions that a test
   runs. Checked in tests only. The connection steps haven't been run against a real client yet
   (open question 1 of the spec), and the README privacy text now names the MCP exception.
+
+- [#156](https://github.com/bradreimer/fibotrail/issues/156) `fibotrail trip pin <id> <photo>` and
+  `unpin <photo>` repair a trip that detection left a photo out of. A pin is a decision that moves
+  the photo to a day of the trip before the rules run (ADR-021). Asked for on 2026-11-18 to add one
+  photo to trip 72. Checked in tests only, not yet run on the maintainer's library.
+
+- [#155](https://github.com/bradreimer/fibotrail/issues/155) `fibotrail trip rename <id> <name>`
+  renames any trip as a decision, so a rescan keeps the name. Found on the maintainer's library
+  on 2026-11-18: `fibotrail join` kept the name of one joined trip, such as "Ontario, July 2010"
+  for a trip that also covers Quebec, and the web rename needs a signed-in session. Checked in
+  tests only, not yet run on the maintainer's library.
 
 - [#144](https://github.com/bradreimer/fibotrail/issues/144) `fibotrail join` joins trips found
   from photos with no position (rules 3b and 4b), not only rule 3 trips. Found on the maintainer's

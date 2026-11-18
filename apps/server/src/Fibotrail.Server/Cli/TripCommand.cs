@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Text.RegularExpressions;
 using Fibotrail.Detection;
 using Fibotrail.Server.Data;
 using Fibotrail.Server.Trips;
@@ -8,10 +9,10 @@ namespace Fibotrail.Server.Cli;
 
 /// <summary>
 /// <c>fibotrail trip</c>. It adds a trip by hand, for photos that carry no position, so that detection
-/// can't find them. The trip is a decision, so a rescan keeps it. See docs/specs/trip-detection.md and
-/// ADR-017. It reads and writes Fibotrail's own database only.
+/// can't find them. The trip is a decision, so a rescan keeps it. It also renames any trip, and pins a
+/// photo to a trip, both as decisions. See docs/specs/trip-detection.md and ADR-017. It reads and writes Fibotrail's own database only.
 /// </summary>
-public static class TripCommand
+public static partial class TripCommand
 {
     public const string Name = "trip";
 
@@ -20,6 +21,9 @@ public static class TripCommand
           fibotrail trip add --start <day> --end <day> [options]   Add a trip. Days look like 2005-07-31.
           fibotrail trip list                                      Show the trips you added by hand.
           fibotrail trip remove <id>                               Remove one of them, and its decision.
+          fibotrail trip rename <id> <name>                        Rename any trip. The id is the trip's id in the app.
+          fibotrail trip pin <id> <photo>                          Put a photo in a trip. The photo is an Immich asset ID or photo page URL.
+          fibotrail trip unpin <photo>                             Let the photo go where its own time and position put it.
 
         Options for add:
           --name <text>      The trip's name. Without it, the name is the place and the month, such as "Berlin, May 2005".
@@ -49,8 +53,11 @@ public static class TripCommand
 
         var list = arguments is ["list"];
         var remove = arguments is ["remove", var idText] && int.TryParse(idText, NumberStyles.None, CultureInfo.InvariantCulture, out _);
+        var rename = arguments is ["rename", var renameId, _] && int.TryParse(renameId, NumberStyles.None, CultureInfo.InvariantCulture, out _);
+        var pin = arguments is ["pin", var pinId, _] && int.TryParse(pinId, NumberStyles.None, CultureInfo.InvariantCulture, out _);
+        var unpin = arguments is ["unpin", _];
         var add = arguments is ["add", ..] ? ParseAdd(arguments.Skip(1).ToList(), console) : null;
-        if (!list && !remove && add is null)
+        if (!list && !remove && !rename && !pin && !unpin && add is null)
         {
             // ParseAdd explains its own problem. Anything else gets the usage.
             if (arguments is not ["add", ..])
@@ -77,7 +84,114 @@ public static class TripCommand
             return await RemoveAsync(int.Parse(arguments[1], CultureInfo.InvariantCulture), console, db, detection, cancellationToken);
         }
 
+        if (rename)
+        {
+            return await RenameAsync(int.Parse(arguments[1], CultureInfo.InvariantCulture), arguments[2], console, db, time, cancellationToken);
+        }
+
+        if (pin)
+        {
+            return await PinAsync(int.Parse(arguments[1], CultureInfo.InvariantCulture), arguments[2], console, db, detection, time, cancellationToken);
+        }
+
+        if (unpin)
+        {
+            return await UnpinAsync(arguments[1], console, db, detection, cancellationToken);
+        }
+
         return await AddAsync(add!, console, db, detection, time, cancellationToken);
+    }
+
+    /// <summary>The asset ID in an Immich asset ID or a photo page URL, in lowercase. Null when there isn't one.</summary>
+    internal static string? PhotoId(string text)
+    {
+        var match = AssetId().Match(text);
+        return match.Success ? match.Value.ToLowerInvariant() : null;
+    }
+
+    [GeneratedRegex("[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}")]
+    private static partial Regex AssetId();
+
+    private static async Task<int> PinAsync(
+        int id, string photoText, IConsoleIo console, FibotrailDbContext db, DetectionService detection, TimeProvider time, CancellationToken cancellationToken)
+    {
+        var photoId = PhotoId(photoText);
+        if (photoId is null)
+        {
+            console.WriteLine("The photo needs to be an Immich asset ID, such as 5b2d32a9-e396-46aa-87fb-1d1ea88cc23e, or the URL of its photo page.");
+            return 1;
+        }
+
+        var trip = await db.Trips.AsNoTracking().FirstOrDefaultAsync(candidate => candidate.Id == id, cancellationToken);
+        if (trip is null)
+        {
+            console.WriteLine($"There is no trip {id}. The id is the one the app shows for the trip.");
+            return 1;
+        }
+
+        var photo = await db.Photos.AsNoTracking().FirstOrDefaultAsync(candidate => candidate.Id == photoId, cancellationToken);
+        if (photo is null)
+        {
+            console.WriteLine($"Fibotrail has no photo {photoId}. Scan your library, then run this command again.");
+            return 1;
+        }
+
+        var day = PinnedPhotos.DayIn(DateOnly.FromDateTime(photo.LocalTime), trip.StartDate, trip.EndDate);
+        var pinned = await db.PinnedPhotos.FindAsync([photoId], cancellationToken);
+        if (pinned is null)
+        {
+            db.PinnedPhotos.Add(new PinnedPhoto { PhotoId = photoId, Day = day, DecidedAt = time.GetUtcNow().UtcDateTime });
+        }
+        else
+        {
+            pinned.Day = day;
+            pinned.DecidedAt = time.GetUtcNow().UtcDateTime;
+        }
+
+        await db.SaveChangesAsync(cancellationToken);
+        console.WriteLine($"Pinned photo {photoId} to {day:yyyy-MM-dd}, a day of trip {id} (\"{trip.Name}\"). Its own day is {photo.LocalTime:yyyy-MM-dd}.");
+        return await ReportAsync(photoId, console, db, detection, cancellationToken);
+    }
+
+    private static async Task<int> UnpinAsync(string photoText, IConsoleIo console, FibotrailDbContext db, DetectionService detection, CancellationToken cancellationToken)
+    {
+        var photoId = PhotoId(photoText);
+        if (photoId is null)
+        {
+            console.WriteLine("The photo needs to be an Immich asset ID, such as 5b2d32a9-e396-46aa-87fb-1d1ea88cc23e, or the URL of its photo page.");
+            return 1;
+        }
+
+        var pinned = await db.PinnedPhotos.FindAsync([photoId], cancellationToken);
+        if (pinned is null)
+        {
+            console.WriteLine($"Photo {photoId} isn't pinned.");
+            return 1;
+        }
+
+        db.PinnedPhotos.Remove(pinned);
+        await db.SaveChangesAsync(cancellationToken);
+        console.WriteLine($"Unpinned photo {photoId}.");
+        return await ReportAsync(photoId, console, db, detection, cancellationToken);
+    }
+
+    /// <summary>Runs detection and says which trip holds the photo.</summary>
+    private static async Task<int> ReportAsync(string photoId, IConsoleIo console, FibotrailDbContext db, DetectionService detection, CancellationToken cancellationToken)
+    {
+        if (!(await detection.RunAsync(cancellationToken)).Ran)
+        {
+            console.WriteLine("Saved. Detection runs once you confirm a home location.");
+            return 0;
+        }
+
+        var holder = await db.TripPhotos.AsNoTracking()
+            .Where(link => link.PhotoId == photoId)
+            .Join(db.Trips.AsNoTracking(), link => link.TripId, trip => trip.Id, (_, trip) => trip)
+            .FirstOrDefaultAsync(cancellationToken);
+        console.WriteLine(holder is null
+            ? "The photo is in no trip now."
+            : $"The photo is in trip {holder.Id}, \"{holder.Name}\", {holder.StartDate:yyyy-MM-dd} to {holder.EndDate:yyyy-MM-dd}, {holder.PhotoCount.ToString("N0", CultureInfo.InvariantCulture)} photos.");
+        return 0;
     }
 
     /// <summary>Reads the options of <c>add</c>. Prints what is wrong and returns null when something is.</summary>
@@ -195,6 +309,24 @@ public static class TripCommand
             ? $"Removed trip {id}. Detection found {result.Trips} trips."
             : $"Removed trip {id}. Detection runs once you confirm a home location.");
         return 0;
+    }
+
+    private static async Task<int> RenameAsync(int id, string name, IConsoleIo console, FibotrailDbContext db, TimeProvider time, CancellationToken cancellationToken)
+    {
+        var before = await db.Trips.AsNoTracking().Where(trip => trip.Id == id).Select(trip => trip.Name).FirstOrDefaultAsync(cancellationToken);
+        var result = await new TripDecisions(db, time).SetDetailsAsync(id, name, null, cancellationToken);
+        switch (result.Outcome)
+        {
+            case DecisionOutcome.Done:
+                console.WriteLine($"Renamed trip {id} from \"{before}\" to \"{name.Trim()}\".");
+                return 0;
+            case DecisionOutcome.NotFound:
+                console.WriteLine($"There is no trip {id}. The id is the one the app shows for the trip.");
+                return 1;
+            default:
+                console.WriteLine(result.Problem!);
+                return 1;
+        }
     }
 
     private static async Task<int> AddAsync(

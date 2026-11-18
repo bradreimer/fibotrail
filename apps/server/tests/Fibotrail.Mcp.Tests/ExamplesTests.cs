@@ -22,7 +22,7 @@ public class ExamplesTests
 
     private static JsonElement Load() => JsonDocument.Parse(File.ReadAllText(ExamplesPath())).RootElement.Clone();
 
-    public static TheoryData<string> ExampleIds() => [.. Load().GetProperty("examples").EnumerateArray().Select(example => example.GetProperty("id").GetString()!)];
+    public static TheoryData<string> ExampleIds() => new(Load().GetProperty("examples").EnumerateArray().Select(example => example.GetProperty("id").GetString()!));
 
     [Theory]
     [MemberData(nameof(ExampleIds))]

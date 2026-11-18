@@ -46,7 +46,9 @@ public sealed partial class DetectionService(FibotrailDbContext db, HomeLocation
             return new DetectionResult(false, 0, 0);
         }
 
-        var photos = await HomeLocation.LoadPhotosAsync(db, placedOnly: false, cancellationToken);
+        // Photos you pinned to a trip count as taken on the day you pinned. The decision table is read, never changed.
+        var pins = await db.PinnedPhotos.AsNoTracking().ToDictionaryAsync(pin => pin.PhotoId, pin => pin.Day, StringComparer.Ordinal, cancellationToken);
+        var photos = PinnedPhotos.Apply(await HomeLocation.LoadPhotosAsync(db, placedOnly: false, cancellationToken), pins);
 
         // Photos you put on the way stay in their trips and add no stop. The decision table is read, never changed.
         var onTheWay = (await db.OnTheWayPhotos.AsNoTracking().Select(photo => photo.PhotoId).ToListAsync(cancellationToken)).ToHashSet(StringComparer.Ordinal);

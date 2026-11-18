@@ -233,6 +233,24 @@ is no web screen for it.
   home location is confirmed, it saves the trip and says detection runs once you confirm one.
 - `fibotrail trip list` shows each trip with its ID. `fibotrail trip remove <id>` deletes the trip
   and its decision, and runs detection. To change a trip, remove it and add it again.
+- `fibotrail trip rename <id> <name>` renames any trip, detected or added by hand, as the web
+  rename does. `<id>` is the trip ID the app shows, and the one `fibotrail join` prints. The name is
+  a decision, so a rescan keeps it. It prints the old and new names and exits 0. An unknown ID, or a
+  name that is empty or over 100 characters, prints the reason and exits 1 with no change. A
+  missing or non-numeric ID, a missing name, or extra arguments print the usage and exit 2. Tracking
+  issue: [#155](https://github.com/bradreimer/fibotrail/issues/155).
+- `fibotrail trip pin <id> <photo>` puts one photo in a trip, to repair a trip that detection left
+  a photo out of, such as one with a wrong time, or with no position on a light day. `<photo>` is an
+  Immich asset ID or the URL of its photo page, and `<id>` is the trip ID the app shows. It stores
+  a pin: the day of the trip nearest the photo's own day ([ADR-021](../adr/ADR-021-a-pinned-photo-is-a-decision-that-detection-reads-as-a-day.md)).
+  On every run, before rule 1, detection reads the photo as taken on that day, with its own time of
+  day and position, so the rules then count it in the trip, its days, and its stops. A rescan keeps
+  the pin, and the photo row and Immich are not changed. The command runs detection and prints the
+  trip that now holds the photo, or says it is in no trip when the day is in none. Pinning a pinned
+  photo again moves the pin. `fibotrail trip unpin <photo>` deletes the pin. An unknown trip, a
+  photo that isn't scanned or isn't an ID or URL, or an unpinned photo given to `unpin`, prints the
+  reason and exits 1 with no change. A missing, extra, or non-numeric argument prints the usage and
+  exits 2. Tracking issue: [#156](https://github.com/bradreimer/fibotrail/issues/156).
 - It refuses, with exit code 1 and no change, when no photo was taken in the days, or when an
   added trip or another manual trip shares a day. A missing or badly formed option, `--lat`
   without `--lon`, a position out of range, or an end before the start prints a message and exits

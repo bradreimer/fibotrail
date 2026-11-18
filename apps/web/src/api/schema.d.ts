@@ -726,6 +726,7 @@ export interface components {
             days: number;
             place: null | string;
             coverPhotoId: string;
+            keywords: string[];
         };
     };
     responses: never;

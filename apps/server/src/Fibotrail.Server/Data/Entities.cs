@@ -283,6 +283,21 @@ public sealed class OnTheWayPhoto
     public DateTime DecidedAt { get; set; }
 }
 
+/// <summary>
+/// A photo you pinned to a trip, to repair it. The row names a day inside the trip, and detection
+/// reads the photo as taken on that day, with its own time of day and position. The row is a decision,
+/// keyed by the Immich asset ID. Detection reads this table and never changes it. See ADR-021 and ADR-002.
+/// </summary>
+public sealed class PinnedPhoto
+{
+    public required string PhotoId { get; set; }
+
+    /// <summary>The day the photo counts as taken. It is a day of the trip you pinned it to.</summary>
+    public DateOnly Day { get; set; }
+
+    public DateTime DecidedAt { get; set; }
+}
+
 /// <summary>One setting, such as the home location.</summary>
 public sealed class Setting
 {
