@@ -31,8 +31,8 @@ function Icon({ children }: { children: ReactNode }) {
 }
 
 /**
- * The destinations, per ADR-007. A destination is listed only when its screen exists, so the tab
- * bar holds Trips and Map until Collections and Stats ship.
+ * The destinations, per ADR-007. The tab bar holds Trips, Map, and Insights. Insights replaced the
+ * Collections and Stats tabs, per ADR-019.
  */
 export const DESTINATIONS: readonly Destination[] = [
   {
@@ -58,21 +58,8 @@ export const DESTINATIONS: readonly Destination[] = [
     ),
   },
   {
-    path: '/collections',
-    label: 'Collections',
-    placement: 'main',
-    icon: (
-      <Icon>
-        <rect x="3" y="3" width="8" height="8" rx="1.5" />
-        <rect x="13" y="3" width="8" height="8" rx="1.5" />
-        <rect x="3" y="13" width="8" height="8" rx="1.5" />
-        <path d="M17 13v8M13 17h8" />
-      </Icon>
-    ),
-  },
-  {
-    path: '/stats',
-    label: 'Stats',
+    path: '/insights',
+    label: 'Insights',
     placement: 'main',
     icon: (
       <Icon>

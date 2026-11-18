@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 
 import { useApi } from '../api/useApi';
-import { type CollectionPlace, PlaceSheet } from '../collections/PlaceSheet';
-import { ProgressRing } from '../stats/ProgressRing';
+import { type CollectionPlace, PlaceSheet } from '../insights/PlaceSheet';
+import { ProgressRing } from '../insights/ProgressRing';
 import { BackLink } from '../shell/BackLink';
 import { EmptyState } from '../states/EmptyState';
 import { ErrorState } from '../states/ErrorState';
@@ -46,8 +46,8 @@ export function StampBookScreen() {
         title="No such collection"
         message="That collection doesn't exist."
         action={
-          <Link className="button" to="/collections">
-            Back to Collections
+          <Link className="button" to="/insights">
+            Back to Insights
           </Link>
         }
       />
@@ -61,10 +61,10 @@ export function StampBookScreen() {
   const groups = [...new Set(data.places.map((place) => place.group))];
   const sheet = data.places.find((place) => place.id === open) ?? null;
   return (
-    <div className="stats-screen">
-      <BackLink to={`/collections/${encodeURIComponent(id)}`}>{data.summary.name}</BackLink>
-      <h2 className="stats-page__title">Stamp book</h2>
-      <p className="stats-page__lead stamp-book__summary">
+    <div className="insights-page">
+      <BackLink to={`/insights/${encodeURIComponent(id)}`}>{data.summary.name}</BackLink>
+      <h2 className="insights-page__title">Stamp book</h2>
+      <p className="insights-page__lead stamp-book__summary">
         <ProgressRing visited={data.summary.visited} total={data.summary.total} />
         <span>
           {data.summary.visited} / {data.summary.total} visited ·{' '}
@@ -74,7 +74,7 @@ export function StampBookScreen() {
       {data.summary.trips === 0 && <p>Add a trip to start your stamp book.</p>}
       {groups.map((group) => (
         <section key={group} aria-label={group || 'Parks'}>
-          <h3 className="stats-view__title">{group}</h3>
+          <h3 className="insights-section__title">{group}</h3>
           <ul className="stamps">
             {data.places
               .filter((place) => place.group === group)
@@ -119,7 +119,7 @@ export function StampBookScreen() {
           </ul>
         </section>
       ))}
-      <p className="stats-page__note">{data.attribution}</p>
+      <p className="insights-page__note">{data.attribution}</p>
       {sheet && <PlaceSheet place={sheet} onClose={() => setOpen(null)} />}
     </div>
   );

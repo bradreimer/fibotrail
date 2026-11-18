@@ -130,7 +130,7 @@ Each one is recorded as an ADR when it's made. Three are decided:
 - [ ] A fresh install connects to Immich, scans, and shows trip suggestions without manual setup
       beyond the API key.
 - [ ] Adding or ignoring a suggestion works on phone and iPad, and the choice survives a rescan.
-- [ ] The trip page, life map, Disney collection, and Stats screen all work with real data.
+- [ ] The trip page, life map, and Insights screen, with the Disney collection, all work with real data.
 - [ ] The app passes the accessibility checks in the design and branding document.
 - [ ] The README explains installation, API key permissions, and backup in under five minutes of
       reading.

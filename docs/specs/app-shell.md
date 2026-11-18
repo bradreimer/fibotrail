@@ -25,7 +25,7 @@ behave like an app, so that browsing my trips feels as comfortable as a native i
 ## Non-goals
 
 - The content of the Inbox, Trips, and trip page screens. Each has its own spec.
-- The Map, Collections, and Stats screens.
+- The Map and Insights screens.
 - Signature animations: the route that draws itself and numbers that count up.
 - Offline use. The service worker caches the app shell, not your trips or photos.
 
@@ -70,9 +70,11 @@ behave like an app, so that browsing my trips feels as comfortable as a native i
   Inbox and Settings move to the top bar. The [life map spec](life-map.md) says what changes in
   the first release: the tab bar holds Trips and Map until the other two screens exist, Inbox and
   Settings are icon buttons in the top bar under 600 px, and the sidebar from 600 px holds all four.
-  Collections ([collections.md](collections.md)) is the third tab and the Stats screen
-  ([stats-screen.md](stats-screen.md)) the fourth, so the tab bar holds the four destinations of the
-  design document, and the sidebar holds those four plus Inbox, MCP, and Settings. The MCP screen
+  Collections ([collections.md](collections.md)) became the third tab and the Stats screen the
+  fourth. Since [#151](https://github.com/bradreimer/fibotrail/issues/151), one Insights tab
+  ([insights.md](insights.md)) replaces both, per
+  [ADR-019](../adr/ADR-019-insights-replaces-the-stats-and-collections-tabs.md). The tab bar holds
+  Trips, Map, and Insights, and the sidebar holds those three plus Inbox, MCP, and Settings. The MCP screen
   ([mcp-server.md](mcp-server.md#the-mcp-screen)) is a third tool. It is an icon button in the top
   bar under 600 px, between Inbox and Settings, and an item in the sidebar from 600 px. Its address
   is `/mcp-setup`, because `/mcp` is the server's own route.

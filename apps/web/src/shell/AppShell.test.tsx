@@ -56,10 +56,10 @@ describe('navigation by width', () => {
 describe('the app shell', () => {
   beforeEach(() => installMatchMedia(390));
 
-  it('has Trips and Map in the tab bar, and Inbox, MCP, and Settings as icon buttons in the top bar', () => {
+  it('has Trips, Map, and Insights in the tab bar, and Inbox, MCP, and Settings as icon buttons in the top bar', () => {
     renderApp();
     const tabs = within(screen.getByRole('navigation', { name: 'Main' })).getAllByRole('link');
-    expect(tabs.map((link) => link.textContent)).toEqual(['Trips', 'Map', 'Collections', 'Stats']);
+    expect(tabs.map((link) => link.textContent)).toEqual(['Trips', 'Map', 'Insights']);
     tabs.forEach((link) => expect(link.querySelector('svg')).not.toBeNull());
 
     const tools = within(
@@ -109,28 +109,24 @@ describe('the Inbox and Settings by width', () => {
   it.each([
     [600, 'rail'],
     [1024, 'sidebar'],
-  ])(
-    'at %i px the sidebar holds all four destinations and the top bar has no tools',
-    (width, mode) => {
-      installMatchMedia(width);
-      const { container } = renderApp();
+  ])('at %i px the sidebar holds every destination and the top bar has no tools', (width, mode) => {
+    installMatchMedia(width);
+    const { container } = renderApp();
 
-      expect(container.querySelector('.app')).toHaveAttribute('data-nav', mode);
-      const items = within(screen.getByRole('navigation', { name: 'Main' })).getAllByRole('link');
-      expect(items.map((link) => link.textContent)).toEqual([
-        'Trips',
-        'Map',
-        'Collections',
-        'Stats',
-        'Inbox',
-        'MCP',
-        'Settings',
-      ]);
-      expect(
-        screen.queryByRole('navigation', { name: 'Inbox, MCP, and settings' }),
-      ).not.toBeInTheDocument();
-    },
-  );
+    expect(container.querySelector('.app')).toHaveAttribute('data-nav', mode);
+    const items = within(screen.getByRole('navigation', { name: 'Main' })).getAllByRole('link');
+    expect(items.map((link) => link.textContent)).toEqual([
+      'Trips',
+      'Map',
+      'Insights',
+      'Inbox',
+      'MCP',
+      'Settings',
+    ]);
+    expect(
+      screen.queryByRole('navigation', { name: 'Inbox, MCP, and settings' }),
+    ).not.toBeInTheDocument();
+  });
 
   it('carries the Inbox badge to whichever place the Inbox is in', async () => {
     fakeServer({ 'GET /api/inbox/count': { count: 3 } });

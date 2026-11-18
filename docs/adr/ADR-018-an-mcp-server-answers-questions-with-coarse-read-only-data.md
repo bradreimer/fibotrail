@@ -21,7 +21,7 @@ what its tools return.
 
 What exists today:
 
-- The [stats library](../specs/stats-screen.md#the-stats-library) holds added trips, their days, and
+- The [stats library](../specs/insights.md#the-stats-library) holds added trips, their days, and
   the country of each day. It is read-only and built per request
   ([ADR-014](ADR-014-stats-views-are-self-contained-modules.md)).
 - Collections count trips and days per park from stored photo positions

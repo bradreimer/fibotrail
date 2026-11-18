@@ -17,7 +17,7 @@ interface ParksSheetProps {
 
 /**
  * The sheet for marking the parks you visited on a trip. A trip from before cameras recorded a
- * position has no photo in a park, so you tick the parks yourself. See docs/specs/collections.md.
+ * position has no photo in a park, so you tick the parks yourself. See docs/specs/insights.md.
  */
 export function ParksSheet({
   fromPhotos,

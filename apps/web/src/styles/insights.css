@@ -1,4 +1,64 @@
-/* Collections: the list of cards, and the stamp book. */
+/*
+ * The Insights screens: the totals, the collection cards, a collection, a resort, and the stamp
+ * book. See docs/specs/insights.md.
+ */
+.insights-page {
+  display: grid;
+  /*
+   * One column that can shrink to the screen. A bare grid column is auto-sized, so it grows to fit
+   * its widest child and pushes past a phone's width.
+   */
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--fibo-space-5);
+}
+
+.insights-page__title {
+  margin: 0;
+  font-family: var(--fibo-font-display);
+  font-size: var(--fibo-text-h2);
+}
+
+.insights-page__lead {
+  margin: 0;
+  color: var(--fibo-ink-muted);
+}
+
+.insights-page__note {
+  color: var(--fibo-ink-muted);
+}
+
+.insights-section {
+  display: grid;
+  gap: var(--fibo-space-3);
+}
+
+.insights-section__title {
+  margin: 0;
+  font-family: var(--fibo-font-display);
+  font-size: var(--fibo-text-h3);
+}
+
+/* The progress ring of the stamp book. */
+.ring {
+  width: calc(var(--fibo-space-7) * 1.25);
+  height: calc(var(--fibo-space-7) * 1.25);
+}
+
+.ring__track {
+  stroke: var(--fibo-mist);
+}
+
+.ring__fill {
+  stroke: var(--fibo-teal);
+}
+
+.ring__text {
+  fill: var(--fibo-ink);
+  font-size: var(--fibo-text-caption);
+  font-weight: 700;
+}
+
+/* The collection cards, and the stamp book. */
 .collections {
   display: grid;
   gap: var(--fibo-space-3);

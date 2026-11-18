@@ -10,7 +10,7 @@ type Detail = components['schemas']['CollectionDetail'];
 
 /** One card for each resort, most trips first and then by name, with the note about shared trips. */
 export function ResortList({ id, detail }: { id: string; detail: Detail }) {
-  const base = `/collections/${encodeURIComponent(id)}`;
+  const base = `/insights/${encodeURIComponent(id)}`;
   const resorts = [...detail.resorts].sort(
     (a, b) => b.trips - a.trips || a.name.localeCompare(b.name),
   );
@@ -30,7 +30,7 @@ export function ResortList({ id, detail }: { id: string; detail: Detail }) {
         ))}
       </ul>
       {resorts.length > 1 && (
-        <p className="stats-page__note">A trip to two resorts counts once for each.</p>
+        <p className="insights-page__note">A trip to two resorts counts once for each.</p>
       )}
     </>
   );
@@ -65,13 +65,13 @@ export function CollectionBody({ id }: { id: string }) {
   const { summary } = detail;
   return (
     <div className="collection-body">
-      <p className="stats-page__lead">
+      <p className="insights-page__lead">
         {summary.visited} / {summary.total} parks · {countOf(summary.totalDays, 'day')} ·{' '}
         {countOf(summary.trips, 'trip')}
       </p>
       <ResortList id={id} detail={detail} />
       <p>
-        <Link className="button" to={`/collections/${encodeURIComponent(id)}/stamps`}>
+        <Link className="button" to={`/insights/${encodeURIComponent(id)}/stamps`}>
           Stamp book
         </Link>
       </p>

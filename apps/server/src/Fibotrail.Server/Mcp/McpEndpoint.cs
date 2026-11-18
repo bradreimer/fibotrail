@@ -137,12 +137,12 @@ public static partial class McpEndpoint
         return builder.ToString();
     }
 
-    /// <summary>Builds what the tools read, from the same code the Stats and Collections screens use.</summary>
+    /// <summary>Builds what the tools read, from the same code the Insights screens use.</summary>
     public static async Task<McpData> LoadAsync(IServiceProvider services, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(services);
         var catalog = services.GetRequiredService<CollectionCatalog>();
-        var library = await StatsRoutes.LoadAsync(
+        var library = await StatsLibraryLoader.LoadAsync(
             services.GetRequiredService<FibotrailDbContext>(),
             services.GetRequiredService<CountryFinder>(),
             services.GetRequiredService<CountryOutlinesCache>(),
