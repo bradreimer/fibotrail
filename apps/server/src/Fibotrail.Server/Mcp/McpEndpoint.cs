@@ -95,7 +95,8 @@ public static partial class McpEndpoint
             LogCall(logger, tool, reply.ToolFailed ? "error" : "ok", milliseconds);
             if (reply.ToolFailed)
             {
-                LogFailedArguments(logger, tool, string.Join(", ", reply.ArgumentNames ?? []));
+                IReadOnlyList<string> names = reply.ArgumentNames ?? [];
+                LogFailedArguments(logger, tool, names);
             }
         }
 
@@ -159,7 +160,7 @@ public static partial class McpEndpoint
     private static partial void LogCall(ILogger logger, string tool, string status, long milliseconds);
 
     [LoggerMessage(Level = LogLevel.Information, Message = "MCP tool {Tool} failed. Argument names: {Names}.")]
-    private static partial void LogFailedArguments(ILogger logger, string tool, string names);
+    private static partial void LogFailedArguments(ILogger logger, string tool, IReadOnlyList<string> names);
 }
 
 /// <summary>
