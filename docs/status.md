@@ -58,6 +58,12 @@ checklist are also still unrecorded.
   runs. Checked in tests only. The connection steps haven't been run against a real client yet
   (open question 1 of the spec), and the README privacy text now names the MCP exception.
 
+- [#155](https://github.com/bradreimer/fibotrail/issues/155) `fibotrail trip rename <id> <name>`
+  renames any trip as a decision, so a rescan keeps the name. Found on the maintainer's library
+  on 2026-11-18: `fibotrail join` kept the name of one joined trip, such as "Ontario, July 2010"
+  for a trip that also covers Quebec, and the web rename needs a signed-in session. Checked in
+  tests only, not yet run on the maintainer's library.
+
 - [#144](https://github.com/bradreimer/fibotrail/issues/144) `fibotrail join` joins trips found
   from photos with no position (rules 3b and 4b), not only rule 3 trips. Found on the maintainer's
   library: trips 2 and 45, one Oregon Coast trip in July 2008, were a trip with GPS and a trip of
