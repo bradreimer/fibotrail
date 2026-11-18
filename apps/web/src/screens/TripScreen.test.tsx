@@ -155,6 +155,8 @@ describe('the trip page', () => {
     fakeServer({ 'GET /api/trips/7': trip });
     renderTrip();
     const map = await screen.findByRole('application', { name: /Map of the route/ });
+    // The trip page draws on the 1:10 million outline (ADR-020).
+    expect(map).toHaveAttribute('data-detail', 'fine');
 
     const pins = within(map)
       .getAllByRole('button')
@@ -279,7 +281,7 @@ describe('the photo viewer', () => {
     expect(within(viewer).getByText('Sanford')).toBeInTheDocument();
     expect(
       within(viewer).getByRole('application', { name: /Map of where this photo was taken/ }),
-    ).toBeInTheDocument();
+    ).toHaveAttribute('data-detail', 'fine');
     const link = within(viewer).getByRole('link', { name: 'Open in Immich' });
     expect(link).toHaveAttribute('href', 'https://photos.example.com/photos/b1');
     expect(link).toHaveAttribute('target', '_blank');

@@ -24,6 +24,9 @@ What is known, measured on 2026-11-18 from `world-atlas@2.0.2`:
 | 1:50 million | 241 | 1,616 | 756 KB | 230 KB |
 | 1:10 million | 255 | 4,253 | 3,661 KB | 921 KB |
 
+The gzipped sizes are at level 9. The Vite build reports them at its default level: 243 KB and
+986 KB. What the browser downloads depends on how the server compresses the file.
+
 A point-in-polygon test on 15 island and coast places found 3 in the water at 1:50 million that are
 on land at 1:10 million:
 

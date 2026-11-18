@@ -19,11 +19,13 @@ export default function MapViewMock({
   draggableId,
   onDrag,
   onSelect,
+  detail = 'coarse',
 }: MapViewProps) {
   return (
     <div
       role="application"
       aria-label={label}
+      data-detail={detail}
       data-route={JSON.stringify(route)}
       data-routes={routes ? JSON.stringify(routes) : undefined}
       data-visited={visited ? JSON.stringify(visited) : undefined}

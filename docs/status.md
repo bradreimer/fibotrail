@@ -342,7 +342,10 @@ checklist are also still unrecorded.
   [ADR-020](adr/ADR-020-trip-page-maps-use-the-1-10-million-outline.md): the route map and the
   photo viewer map use the Natural Earth 1:10 million outline (3,661 KB, 921 KB gzipped), embedded
   in the image and loaded on first use. The Map tab, the home location step, and the server keep
-  1:50 million. The [spec](specs/trip-page.md#route-map) is updated. The code isn't written yet.
+  1:50 million. The [spec](specs/trip-page.md#route-map) is updated. The maps pick the outline
+  with a `detail` setting, and each outline file is fetched once, when a map first asks for it.
+  Checked in tests and the build only. Not yet run in a browser or on an iPhone, so pan and zoom
+  with 4,253 polygons and the Friday Harbor check are still open.
 
 ## Next
 

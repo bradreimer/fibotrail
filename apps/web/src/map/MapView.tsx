@@ -3,13 +3,10 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 import { Map as MapLibreMap, Marker, setWorkerUrl, type GeoJSONSource } from 'maplibre-gl';
 import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?url';
 import { useEffect, useRef } from 'react';
-import { feature } from 'topojson-client';
-import type { Topology } from 'topojson-specification';
-import countriesUrl from 'world-atlas/countries-50m.json?url';
 
 import regionsUrl from './regions.json?url';
 
-import { cutGeometry } from './antimeridian.mjs';
+import { loadCountries, type OutlineDetail } from './countryOutlines';
 import {
   CITY_LAYER,
   CITY_SOURCE,
@@ -75,32 +72,12 @@ export interface MapViewProps {
   onSelect?: (id: string) => void;
   /** False for a small preview that doesn't pan or zoom. */
   interactive?: boolean;
+  /** How detailed the country outline is. `fine` is for the trip page (ADR-020). */
+  detail?: OutlineDetail;
 }
 
 /** The zoom for a single point: about 2,000 km across on a phone. */
 const SINGLE_POINT_ZOOM = 4;
-
-let countries: Promise<GeoJSON.FeatureCollection> | null = null;
-
-/** Loads the country outlines once. The file is part of the app, so no other host is asked. */
-function loadCountries(): Promise<GeoJSON.FeatureCollection> {
-  countries ??= fetch(countriesUrl)
-    .then((response) => response.json() as Promise<Topology>)
-    .then((topology) => {
-      const land = feature(
-        topology,
-        topology.objects.countries!,
-      ) as unknown as GeoJSON.FeatureCollection;
-      // The key lets the visited layer pick outlines by the same ID the server uses.
-      for (const item of land.features) {
-        item.properties = { ...item.properties, key: String(item.id ?? item.properties?.name) };
-        // Russia and Fiji cross the antimeridian. Uncut, their outlines cover the sea across the map.
-        item.geometry = cutGeometry(item.geometry as GeoJSON.Polygon | GeoJSON.MultiPolygon);
-      }
-      return land;
-    });
-  return countries;
-}
 
 let regions: Promise<GeoJSON.FeatureCollection> | null = null;
 
@@ -151,6 +128,7 @@ export default function MapView({
   onDrag,
   onSelect,
   interactive = true,
+  detail = 'coarse',
 }: MapViewProps) {
   const container = useRef<HTMLDivElement>(null);
   const map = useRef<MapLibreMap | null>(null);
@@ -181,7 +159,7 @@ export default function MapView({
     map.current = created;
 
     created.on('load', () => {
-      void loadCountries().then((land) => {
+      void loadCountries(detail).then((land) => {
         (created.getSource(LAND_SOURCE) as GeoJSONSource | undefined)?.setData(land);
       });
       if (wantsRegions) {
@@ -252,7 +230,7 @@ export default function MapView({
       created.remove();
       map.current = null;
     };
-  }, [interactive, wantsRegions]);
+  }, [interactive, wantsRegions, detail]);
 
   // Fill the visited countries. A detail country fills whole only until its regions are drawn.
   useEffect(() => {
