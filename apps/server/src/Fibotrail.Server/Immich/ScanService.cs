@@ -226,6 +226,7 @@ public sealed partial class ScanService(
             photo.ImmichUpdatedAt = asset.UpdatedAt;
             photo.IsVideo = asset.IsVideo;
             photo.DurationMs = asset.IsVideo ? asset.DurationMs : null;
+            photo.Thumbhash = asset.Thumbhash;
         }
     }
 

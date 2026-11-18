@@ -2,6 +2,7 @@ using Fibotrail.Immich;
 using Fibotrail.Server.Data;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Net.Http.Headers;
 
 namespace Fibotrail.Server.Immich;
 
@@ -94,7 +95,7 @@ public static class ImmichRoutes
         return new ScanStatus(state, run.PhotosSeen, run.Total, run.Message, finishedAt, photos);
     }
 
-    private static async Task<Results<FileContentHttpResult, NotFound, ProblemHttpResult>> ImageAsync(
+    private static async Task<Results<FileContentHttpResult, StatusCodeHttpResult, NotFound, ProblemHttpResult>> ImageAsync(
         string id,
         ImmichImageSize size,
         ThumbnailStore store,
@@ -102,20 +103,41 @@ public static class ImmichRoutes
     {
         try
         {
-            var image = await store.GetAsync(id, size, context.RequestAborted);
+            var key = await store.FindAsync(id, context.RequestAborted);
+            if (key is null)
+            {
+                return TypedResults.NotFound();
+            }
+
+            // The browser keeps the image but asks again each time. While the photo is unchanged, the
+            // answer is a 304 with no body. After a scan reads a change, such as a rotation, the ETag
+            // differs and the new image is sent. "private" keeps it out of shared caches.
+            var etag = new EntityTagHeaderValue($"\"{key.Version}\"");
+            if (context.Request.GetTypedHeaders().IfNoneMatch.Any(match => match.Tag == etag.Tag))
+            {
+                SetCacheHeaders(context, etag);
+                return TypedResults.StatusCode(StatusCodes.Status304NotModified);
+            }
+
+            var image = await store.GetAsync(key, size, context.RequestAborted);
             if (image is null)
             {
                 return TypedResults.NotFound();
             }
 
-            // A photo's image doesn't change, so the browser may keep it. "private" keeps it out of shared caches.
-            context.Response.Headers.CacheControl = "private, max-age=604800";
+            SetCacheHeaders(context, etag);
             return TypedResults.File(image.Bytes, image.ContentType);
         }
         catch (ImmichException)
         {
             return TypedResults.Problem(ImmichConnection.CantReachMessage, statusCode: StatusCodes.Status502BadGateway);
         }
+    }
+
+    private static void SetCacheHeaders(HttpContext context, EntityTagHeaderValue etag)
+    {
+        context.Response.Headers.CacheControl = "private, no-cache";
+        context.Response.Headers.ETag = etag.ToString();
     }
 }
 

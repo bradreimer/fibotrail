@@ -153,6 +153,9 @@ namespace Fibotrail.Server.Data.Migrations
                     b.Property<string>("State")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Thumbhash")
+                        .HasColumnType("TEXT");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ImmichUpdatedAt");

@@ -28,6 +28,12 @@ checklist are also still unrecorded.
 
 ## Completed
 
+- [#161](https://github.com/bradreimer/fibotrail/issues/161) A photo rotated in Immich now shows
+  rotated after a rescan ([spec](specs/immich-scanning.md#thumbnail-proxy)). The scan stores
+  Immich's `thumbhash` for each photo. The image cache and the browser's `ETag` follow it, so a
+  changed photo is fetched again, and the proxy asks Immich for the edited image. The first image
+  requests after the upgrade fetch from Immich again, once, because the cache file names changed.
+  Checked in tests only, not yet against a photo rotated in the maintainer's Immich.
 - [#157](https://github.com/bradreimer/fibotrail/issues/157) Search on the Trips screen
   ([spec](specs/trip-library.md#search)). A search field above the grid finds trips by name,
   destination, year, country, city, park, resort, or collection, so "disney" finds every trip to a
