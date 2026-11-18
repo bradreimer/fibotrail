@@ -130,6 +130,5 @@ Client (Claude app)  ──▶  /mcp  ──▶  tools  ──▶  stats library
   coarse data only, never photos or coordinates.
 - Answers depend on the model's reading of the tool results. Tool descriptions must state the
   rules, such as "days are park days, not calendar days of the trip", so the model doesn't guess.
-- Before code: a spec, `docs/specs/mcp-server.md`, with the full tool list and the
-  tracking issue, and a project-organization update for the new C# project, per the
-  [workflow](../development-workflow.md). Neither exists yet.
+- The spec is [mcp-server.md](../specs/mcp-server.md), tracked by
+  [#143](https://github.com/bradreimer/fibotrail/issues/143). It holds the full tool list.
