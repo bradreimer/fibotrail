@@ -74,7 +74,7 @@ each question.
   token of any length.
 - The token never appears in a log, an error, a result, or a response to the browser.
 - `.env.example` lists `MCP_TOKEN` with an empty value.
-- Requests over 60 a minute return 429. See open question 3.
+- Requests over 60 a minute return 429. See open question 2.
 - The Settings screen shows one line, "MCP server: on" or "MCP server: off". It never shows the
   token.
 
@@ -208,14 +208,11 @@ reads, for example:
 
 ## Open questions
 
-1. **Are country and park names acceptable to send to a cloud model?** This is open question 1 of
-   ADR-018. Until you answer it, ADR-018 stays Proposed and this spec isn't built. If the answer
-   is no, version 1 targets local models only.
-2. **Which clients can reach a home server?** Not known yet. A cloud client has to reach `/mcp`
+1. **Which clients can reach a home server?** Not known yet. A cloud client has to reach `/mcp`
    over HTTPS through your reverse proxy, and a desktop client may need a local bridge. Check one
    client with a real setup before the tool list is final, and record the steps in a knowledge
    document.
-3. **Is 60 requests a minute the right limit?** It is a guess. A model can call several tools to
+2. **Is 60 requests a minute the right limit?** It is a guess. A model can call several tools to
    answer one question. Measure on real use and change the number here.
-4. **Should `list_trips` accept a text filter?** Trip names are excluded, so there is nothing to
+3. **Should `list_trips` accept a text filter?** Trip names are excluded, so there is nothing to
    search. Leave it out until a question needs it.

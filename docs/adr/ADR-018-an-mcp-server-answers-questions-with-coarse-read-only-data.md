@@ -2,7 +2,7 @@
 
 ## Status
 
-Proposed
+Accepted
 
 ## Context
 
@@ -31,8 +31,8 @@ What exists today:
 - A trip's name is free text that you type. It can hold anything, such as a family member's name.
 
 Not known yet: how well a model answers from these tools without hand-written views, and whether a
-country name alone is acceptable to the maintainer as "location data". Question 1 in the
-consequences covers the second.
+country name alone is acceptable to the maintainer as "location data". The consequences
+record the answer.
 
 ## Decision
 
@@ -120,11 +120,12 @@ Client (Claude app)  ──▶  /mcp  ──▶  tools  ──▶  stats library
   isn't on the allowed list, so a later change can't leak a coordinate or a trip name by accident.
 - Trip IDs let the model refer to a trip without a name. The model can't open the trip, because no
   tool returns the name or the photos. To read a trip, you open it in the app.
-- Country and park names still leave the home network when the client is a cloud model. They are
-  coarse, but they are location data in a loose sense. **Open question 1:** is that acceptable
-  under the CLAUDE.md rule? If not, restrict the first release to local models, and amend this ADR
-  before it ships.
-- **Open question 2:** does a person's visit count to a named park identify them? We treat it as no
+- Country and park names leave the home network when the client is a cloud model. The maintainer
+  accepted this on 2026-11-18, because they are coarse. The CLAUDE.md rule "never send photo data
+  or location data to an outside service" is read to mean photos, coordinates, and place names
+  finer than a park. A tool that returns anything on that list breaks the rule, and the test of the
+  allowed list catches it. A person who wants nothing to leave the network uses a local model.
+- **Open question:** does a person's visit count to a named park identify them? We treat it as no
   for a private, single-user app, and we revisit this if Fibotrail becomes multi-user.
 - The feature adds one token to manage and one more route to secure. A leaked token exposes the
   coarse data only, never photos or coordinates.
