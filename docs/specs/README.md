@@ -70,4 +70,5 @@ None.
 | [stats-screen.md](stats-screen.md) | The Stats screen: the host for stats views, totals, continents, and countries with trips and days |
 | [season-wheel.md](season-wheel.md) | A stats view: the months and seasons you have spent in a country |
 | [trip-spiral.md](trip-spiral.md) | A stats view: every trip along a Fibonacci spiral in date order |
+| [mcp-server.md](mcp-server.md) | A read-only MCP server that answers questions about your travel with coarse data and a token |
 | [release.md](release.md) | The accessibility checks, README, and tagged image for version 0.1 |

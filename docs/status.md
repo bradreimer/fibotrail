@@ -20,6 +20,22 @@ also still unrecorded.
 
 ## Completed
 
+- [#143](https://github.com/bradreimer/fibotrail/issues/143) A read-only MCP server and an **MCP**
+  screen
+  ([ADR-018](adr/ADR-018-an-mcp-server-answers-questions-with-coarse-read-only-data.md),
+  [spec](specs/mcp-server.md)). `/mcp` answers JSON-RPC over streamable HTTP with seven tools:
+  `list_collections`, `collection_visits`, `list_countries`, `country_summary`, `list_trips`,
+  `get_trip`, and `days_away`. "How many times have I been to a Disney park?" is one call to
+  `collection_visits`. It is off until `MCP_TOKEN` is set (32 characters or more), checks the token
+  in constant time, refuses a foreign `Origin`, and allows 60 requests a minute. A result holds only
+  counts, dates, kilometers, IDs, and country, continent, collection, and park names, and a test
+  walks every result type to keep it so. The new `Fibotrail.Mcp` project is pure, and its tools read
+  the same stats library as the screens. The stats library gained `LastVisit` for parks and
+  countries. The **MCP** screen (`/mcp-setup`, a tool in the top bar and the sidebar) shows how to
+  turn the server on, the address, three ways to connect a client, and example questions that a test
+  runs. Checked in tests only. The connection steps haven't been run against a real client yet
+  (open question 1 of the spec), and the README privacy text now names the MCP exception.
+
 - [#144](https://github.com/bradreimer/fibotrail/issues/144) `fibotrail join` joins trips found
   from photos with no position (rules 3b and 4b), not only rule 3 trips. Found on the maintainer's
   library: trips 2 and 45, one Oregon Coast trip in July 2008, were a trip with GPS and a trip of

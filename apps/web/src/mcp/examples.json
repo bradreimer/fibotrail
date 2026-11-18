@@ -1,0 +1,102 @@
+{
+  "examples": [
+    {
+      "id": "disney-times",
+      "group": "Collections",
+      "question": "How many times have I been to a Disney park?",
+      "answer": "Separate trips and park days, with your first and last visit.",
+      "calls": [{ "tool": "collection_visits", "arguments": { "collection": "disney-parks" } }]
+    },
+    {
+      "id": "disney-most-days",
+      "group": "Collections",
+      "question": "Which Disney park have I spent the most days in?",
+      "answer": "The parks you have visited, with trips and days for each.",
+      "calls": [{ "tool": "collection_visits", "arguments": { "collection": "disney-parks" } }]
+    },
+    {
+      "id": "universal-last",
+      "group": "Collections",
+      "question": "When was my last trip to a Universal park?",
+      "answer": "The date of your last visit, and how many trips and days you have there.",
+      "calls": [{ "tool": "collection_visits", "arguments": { "collection": "universal-parks" } }]
+    },
+    {
+      "id": "collections",
+      "group": "Collections",
+      "question": "Which collections do you know about, and how far along am I?",
+      "answer": "Each collection with its trips, days, and parks visited out of the total.",
+      "calls": [{ "tool": "list_collections", "arguments": {} }]
+    },
+    {
+      "id": "disney-recent-trip",
+      "group": "Collections",
+      "question": "Walk me through my most recent Disney trip.",
+      "answer": "The trip's dates, days, countries, and parks.",
+      "calls": [
+        { "tool": "list_trips", "arguments": { "collection": "disney-parks", "limit": 1 } },
+        { "tool": "get_trip", "arguments": { "id": 3 } }
+      ]
+    },
+    {
+      "id": "europe-countries",
+      "group": "Countries",
+      "question": "How many countries have I visited in Europe?",
+      "answer": "Your visited countries in Europe, out of the total, with trips and days.",
+      "calls": [{ "tool": "list_countries", "arguments": { "continent": "Europe" } }]
+    },
+    {
+      "id": "sweden-days",
+      "group": "Countries",
+      "question": "How many days have I spent in Sweden?",
+      "answer": "Trips and days in Sweden, with your first and last visit.",
+      "calls": [{ "tool": "country_summary", "arguments": { "country": "Sweden" } }]
+    },
+    {
+      "id": "japan-first",
+      "group": "Countries",
+      "question": "When did I first go to Japan?",
+      "answer": "The date of your first visit.",
+      "calls": [{ "tool": "country_summary", "arguments": { "country": "Japan" } }]
+    },
+    {
+      "id": "trips-2023",
+      "group": "Trips and time",
+      "question": "Which trips did I take in 2023, and how far did I travel?",
+      "answer": "Each trip with its dates, days, countries, and distance. The model adds the distances.",
+      "calls": [{ "tool": "list_trips", "arguments": { "from": "2023-01-01", "to": "2023-12-31" } }]
+    },
+    {
+      "id": "longest-trip",
+      "group": "Trips and time",
+      "question": "What was my longest trip, and where did it go?",
+      "answer": "The trip with the most days and its countries. A trip has an ID, not a name.",
+      "calls": [{ "tool": "list_trips", "arguments": { "limit": 200 } }]
+    },
+    {
+      "id": "busiest-year",
+      "group": "Trips and time",
+      "question": "Which year did I spend the most days away?",
+      "answer": "Days away for each year you travelled.",
+      "calls": [{ "tool": "days_away", "arguments": { "by": "year" } }]
+    }
+  ],
+  "cannot": [
+    {
+      "question": "Show me my photos from Paris.",
+      "why": "Photos never leave Immich. No tool returns a photo, a thumbnail, or a file name."
+    },
+    {
+      "question": "Where exactly did I stay in Orlando?",
+      "why": "No tool returns a coordinate or a place below a park."
+    },
+    {
+      "question": "What did I call my 2019 trip?",
+      "why": "A trip name is text you typed, so it stays in the app. Tools give a trip's ID, dates, and countries."
+    },
+    {
+      "question": "Which city have I visited most?",
+      "why": "A city is finer than a country, so no tool returns one."
+    }
+  ]
+}

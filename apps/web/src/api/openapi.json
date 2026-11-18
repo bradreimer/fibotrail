@@ -678,6 +678,26 @@
         }
       }
     },
+    "/api/mcp/status": {
+      "get": {
+        "tags": [
+          "Fibotrail"
+        ],
+        "operationId": "GetMcpStatus",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/McpStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/stats/summary": {
       "get": {
         "tags": [
@@ -1410,6 +1430,24 @@
           "endDate": {
             "type": "string",
             "format": "date"
+          }
+        }
+      },
+      "McpStatus": {
+        "required": [
+          "enabled",
+          "tools"
+        ],
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "tools": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         }
       },

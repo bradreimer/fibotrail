@@ -10,6 +10,7 @@ import './styles/trips.css';
 import './styles/trip.css';
 import './styles/stats.css';
 import './styles/collections.css';
+import './styles/mcp.css';
 
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';

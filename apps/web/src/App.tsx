@@ -8,6 +8,7 @@ import { CollectionsScreen } from './screens/CollectionsScreen';
 import { ResortScreen } from './screens/ResortScreen';
 import { StampBookScreen } from './screens/StampBookScreen';
 import { InboxScreen } from './screens/InboxScreen';
+import { McpScreen } from './screens/McpScreen';
 import { MapScreen } from './screens/MapScreen';
 import { SettingsScreen } from './screens/SettingsScreen';
 import { StatsContinentScreen } from './screens/StatsContinentScreen';
@@ -36,6 +37,7 @@ export function App() {
               <Route path="/stats/continents/:continent" element={<StatsContinentScreen />} />
               <Route path="/stats/countries/:id" element={<StatsCountryScreen />} />
               <Route path="/inbox" element={<InboxScreen />} />
+              <Route path="/mcp-setup" element={<McpScreen />} />
               <Route path="/settings" element={<SettingsScreen />} />
               <Route path="*" element={<Navigate to="/trips" replace />} />
             </Route>

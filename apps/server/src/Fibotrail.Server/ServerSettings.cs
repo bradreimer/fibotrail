@@ -10,6 +10,8 @@ public sealed class ServerSettings
     public const string ImmichExternalUrlVariable = "IMMICH_EXTERNAL_URL";
     public const string ImmichTimeoutVariable = "IMMICH_TIMEOUT_SECONDS";
     public const string DataDirectoryVariable = "FIBOTRAIL_DATA_DIR";
+    public const string McpTokenVariable = "MCP_TOKEN";
+    public const int MinMcpTokenLength = 32;
     public const int DefaultImmichTimeoutSeconds = 30;
     public const int MaxImmichTimeoutSeconds = 600;
     public const string DefaultDataDirectory = "/data";
@@ -19,8 +21,10 @@ public sealed class ServerSettings
         Uri? immichUrl = null,
         string? immichApiKey = null,
         Uri? immichExternalUrl = null,
-        int immichTimeoutSeconds = DefaultImmichTimeoutSeconds)
+        int immichTimeoutSeconds = DefaultImmichTimeoutSeconds,
+        string? mcpToken = null)
     {
+        McpToken = string.IsNullOrWhiteSpace(mcpToken) ? null : mcpToken;
         DataDirectory = dataDirectory;
         ImmichUrl = immichUrl;
         ImmichApiKey = immichApiKey;
@@ -38,6 +42,15 @@ public sealed class ServerSettings
 
     /// <summary>The address your browser uses for Immich. Only "Open in Immich" links use it.</summary>
     public Uri? ImmichExternalUrl { get; }
+
+    /// <summary>
+    /// A secret. The bearer token of the MCP server, or null when the server is off. Never log it,
+    /// return it, or send it to the browser. See ADR-018.
+    /// </summary>
+    public string? McpToken { get; }
+
+    /// <summary>True when <c>MCP_TOKEN</c> is set, so <c>/mcp</c> answers.</summary>
+    public bool McpEnabled => McpToken is not null;
 
     /// <summary>How long one Immich request may take.</summary>
     public TimeSpan ImmichTimeout { get; }
@@ -109,8 +122,14 @@ public sealed class ServerSettings
             problems.Add($"{ImmichTimeoutVariable} must be a whole number from 1 to {MaxImmichTimeoutSeconds}. Use a value such as {DefaultImmichTimeoutSeconds}.");
         }
 
+        var mcpToken = configuration[McpTokenVariable];
+        if (!string.IsNullOrWhiteSpace(mcpToken) && mcpToken.Length < MinMcpTokenLength)
+        {
+            problems.Add($"{McpTokenVariable} must be at least {MinMcpTokenLength} characters, or empty to turn the MCP server off.");
+        }
+
         return problems.Count > 0
             ? (null, problems)
-            : (new ServerSettings(dataDirectory, immichUrl, immichApiKey, externalUrl, timeoutSeconds), problems);
+            : (new ServerSettings(dataDirectory, immichUrl, immichApiKey, externalUrl, timeoutSeconds, mcpToken), problems);
     }
 }

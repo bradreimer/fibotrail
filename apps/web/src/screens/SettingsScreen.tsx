@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 
 import { useScan, type ScanStatus } from '../api/scan';
 import { useSession } from '../api/session';
@@ -33,6 +34,7 @@ export function SettingsScreen() {
   const session = useSession();
   const scan = useScan();
   const immich = useApi('/api/immich');
+  const mcp = useApi('/api/mcp/status');
   const home = useApi('/api/home', undefined, scan.status?.state);
   const [changingHome, setChangingHome] = useState(false);
   const [homeResult, setHomeResult] = useState<SetHomeResponse | null>(null);
@@ -144,6 +146,28 @@ export function SettingsScreen() {
         <p className="settings__hint">
           Fibotrail finds trips by how far from home your photos were taken. A new home location
           looks for every trip again, and your choices stay.
+        </p>
+      </section>
+
+      <section className="settings__section" aria-labelledby="settings-mcp">
+        <h2 className="state__title" id="settings-mcp">
+          AI assistants
+        </h2>
+        {mcp.data && (
+          <p className="settings__status" role="status">
+            <span
+              className={`settings__dot${mcp.data.enabled ? '' : ' settings__dot--off'}`}
+              aria-hidden="true"
+            />
+            {mcp.data.enabled ? 'MCP server: on' : 'MCP server: off'}
+          </p>
+        )}
+        <Link className="button button--secondary" to="/mcp-setup">
+          Open MCP
+        </Link>
+        <p className="settings__hint">
+          Ask questions about your travel from an AI client. Only counts, dates, and place names are
+          shared.
         </p>
       </section>
 

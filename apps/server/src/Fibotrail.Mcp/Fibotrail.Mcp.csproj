@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\Fibotrail.Detection\Fibotrail.Detection.csproj" />
+    <ProjectReference Include="..\Fibotrail.Places\Fibotrail.Places.csproj" />
+    <ProjectReference Include="..\Fibotrail.Stats\Fibotrail.Stats.csproj" />
+  </ItemGroup>
+
+</Project>

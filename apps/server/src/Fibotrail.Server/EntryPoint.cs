@@ -91,6 +91,7 @@ public static class EntryPoint
         var app = ServerApp.Create(builder, settings);
         await ServerApp.PrepareDatabaseAsync(app);
         await app.StartAsync();
+        ServerApp.LogMcpState(app);
         await ServerApp.StartImmichAsync(app);
         await app.WaitForShutdownAsync();
         return 0;

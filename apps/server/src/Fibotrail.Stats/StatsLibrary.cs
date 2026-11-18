@@ -51,7 +51,14 @@ public sealed record CountryDay(DateOnly Day, double Latitude);
 /// <param name="Trips">Added trips with a stop in the country, earliest first.</param>
 /// <param name="Days">Distinct local days with at least one positioned away photo in the country.</param>
 /// <param name="DayList">Those days, oldest first, each with a latitude. <c>Days</c> is its length.</param>
-public sealed record CountryStats(Country Country, Continent Continent, DateOnly FirstVisit, IReadOnlyList<VisitedTrip> Trips, int Days, IReadOnlyList<CountryDay> DayList);
+public sealed record CountryStats(Country Country, Continent Continent, DateOnly FirstVisit, IReadOnlyList<VisitedTrip> Trips, int Days, IReadOnlyList<CountryDay> DayList)
+{
+    /// <summary>
+    /// The latest local day with a positioned away photo in the country. A country with no such day
+    /// uses the last day of its latest trip.
+    /// </summary>
+    public DateOnly LastVisit => DayList.Count > 0 ? DayList[^1].Day : Trips.Max(trip => trip.EndDate);
+}
 
 /// <summary>The totals of the summary tiles.</summary>
 public sealed record StatsTotals(int Trips, int DaysAway, double DistanceKm, int Countries, int Continents);
@@ -136,7 +143,7 @@ public sealed class StatsLibrary
 
         var parks = parkLookup is null
             ? []
-            : ParkDays.Count(ordered.Select(trip => new ParkTrip(trip.Id, trip.Name, [.. trip.Photos.Select(photo => new ParkPhoto(photo.Day, photo.Latitude, photo.Longitude))], trip.StartDate, trip.MarkedParks)), parkLookup);
+            : ParkDays.Count(ordered.Select(trip => new ParkTrip(trip.Id, trip.Name, [.. trip.Photos.Select(photo => new ParkPhoto(photo.Day, photo.Latitude, photo.Longitude))], trip.StartDate, trip.MarkedParks, trip.EndDate)), parkLookup);
 
         var places = CityPlaces.Find(
             ordered.SelectMany(trip => (trip.NamedStops ?? []).Select(stop =>
