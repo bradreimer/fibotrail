@@ -21,7 +21,8 @@ public static class TripDetector
     /// Runs rules 1 to 10 and returns the trips, oldest first. A photo whose ID is in
     /// <paramref name="onTheWay"/> still belongs to its trip, but rules 6 to 8 skip it: it adds no
     /// stop, no line, and no distance. See docs/specs/on-the-way.md. Each range in
-    /// <paramref name="joins"/> makes the trips that touch it one trip: see <see cref="JoinGroups"/>.
+    /// <paramref name="joins"/> makes the trips that touch it one trip: see <see cref="JoinGroups"/>
+    /// and <see cref="JoinTrips"/>.
     /// </summary>
     public static IReadOnlyList<DetectedTrip> Detect(IEnumerable<PhotoPoint> photos, GeoPoint home, DetectionSettings? settings = null, IReadOnlySet<string>? onTheWay = null, IReadOnlyList<DateRange>? joins = null)
     {
@@ -44,7 +45,7 @@ public static class TripDetector
 
         trips.AddRange(DetectUnlocated(all, trips, home, settings, onTheWay));
         trips.AddRange(DetectFar(all, trips, home, settings, onTheWay));
-        return [.. trips.OrderBy(trip => trip.StartDate).ThenBy(trip => trip.Fingerprint, StringComparer.Ordinal)];
+        return [.. JoinTrips(trips, all, home, settings, onTheWay, joins).OrderBy(trip => trip.StartDate).ThenBy(trip => trip.Fingerprint, StringComparer.Ordinal)];
     }
 
     /// <summary>
@@ -247,7 +248,7 @@ public static class TripDetector
     /// Rule 3c: a join you chose. The groups of away photos that touch a joined date range become one
     /// group, in time order, even when no photo was taken for longer than the gap limit. The minimums of
     /// rule 4 then apply to the joined group. A range that touches fewer than two groups changes
-    /// nothing. It joins the groups of rule 3 only: a trip found by rule 3b or 4b isn't joined.
+    /// nothing. A trip found by rule 3b or 4b is joined later, by <see cref="JoinTrips"/>.
     /// </summary>
     public static IReadOnlyList<IReadOnlyList<PhotoPoint>> JoinGroups(IReadOnlyList<IReadOnlyList<PhotoPoint>> groups, IReadOnlyList<DateRange>? joins)
     {
@@ -279,6 +280,91 @@ public static class TripDetector
         }
 
         return result;
+    }
+
+    /// <summary>
+    /// Rule 3c, second half: the trips that touch a joined range become one trip, whichever rule found
+    /// them, so a trip from photos with no position (rules 3b and 4b) joins a trip with a position. It
+    /// runs after every rule has found its trips. The joined trip is rebuilt from the union of the
+    /// photos of the trips it replaces: its main place, stops, distance, and confidence come from
+    /// those photos, and its fingerprint is the first day and the main place, as for any trip. A range
+    /// that touches fewer than two trips changes nothing.
+    /// </summary>
+    public static IReadOnlyList<DetectedTrip> JoinTrips(
+        IReadOnlyList<DetectedTrip> trips,
+        IReadOnlyList<PhotoPoint> allPhotos,
+        GeoPoint home,
+        DetectionSettings settings,
+        IReadOnlySet<string>? onTheWay,
+        IReadOnlyList<DateRange>? joins)
+    {
+        ArgumentNullException.ThrowIfNull(trips);
+        ArgumentNullException.ThrowIfNull(allPhotos);
+        ArgumentNullException.ThrowIfNull(settings);
+        if (joins is null or { Count: 0 })
+        {
+            return trips;
+        }
+
+        var byId = new Dictionary<string, PhotoPoint>(StringComparer.Ordinal);
+        foreach (var photo in allPhotos)
+        {
+            byId.TryAdd(photo.Id, photo);
+        }
+
+        var result = trips.ToList();
+        foreach (var join in joins.OrderBy(range => range.Start))
+        {
+            var touched = result
+                .Where(trip => trip.StartDate <= join.End && trip.EndDate >= join.Start)
+                .OrderBy(trip => trip.StartDate)
+                .ThenBy(trip => trip.Fingerprint, StringComparer.Ordinal)
+                .ToList();
+            if (touched.Count < 2)
+            {
+                continue;
+            }
+
+            result[result.IndexOf(touched[0])] = Merge(touched, byId, home, settings, onTheWay);
+            foreach (var other in touched.Skip(1))
+            {
+                result.Remove(other);
+            }
+        }
+
+        return result;
+    }
+
+    private static DetectedTrip Merge(List<DetectedTrip> touched, Dictionary<string, PhotoPoint> byId, GeoPoint home, DetectionSettings settings, IReadOnlySet<string>? onTheWay)
+    {
+        var photos = touched
+            .SelectMany(trip => trip.PhotoIds)
+            .Distinct(StringComparer.Ordinal)
+            .Select(id => byId[id])
+            .OrderBy(photo => photo.LocalTime)
+            .ThenBy(photo => photo.Id, StringComparer.Ordinal)
+            .ToList();
+        var placed = photos.Where(photo => photo.Position is not null).ToList();
+        var ids = photos.Select(photo => photo.Id).ToList();
+        var start = touched.Min(trip => trip.StartDate);
+        var end = touched.Max(trip => trip.EndDate);
+        var mainPlace = MainPlace(placed);
+        var geometry = Measure(placed, ids, home, settings, onTheWay);
+
+        return new DetectedTrip(
+            Fingerprint(start, mainPlace),
+            Name(mainPlace, start),
+            mainPlace,
+            MostCommon(placed, photo => photo.Country) ?? touched.Select(trip => trip.Country).FirstOrDefault(country => country is not null),
+            start,
+            end,
+            ids,
+            placed.Count,
+            geometry.Stops,
+            geometry.DistanceKm,
+            geometry.FarthestFromHomeKm,
+            Score(photos.Count, placed.Count, end.DayNumber - start.DayNumber + 1, geometry.FarthestFromHomeKm, settings),
+            geometry.CoverPhotoId);
     }
 
     /// <summary>Rule 4: enough away photos, over enough calendar days.</summary>

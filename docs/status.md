@@ -17,6 +17,14 @@ also still unrecorded.
 
 ## Completed
 
+- [#144](https://github.com/bradreimer/fibotrail/issues/144) `fibotrail join` joins trips found
+  from photos with no position (rules 3b and 4b), not only rule 3 trips. Found on the maintainer's
+  library: trips 2 and 45, one Oregon Coast trip in July 2008, were a trip with GPS and a trip of
+  1,449 photos with none, and the join was saved and changed nothing. A step after every rule now
+  merges the trips that touch a joined range and rebuilds the merged trip from their photos
+  ([ADR-016](adr/ADR-016-a-join-is-a-decision-over-a-range-of-days.md)). Checked in tests only,
+  not yet run on the maintainer's library.
+
 - [#140](https://github.com/bradreimer/fibotrail/issues/140) `fibotrail trip add` adds a trip by
   hand, for photos with no position that no rule can find. The trip is a decision in the new
   `manual_trip` table
