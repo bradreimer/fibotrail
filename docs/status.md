@@ -35,6 +35,16 @@ checklist are also still unrecorded.
   library, so search agrees with the collections. Filtering happens on the device, and every word
   of the search must match. The search stays in the address (`/trips?q=...`), so going back from a
   trip page keeps it. Checked in tests only, not yet on a phone.
+- [#153](https://github.com/bradreimer/fibotrail/issues/153) Finer coasts and islands on the trip
+  page maps. Decided in
+  [ADR-020](adr/ADR-020-trip-page-maps-use-the-1-10-million-outline.md): the route map and the
+  photo viewer map use the Natural Earth 1:10 million outline (3,661 KB, 921 KB gzipped), embedded
+  in the image and loaded on first use. The Map tab, the home location step, and the server keep
+  1:50 million. The [spec](specs/trip-page.md#route-map) is updated. The maps pick the outline
+  with a `detail` setting, and each outline file is fetched once, when a map first asks for it.
+  Checked in tests and the build. On 2026-11-18 the maintainer found pan and zoom on an iPhone good
+  enough with 4,253 polygons, so the outline stays as the package ships it. The Friday Harbor check
+  (a stop on San Juan Island drawn on land) wasn't run before the issue closed.
 - [#151](https://github.com/bradreimer/fibotrail/issues/151) One **Insights** tab replaces the
   Collections and Stats tabs ([spec](specs/insights.md),
   [ADR-019](adr/ADR-019-insights-replaces-the-stats-and-collections-tabs.md)). It shows the six
@@ -355,15 +365,7 @@ checklist are also still unrecorded.
 
 ## In progress
 
-- [#153](https://github.com/bradreimer/fibotrail/issues/153) Finer coasts and islands on the trip
-  page maps. Decided in
-  [ADR-020](adr/ADR-020-trip-page-maps-use-the-1-10-million-outline.md): the route map and the
-  photo viewer map use the Natural Earth 1:10 million outline (3,661 KB, 921 KB gzipped), embedded
-  in the image and loaded on first use. The Map tab, the home location step, and the server keep
-  1:50 million. The [spec](specs/trip-page.md#route-map) is updated. The maps pick the outline
-  with a `detail` setting, and each outline file is fetched once, when a map first asks for it.
-  Checked in tests and the build only. Not yet run in a browser or on an iPhone, so pan and zoom
-  with 4,253 polygons and the Friday Harbor check are still open.
+Nothing is in progress.
 
 ## Next
 
