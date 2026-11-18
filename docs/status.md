@@ -2,21 +2,29 @@
 
 ## Current milestone
 
-Version 0.3.1 fixes `fibotrail join`, which saved a join over a trip with no photo positions and
-changed nothing ([#144](https://github.com/bradreimer/fibotrail/issues/144)). Version 0.3.0 was the
-release after 0.2.0 (55 commits): Collections (Disney and Universal parks, with park days counted
-on the server), cities and pins on the Map, the Fibonacci spiral on the Stats screen, a back arrow
-on every detail page, and the command line tools `fibotrail rescan`, `places`, `join`, and
+Version 0.4.0 adds the read-only MCP server and the **MCP** screen
+([#143](https://github.com/bradreimer/fibotrail/issues/143)), so an AI client can ask questions
+such as "How many times have I been to a Disney park?" without a new Stats view for each one. The
+server is off until `MCP_TOKEN` is set. Version 0.3.1 fixed `fibotrail join`, which saved a join
+over a trip with no photo positions and changed nothing
+([#144](https://github.com/bradreimer/fibotrail/issues/144)). Version 0.3.0 was the release after
+0.2.0 (55 commits): Collections (Disney and Universal parks, with park days counted on the
+server), cities and pins on the Map, the Fibonacci spiral on the Stats screen, a back arrow on
+every detail page, and the command line tools `fibotrail rescan`, `places`, `join`, and
 `trip add`, with a **Rescan everything** button in Settings. The release workflow publishes
-`ghcr.io/bradreimer/fibotrail:0.3.1` and `:latest`. See [roadmap.md](roadmap.md) and
+`ghcr.io/bradreimer/fibotrail:0.4.0` and `:latest`. See [roadmap.md](roadmap.md) and
 [the releases](https://github.com/bradreimer/fibotrail/releases).
 
 **What wasn't recorded before the tag:** `./scripts/check.sh` and CI pass on the tagged commit.
-`fibotrail join` ran on the maintainer's library on 2026-11-18 and joined trips 2 and 45 into one
-trip of 1,635 photos. `fibotrail trip add` and the **Rescan everything** button are checked in
-tests only, and haven't been run on the maintainer's library or a phone. The
-ADR-007 table lines for version 0.1 and the per-line results of the accessibility checklist are
-also still unrecorded.
+The MCP server is checked in tests, and against a running server with the shipped collection files
+and an empty library, where `initialize`, `tools/list`, and the Disney question answered over
+HTTP. It hasn't run on the maintainer's library or a phone, and the connection steps on the MCP
+screen haven't been run against a real AI client (open question 1 of the
+[spec](specs/mcp-server.md)). `fibotrail join` ran on the maintainer's library on 2026-11-18 and
+joined trips 2 and 45 into one trip of 1,635 photos. `fibotrail trip add` and the **Rescan
+everything** button are checked in tests only, and haven't been run on the maintainer's library or
+a phone. The ADR-007 table lines for version 0.1 and the per-line results of the accessibility
+checklist are also still unrecorded.
 
 ## Completed
 
