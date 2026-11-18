@@ -2,29 +2,29 @@
 
 ## Current milestone
 
-Version 0.4.0 adds the read-only MCP server and the **MCP** screen
-([#143](https://github.com/bradreimer/fibotrail/issues/143)), so an AI client can ask questions
-such as "How many times have I been to a Disney park?" without a new Stats view for each one. The
-server is off until `MCP_TOKEN` is set. Version 0.3.1 fixed `fibotrail join`, which saved a join
-over a trip with no photo positions and changed nothing
-([#144](https://github.com/bradreimer/fibotrail/issues/144)). Version 0.3.0 was the release after
-0.2.0 (55 commits): Collections (Disney and Universal parks, with park days counted on the
-server), cities and pins on the Map, the Fibonacci spiral on the Stats screen, a back arrow on
-every detail page, and the command line tools `fibotrail rescan`, `places`, `join`, and
-`trip add`, with a **Rescan everything** button in Settings. The release workflow publishes
-`ghcr.io/bradreimer/fibotrail:0.4.0` and `:latest`. See [roadmap.md](roadmap.md) and
+Version 0.5.0 is the release after 0.4.0 (10 commits). One **Insights** tab replaces the
+Collections and Stats tabs ([#151](https://github.com/bradreimer/fibotrail/issues/151)), and the
+continent and country pages, Records, the Fibonacci spiral, and the season wheel are removed. The
+Trips screen gains search ([#157](https://github.com/bradreimer/fibotrail/issues/157)). The trip
+page maps draw the 1:10 million outline
+([#153](https://github.com/bradreimer/fibotrail/issues/153)). The command line gains
+`fibotrail trip rename` ([#155](https://github.com/bradreimer/fibotrail/issues/155)) and
+`fibotrail trip pin` and `unpin` ([#156](https://github.com/bradreimer/fibotrail/issues/156)). A
+photo changed in Immich now shows its new image after a rescan
+([#161](https://github.com/bradreimer/fibotrail/issues/161)), and an opened collection shows a
+skeleton shaped like its content ([#149](https://github.com/bradreimer/fibotrail/issues/149)).
+Version 0.4.0 added the read-only MCP server and the **MCP** screen
+([#143](https://github.com/bradreimer/fibotrail/issues/143)). The release workflow publishes
+`ghcr.io/bradreimer/fibotrail:0.5.0` and `:latest`. See [roadmap.md](roadmap.md) and
 [the releases](https://github.com/bradreimer/fibotrail/releases).
 
 **What wasn't recorded before the tag:** `./scripts/check.sh` and CI pass on the tagged commit.
-The MCP server is checked in tests, and against a running server with the shipped collection files
-and an empty library, where `initialize`, `tools/list`, and the Disney question answered over
-HTTP. It hasn't run on the maintainer's library or a phone, and the connection steps on the MCP
-screen haven't been run against a real AI client (open question 1 of the
-[spec](specs/mcp-server.md)). `fibotrail join` ran on the maintainer's library on 2026-11-18 and
-joined trips 2 and 45 into one trip of 1,635 photos. `fibotrail trip add` and the **Rescan
-everything** button are checked in tests only, and haven't been run on the maintainer's library or
-a phone. The ADR-007 table lines for version 0.1 and the per-line results of the accessibility
-checklist are also still unrecorded.
+The finer trip maps were checked on an iPhone on 2026-11-18. The Insights tab, search, the
+thumbnail refresh, and the collection skeleton are checked in tests only, not yet on a phone or
+the maintainer's library. `fibotrail trip rename`, `pin`, and `unpin` are checked in tests only.
+The MCP connection steps still haven't been run against a real AI client (open question 1 of the
+[spec](specs/mcp-server.md)). The ADR-007 table lines for version 0.1 and the per-line results of
+the accessibility checklist are also still unrecorded.
 
 ## Completed
 
