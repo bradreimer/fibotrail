@@ -66,3 +66,20 @@
   font-size: var(--fibo-text-caption);
   font-variant-numeric: tabular-nums;
 }
+
+/* The search field above the grid. 16 px text, so iOS doesn't zoom on focus (ADR-007). */
+.trip-search {
+  display: block;
+  margin-block-end: var(--fibo-space-4);
+}
+
+.trip-search__field {
+  width: 100%;
+  min-height: var(--fibo-tap);
+  padding: var(--fibo-space-2) var(--fibo-space-4);
+  border: none;
+  border-radius: var(--fibo-radius);
+  background: var(--fibo-mist);
+  color: inherit;
+  font-size: var(--fibo-text-input);
+}

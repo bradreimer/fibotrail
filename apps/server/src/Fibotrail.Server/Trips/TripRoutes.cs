@@ -1,6 +1,8 @@
+using Fibotrail.Places;
 using Fibotrail.Server.Collections;
 using Fibotrail.Server.Data;
 using Fibotrail.Server.Immich;
+using Fibotrail.Server.Stats;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,7 +11,8 @@ namespace Fibotrail.Server.Trips;
 /// <summary>A trip in your library, as its card shows it.</summary>
 /// <param name="Days">Calendar days from the first day to the last, counting both.</param>
 /// <param name="Place">The main destination: the city with the most photos, or the state or country.</param>
-public sealed record TripSummary(int Id, string Name, DateOnly StartDate, DateOnly EndDate, int Days, string? Place, string CoverPhotoId);
+/// <param name="Keywords">The words search matches besides the name, dates, and place: countries, cities, parks, resorts, and collections.</param>
+public sealed record TripSummary(int Id, string Name, DateOnly StartDate, DateOnly EndDate, int Days, string? Place, string CoverPhotoId, IReadOnlyList<string> Keywords);
 
 /// <summary>A new name, a new cover, or both. A value left out stays as it is.</summary>
 public sealed record TripChange(string? Name = null, string? CoverPhotoId = null);
@@ -30,14 +33,23 @@ public static class TripRoutes
     {
         ArgumentNullException.ThrowIfNull(api);
 
-        api.MapGet("/trips", async (FibotrailDbContext db, CancellationToken cancellationToken) =>
-            TypedResults.Ok<IReadOnlyList<TripSummary>>(await db.Trips.AsNoTracking()
+        // The keywords come from the stats library, so search finds a trip by the same parks and countries the collections and insights count.
+        api.MapGet("/trips", async (FibotrailDbContext db, CountryFinder finder, CountryOutlinesCache outlines, CollectionCatalog catalog, CancellationToken cancellationToken) =>
+        {
+            var trips = await db.Trips.AsNoTracking()
                 .Where(trip => trip.Status == TripStatus.Added)
                 .OrderByDescending(trip => trip.StartDate)
                 .ThenByDescending(trip => trip.Id)
-                .Select(trip => new TripSummary(trip.Id, trip.Name, trip.StartDate, trip.EndDate, trip.Days, trip.MainPlace, trip.CoverPhotoId))
-                .ToListAsync(cancellationToken)))
-            .WithName("GetTrips");
+                .ToListAsync(cancellationToken);
+            var library = await StatsLibraryLoader.LoadAsync(db, finder, outlines, catalog, cancellationToken);
+            var collectionOfPark = catalog.Collections
+                .SelectMany(collection => collection.Places.Select(place => (place.Park.Id, collection.Name)))
+                .GroupBy(pair => pair.Id, StringComparer.Ordinal)
+                .ToDictionary(group => group.Key, group => group.First().Name, StringComparer.Ordinal);
+            var keywords = library.KeywordsByTrip(collectionOfPark);
+            return TypedResults.Ok<IReadOnlyList<TripSummary>>([.. trips.Select(trip => new TripSummary(
+                trip.Id, trip.Name, trip.StartDate, trip.EndDate, trip.Days, trip.MainPlace, trip.CoverPhotoId, keywords.GetValueOrDefault(trip.Id) ?? []))]);
+        }).WithName("GetTrips");
 
         api.MapGet("/trips/{id:int}", async Task<Results<Ok<TripDetail>, NotFound>> (int id, FibotrailDbContext db, ServerSettings settings, CollectionCatalog catalog, CancellationToken cancellationToken) =>
             await TripPage.LoadAsync(db, settings, id, cancellationToken, catalog) is { } trip ? TypedResults.Ok(trip) : TypedResults.NotFound())
