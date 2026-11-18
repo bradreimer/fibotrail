@@ -137,6 +137,32 @@ public class JoinCommandTests
     }
 
     [Fact]
+    public async Task A_trip_from_photos_with_no_position_joins_a_trip_with_a_position()
+    {
+        // The case from issue 144: three days at a place, then days of photos that carry no position.
+        await using var app = await TestApp.StartAsync();
+        app.Immich.Assets.AddRange(TripLibrary.AtHome());
+        app.Immich.Assets.AddRange(TripLibrary.Trip(new DateTime(2027, 3, 15, 9, 0, 0), 3, 30));
+        app.Immich.Assets.AddRange(TripLibrary.Camera(new DateTime(2027, 3, 18, 0, 30, 0), 4, 200));
+        var browser = await TripLibrary.ScanAndConfirmHomeAsync(app);
+        var before = await TripLibrary.TripsAsync(app);
+        Assert.Equal(2, before.Count);
+        await AddTripAsync(browser, before.First().Id);
+
+        var (exitCode, output) = await RunAsync(app, "2027-03-16", "2027-03-19");
+
+        Assert.Equal(0, exitCode);
+        Assert.Contains("Joined into", output, StringComparison.Ordinal);
+        var trip = Assert.Single(await TripLibrary.TripsAsync(app));
+        Assert.Equal(new DateOnly(2027, 3, 15), trip.StartDate);
+        Assert.Equal(new DateOnly(2027, 3, 21), trip.EndDate);
+        Assert.Equal(230, trip.PhotoCount);
+        Assert.Equal("Orlando", trip.MainPlace);
+        Assert.Equal(TripStatus.Added, trip.Status);
+        Assert.Equal(1, await app.WithDbAsync(db => db.TripJoins.CountAsync()));
+    }
+
+    [Fact]
     public async Task Two_days_in_one_trip_are_refused()
     {
         var (app, _) = await StartWithTwoPartsAsync();

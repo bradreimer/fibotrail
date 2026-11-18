@@ -99,8 +99,12 @@ home is, so that I review suggestions and don't build my travel history by hand.
 3c. **Apply joins.** A join is a range of days that you chose with `fibotrail join`. The groups of
    away photos from rule 3 that touch the range become one group, in time order, even when the
    pause between them is longer than the gap limit. Rule 4 then applies to the joined group, so two
-   groups that are each too small can pass together. A join changes rule 3 groups only: a trip
-   from rule 3b or 4b isn't joined. A range that touches fewer than two groups changes nothing.
+   groups that are each too small can pass together. After rules 3b and 4b have found their trips,
+   the trips that touch the range become one trip, whichever rule found them. A trip from photos
+   with no position joins a trip with a position, or another such trip. The joined trip is rebuilt
+   from the union of their photos: the main place, stops, distance, and confidence come from those
+   photos, and the fingerprint is the first day and the main place. A range that touches fewer
+   than two trips changes nothing.
 4. **Filter.** Keep a trip that has at least the minimum photos and the minimum days. Only away
    photos count toward the minimum photos. Days run from the first day to the last, counting
    both.
@@ -185,7 +189,8 @@ try, the way the
 
 Tracking issue: [#136](https://github.com/bradreimer/fibotrail/issues/136).
 
-Intention: repair a trip that detection split because you took no pictures for 3 days or more.
+Intention: repair a trip that detection split, because you took no pictures for 3 days or more, or
+because part of it has photos with no position and another part has.
 Detection can't know the days were one trip, so you tell it, and the choice is a decision per
 [ADR-016](../adr/ADR-016-a-join-is-a-decision-over-a-range-of-days.md).
 

@@ -28,4 +28,7 @@ joined trip, so its status and name stay.
 
 - Joins are never rebuilt or deleted by detection.
 - Removing a join splits the trips again. The decision of the set-aside trip applies again.
-- Trips from rules 3b and 4b can't be joined yet.
+- Trips from rules 3b and 4b join too, as of [#144](https://github.com/bradreimer/fibotrail/issues/144).
+  A second step, after every rule has run, merges the trips that touch a range and rebuilds the
+  merged trip from their photos. Before it, a join over a trip with no photo positions was saved
+  and changed nothing.
