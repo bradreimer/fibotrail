@@ -69,6 +69,37 @@ public class ParkTests
     }
 
     [Fact]
+    public void The_last_visit_is_the_latest_day_with_a_photo_in_the_park()
+    {
+        var first = new ParkTrip(1, "March", [Photo(0, 0.005, 0.005), Photo(1, 0.005, 0.005), Photo(2, 0.005, 0.005)]);
+        var second = new ParkTrip(2, "June", [Photo(90, 0.005, 0.005), Photo(90, 0.005, 0.005), Photo(91, 0.005, 0.005)]);
+
+        var stats = Assert.Single(ParkDays.Count([second, first], Lookup(A)));
+
+        Assert.Equal((Day1, Day1.AddDays(91)), (stats.FirstVisit, stats.LastVisit));
+    }
+
+    [Fact]
+    public void A_park_you_marked_by_hand_uses_the_last_day_of_the_trip_as_its_last_visit()
+    {
+        var trip = new ParkTrip(1, "Old trip", [], Day1, ["A"], Day1.AddDays(4));
+
+        var stats = Assert.Single(ParkDays.Count([trip], Lookup(A)));
+
+        Assert.Equal((0, Day1, Day1.AddDays(4)), (stats.Days, stats.FirstVisit, stats.LastVisit));
+    }
+
+    [Fact]
+    public void A_marked_trip_with_no_end_date_uses_its_start_date()
+    {
+        var trip = new ParkTrip(1, "Old trip", [], Day1, ["A"]);
+
+        var stats = Assert.Single(ParkDays.Count([trip], Lookup(A)));
+
+        Assert.Equal(Day1, stats.LastVisit);
+    }
+
+    [Fact]
     public void Two_trips_add_their_days_and_both_are_listed()
     {
         var first = new ParkTrip(1, "March", [Photo(0, 0.005, 0.005), Photo(1, 0.005, 0.005), Photo(2, 0.005, 0.005)]);

@@ -40,6 +40,28 @@ public class StatsLibraryTests
     }
 
     [Fact]
+    public void A_country_has_a_last_visit_that_is_its_latest_positioned_day()
+    {
+        var library = Build(
+            Trip(1, new DateOnly(2019, 7, 1), 5, SwedenDays(new DateOnly(2019, 7, 1), 5)),
+            Trip(2, new DateOnly(2022, 12, 27), 7, SwedenDays(new DateOnly(2022, 12, 27), 7)));
+
+        Assert.Equal(new DateOnly(2023, 1, 2), library.Country("752")!.LastVisit);
+    }
+
+    [Fact]
+    public void A_country_with_no_positioned_day_uses_the_end_of_its_latest_trip()
+    {
+        // The stop is in Sweden, but no photo has a position, so no day is placed.
+        var trip = new StatsTrip(1, "Trip 1", new DateOnly(2024, 8, 1), new DateOnly(2024, 8, 7), 7, 100, 50, [(59, 15)], []);
+
+        var sweden = Build(trip).Country("752")!;
+
+        Assert.Equal(0, sweden.Days);
+        Assert.Equal(new DateOnly(2024, 8, 7), sweden.LastVisit);
+    }
+
+    [Fact]
     public void A_trip_with_days_in_two_countries_counts_once_for_each_and_a_shared_day_counts_for_both()
     {
         var day1 = new DateOnly(2023, 5, 1);
