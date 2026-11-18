@@ -344,8 +344,9 @@ checklist are also still unrecorded.
   in the image and loaded on first use. The Map tab, the home location step, and the server keep
   1:50 million. The [spec](specs/trip-page.md#route-map) is updated. The maps pick the outline
   with a `detail` setting, and each outline file is fetched once, when a map first asks for it.
-  Checked in tests and the build only. Not yet run in a browser or on an iPhone, so pan and zoom
-  with 4,253 polygons and the Friday Harbor check are still open.
+  Checked in tests and the build. On 2026-11-18 the maintainer found pan and zoom on an iPhone good
+  enough with 4,253 polygons, so the outline stays as the package ships it. The Friday Harbor check
+  is still open.
 
 ## Next
 
