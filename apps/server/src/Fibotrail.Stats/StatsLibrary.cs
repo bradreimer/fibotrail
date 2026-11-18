@@ -25,29 +25,12 @@ public sealed record StatsTrip(
     IReadOnlyList<(double Latitude, double Longitude)> Stops,
     IReadOnlyList<PhotoPosition> Photos,
     IReadOnlyList<NamedStop>? NamedStops = null,
-    IReadOnlyList<string>? MarkedParks = null)
-{
-    /// <summary>True when the trip has fewer positioned local days than days.</summary>
-    public bool HasUnpositionedDays => Photos.Select(photo => photo.Day).Distinct().Count() < Days;
-}
-
-/// <summary>A trip as a list row. Shared by the host and the views.</summary>
-public sealed record TripRef(int Id, string Name, DateOnly StartDate, DateOnly EndDate, int Days);
-
-/// <summary>Helpers on the library's trips.</summary>
-public static class StatsTripExtensions
-{
-    public static TripRef ToRef(this StatsTrip trip)
-    {
-        ArgumentNullException.ThrowIfNull(trip);
-        return new TripRef(trip.Id, trip.Name, trip.StartDate, trip.EndDate, trip.Days);
-    }
-}
+    IReadOnlyList<string>? MarkedParks = null);
 
 /// <summary>A local day with a positioned away photo in a country, and the latitude of the first such photo.</summary>
 public sealed record CountryDay(DateOnly Day, double Latitude);
 
-/// <summary>A country with the numbers the Stats screen shows for it.</summary>
+/// <summary>A country with its trips and days, as the MCP server reports them.</summary>
 /// <param name="Trips">Added trips with a stop in the country, earliest first.</param>
 /// <param name="Days">Distinct local days with at least one positioned away photo in the country.</param>
 /// <param name="DayList">Those days, oldest first, each with a latitude. <c>Days</c> is its length.</param>
@@ -60,16 +43,13 @@ public sealed record CountryStats(Country Country, Continent Continent, DateOnly
     public DateOnly LastVisit => DayList.Count > 0 ? DayList[^1].Day : Trips.Max(trip => trip.EndDate);
 }
 
-/// <summary>The totals of the summary tiles.</summary>
+/// <summary>The totals at the top of the Insights screen.</summary>
 public sealed record StatsTotals(int Trips, int DaysAway, double DistanceKm, int Countries, int Continents);
 
-/// <summary>How many countries of a continent have been visited, out of how many there are.</summary>
-public sealed record ContinentProgress(Continent Continent, int Visited, int Total);
-
 /// <summary>
-/// The shared, read-only input of every stats view: the added trips and the numbers worked out per
-/// country, by the rules of docs/specs/stats-screen.md. Pure: callers pass the added trips and the
-/// outlines, so it is tested with plain data. See ADR-014.
+/// The shared, read-only input of the Insights totals, the collections, and the MCP server: the
+/// added trips and the numbers worked out per country, by the rules of docs/specs/insights.md.
+/// Pure: callers pass the added trips and the outlines, so it is tested with plain data. See ADR-019.
 /// </summary>
 public sealed class StatsLibrary
 {
@@ -153,7 +133,7 @@ public sealed class StatsLibrary
         return new StatsLibrary(ordered, countries, Continents.Totals(outlineList), outlineList.Count(outline => outline.Id is not null), parks, places);
     }
 
-    /// <summary>The summary tiles.</summary>
+    /// <summary>The totals at the top of the Insights screen.</summary>
     public StatsTotals Totals() => new(
         Trips.Count,
         Trips.Sum(trip => trip.Days),
@@ -161,26 +141,8 @@ public sealed class StatsLibrary
         Countries.Count,
         Countries.Select(country => country.Continent).Distinct().Count());
 
-    /// <summary>Each continent's progress, visited first, then by name.</summary>
-    public IReadOnlyList<ContinentProgress> Progress() => [.. Continents.All
-        .Select(continent => new ContinentProgress(continent, Countries.Count(country => country.Continent == continent), ContinentTotals[continent]))
-        .OrderByDescending(progress => progress.Visited > 0)
-        .ThenBy(progress => Continents.Name(progress.Continent), StringComparer.Ordinal)];
-
     /// <summary>The visited countries of a continent, in the library's order.</summary>
     public IReadOnlyList<CountryStats> CountriesOn(Continent continent) => [.. Countries.Where(country => country.Continent == continent)];
-
-    /// <summary>
-    /// The continent a trip is placed on: the one with the most of the trip's visited countries, and
-    /// the first in the continent list on a tie. Null for a trip with no stop in a country.
-    /// </summary>
-    public Continent? ContinentOfTrip(int tripId) => Countries
-        .Where(country => country.Trips.Any(trip => trip.TripId == tripId))
-        .GroupBy(country => country.Continent)
-        .OrderByDescending(group => group.Count())
-        .ThenBy(group => group.Key)
-        .Select(group => (Continent?)group.Key)
-        .FirstOrDefault();
 
     /// <summary>One visited country by its key (its id, or its name when it has none), or null.</summary>
     public CountryStats? Country(string key) => Countries.FirstOrDefault(country => country.Country.Key == key);

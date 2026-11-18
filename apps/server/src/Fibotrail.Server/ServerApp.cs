@@ -2,6 +2,7 @@ using Fibotrail.Places;
 using Fibotrail.Server.Collections;
 using Fibotrail.Server.Map;
 using Fibotrail.Server.Mcp;
+using Fibotrail.Server.Insights;
 using Fibotrail.Server.Stats;
 using System.Net;
 using System.Text.Json;
@@ -350,7 +351,7 @@ public static partial class ServerApp
         api.MapInboxRoutes();
         api.MapTripRoutes();
         api.MapMapRoutes();
-        api.MapStatsRoutes();
+        api.MapInsightsRoutes();
         api.MapCollectionRoutes();
         api.MapMcpRoutes();
 

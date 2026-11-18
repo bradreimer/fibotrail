@@ -85,7 +85,6 @@ public class StatsLibraryTests
 
         Assert.Equal(3, library.Totals().DaysAway);
         Assert.Equal(1, library.Country("752")!.Days);
-        Assert.True(trip.HasUnpositionedDays);
     }
 
     [Fact]
@@ -111,13 +110,13 @@ public class StatsLibraryTests
     }
 
     [Fact]
-    public void No_trips_gives_empty_numbers_and_every_continent_with_none_visited()
+    public void No_trips_gives_empty_numbers_and_no_visited_country()
     {
         var library = Build();
 
         Assert.Equal(new StatsTotals(0, 0, 0, 0, 0), library.Totals());
-        Assert.Equal(7, library.Progress().Count);
-        Assert.All(library.Progress(), progress => Assert.Equal(0, progress.Visited));
+        Assert.Empty(library.Countries);
+        Assert.Equal(7, library.ContinentTotals.Count);
     }
 
     [Fact]
@@ -126,7 +125,7 @@ public class StatsLibraryTests
         var d = new DateOnly(2023, 5, 1);
         var library = Build(Trip(1, d, 2, (59, 15, d), (56, 10, d.AddDays(1))));
 
-        Assert.Equal(library.Totals().Countries, library.Progress().Sum(progress => progress.Visited));
+        Assert.Equal(library.Totals().Countries, Continents.All.Sum(continent => library.CountriesOn(continent).Count));
     }
 
     [Fact]

@@ -1,6 +1,6 @@
 namespace Fibotrail.Places;
 
-/// <summary>The seven continents of the Stats screen.</summary>
+/// <summary>The seven continents.</summary>
 public enum Continent
 {
     Africa,
@@ -15,7 +15,7 @@ public enum Continent
 /// <summary>
 /// Which continent each bundled country outline belongs to. The Natural Earth outlines carry no
 /// continent, so this table maps <see cref="Country.Key"/> to one. A transcontinental country has the
-/// one continent that Natural Earth's CONTINENT field gives it. See docs/specs/stats-screen.md.
+/// one continent that Natural Earth's CONTINENT field gives it. See docs/specs/insights.md.
 /// </summary>
 public static class Continents
 {
@@ -273,7 +273,7 @@ public static class Continents
         return Table.TryGetValue(country.Key, out var continent) ? continent : null;
     }
 
-    /// <summary>The name the Stats screen shows, such as "North America".</summary>
+    /// <summary>The display name, such as "North America".</summary>
     public static string Name(Continent continent) => continent switch
     {
         Continent.NorthAmerica => "North America",

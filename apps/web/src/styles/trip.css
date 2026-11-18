@@ -141,6 +141,11 @@
   border-radius: var(--fibo-radius);
 }
 
+.stat__detail {
+  font-size: var(--fibo-text-caption);
+  color: var(--fibo-ink-muted);
+}
+
 .stat__icon {
   width: var(--fibo-space-5);
   height: var(--fibo-space-5);

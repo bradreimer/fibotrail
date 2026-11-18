@@ -1,7 +1,7 @@
 import { Link, useParams } from 'react-router-dom';
 
 import { useApi } from '../api/useApi';
-import { ResortList } from '../collections/CollectionBody';
+import { ResortList } from '../insights/CollectionBody';
 import { BackLink } from '../shell/BackLink';
 import { EmptyState } from '../states/EmptyState';
 import { ErrorState } from '../states/ErrorState';
@@ -31,8 +31,8 @@ export function CollectionScreen() {
         title="No such collection"
         message="That collection doesn't exist."
         action={
-          <Link className="button" to="/collections">
-            Back to Collections
+          <Link className="button" to="/insights">
+            Back to Insights
           </Link>
         }
       />
@@ -43,12 +43,12 @@ export function CollectionScreen() {
   const data = collection.data;
   if (!data) return null;
 
-  const base = `/collections/${encodeURIComponent(id)}`;
+  const base = `/insights/${encodeURIComponent(id)}`;
   return (
-    <div className="stats-screen">
-      <BackLink to="/collections">Collections</BackLink>
-      <h2 className="stats-page__title">{data.summary.name}</h2>
-      <p className="stats-page__lead">{tripsText(data.summary.trips)}</p>
+    <div className="insights-page">
+      <BackLink to="/insights">Insights</BackLink>
+      <h2 className="insights-page__title">{data.summary.name}</h2>
+      <p className="insights-page__lead">{tripsText(data.summary.trips)}</p>
       {data.summary.trips === 0 && <p>Add a trip to start your stamp book.</p>}
       <ResortList id={id} detail={data} />
       <p>
@@ -56,7 +56,7 @@ export function CollectionScreen() {
           Stamp book
         </Link>
       </p>
-      <p className="stats-page__note">{data.attribution}</p>
+      <p className="insights-page__note">{data.attribution}</p>
     </div>
   );
 }

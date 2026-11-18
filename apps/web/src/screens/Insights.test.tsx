@@ -1,13 +1,23 @@
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import { expectNoAccessibilityProblems } from '../accessibility/accessibility';
 import { App } from '../App';
-import { CollectionBodySkeleton } from '../collections/CollectionBody';
+import { CollectionBodySkeleton } from '../insights/CollectionBody';
 import { fakeServer, status } from '../test/server';
 import { installMatchMedia } from '../test/window';
+
+const totals = {
+  trips: 12,
+  countries: 9,
+  outlineCountries: 240,
+  continents: 3,
+  cities: 21,
+  daysAway: 84,
+  distanceKm: 40250.4,
+};
 
 const summary = {
   id: 'universal-parks',
@@ -93,6 +103,12 @@ const detail = {
   ],
 };
 
+/** Reports the address the router settled on. */
+function Spy({ onPath }: { onPath: (path: string) => void }) {
+  onPath(useLocation().pathname);
+  return null;
+}
+
 function renderAt(path: string) {
   return render(
     <MemoryRouter initialEntries={[path]}>
@@ -103,7 +119,7 @@ function renderAt(path: string) {
 
 /** The back link is the first thing on the page, and its arrow is hidden from a screen reader. */
 function expectBackLink(container: HTMLElement, name: string, href: string) {
-  const page = container.querySelector('.stats-screen') as HTMLElement;
+  const page = container.querySelector('.insights-page') as HTMLElement;
   const link = within(page).getByRole('link', { name });
   expect(link).toHaveAttribute('href', href);
   expect(link).toHaveClass('back-link');
@@ -113,10 +129,89 @@ function expectBackLink(container: HTMLElement, name: string, href: string) {
 
 beforeEach(() => installMatchMedia(390));
 
-describe('the Collections screens', () => {
+describe('the Insights screen', () => {
+  it('shows the six totals above the collections', async () => {
+    fakeServer({ 'GET /api/insights/summary': totals, 'GET /api/collections': [summary] });
+    const { container } = renderAt('/insights');
+
+    const numbers = await screen.findByRole('region', { name: 'Your travel in numbers' });
+    expect(
+      within(numbers)
+        .getAllByRole('listitem')
+        .map((tile) => tile.querySelector('.stat__label')?.textContent),
+    ).toEqual(['Trips', 'Countries', 'Cities', 'Continents', 'Days away', 'Distance']);
+    expect(numbers.textContent).toContain('9 / 240 · 3.8%');
+    expect(numbers.textContent).toContain('3 / 7');
+    const collections = screen.getByRole('region', { name: 'Collections' });
+    expect(
+      within(collections).getByRole('heading', { name: 'Universal parks' }),
+    ).toBeInTheDocument();
+    expect(
+      numbers.compareDocumentPosition(collections) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+    expect(screen.getByRole('heading', { level: 1, name: 'Insights' })).toBeInTheDocument();
+    await expectNoAccessibilityProblems(container);
+  });
+
+  it('shows zeros and points to the inbox with no added trip', async () => {
+    fakeServer({
+      'GET /api/insights/summary': {
+        ...totals,
+        trips: 0,
+        countries: 0,
+        continents: 0,
+        cities: 0,
+        daysAway: 0,
+        distanceKm: 0,
+      },
+      'GET /api/collections': [{ ...summary, trips: 0, visited: 0, totalDays: 0 }],
+    });
+    renderAt('/insights');
+
+    expect(
+      await screen.findByText(/No trips yet\. Add a trip, and the numbers fill in\./),
+    ).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Open the inbox' })).toHaveAttribute('href', '/inbox');
+    expect(screen.getByRole('heading', { name: 'Universal parks' })).toBeInTheDocument();
+  });
+
+  it('shows Try again when the totals fail to load', async () => {
+    fakeServer({ 'GET /api/insights/summary': status(500), 'GET /api/collections': [summary] });
+    renderAt('/insights');
+
+    expect(await screen.findByRole('button', { name: 'Try again' })).toBeInTheDocument();
+  });
+
+  it.each([
+    ['/stats', '/insights'],
+    ['/stats/countries/752', '/insights'],
+    ['/collections', '/insights'],
+    ['/collections/universal-parks/stamps', '/insights/universal-parks/stamps'],
+  ])('sends the old address %s to %s', async (from, to) => {
+    fakeServer({
+      'GET /api/insights/summary': totals,
+      'GET /api/collections': [summary],
+      'GET /api/collections/universal-parks': detail,
+    });
+    let pathname = '';
+    render(
+      <MemoryRouter initialEntries={[from]}>
+        <App />
+        <Routes>
+          <Route path="*" element={<Spy onPath={(path) => (pathname = path)} />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    await screen.findByRole('heading', { level: 1, name: 'Insights' });
+    expect(pathname).toBe(to);
+  });
+});
+
+describe('the collection screens', () => {
   it('lists each collection closed, with its trips and no days', async () => {
-    fakeServer({ 'GET /api/collections': [summary] });
-    renderAt('/collections');
+    fakeServer({ 'GET /api/insights/summary': totals, 'GET /api/collections': [summary] });
+    renderAt('/insights');
 
     const row = (await screen.findByRole('heading', { name: 'Universal parks' })).closest(
       'details',
@@ -129,10 +224,11 @@ describe('the Collections screens', () => {
 
   it('opens a collection in place to show its totals, resorts, and stamp book', async () => {
     fakeServer({
+      'GET /api/insights/summary': totals,
       'GET /api/collections': [summary],
       'GET /api/collections/universal-parks': detail,
     });
-    const { container } = renderAt('/collections');
+    const { container } = renderAt('/insights');
 
     await userEvent.click(await screen.findByText('Universal parks'));
 
@@ -143,7 +239,7 @@ describe('the Collections screens', () => {
     expect(screen.queryByText('Universal Studios Florida')).not.toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Stamp book' })).toHaveAttribute(
       'href',
-      '/collections/universal-parks/stamps',
+      '/insights/universal-parks/stamps',
     );
     await expectNoAccessibilityProblems(container);
   });
@@ -160,10 +256,11 @@ describe('the Collections screens', () => {
 
   it('shows Try again when an open collection fails to load', async () => {
     fakeServer({
+      'GET /api/insights/summary': totals,
       'GET /api/collections': [summary],
       'GET /api/collections/universal-parks': status(500),
     });
-    renderAt('/collections');
+    renderAt('/insights');
 
     await userEvent.click(await screen.findByText('Universal parks'));
 
@@ -171,8 +268,8 @@ describe('the Collections screens', () => {
   });
 
   it('says so when there are no collection files', async () => {
-    fakeServer({ 'GET /api/collections': [] });
-    renderAt('/collections');
+    fakeServer({ 'GET /api/insights/summary': totals, 'GET /api/collections': [] });
+    renderAt('/insights');
 
     expect(
       await screen.findByText(
@@ -183,13 +280,13 @@ describe('the Collections screens', () => {
 
   it('lists the resorts of a collection with their trips, most trips first', async () => {
     fakeServer({ 'GET /api/collections/universal-parks': detail });
-    renderAt('/collections/universal-parks');
+    renderAt('/insights/universal-parks');
 
     const resort = await screen.findByRole('link', { name: /Universal Orlando Resort/ });
     expect(resort.textContent).toContain('2 trips');
     expect(resort).toHaveAttribute(
       'href',
-      '/collections/universal-parks/resorts/Universal%20Orlando%20Resort',
+      '/insights/universal-parks/resorts/Universal%20Orlando%20Resort',
     );
     expect(screen.getByRole('link', { name: /Hollywood/ }).textContent).toContain(
       '0 trips · Not visited yet',
@@ -197,7 +294,7 @@ describe('the Collections screens', () => {
     expect(screen.getByText('A trip to two resorts counts once for each.')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Stamp book' })).toHaveAttribute(
       'href',
-      '/collections/universal-parks/stamps',
+      '/insights/universal-parks/stamps',
     );
   });
 
@@ -206,7 +303,7 @@ describe('the Collections screens', () => {
       'GET /api/collections/universal-parks': detail,
       'GET /api/trips': library,
     });
-    renderAt('/collections/universal-parks/resorts/Universal%20Orlando%20Resort');
+    renderAt('/insights/universal-parks/resorts/Universal%20Orlando%20Resort');
 
     const june = await screen.findByRole('link', { name: /Orlando, June 2025/ });
     expect(june).toHaveAttribute('href', '/trips/9');
@@ -225,14 +322,14 @@ describe('the Collections screens', () => {
 
   it('says so for a resort that is not in the collection', async () => {
     fakeServer({ 'GET /api/collections/universal-parks': detail, 'GET /api/trips': library });
-    renderAt('/collections/universal-parks/resorts/Nowhere');
+    renderAt('/insights/universal-parks/resorts/Nowhere');
 
     expect(await screen.findByText("That resort isn't in this collection.")).toBeInTheDocument();
   });
 
   it('shows each stamp as one label, and tells the three states apart by words', async () => {
     fakeServer({ 'GET /api/collections/universal-parks': detail });
-    renderAt('/collections/universal-parks/stamps');
+    renderAt('/insights/universal-parks/stamps');
 
     expect(
       await screen.findByRole('button', { name: 'Universal Studios Florida, 6 days, 2 trips' }),
@@ -246,7 +343,7 @@ describe('the Collections screens', () => {
 
   it('opens a visited stamp into a sheet with its trips, and closes it', async () => {
     fakeServer({ 'GET /api/collections/universal-parks': detail });
-    renderAt('/collections/universal-parks/stamps');
+    renderAt('/insights/universal-parks/stamps');
 
     await userEvent.click(
       await screen.findByRole('button', { name: 'Universal Studios Florida, 6 days, 2 trips' }),
@@ -269,14 +366,14 @@ describe('the Collections screens', () => {
         summary: { ...summary, visited: 0, totalDays: 0, trips: 0 },
       },
     });
-    renderAt('/collections/universal-parks');
+    renderAt('/insights/universal-parks');
 
     expect(await screen.findByText('Add a trip to start your stamp book.')).toBeInTheDocument();
   });
 
   it('says so for a collection that does not exist', async () => {
     fakeServer({ 'GET /api/collections/nope': status(404, {}) });
-    renderAt('/collections/nope');
+    renderAt('/insights/nope');
 
     expect(await screen.findByText("That collection doesn't exist.")).toBeInTheDocument();
   });
@@ -284,27 +381,27 @@ describe('the Collections screens', () => {
   it('shows a back arrow on a collection, a resort, and the stamp book', async () => {
     fakeServer({ 'GET /api/collections/universal-parks': detail, 'GET /api/trips': library });
 
-    const collection = renderAt('/collections/universal-parks');
+    const collection = renderAt('/insights/universal-parks');
     await screen.findByRole('heading', { name: 'Universal parks' });
-    expectBackLink(collection.container, 'Collections', '/collections');
+    expectBackLink(collection.container, 'Insights', '/insights');
     collection.unmount();
 
-    const resort = renderAt('/collections/universal-parks/resorts/Universal%20Orlando%20Resort');
+    const resort = renderAt('/insights/universal-parks/resorts/Universal%20Orlando%20Resort');
     await screen.findByRole('heading', { name: 'Universal Orlando Resort' });
-    expectBackLink(resort.container, 'Universal parks', '/collections/universal-parks');
+    expectBackLink(resort.container, 'Universal parks', '/insights/universal-parks');
     resort.unmount();
 
-    const stamps = renderAt('/collections/universal-parks/stamps');
+    const stamps = renderAt('/insights/universal-parks/stamps');
     await screen.findByRole('heading', { name: 'Stamp book' });
-    expectBackLink(stamps.container, 'Universal parks', '/collections/universal-parks');
+    expectBackLink(stamps.container, 'Universal parks', '/insights/universal-parks');
   });
 
   it('has no accessibility problems', async () => {
     fakeServer({ 'GET /api/collections/universal-parks': detail, 'GET /api/trips': library });
     for (const path of [
-      '/collections/universal-parks',
-      '/collections/universal-parks/resorts/Universal%20Orlando%20Resort',
-      '/collections/universal-parks/stamps',
+      '/insights/universal-parks',
+      '/insights/universal-parks/resorts/Universal%20Orlando%20Resort',
+      '/insights/universal-parks/stamps',
     ]) {
       const { container, unmount } = renderAt(path);
       await screen.findByRole('heading', { level: 2 });

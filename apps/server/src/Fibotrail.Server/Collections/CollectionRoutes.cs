@@ -5,7 +5,7 @@ using Fibotrail.Stats;
 
 namespace Fibotrail.Server.Collections;
 
-/// <summary>A collection on the Collections screen.</summary>
+/// <summary>A collection on the Insights screen.</summary>
 /// <param name="Visited">Open places with at least one visiting trip.</param>
 /// <param name="Total">Open places. Planned places aren't counted.</param>
 /// <param name="Trips">Distinct added trips that visit at least one open place. A trip to two parks counts once.</param>
@@ -33,7 +33,7 @@ public sealed record CollectionPlaceInfo(string Id, string Name, string Group, s
 public sealed record CollectionDetail(CollectionSummary Summary, IReadOnlyList<ResortInfo> Resorts, IReadOnlyList<CollectionPlaceInfo> Places, string Attribution);
 
 /// <summary>
-/// The Collections screens' data. The park days come from the stats library. See
+/// The collection data of the Insights screens. The park days come from the stats library. See
 /// docs/specs/collections.md and ADR-013.
 /// </summary>
 public static class CollectionRoutes
@@ -46,14 +46,14 @@ public static class CollectionRoutes
 
         api.MapGet("/collections", async (FibotrailDbContext db, Places.CountryFinder finder, CountryOutlinesCache outlines, CollectionCatalog catalog, CancellationToken cancellationToken) =>
         {
-            var library = await StatsRoutes.LoadAsync(db, finder, outlines, catalog, cancellationToken);
+            var library = await StatsLibraryLoader.LoadAsync(db, finder, outlines, catalog, cancellationToken);
             return TypedResults.Ok(catalog.Collections.Select(collection => Summarize(collection, library)).ToList());
         }).WithName("GetCollections");
 
         api.MapGet("/collections/{id}", async (string id, FibotrailDbContext db, Places.CountryFinder finder, CountryOutlinesCache outlines, CollectionCatalog catalog, CancellationToken cancellationToken) =>
         {
             if (catalog.Collections.FirstOrDefault(collection => collection.Id == id) is not { } collection) return Results.NotFound();
-            var library = await StatsRoutes.LoadAsync(db, finder, outlines, catalog, cancellationToken);
+            var library = await StatsLibraryLoader.LoadAsync(db, finder, outlines, catalog, cancellationToken);
             return Results.Ok(Detail(collection, library));
         }).WithName("GetCollection").Produces<CollectionDetail>();
     }

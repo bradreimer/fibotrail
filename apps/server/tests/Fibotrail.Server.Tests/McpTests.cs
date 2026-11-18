@@ -152,7 +152,7 @@ public class McpTests
         Assert.Equal(HttpStatusCode.Unauthorized, (await browser.SendAsync(request)).StatusCode);
 
         // The token alone opens no /api route.
-        var api = new HttpRequestMessage(HttpMethod.Get, "/api/stats/summary");
+        var api = new HttpRequestMessage(HttpMethod.Get, "/api/insights/summary");
         api.Headers.Authorization = new AuthenticationHeaderValue("Bearer", Token);
         Assert.Equal(HttpStatusCode.Unauthorized, (await app.App.GetTestClient().SendAsync(api)).StatusCode);
     }
@@ -223,13 +223,13 @@ public class McpTests
     }
 
     [Fact]
-    public async Task Countries_and_days_match_the_stats_summary()
+    public async Task Countries_and_days_match_the_insights_summary()
     {
         var (app, browser, trip) = await StartWithTripAsync();
         await using var _ = app;
         await AddAsync(browser, trip);
 
-        var summary = await browser.GetJsonAsync("/api/stats/summary");
+        var summary = await browser.GetJsonAsync("/api/insights/summary");
         var countries = await CallToolAsync(app, "list_countries");
         var days = await CallToolAsync(app, "days_away", """{"by":"year"}""");
 

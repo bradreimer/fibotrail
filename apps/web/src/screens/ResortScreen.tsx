@@ -32,7 +32,7 @@ export function ResortScreen() {
         title="No such resort"
         message="That resort isn't in this collection."
         action={
-          <Link className="button" to={`/collections/${encodeURIComponent(id)}`}>
+          <Link className="button" to={`/insights/${encodeURIComponent(id)}`}>
             Back to the collection
           </Link>
         }
@@ -45,10 +45,10 @@ export function ResortScreen() {
   const visits = (trips.data ?? []).filter((trip) => parksOf.has(trip.id));
 
   return (
-    <div className="stats-screen">
-      <BackLink to={`/collections/${encodeURIComponent(id)}`}>{data.summary.name}</BackLink>
-      <h2 className="stats-page__title">{info.name}</h2>
-      <p className="stats-page__lead">{tripsText(info.trips)}</p>
+    <div className="insights-page">
+      <BackLink to={`/insights/${encodeURIComponent(id)}`}>{data.summary.name}</BackLink>
+      <h2 className="insights-page__title">{info.name}</h2>
+      <p className="insights-page__lead">{tripsText(info.trips)}</p>
       <ul className="resort-trips">
         {visits.map((trip) => {
           const parks = parksOf.get(trip.id) ?? [];
@@ -67,7 +67,7 @@ export function ResortScreen() {
           );
         })}
       </ul>
-      <p className="stats-page__note">{data.attribution}</p>
+      <p className="insights-page__note">{data.attribution}</p>
     </div>
   );
 }

@@ -625,6 +625,26 @@
         }
       }
     },
+    "/api/insights/summary": {
+      "get": {
+        "tags": [
+          "Fibotrail"
+        ],
+        "operationId": "GetInsightsSummary",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InsightsSummary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/collections": {
       "get": {
         "tags": [
@@ -691,159 +711,6 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/McpStatus"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/stats/summary": {
-      "get": {
-        "tags": [
-          "Fibotrail"
-        ],
-        "operationId": "GetStatsSummary",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/StatsSummary"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/stats/continents/{continent}": {
-      "get": {
-        "tags": [
-          "Fibotrail"
-        ],
-        "operationId": "GetStatsContinent",
-        "parameters": [
-          {
-            "name": "continent",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/StatsContinentPage"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/stats/countries/{id}": {
-      "get": {
-        "tags": [
-          "Fibotrail"
-        ],
-        "operationId": "GetStatsCountry",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/StatsCountryPage"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/stats/trip-spiral": {
-      "get": {
-        "tags": [
-          "Fibotrail"
-        ],
-        "operationId": "GetStatsTripSpiral",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SpiralTrip"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/stats/countries/{id}/season-wheel": {
-      "get": {
-        "tags": [
-          "Fibotrail"
-        ],
-        "operationId": "GetStatsSeasonWheel",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SeasonWheelResult"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/stats/records": {
-      "get": {
-        "tags": [
-          "Fibotrail"
-        ],
-        "operationId": "GetStatsRecords",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/RecordsResult"
                 }
               }
             }
@@ -970,31 +837,6 @@
           }
         }
       },
-      "CountryRecord": {
-        "required": [
-          "countryId",
-          "name",
-          "trips",
-          "days"
-        ],
-        "type": "object",
-        "properties": {
-          "countryId": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "trips": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "days": {
-            "type": "integer",
-            "format": "int32"
-          }
-        }
-      },
       "DecisionAction": {
         "enum": [
           "add",
@@ -1023,26 +865,6 @@
               "null",
               "string"
             ]
-          }
-        }
-      },
-      "GapRecord": {
-        "required": [
-          "days",
-          "after",
-          "before"
-        ],
-        "type": "object",
-        "properties": {
-          "days": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "after": {
-            "$ref": "#/components/schemas/TripRef"
-          },
-          "before": {
-            "$ref": "#/components/schemas/TripRef"
           }
         }
       },
@@ -1177,6 +999,48 @@
           "count": {
             "type": "integer",
             "format": "int32"
+          }
+        }
+      },
+      "InsightsSummary": {
+        "required": [
+          "trips",
+          "countries",
+          "outlineCountries",
+          "continents",
+          "cities",
+          "daysAway",
+          "distanceKm"
+        ],
+        "type": "object",
+        "properties": {
+          "trips": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "countries": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "outlineCountries": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "continents": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "cities": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "daysAway": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "distanceKm": {
+            "type": "number",
+            "format": "double"
           }
         }
       },
@@ -1561,68 +1425,6 @@
           }
         }
       },
-      "RecordsResult": {
-        "required": [
-          "longestTrip",
-          "farthestTrip",
-          "mostCountriesTrip",
-          "mostVisitedCountry",
-          "longestGap"
-        ],
-        "type": "object",
-        "properties": {
-          "longestTrip": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/TripRecord"
-              }
-            ]
-          },
-          "farthestTrip": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/TripRecord"
-              }
-            ]
-          },
-          "mostCountriesTrip": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/TripRecord"
-              }
-            ]
-          },
-          "mostVisitedCountry": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/CountryRecord"
-              }
-            ]
-          },
-          "longestGap": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/GapRecord"
-              }
-            ]
-          }
-        }
-      },
       "ResortInfo": {
         "required": [
           "name",
@@ -1758,44 +1560,6 @@
           "failed"
         ]
       },
-      "SeasonWheelResult": {
-        "required": [
-          "countryName",
-          "hemisphere",
-          "arcHemisphere",
-          "seasonsSeen",
-          "months",
-          "seasons"
-        ],
-        "type": "object",
-        "properties": {
-          "countryName": {
-            "type": "string"
-          },
-          "hemisphere": {
-            "type": "string"
-          },
-          "arcHemisphere": {
-            "type": "string"
-          },
-          "seasonsSeen": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "months": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/WheelMonth"
-            }
-          },
-          "seasons": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/WheelSeason"
-            }
-          }
-        }
-      },
       "SessionInfo": {
         "required": [
           "csrfToken"
@@ -1842,211 +1606,6 @@
           "newSuggestions": {
             "type": "integer",
             "format": "int32"
-          }
-        }
-      },
-      "SpiralTrip": {
-        "required": [
-          "trip",
-          "continentId",
-          "continentName"
-        ],
-        "type": "object",
-        "properties": {
-          "trip": {
-            "$ref": "#/components/schemas/TripRef"
-          },
-          "continentId": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "continentName": {
-            "type": [
-              "null",
-              "string"
-            ]
-          }
-        }
-      },
-      "StatsContinent": {
-        "required": [
-          "id",
-          "name",
-          "visited",
-          "total"
-        ],
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "visited": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "total": {
-            "type": "integer",
-            "format": "int32"
-          }
-        }
-      },
-      "StatsContinentPage": {
-        "required": [
-          "id",
-          "name",
-          "visited",
-          "total",
-          "countries"
-        ],
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "visited": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "total": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "countries": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/StatsCountryRow"
-            }
-          }
-        }
-      },
-      "StatsCountryPage": {
-        "required": [
-          "id",
-          "name",
-          "continentId",
-          "continentName",
-          "firstVisit",
-          "trips",
-          "days",
-          "hasUnpositionedDays",
-          "tripList"
-        ],
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "continentId": {
-            "type": "string"
-          },
-          "continentName": {
-            "type": "string"
-          },
-          "firstVisit": {
-            "type": "string",
-            "format": "date"
-          },
-          "trips": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "days": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "hasUnpositionedDays": {
-            "type": "boolean"
-          },
-          "tripList": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/TripRef"
-            }
-          }
-        }
-      },
-      "StatsCountryRow": {
-        "required": [
-          "id",
-          "name",
-          "trips",
-          "days"
-        ],
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "trips": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "days": {
-            "type": "integer",
-            "format": "int32"
-          }
-        }
-      },
-      "StatsSummary": {
-        "required": [
-          "trips",
-          "countries",
-          "outlineCountries",
-          "continents",
-          "cities",
-          "daysAway",
-          "distanceKm",
-          "continentCards"
-        ],
-        "type": "object",
-        "properties": {
-          "trips": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "countries": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "outlineCountries": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "continents": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "cities": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "daysAway": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "distanceKm": {
-            "type": "number",
-            "format": "double"
-          },
-          "continentCards": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/StatsContinent"
-            }
           }
         }
       },
@@ -2364,53 +1923,6 @@
           }
         }
       },
-      "TripRecord": {
-        "required": [
-          "trip",
-          "value"
-        ],
-        "type": "object",
-        "properties": {
-          "trip": {
-            "$ref": "#/components/schemas/TripRef"
-          },
-          "value": {
-            "type": "number",
-            "format": "double"
-          }
-        }
-      },
-      "TripRef": {
-        "required": [
-          "id",
-          "name",
-          "startDate",
-          "endDate",
-          "days"
-        ],
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "name": {
-            "type": "string"
-          },
-          "startDate": {
-            "type": "string",
-            "format": "date"
-          },
-          "endDate": {
-            "type": "string",
-            "format": "date"
-          },
-          "days": {
-            "type": "integer",
-            "format": "int32"
-          }
-        }
-      },
       "TripStats": {
         "required": [
           "days",
@@ -2529,55 +2041,6 @@
           },
           "coverPhotoId": {
             "type": "string"
-          }
-        }
-      },
-      "WheelMonth": {
-        "required": [
-          "month",
-          "days",
-          "hemisphere"
-        ],
-        "type": "object",
-        "properties": {
-          "month": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "days": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "hemisphere": {
-            "type": "string"
-          }
-        }
-      },
-      "WheelSeason": {
-        "required": [
-          "name",
-          "months",
-          "days",
-          "seen"
-        ],
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string"
-          },
-          "months": {
-            "type": "array",
-            "items": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          "days": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "seen": {
-            "type": "boolean"
           }
         }
       }

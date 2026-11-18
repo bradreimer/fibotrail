@@ -66,7 +66,7 @@ public static class McpTools
         new(
             "days_away",
             "Days away from home, by calendar month or calendar year. Every day from the first to the last day of a trip counts, " +
-            "so the total is the 'days away' of the Stats screen. Only periods with a trip are listed.",
+            "so the total is the 'days away' of the Insights screen. Only periods with a trip are listed.",
             """{"type":"object","properties":{"by":{"type":"string","enum":["month","year"],"description":"Group by month or by year."}},"required":["by"],"additionalProperties":false}""",
             typeof(DaysAway),
             DaysAwayOf),
