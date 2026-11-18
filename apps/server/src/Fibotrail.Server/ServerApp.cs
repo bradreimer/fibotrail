@@ -1,6 +1,7 @@
 using Fibotrail.Places;
 using Fibotrail.Server.Collections;
 using Fibotrail.Server.Map;
+using Fibotrail.Server.Mcp;
 using Fibotrail.Server.Stats;
 using System.Net;
 using System.Text.Json;
@@ -33,6 +34,7 @@ public static partial class ServerApp
     public static void AddFibotrailCore(this IServiceCollection services, ServerSettings settings, Argon2Cost? cost = null)
     {
         services.TryAddSingleton(settings);
+        services.TryAddSingleton<McpRateLimiter>();
         services.TryAddSingleton(TimeProvider.System);
         services.TryAddSingleton(new PasswordHasher(cost ?? Argon2Cost.Default));
         services.TryAddSingleton<ISignInDelay, SignInDelay>();
@@ -142,6 +144,8 @@ public static partial class ServerApp
 
         app.UseForwardedHeaders();
         app.Use(SecurityHeaders);
+        // The MCP server answers before the session and anti-forgery checks. It has its own token.
+        app.UseMcp();
         // API answers aren't compressed. They're small, and a compressed answer that holds a secret
         // next to text an attacker chose can leak the secret through its length.
         app.UseWhen(
@@ -198,6 +202,26 @@ public static partial class ServerApp
 
     [LoggerMessage(Level = LogLevel.Warning, Message = "{Message}")]
     private static partial void LogNotConnected(ILogger logger, string? message);
+
+    /// <summary>Writes whether the MCP server is on. The token is never part of the line.</summary>
+    public static void LogMcpState(WebApplication app)
+    {
+        ArgumentNullException.ThrowIfNull(app);
+        if (app.Services.GetRequiredService<ServerSettings>().McpEnabled)
+        {
+            LogMcpOn(app.Logger);
+        }
+        else
+        {
+            LogMcpOff(app.Logger);
+        }
+    }
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "MCP is on at /mcp.")]
+    private static partial void LogMcpOn(ILogger logger);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "MCP is off. Set MCP_TOKEN to turn it on.")]
+    private static partial void LogMcpOff(ILogger logger);
 
     [LoggerMessage(Level = LogLevel.Information, Message = "Continuing the scan that was interrupted.")]
     private static partial void LogResumed(ILogger logger);
@@ -328,6 +352,7 @@ public static partial class ServerApp
         api.MapMapRoutes();
         api.MapStatsRoutes();
         api.MapCollectionRoutes();
+        api.MapMcpRoutes();
 
         app.MapOpenApi();
 

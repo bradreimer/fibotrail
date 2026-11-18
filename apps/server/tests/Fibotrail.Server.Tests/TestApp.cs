@@ -84,11 +84,11 @@ public sealed class TestApp : IAsyncDisposable
     /// <param name="immichTimeout">How long one Immich request may take. Short, so a test of a hung Immich is fast.</param>
     /// <param name="logging">Receives every log line, at every level.</param>
     /// <param name="externalUrl">IMMICH_EXTERNAL_URL, or null for an empty one.</param>
-    public static async Task<TestApp> StartAsync(string? folder = null, FakeImmichServer? immich = null, TimeSpan? immichTimeout = null, ILoggerProvider? logging = null, string? externalUrl = "https://photos.example.com", Fibotrail.Server.Collections.CollectionCatalog? collections = null)
+    public static async Task<TestApp> StartAsync(string? folder = null, FakeImmichServer? immich = null, TimeSpan? immichTimeout = null, ILoggerProvider? logging = null, string? externalUrl = "https://photos.example.com", Fibotrail.Server.Collections.CollectionCatalog? collections = null, string? mcpToken = null)
     {
         folder ??= Directory.CreateTempSubdirectory("fibotrail-test-").FullName;
         immich ??= new FakeImmichServer();
-        var settings = new ServerSettings(folder, new Uri("http://immich.invalid:2283"), FakeImmichServer.Key, externalUrl is null ? null : new Uri(externalUrl));
+        var settings = new ServerSettings(folder, new Uri("http://immich.invalid:2283"), FakeImmichServer.Key, externalUrl is null ? null : new Uri(externalUrl), mcpToken: mcpToken);
         var time = new FakeTime();
         var delay = new FakeDelay();
 

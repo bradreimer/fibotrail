@@ -324,6 +324,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/mcp/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["GetMcpStatus"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/stats/summary": {
         parameters: {
             query?: never;
@@ -578,6 +594,10 @@ export interface components {
             startDate: string;
             /** Format: date */
             endDate: string;
+        };
+        McpStatus: {
+            enabled: boolean;
+            tools: string[];
         };
         OnTheWayChange: {
             onTheWay: boolean;
@@ -1485,6 +1505,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CollectionDetail"];
+                };
+            };
+        };
+    };
+    GetMcpStatus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["McpStatus"];
                 };
             };
         };
