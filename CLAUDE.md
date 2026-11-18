@@ -6,7 +6,7 @@ Guidance for Claude Code when working in this repository.
 
 Fibotrail is a self-hosted web app that turns an Immich photo library into a travel journal. It
 finds trips, maps them, and counts them. Immich supplies photos and GPS. Fibotrail adds trips,
-places, collections, and statistics on top.
+places, collections, and insights on top.
 
 Core principle: **Immich stays untouched.** Fibotrail only reads from Immich and keeps its own
 state in its own database. See

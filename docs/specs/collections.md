@@ -26,12 +26,14 @@ the same rule for counting days works for both.
 Added trips ─▶ Photos with a position ─▶ Park boundaries ─▶ Park days ─▶ Collections: stamps
 ```
 
-The Collections screens lead with trips, per
-[#110](https://github.com/bradreimer/fibotrail/issues/110).
+The collection screens lead with trips, per
+[#110](https://github.com/bradreimer/fibotrail/issues/110). Since
+[#151](https://github.com/bradreimer/fibotrail/issues/151), they are part of the Insights tab, under
+the travel totals. See [insights.md](insights.md).
 
 The Stats screen once had a Theme parks view of these days. It was removed in
 [#111](https://github.com/bradreimer/fibotrail/issues/111). This spec covers the data files, the
-counting rule, the shared numbers, and the Collections screens.
+counting rule, the shared numbers, and the collection screens of the Insights tab.
 
 ## User story
 
@@ -59,7 +61,7 @@ spent in Universal Studios Florida?"
 - **Not a visit**, the override that removes a park a photo placed. Only **Mark as visited** is in
   this spec, per [#119](https://github.com/bradreimer/fibotrail/issues/119).
 - Adding or removing a park day by hand.
-- A park view on the Stats screen.
+- A park chart. The MCP server answers questions about park days.
 - National parks, countries, and regions as collections. They follow the same format later.
 - Filters by year.
 
@@ -170,13 +172,13 @@ counting rule above can't see the trip. You mark the parks yourself.
 - The lookup and the day count are pure functions in the detection project, so they test with plain
   data and no running Immich.
 
-### Collections screens
+### Insights screens
 
-- **Collections** is a destination, per the four destinations of the design document and
-  [ADR-007](../adr/ADR-007-native-ios-feel-through-a-progressive-web-app.md). The
-  [app shell spec](app-shell.md) is updated in the same change.
+- The collections are on the **Insights** screen, under the travel totals, per
+  [insights.md](insights.md). Their pages are at `/insights/{id}`,
+  `/insights/{id}/resorts/{resort}`, and `/insights/{id}/stamps`.
 - Collections drill down in three levels, then a stamp book:
-  1. **List.** One row per collection: the name and its trips, such as "9 trips". The row has no
+  1. **List.** On the Insights screen, one row per collection: the name and its trips, such as "9 trips". The row has no
      ring and no days. A collection with no trips reads "0 trips · Not visited yet". Each row
      opens and closes in place, like a section under the map on the
      [life map](life-map.md), per [#116](https://github.com/bradreimer/fibotrail/issues/116).
@@ -209,7 +211,7 @@ counting rule above can't see the trip. You mark the parks yourself.
 - A screen reader reads each stamp once, as one label: the name, the days, and the trips, such as
   "Universal Studios Florida, 6 days, 2 trips." The grid is also the text alternative to the ring.
 - The four screen states of the app shell apply: loading, empty, error, and offline. With no added
-  trips, the screen says "Add a trip to start your stamp book."
+  trips, a collection page says "Add a trip to start your stamp book."
 
 ### API
 
@@ -296,6 +298,5 @@ counting rule above can't see the trip. You mark the parks yourself.
    name is changed in the data file. The design document should say who checks the list, and
    how often.
 6. **What happens to a trip that is only partly detected?** A photo with no position adds no
-   park day, so a day inside a park with no GPS fix doesn't count. The Stats screen spec adds a
-   line about this for country days, such as "Days count only photos with a location." The
-   collection sheet should show the same line.
+   park day, so a day inside a park with no GPS fix doesn't count. The collection sheet could
+   say so, such as "Days count only photos with a location."

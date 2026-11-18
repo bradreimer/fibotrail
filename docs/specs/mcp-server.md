@@ -9,7 +9,7 @@ This spec defines the MCP server decided in
 you ask Fibotrail questions in plain language from an MCP client, such as "How many times have I
 been to a Disney park?", without a new Stats view for each question.
 
-Think of the Stats screen as a printed menu and the MCP server as the kitchen window. The menu
+Think of the Insights screen as a printed menu and the MCP server as the kitchen window. The menu
 lists the dishes someone planned. The window takes any order that the kitchen's basic ingredients
 can make. The tools are the ingredients, and the model combines them.
 
@@ -63,8 +63,7 @@ each question.
 - The code is a new C# project, `Fibotrail.Mcp`, in `apps/server/src/`, with a test project in
   `apps/server/tests/`. The server project only maps the route and passes in the stats library.
 - A tool reads only the stats library and the collections code, per
-  [ADR-014](../adr/ADR-014-stats-views-are-self-contained-modules.md). It never reads the database,
-  Immich, or a view.
+  [insights.md](insights.md#the-stats-library). It never reads the database or Immich.
 
 ### Access
 
@@ -117,7 +116,7 @@ URL, a key, or a user name.
 
 ### What counts
 
-- The rules are those of the [Stats screen](stats-screen.md#what-counts) and
+- The rules are those of the [Insights screen](insights.md#what-counts) and
   [collections](collections.md#what-counts), and the tools call the same functions.
 - Only added trips are in any result. Suggested, later, and ignored trips change no number.
 - Photos on the way count for nothing, per [on the way](on-the-way.md).
@@ -125,13 +124,13 @@ URL, a key, or a user name.
 - **Trips** in a collection, resort, or park is the number of distinct added trips that visit it.
   A trip that visits two parks counts once in the collection.
 - **Days** in a park is the number of distinct local days with a photo in it. **Days** in a
-  collection or resort is the sum of the days of its parks, as the Collections screen shows, so a
+  collection or resort is the sum of the days of its parks, as the Insights screen shows, so a
   day with photos in two parks counts for both. A trip marked by hand adds a trip and no days, per
   collections.
 - **Last visit** is new. It is the latest local day with a photo in the place, or the last day of
   the trip for a park that only you marked. A country with no day that has a position uses the last
-  day of its latest trip. It is added to the stats library, with its tests, because ADR-014 puts
-  every new fact there: `LastVisit` on `ParkStats` and on `CountryStats`.
+  day of its latest trip. It is added to the stats library, with its tests, because the stats library
+  holds every shared fact: `LastVisit` on `ParkStats` and on `CountryStats`.
 
 ### The tools
 
@@ -191,7 +190,7 @@ reads, for example:
 ```
 
 "Times" can mean separate trips or park days, and the tool returns both, so the model can answer
-"9 trips and 34 days". The numbers are those of the Collections screen's collection row.
+"9 trips and 34 days". The numbers are those of the collection row on the Insights screen.
 
 ### The MCP screen
 
@@ -249,8 +248,8 @@ to the server. Settings has an **Open MCP** button that goes to it.
   1 trip and 2 days.
 - A fourth trip that is only suggested, ignored, or later changes no number in any tool.
 - A park marked by hand adds one trip to its park, resort, and collection, and adds no days.
-- The trips of `collection_visits` match the Collections screen, and the countries of
-  `list_countries` match the Stats summary, in one test that builds the data once.
+- The trips of `collection_visits` match the Insights screen, and the countries of
+  `list_countries` match the Insights totals, in one test that builds the data once.
 - A test walks every tool's result type, and fails when a field has no kind or a kind that isn't
   in the table.
 - A test seeds a trip named "Mom's 70th" with a position, and shows that no tool result holds the

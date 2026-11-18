@@ -2,13 +2,13 @@
 
 ## Status
 
-Accepted
+Superseded by ADR-019
 
 ## Context
 
-The Stats screen ([spec](../specs/stats-screen.md)) will show several visuals: trips per year, a
-trip length histogram, records, a season wheel ([spec](../specs/season-wheel.md)), and a Fibonacci
-spiral of trips ([spec](../specs/trip-spiral.md)). More ideas are waiting, such as a travel clock
+The Stats screen (spec removed in #151) will show several visuals: trips per year, a
+trip length histogram, records, a season wheel (spec removed in #151), and a Fibonacci
+spiral of trips (spec removed in #151). More ideas are waiting, such as a travel clock
 and distance rings.
 
 Which visuals are worth keeping is not known yet. The maintainer expects to change their mind after

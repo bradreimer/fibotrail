@@ -28,6 +28,16 @@ checklist are also still unrecorded.
 
 ## Completed
 
+- [#151](https://github.com/bradreimer/fibotrail/issues/151) One **Insights** tab replaces the
+  Collections and Stats tabs ([spec](specs/insights.md),
+  [ADR-019](adr/ADR-019-insights-replaces-the-stats-and-collections-tabs.md)). It shows the six
+  totals of the old Stats screen (trips, countries, cities, continents, days away, distance), then
+  the collections. The tab bar holds Trips, Map, and Insights. The continent and country pages,
+  Records, the Fibonacci spiral, and the season wheel are removed, on the web and the server,
+  because the MCP server answers those questions. The totals moved from `GET /api/stats/summary`
+  to `GET /api/insights/summary`, and the other `/api/stats/*` routes are gone. Collection pages
+  moved from `/collections/...` to `/insights/...`, and old `/collections` and `/stats` addresses
+  redirect. Checked in tests only, not yet on a phone.
 - [#149](https://github.com/bradreimer/fibotrail/issues/149) An opened collection loads with a
   skeleton shaped like its content: a summary line, three resort rows, and a button. It replaces
   one 4:3 block that collapsed when the data arrived. The row height is an estimate (1.5 times the
@@ -146,7 +156,7 @@ checklist are also still unrecorded.
   copies `collections/` into the image.
 
 - [#59](https://github.com/bradreimer/fibotrail/issues/59) The Fibonacci spiral of trips, a Stats
-  view ([spec](specs/trip-spiral.md)). Every added trip is a dot along a spiral of quarter circles
+  view (spec removed in #151). Every added trip is a dot along a spiral of quarter circles
   in Fibonacci squares, oldest at the center, sized by days and colored by continent, with continent
   chips, **Earlier** and **Later** buttons, and a card that opens the trip. A trip takes the continent
   that has most of its countries. The seven continent colors are tokens, each at least 3:1 on Paper
@@ -154,7 +164,7 @@ checklist are also still unrecorded.
   trips only, so how it looks at 60 or more is unknown. That is the spec's first open question.
 
 - [#58](https://github.com/bradreimer/fibotrail/issues/58) The season wheel, a country page view
-  ([spec](specs/season-wheel.md)). A ring of 12 months shaded by the country's days, four season
+  (spec removed in #151). A ring of 12 months shaded by the country's days, four season
   arcs (solid Gold when seen, dashed when not), a center that reads "2 of 4 seasons seen", and a row
   for each season that dims the rest when tapped. Each day uses its own latitude for the
   hemisphere. The stats library now keeps each day of a country with a latitude. Checked in a
@@ -346,22 +356,16 @@ The plan is in [roadmap.md](roadmap.md). Specs are in [specs/](specs/README.md).
   and keep the photo viewer dark in dark mode
   ([#51](https://github.com/bradreimer/fibotrail/issues/51)). Built and checked in a desktop browser
   at phone size, not yet on a phone.
-- Phase 5: collections, such as Disney and Universal parks, and the Stats screen. The tab bar then
-  gains Collections and Stats, per ADR-007. Collections are specified in
+- Phase 5: collections, such as Disney and Universal parks, and the travel totals, now together on
+  the Insights tab ([insights.md](specs/insights.md)). Collections are specified in
   [collections.md](specs/collections.md)
   ([#64](https://github.com/bradreimer/fibotrail/issues/64)). Park days are derived from stored photo
   positions, per [ADR-013](adr/ADR-013-park-days-are-derived-from-stored-photo-positions.md). The
   collections are built, and the park outlines are validated in production by
-  the maintainer. What's left is the run-through on a phone.
+  the maintainer. What's left is the run-through of the Insights tab on a phone.
 - Answer the open questions in the [life map spec](specs/life-map.md) with real use: whether the
   home country should always fill in, and whether 25 km is the right distance for a stop just off a
   coast.
-- Phase 5, the Stats views. The host and the three views with a spec are built: records
-  ([#54](https://github.com/bradreimer/fibotrail/issues/54)), the season wheel
-  ([#58](https://github.com/bradreimer/fibotrail/issues/58)), and the trip spiral
-  ([#59](https://github.com/bradreimer/fibotrail/issues/59)). They need a look on real data and on a
-  phone. Views are self-contained, per
-  [ADR-014](adr/ADR-014-stats-views-are-self-contained-modules.md).
 - Answer the remaining open questions in the
   [design and branding document](knowledge/design-and-branding.md#risks-open-questions-and-next-steps).
   The server language is settled: see [ADR-004](adr/ADR-004-technology-stack.md).

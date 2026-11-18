@@ -7,7 +7,7 @@ Accepted
 ## Context
 
 [#48](https://github.com/bradreimer/fibotrail/issues/48) asks for the life map to zoom to cities,
-and the [Stats screen spec](../specs/stats-screen.md) leaves out a count of cities because of one
+and the Stats screen spec (removed in #151) leaves out a count of cities because of one
 problem: Immich's city names are granular. A neighborhood can be a "city", so Tokyo could count as
 ten cities, and a count would overstate how many you've seen.
 

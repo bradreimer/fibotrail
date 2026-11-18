@@ -35,8 +35,8 @@ visited, so that I can see my travel history at a glance.
 
 - Regions in countries other than the detail countries. Every other country is one unit
   ([ADR-015](../adr/ADR-015-cities-are-merged-places-and-theme-parks-keep-their-own-identity.md)).
-- Collections such as Disney parks, and the Stats screen. They are phase 5.
-- Continents. They are on the [Stats screen](stats-screen.md).
+- Collections such as Disney parks, and the travel totals. They are on the [Insights screen](insights.md).
+- Continents. The [MCP server](mcp-server.md) answers questions about them.
 - Adding or removing a visit by hand.
 - Filters by year or collection.
 
