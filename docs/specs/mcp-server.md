@@ -205,6 +205,9 @@ reads, for example:
 - `list_trips` with `limit` 500 returns 200 entries and says the list was cut short.
 - The token appears in no log line, and no response body, in a test that makes a call with it.
 - The Settings screen shows "MCP server: on" with a token and "MCP server: off" without one.
+- The README says that nothing leaves your network unless you set `MCP_TOKEN` and connect a
+  client, and that a result holds only the allowed kinds. No line of it still says that Fibotrail
+  never sends location data anywhere.
 
 ## Open questions
 
