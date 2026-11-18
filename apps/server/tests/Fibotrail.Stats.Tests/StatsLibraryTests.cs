@@ -147,4 +147,24 @@ public class StatsLibraryTests
 
     [Fact]
     public void With_no_named_stops_there_are_no_cities() => Assert.Equal(0, Build().CityCount);
+
+    [Fact]
+    public void A_trip_is_found_by_its_country_city_park_resort_and_collection()
+    {
+        var day = new DateOnly(2023, 5, 1);
+        // A square park in Sweden, around (59, 15).
+        var park = new Fibotrail.Detection.Parks.ParkPlace("tivoli", "Gröna Lund", "Djurgården", 1, 50,
+            [[[new(58.99, 14.99), new(58.99, 15.01), new(59.01, 15.01), new(59.01, 14.99), new(58.99, 14.99)]]]);
+        var lookup = new Fibotrail.Detection.Parks.ParkLookup([park]);
+        var sweden = new StatsTrip(1, "Trip 1", day, day, 1, 0, 0, [(59.0, 15.0)], [new PhotoPosition(day, 59.0, 15.0)],
+            [new NamedStop("Stockholm", 59.3, 18.0, 5)]);
+        var denmark = new StatsTrip(2, "Trip 2", day, day, 1, 0, 0, [(56.0, 10.0)], [new PhotoPosition(day, 56.0, 10.0)],
+            [new NamedStop("Aarhus", 56.0, 10.0, 5)]);
+
+        var keywords = StatsLibrary.Build([sweden, denmark], new CountryFinder(Outlines), Outlines, lookup)
+            .KeywordsByTrip(new Dictionary<string, string> { ["tivoli"] = "Nordic Parks" });
+
+        Assert.Equal(["Sweden", "Stockholm", "Gröna Lund", "Djurgården", "Nordic Parks"], keywords[1]);
+        Assert.Equal(["Denmark", "Aarhus"], keywords[2]);
+    }
 }

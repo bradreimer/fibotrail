@@ -18,6 +18,7 @@ const trips: TripSummary[] = [
     days: 6,
     place: 'Paris',
     coverPhotoId: 'c3',
+    keywords: ['France', 'Paris'],
   },
   {
     id: 2,
@@ -27,6 +28,7 @@ const trips: TripSummary[] = [
     days: 4,
     place: 'Kelowna',
     coverPhotoId: 'c2',
+    keywords: ['Canada', 'Kelowna'],
   },
   {
     id: 1,
@@ -36,6 +38,12 @@ const trips: TripSummary[] = [
     days: 10,
     place: 'Orlando',
     coverPhotoId: 'c1',
+    keywords: [
+      'United States of America',
+      'Magic Kingdom',
+      'Walt Disney World Resort',
+      'Disney Parks',
+    ],
   },
 ];
 
@@ -117,6 +125,64 @@ describe('the trip library', () => {
     await screen.findByRole('list', { name: 'Your trips' });
     resizeTo(1100);
     expect(screen.getAllByRole('link', { name: /days/ })).toHaveLength(3);
+  });
+});
+
+describe('searching the library', () => {
+  function names() {
+    return within(screen.getByRole('list', { name: 'Your trips' }))
+      .getAllByRole('link')
+      .map((card) => card.querySelector('.trip-card__name')!.textContent);
+  }
+
+  it('finds trips by a park or collection on the trip', async () => {
+    fakeServer({ 'GET /api/trips': trips });
+    renderTrips();
+    await userEvent.type(
+      await screen.findByRole('searchbox', { name: 'Search your trips' }),
+      'disney',
+    );
+    expect(names()).toEqual(['Disney with the kids']);
+    expect(screen.getByRole('status')).toHaveTextContent('1 trip found');
+    expectNoAccessibilityProblems();
+  });
+
+  it('finds trips by name, year, and place, and needs every word to match', async () => {
+    fakeServer({ 'GET /api/trips': trips });
+    renderTrips();
+    const field = await screen.findByRole('searchbox', { name: 'Search your trips' });
+    await userEvent.type(field, 'weekend');
+    expect(names()).toEqual(['Okanagan weekend']);
+    await userEvent.clear(field);
+    await userEvent.type(field, '2027');
+    expect(names()).toHaveLength(3);
+    await userEvent.clear(field);
+    await userEvent.type(field, 'france 2027');
+    expect(names()).toEqual(['Paris']);
+  });
+
+  it('says when nothing matches, and Clear search shows every trip again', async () => {
+    fakeServer({ 'GET /api/trips': trips });
+    renderTrips();
+    await userEvent.type(await screen.findByRole('searchbox'), 'tokyo');
+    expect(
+      screen.getByText('No trip matches “tokyo”. Try a trip name, a year, or a place.'),
+    ).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: 'Clear search' }));
+    expect(names()).toHaveLength(3);
+    expect(screen.getByRole('searchbox')).toHaveValue('');
+  });
+
+  it('keeps the search in the address, so going back keeps it', async () => {
+    fakeServer({ 'GET /api/trips': trips });
+    render(
+      <MemoryRouter initialEntries={['/trips?q=kelowna']}>
+        <App />
+      </MemoryRouter>,
+    );
+    await screen.findByRole('list', { name: 'Your trips' });
+    expect(screen.getByRole('searchbox')).toHaveValue('kelowna');
+    expect(names()).toEqual(['Okanagan weekend']);
   });
 });
 

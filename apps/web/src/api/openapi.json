@@ -2010,7 +2010,8 @@
           "endDate",
           "days",
           "place",
-          "coverPhotoId"
+          "coverPhotoId",
+          "keywords"
         ],
         "type": "object",
         "properties": {
@@ -2041,6 +2042,12 @@
           },
           "coverPhotoId": {
             "type": "string"
+          },
+          "keywords": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         }
       }

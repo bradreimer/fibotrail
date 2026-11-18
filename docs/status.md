@@ -28,6 +28,13 @@ checklist are also still unrecorded.
 
 ## Completed
 
+- [#157](https://github.com/bradreimer/fibotrail/issues/157) Search on the Trips screen
+  ([spec](specs/trip-library.md#search)). A search field above the grid finds trips by name,
+  destination, year, country, city, park, resort, or collection, so "disney" finds every trip to a
+  Disney park. `GET /api/trips` now returns `keywords` for each trip, worked out by the stats
+  library, so search agrees with the collections. Filtering happens on the device, and every word
+  of the search must match. The search stays in the address (`/trips?q=...`), so going back from a
+  trip page keeps it. Checked in tests only, not yet on a phone.
 - [#151](https://github.com/bradreimer/fibotrail/issues/151) One **Insights** tab replaces the
   Collections and Stats tabs ([spec](specs/insights.md),
   [ADR-019](adr/ADR-019-insights-replaces-the-stats-and-collections-tabs.md)). It shows the six

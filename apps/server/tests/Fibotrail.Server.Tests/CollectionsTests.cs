@@ -66,6 +66,24 @@ public class CollectionsTests
     }
 
     [Fact]
+    public async Task A_trip_in_the_library_has_its_park_resort_and_collection_as_keywords()
+    {
+        var (app, browser, trip) = await StartAsync();
+        await using var _ = app;
+        await DecideAsync(browser, trip, "add");
+
+        var card = Assert.Single((await browser.GetJsonAsync("/api/trips")).EnumerateArray());
+        var keywords = card.GetProperty("keywords").EnumerateArray().Select(word => word.GetString()).ToList();
+
+        Assert.Contains("NEAR", keywords);
+        Assert.Contains("Test Resort", keywords);
+        Assert.Contains("Test parks", keywords);
+        Assert.Contains("United States of America", keywords);
+        Assert.DoesNotContain("FAR", keywords);
+        Assert.DoesNotContain("COMING", keywords);
+    }
+
+    [Fact]
     public async Task A_suggested_or_ignored_trip_adds_no_park_day()
     {
         var (app, browser, trip) = await StartAsync();

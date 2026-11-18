@@ -146,4 +146,46 @@ public sealed class StatsLibrary
 
     /// <summary>One visited country by its key (its id, or its name when it has none), or null.</summary>
     public CountryStats? Country(string key) => Countries.FirstOrDefault(country => country.Country.Key == key);
+
+    /// <summary>
+    /// The words that find each trip in the library's search: its countries, its cities and their
+    /// stop names, its parks, their resorts, and their collections. Each list is in that order,
+    /// with no duplicates, ignoring case. See docs/specs/trip-library.md.
+    /// </summary>
+    /// <param name="collectionOfPark">The collection name of each park id, such as "Disney Parks".</param>
+    public IReadOnlyDictionary<int, IReadOnlyList<string>> KeywordsByTrip(IReadOnlyDictionary<string, string>? collectionOfPark = null)
+    {
+        var words = Trips.ToDictionary(trip => trip.Id, _ => new List<string>());
+        void Add(int tripId, string? word)
+        {
+            if (string.IsNullOrWhiteSpace(word) || !words.TryGetValue(tripId, out var list)) return;
+            if (!list.Contains(word, StringComparer.OrdinalIgnoreCase)) list.Add(word);
+        }
+
+        foreach (var country in Countries)
+        {
+            foreach (var trip in country.Trips) Add(trip.TripId, country.Country.Name);
+        }
+
+        foreach (var place in Places)
+        {
+            foreach (var trip in place.Trips)
+            {
+                Add(trip.TripId, place.Name);
+                foreach (var stop in place.StopNames ?? []) Add(trip.TripId, stop);
+            }
+        }
+
+        foreach (var park in Parks)
+        {
+            foreach (var visit in park.Trips)
+            {
+                Add(visit.TripId, park.Place.Name);
+                Add(visit.TripId, park.Place.Group);
+                Add(visit.TripId, collectionOfPark?.GetValueOrDefault(park.Place.Id));
+            }
+        }
+
+        return words.ToDictionary(pair => pair.Key, pair => (IReadOnlyList<string>)pair.Value);
+    }
 }
