@@ -58,6 +58,11 @@ checklist are also still unrecorded.
   runs. Checked in tests only. The connection steps haven't been run against a real client yet
   (open question 1 of the spec), and the README privacy text now names the MCP exception.
 
+- [#156](https://github.com/bradreimer/fibotrail/issues/156) `fibotrail trip pin <id> <photo>` and
+  `unpin <photo>` repair a trip that detection left a photo out of. A pin is a decision that moves
+  the photo to a day of the trip before the rules run (ADR-021). Asked for on 2026-11-18 to add one
+  photo to trip 72. Checked in tests only, not yet run on the maintainer's library.
+
 - [#155](https://github.com/bradreimer/fibotrail/issues/155) `fibotrail trip rename <id> <name>`
   renames any trip as a decision, so a rescan keeps the name. Found on the maintainer's library
   on 2026-11-18: `fibotrail join` kept the name of one joined trip, such as "Ontario, July 2010"
