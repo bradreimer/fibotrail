@@ -96,6 +96,7 @@ them.
   | Immich's updated time | `updatedAt` |
   | Whether it's a video | `type` equal to `VIDEO` |
   | Length of a video, in milliseconds | `duration` |
+  | Thumbnail version | `thumbhash`, which Immich makes again with each new thumbnail |
 
 - Rows are keyed by asset ID. An asset that Immich returns again replaces its row.
 - An asset with `isTrashed` set to true isn't stored, and its row is removed if it has one.
@@ -172,10 +173,20 @@ rescan command reads everything, so it always does. It is the command-line form 
   `GET /api/assets/{id}/thumbnail` on `IMMICH_URL`.
 - The proxy serves two sizes: a thumbnail for grids and a preview for the photo viewer, which are
   Immich's `size=thumbnail` and `size=preview`. For a video, both are still frames.
+- The proxy asks for `edited=true`, so an edit made in Immich, such as a rotation, shows. Immich
+  sends the original when a photo has no edit.
 - The proxy serves only asset IDs that are in the `photo` table, and only to a signed-in session.
-- Fetched images are cached in `/data/thumbnails`. The cache can be deleted at any time and
-  refills on demand.
-- The browser may keep an image for 7 days, in its private cache.
+- Each photo's image has a version: 16 hex digits of a SHA-256 of its stored `thumbhash` and
+  `updatedAt`. When a photo changes in Immich, such as after a rotation, the next scan stores the
+  new values, so the version changes. **Scan now** reads the change when Immich gives it a new
+  `updatedAt`. **Rescan everything** and `fibotrail rescan` read it either way
+  ([#161](https://github.com/bradreimer/fibotrail/issues/161)).
+- Fetched images are cached in `/data/thumbnails`, under the photo ID and its version. An image of
+  an older version is fetched again, and the older file is deleted. The cache can be deleted at any
+  time and refills on demand.
+- The browser keeps an image in its private cache, but asks again each time
+  (`Cache-Control: private, no-cache`). The answer has the version as its `ETag`. While the version
+  is the same, the proxy answers 304 with no body and doesn't ask Immich.
 
 ## Acceptance criteria
 
@@ -188,6 +199,10 @@ rescan command reads everything, so it always does. It is the command-line form 
 - The Immich access log for a full scan shows only requests on the allowed list.
 - The key appears in no log line, no API response, and no file served to the browser.
 - A thumbnail request for an ID that isn't in the `photo` table returns 404.
+- After a photo is rotated in Immich, **Rescan everything** makes the trip show the rotated
+  thumbnail, preview, and cover, with no other step.
+- An image request with the current `ETag` in `If-None-Match` returns 304 and makes no request to
+  Immich.
 - A video taken away from home counts toward the minimum photos of a trip.
 - After a photo's position changes in Immich without a new `updatedAt`, `fibotrail rescan` stores
   the new position and **Scan now** doesn't.

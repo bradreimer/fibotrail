@@ -108,6 +108,62 @@ public class ThumbnailTests
         Assert.Equal("image/jpeg", preview.Content.Headers.ContentType!.MediaType);
         Assert.Equal(FakeImmichServer.JpegBytes, await preview.Content.ReadAsByteArrayAsync());
         Assert.Contains("private", thumbnail.Headers.CacheControl!.ToString(), StringComparison.Ordinal);
+        Assert.True(thumbnail.Headers.CacheControl.NoCache);
+        Assert.NotNull(thumbnail.Headers.ETag);
+    }
+
+    [Fact]
+    public async Task An_unchanged_photo_answers_not_modified_without_asking_immich()
+    {
+        var (app, browser) = await StartWithOnePhotoAsync();
+        await using var _ = app;
+        var path = $"/api/photos/{FakeAsset.IdFor(1)}/thumbnail";
+        var first = await browser.GetAsync(path, asPage: false);
+
+        var request = new HttpRequestMessage(HttpMethod.Get, path);
+        request.Headers.IfNoneMatch.Add(first.Headers.ETag!);
+        var again = await browser.SendAsync(request);
+
+        Assert.Equal(HttpStatusCode.NotModified, again.StatusCode);
+        Assert.Equal(first.Headers.ETag, again.Headers.ETag);
+        Assert.Equal(1, ImageRequests(app));
+    }
+
+    [Fact]
+    public async Task After_a_photo_is_rotated_in_immich_a_rescan_makes_the_new_image_show()
+    {
+        var (app, browser) = await StartWithOnePhotoAsync();
+        await using var _ = app;
+        var path = $"/api/photos/{FakeAsset.IdFor(1)}/thumbnail";
+        var before = await browser.GetAsync(path, asPage: false);
+
+        // Immich makes a new thumbnail, and a new thumbhash, but keeps the same updatedAt.
+        app.Immich.Assets[0] = app.Immich.Assets[0] with { Thumbhash = "rotatedThumbhash==" };
+        await app.Scans.RunFullPassAsync(onPage: null, CancellationToken.None);
+
+        var request = new HttpRequestMessage(HttpMethod.Get, path);
+        request.Headers.IfNoneMatch.Add(before.Headers.ETag!);
+        var after = await browser.SendAsync(request);
+
+        Assert.Equal(HttpStatusCode.OK, after.StatusCode);
+        Assert.NotEqual(before.Headers.ETag, after.Headers.ETag);
+        Assert.Equal(2, ImageRequests(app));
+        // The old version is gone from the cache.
+        Assert.Single(Directory.EnumerateFiles(app.Settings.ThumbnailDirectory, "*", SearchOption.AllDirectories));
+    }
+
+    [Fact]
+    public void The_image_version_follows_the_thumbhash_and_the_update_time()
+    {
+        var updated = new DateTime(2026, 4, 2, 18, 5, 0, DateTimeKind.Utc);
+
+        var version = ThumbnailStore.VersionOf("EXAMPLEthumbhash0001==", updated);
+
+        Assert.Matches("^[0-9a-f]{16}$", version);
+        Assert.Equal(version, ThumbnailStore.VersionOf("EXAMPLEthumbhash0001==", updated));
+        Assert.NotEqual(version, ThumbnailStore.VersionOf("rotatedThumbhash==", updated));
+        Assert.NotEqual(version, ThumbnailStore.VersionOf("EXAMPLEthumbhash0001==", updated.AddSeconds(1)));
+        Assert.NotEqual(version, ThumbnailStore.VersionOf(null, updated));
     }
 
     [Theory]

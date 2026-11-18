@@ -108,7 +108,12 @@ public sealed class ImmichClient : IImmichClient, IDisposable
     public Task<byte[]> GetImageAsync(Guid assetId, ImmichImageSize size, CancellationToken cancellationToken) => SendAsync(async token =>
     {
         var stream = await _api.Assets[assetId].Thumbnail.GetAsync(
-            request => request.QueryParameters.Size = size == ImmichImageSize.Preview ? AssetMediaSize.Preview : AssetMediaSize.Thumbnail,
+            request =>
+            {
+                request.QueryParameters.Size = size == ImmichImageSize.Preview ? AssetMediaSize.Preview : AssetMediaSize.Thumbnail;
+                // An edit made in Immich, such as a rotation, shows. Immich sends the original when there is no edit.
+                request.QueryParameters.Edited = true;
+            },
             token).ConfigureAwait(false) ?? throw new ImmichNotFoundException();
         await using (stream.ConfigureAwait(false))
         {
@@ -135,7 +140,8 @@ public sealed class ImmichClient : IImmichClient, IDisposable
             item.UpdatedAt?.UtcDateTime ?? DateTime.UnixEpoch,
             item.Type == AssetTypeEnum.VIDEO,
             item.Duration,
-            item.IsTrashed == true);
+            item.IsTrashed == true,
+            NullIfEmpty(item.Thumbhash));
     }
 
     private static string? NullIfEmpty(string? value) => string.IsNullOrWhiteSpace(value) ? null : value;

@@ -136,6 +136,20 @@ public class ImmichClientTests
         Assert.Equal(FakeImmichServer.JpegBytes, preview);
         Assert.Contains("size=thumbnail", immich.Requests[0].PathAndQuery, StringComparison.Ordinal);
         Assert.Contains("size=preview", immich.Requests[1].PathAndQuery, StringComparison.Ordinal);
+        // An edit made in Immich, such as a rotation, is what Fibotrail shows.
+        Assert.All(immich.Requests, request => Assert.Contains("edited=true", request.PathAndQuery, StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public async Task A_search_reads_the_thumbhash_of_each_asset()
+    {
+        using var immich = new FakeImmichServer();
+        immich.Assets.Add(FakeAsset.Number(1, "2026-03-01T10:00:00.000Z") with { Thumbhash = "rotatedThumbhash==" });
+        using var client = new ImmichClient(Options(), immich);
+
+        var page = await client.SearchAsync(null, null, 10, CancellationToken.None);
+
+        Assert.Equal("rotatedThumbhash==", Assert.Single(page.Assets).Thumbhash);
     }
 
     [Fact]

@@ -36,8 +36,8 @@ public sealed class SignInFailure
 }
 
 /// <summary>
-/// What Fibotrail keeps about one Immich asset: when and where it was taken. "Photo" covers images
-/// and videos. Nothing else about the asset is stored. See docs/specs/immich-scanning.md.
+/// What Fibotrail keeps about one Immich asset: when and where it was taken, and which version of its
+/// thumbnail Immich has. "Photo" covers images and videos. Nothing else about the asset is stored. See docs/specs/immich-scanning.md.
 /// </summary>
 public sealed class Photo
 {
@@ -64,6 +64,12 @@ public sealed class Photo
 
     /// <summary>The length of a video, in milliseconds.</summary>
     public int? DurationMs { get; set; }
+
+    /// <summary>
+    /// Immich's hash of the thumbnail. It changes when Immich makes a new thumbnail, such as after a
+    /// rotation, so the image cache knows to fetch again.
+    /// </summary>
+    public string? Thumbhash { get; set; }
 }
 
 public enum ScanState

@@ -21,6 +21,10 @@ public sealed record ImmichVersion(int Major, int Minor, int Patch)
 /// <param name="LocalTime">The wall-clock time at the place of capture, with no zone. Null when Immich has none.</param>
 /// <param name="UpdatedAt">When Immich last changed its record, in UTC.</param>
 /// <param name="DurationMs">The length of a video, in milliseconds.</param>
+/// <param name="Thumbhash">
+/// A small hash of the thumbnail. Immich makes a new one when it makes a new thumbnail, such as
+/// after a rotation, and uses it to bust its own cache. Null when Immich has none yet.
+/// </param>
 public sealed record ImmichAsset(
     Guid Id,
     DateTime? LocalTime,
@@ -32,7 +36,8 @@ public sealed record ImmichAsset(
     DateTime UpdatedAt,
     bool IsVideo,
     int? DurationMs,
-    bool IsTrashed);
+    bool IsTrashed,
+    string? Thumbhash = null);
 
 /// <summary>One page of a search. A null <see cref="NextCursor"/> means it was the last page.</summary>
 public sealed record ImmichPage(IReadOnlyList<ImmichAsset> Assets, string? NextCursor);

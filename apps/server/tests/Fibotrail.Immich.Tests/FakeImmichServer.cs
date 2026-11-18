@@ -18,7 +18,8 @@ public sealed record FakeAsset(
     string? State = null,
     string? Country = null,
     bool IsVideo = false,
-    bool IsTrashed = false)
+    bool IsTrashed = false,
+    string Thumbhash = "EXAMPLEthumbhash0001==")
 {
     /// <summary>An asset whose ID is built from a number, so a test can name it.</summary>
     public static FakeAsset Number(int number, string localDateTime) =>
@@ -203,6 +204,7 @@ public sealed class FakeImmichServer : HttpMessageHandler
         item["type"] = asset.IsVideo ? "VIDEO" : "IMAGE";
         item["duration"] = asset.IsVideo ? 8836 : null;
         item["isTrashed"] = asset.IsTrashed;
+        item["thumbhash"] = asset.Thumbhash;
         var exif = item["exifInfo"]!.AsObject();
         exif["latitude"] = asset.Latitude;
         exif["longitude"] = asset.Longitude;
