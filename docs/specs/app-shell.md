@@ -72,7 +72,10 @@ behave like an app, so that browsing my trips feels as comfortable as a native i
   Settings are icon buttons in the top bar under 600 px, and the sidebar from 600 px holds all four.
   Collections ([collections.md](collections.md)) is the third tab and the Stats screen
   ([stats-screen.md](stats-screen.md)) the fourth, so the tab bar holds the four destinations of the
-  design document, and the sidebar holds those four plus Inbox and Settings.
+  design document, and the sidebar holds those four plus Inbox, MCP, and Settings. The MCP screen
+  ([mcp-server.md](mcp-server.md#the-mcp-screen)) is a third tool. It is an icon button in the top
+  bar under 600 px, between Inbox and Settings, and an item in the sidebar from 600 px. Its address
+  is `/mcp-setup`, because `/mcp` is the server's own route.
 - The active item is Trail Teal with a Golden Gold marker. Each item has an icon and a label.
 - Going back returns to the previous screen at the scroll position you left.
 - Every detail page opened from a list starts with a back link: a back arrow and the name of its

@@ -19,8 +19,9 @@ MCP client ──▶ POST /mcp ──▶ token check ──▶ tool ──▶ st
                                               └─▶ result: only fields on the allowed list
 ```
 
-This spec covers the route, access, the tools and their results, and the checks that keep a result
-coarse. It doesn't cover which client or model you use. Fibotrail doesn't choose one.
+This spec covers the route, access, the tools and their results, the checks that keep a result
+coarse, and the **MCP screen** in the app, which shows how to connect a client and which questions
+work. It doesn't cover which client or model you use. Fibotrail doesn't choose one.
 
 ## User story
 
@@ -37,13 +38,17 @@ each question.
 - A tool result never holds a coordinate, a photo, a trip name, or a city name, and a test fails
   when it would.
 - The feature is off until you set `MCP_TOKEN`.
+- The MCP screen tells you how to turn the server on and how to connect an AI client, and it lists
+  example questions. A test runs every example against a made-up library, so no example promises a
+  tool that is missing or an input that a tool refuses.
 
 ## Non-goals
 
 - Tools that write: adding, ignoring, renaming, or merging a trip, or marking a park.
 - Calling Immich, or returning anything from Immich, such as photos, thumbnails, or user names.
 - Running or calling a model from Fibotrail, and storing a model API key.
-- A screen to create, show, or rotate the token. You set it in `.env`.
+- A screen to create, show, or rotate the token. You set it in `.env`, and the MCP screen never
+  shows it.
 - Several people, each with their own token and their own trips.
 - Streaming results and progress messages. Every tool returns one result.
 - Prompts and resources from the MCP specification. Version 1 offers tools only.
@@ -75,8 +80,14 @@ each question.
 - The token never appears in a log, an error, a result, or a response to the browser.
 - `.env.example` lists `MCP_TOKEN` with an empty value.
 - Requests over 60 a minute return 429. See open question 2.
-- The Settings screen shows one line, "MCP server: on" or "MCP server: off". It never shows the
-  token.
+- A request that carries an `Origin` header must name this server's own address, or it gets 403. A
+  client that isn't a web page sends none, and passes. This stops another site from reaching
+  `/mcp` through your browser.
+- Only `POST` is allowed. Any other method gets 405 with `Allow: POST`, once the token is right.
+- A body over 1 MiB gets 413.
+- A wrong token doesn't use up the limit. Only requests with the right token count.
+- The Settings screen shows one line, "MCP server: on" or "MCP server: off", and a button that
+  opens the MCP screen. It never shows the token.
 
 ### What a result may hold
 
@@ -88,16 +99,20 @@ Every field in every result is one of these kinds. This is the vocabulary of ADR
 | Date, to the day | `firstVisit: "2019-07-03"` |
 | Country or continent name | `Sweden`, `Europe` |
 | Collection, resort, or park name | `Disney parks`, `Walt Disney World Resort`, `Magic Kingdom` |
+| Collection or country ID | `disney-parks`, `752` |
 | Trip ID | `42` |
 | Distance in kilometers, per trip | `distanceKm: 8120` |
+| Yes or no | `markedByYou: false`, `truncated: true` |
+| A fixed sentence that the code writes | "The list is cut short: 212 trips match and 200 are listed." |
 
 These never appear in a result: latitude, longitude, a route or stop center, a photo ID, a file
 name, a thumbnail, camera data, a trip name or note, a city or place name below a park, an Immich
 URL, a key, or a user name.
 
-- Every result field is declared with its kind in the code. A field with no kind doesn't compile,
-  and a test walks every tool's result type and fails on any field of a kind that isn't in the
-  table. See the acceptance criteria.
+- Every result field is declared with its kind in the code (`[Coarse(...)]`, or `[Nested]` for a
+  field that holds another result). A test walks every tool's result type and fails on a field with
+  neither, on a field named for data the table leaves out, such as a coordinate, a photo, or a
+  city, and on a field whose type doesn't fit its kind. See the acceptance criteria.
 - Error messages follow the same table. They hold no stack trace, file path, or SQL.
 
 ### What counts
@@ -110,11 +125,13 @@ URL, a key, or a user name.
 - **Trips** in a collection, resort, or park is the number of distinct added trips that visit it.
   A trip that visits two parks counts once in the collection.
 - **Days** in a park is the number of distinct local days with a photo in it. **Days** in a
-  collection or resort is the number of distinct local days with a photo in any of its parks.
-  A trip marked by hand adds a trip and no days, per collections.
+  collection or resort is the sum of the days of its parks, as the Collections screen shows, so a
+  day with photos in two parks counts for both. A trip marked by hand adds a trip and no days, per
+  collections.
 - **Last visit** is new. It is the latest local day with a photo in the place, or the last day of
-  the trip for a park that only you marked. It is added to the stats library, with its test,
-  because ADR-014 puts every new fact there.
+  the trip for a park that only you marked. A country with no day that has a position uses the last
+  day of its latest trip. It is added to the stats library, with its tests, because ADR-014 puts
+  every new fact there: `LastVisit` on `ParkStats` and on `CountryStats`.
 
 ### The tools
 
@@ -176,6 +193,45 @@ reads, for example:
 "Times" can mean separate trips or park days, and the tool returns both, so the model can answer
 "9 trips and 34 days". The numbers are those of the Collections screen's collection row.
 
+### The MCP screen
+
+A new destination, **MCP**, beside Inbox and Settings. It is a tool, not a main destination, so it
+follows the rules of [app-shell.md](app-shell.md#navigation): an icon button in the top bar under
+600 px, and an item in the sidebar from 600 px. Its address is `/mcp-setup`, because `/mcp` belongs
+to the server. Settings has an **Open MCP** button that goes to it.
+
+- It reads `GET /api/mcp/status`, which needs a session and returns `{ enabled, tools }`. It never
+  returns the token.
+- **When the server is off**, the screen shows "MCP server: off" and three steps: make a token with
+  `openssl rand -hex 32`, add `MCP_TOKEN=` and the token to `.env`, and restart with
+  `docker compose up -d --force-recreate`.
+- **When the server is on**, the screen shows "MCP server: on", and three parts:
+  1. **The address**, which is this page's origin plus `/mcp`, with a **Copy** button. On a plain
+     HTTP address, on `localhost`, on a private IP address, and on a name with no dot or ending in
+     `.local`, a note says that the address works only on your own network and a cloud client
+     can't reach it.
+  2. **The token**: a line that says it is the `MCP_TOKEN` value in `.env`, and that Fibotrail never
+     shows it. The screen only ever shows the word `YOUR_MCP_TOKEN` where the token goes.
+  3. **Three ways to add Fibotrail**, each in its own disclosure with a **Copy** button: the Claude
+     Code command, a settings file for an app that starts a local command (using `mcp-remote`),
+     and a settings file for a client that takes an address and headers.
+- Under both states: **Questions to try**, **What it can't answer**, and **What your AI client
+  sees**.
+- **Questions to try** come from `apps/web/src/mcp/examples.json`. Each has a question, a plain
+  line about what the answer holds, the tools it uses, and a **Copy** button. They are grouped as
+  Collections, Countries, and Trips and time, and the first is "How many times have I been to a
+  Disney park?". Every call in the file is run by a test against a made-up library, and every tool
+  appears in at least one example.
+- **What it can't answer** comes from the same file, with a reason for each: photos, exact places,
+  trip names, and cities.
+- Every copy button says "Copied", or "Couldn't copy. Select the text and copy it." The result is
+  in a live region, and a button's accessible name says what it copies.
+- The screen has the four screen states of the app shell: loading, error with **Try again**, and
+  the two states above. Tap targets are at least 44 px high, code blocks wrap and never scroll
+  sideways, and the screen has no color-only meaning. It passes the accessibility check.
+- The steps follow each client's own documentation. A client's menus change, so the screen says to
+  look for "MCP" or "connectors" in the client's help when a step doesn't match. See open question 1.
+
 ### Logging
 
 - The server logs the tool name, the status, and the duration of each call, and never the token
@@ -204,7 +260,17 @@ reads, for example:
 - An empty library returns zero counts from every tool.
 - `list_trips` with `limit` 500 returns 200 entries and says the list was cut short.
 - The token appears in no log line, and no response body, in a test that makes a call with it.
-- The Settings screen shows "MCP server: on" with a token and "MCP server: off" without one.
+- The Settings screen shows "MCP server: on" with a token and "MCP server: off" without one, and
+  its **Open MCP** button opens the MCP screen.
+- Opening `/mcp-setup` in a browser, or reloading it, shows the app and not the MCP endpoint.
+- With the server off, the MCP screen shows the three steps, and with it on it shows the address and
+  the three ways to connect. Neither shows a token.
+- On a plain HTTP or private address, the MCP screen says the address reaches only your own network.
+- Every example on the MCP screen is a question whose calls run without an error in a test, the
+  first is the Disney question, and every tool is used by an example.
+- The MCP screen passes the accessibility check in both states.
+- A request with a foreign `Origin` gets 403, a `GET` gets 405, and the sixty-first request in a
+  minute gets 429 with `Retry-After`. A wrong token doesn't use up the limit.
 - The README says that nothing leaves your network unless you set `MCP_TOKEN` and connect a
   client, and that a result holds only the allowed kinds. No line of it still says that Fibotrail
   never sends location data anywhere.
@@ -212,9 +278,10 @@ reads, for example:
 ## Open questions
 
 1. **Which clients can reach a home server?** Not known yet. A cloud client has to reach `/mcp`
-   over HTTPS through your reverse proxy, and a desktop client may need a local bridge. Check one
-   client with a real setup before the tool list is final, and record the steps in a knowledge
-   document.
+   over HTTPS through your reverse proxy, and a desktop client may need a local bridge. The three
+   ways on the MCP screen follow each client's documentation and haven't been run against a real
+   client yet. Check each one on a real setup, fix the screen where it differs, and record the
+   steps in a knowledge document.
 2. **Is 60 requests a minute the right limit?** It is a guess. A model can call several tools to
    answer one question. Measure on real use and change the number here.
 3. **Should `list_trips` accept a text filter?** Trip names are excluded, so there is nothing to

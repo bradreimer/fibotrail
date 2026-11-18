@@ -72,6 +72,7 @@ Every setting is an environment variable. Docker Compose reads them from `.env`.
 | `IMMICH_EXTERNAL_URL` | none | The address of Immich as your browser sees it. Fibotrail uses it only to build **Open in Immich** links. Leave it empty to hide them |
 | `IMMICH_TIMEOUT_SECONDS` | `30` | Seconds to wait for one Immich request before it fails and is retried |
 | `IMMICH_API_KEY` | none | The read-only API key. Fibotrail never shows it in the browser or in logs |
+| `MCP_TOKEN` | none | A password of at least 32 characters that turns on the MCP server at `/mcp`, so an AI client can ask questions about your trips. Empty keeps it off. Fibotrail never shows it in the browser or in logs. The **MCP** screen shows how to connect |
 | `FIBOTRAIL_DATA_DIR` | `/data` | The folder for Fibotrail's data. Leave it alone in Docker |
 | `TZ` | `America/Vancouver` | The time zone of the container, which sets the times in logs |
 
@@ -148,9 +149,16 @@ Your photos are in Immich, not in Fibotrail. Back up Immich the way Immich descr
 
 ## Privacy
 
-Fibotrail makes no request to any outside service by default. It talks only to your Immich server.
-It never writes to Immich, and it never sends photo data or location data anywhere. The base map
+Fibotrail makes no request to any outside service. It talks only to your Immich server. It never
+writes to Immich, and it never sends photo data or location data anywhere on its own. The base map
 is bundled in the image.
+
+The one door is the optional MCP server. It is off until you set `MCP_TOKEN`. A client that you
+connect with that token can ask for counts, dates, distances, and the names of countries,
+continents, collections, and parks. It never gets photos, coordinates, trip names, or city names,
+and it can't change anything. If the client uses a model in the cloud, its answers go to that
+model. To keep them at home, connect a client that uses a model on your own computer. The reasons
+are in [ADR-018](docs/adr/ADR-018-an-mcp-server-answers-questions-with-coarse-read-only-data.md).
 
 ## Updating and resetting
 
