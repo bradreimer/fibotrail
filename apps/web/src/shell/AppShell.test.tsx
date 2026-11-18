@@ -56,16 +56,20 @@ describe('navigation by width', () => {
 describe('the app shell', () => {
   beforeEach(() => installMatchMedia(390));
 
-  it('has Trips and Map in the tab bar, and Inbox and Settings as icon buttons in the top bar', () => {
+  it('has Trips and Map in the tab bar, and Inbox, MCP, and Settings as icon buttons in the top bar', () => {
     renderApp();
     const tabs = within(screen.getByRole('navigation', { name: 'Main' })).getAllByRole('link');
     expect(tabs.map((link) => link.textContent)).toEqual(['Trips', 'Map', 'Collections', 'Stats']);
     tabs.forEach((link) => expect(link.querySelector('svg')).not.toBeNull());
 
     const tools = within(
-      screen.getByRole('navigation', { name: 'Inbox and settings' }),
+      screen.getByRole('navigation', { name: 'Inbox, MCP, and settings' }),
     ).getAllByRole('link');
-    expect(tools.map((link) => link.getAttribute('aria-label'))).toEqual(['Inbox', 'Settings']);
+    expect(tools.map((link) => link.getAttribute('aria-label'))).toEqual([
+      'Inbox',
+      'MCP',
+      'Settings',
+    ]);
     tools.forEach((link) => expect(link.querySelector('svg')).not.toBeNull());
     expect(screen.getByRole('banner')).toContainElement(tools[0]!);
   });
@@ -119,10 +123,11 @@ describe('the Inbox and Settings by width', () => {
         'Collections',
         'Stats',
         'Inbox',
+        'MCP',
         'Settings',
       ]);
       expect(
-        screen.queryByRole('navigation', { name: 'Inbox and settings' }),
+        screen.queryByRole('navigation', { name: 'Inbox, MCP, and settings' }),
       ).not.toBeInTheDocument();
     },
   );
@@ -132,7 +137,9 @@ describe('the Inbox and Settings by width', () => {
     installMatchMedia(390);
     const { unmount } = renderApp();
     const topBar = await screen.findByRole('link', { name: 'Inbox, 3 possible trips' });
-    expect(screen.getByRole('navigation', { name: 'Inbox and settings' })).toContainElement(topBar);
+    expect(screen.getByRole('navigation', { name: 'Inbox, MCP, and settings' })).toContainElement(
+      topBar,
+    );
     expect(within(topBar).getByText('3')).toHaveClass('nav__badge');
     unmount();
 

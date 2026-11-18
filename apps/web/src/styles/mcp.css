@@ -1,0 +1,99 @@
+/* The MCP screen. It reuses the Settings sections, and adds code blocks and example lists. */
+
+.mcp {
+  max-width: calc(var(--fibo-space-7) * 12);
+}
+
+.mcp .settings__section {
+  align-items: stretch;
+}
+
+.mcp__subhead {
+  font-size: var(--fibo-text-row);
+  margin-block-start: var(--fibo-space-3);
+}
+
+.mcp__block {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--fibo-space-3);
+  min-width: 0;
+}
+
+.mcp__code {
+  flex: 1 1 calc(var(--fibo-space-7) * 4);
+  min-width: 0;
+  margin: 0;
+  padding: var(--fibo-space-3) var(--fibo-space-4);
+  overflow-wrap: anywhere;
+  border: var(--fibo-border) solid var(--fibo-mist);
+  border-radius: var(--fibo-radius);
+  background: color-mix(in srgb, var(--fibo-mist) 40%, var(--fibo-paper));
+  font-size: var(--fibo-text-caption);
+  user-select: text;
+}
+
+.mcp__code code {
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+  white-space: pre-wrap;
+}
+
+.mcp__copy {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--fibo-space-3);
+}
+
+.mcp__copied {
+  color: var(--fibo-ink-muted);
+  font-size: var(--fibo-text-caption);
+}
+
+.mcp__steps {
+  display: grid;
+  gap: var(--fibo-space-4);
+  padding-inline-start: var(--fibo-space-5);
+}
+
+.mcp__client {
+  border: var(--fibo-border) solid var(--fibo-mist);
+  border-radius: var(--fibo-radius);
+  padding: var(--fibo-space-3) var(--fibo-space-4);
+}
+
+.mcp__client summary {
+  min-height: var(--fibo-tap);
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.mcp__client[open] {
+  display: grid;
+  gap: var(--fibo-space-3);
+}
+
+.mcp__examples {
+  display: grid;
+  gap: var(--fibo-space-4);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.mcp__example {
+  display: grid;
+  gap: var(--fibo-space-2);
+  justify-items: start;
+}
+
+.mcp__question {
+  font-weight: 600;
+}
+
+.mcp__group {
+  display: grid;
+  gap: var(--fibo-space-3);
+}

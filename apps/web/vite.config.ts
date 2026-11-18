@@ -13,7 +13,7 @@ export default defineConfig({
   plugins: [react(), splashScreens(screens), serviceWorker('src/service-worker.js')],
   server: {
     proxy: Object.fromEntries(
-      ['/api', '/sign-in', '/sign-out', '/setup', '/healthz', '/auth.css'].map((path) => [
+      ['/api', '/sign-in', '/sign-out', '/setup', '/healthz', '/auth.css', '^/mcp$'].map((path) => [
         path,
         SERVER,
       ]),

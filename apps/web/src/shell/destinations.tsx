@@ -92,6 +92,16 @@ export const DESTINATIONS: readonly Destination[] = [
     ),
   },
   {
+    path: '/mcp-setup',
+    label: 'MCP',
+    placement: 'tool',
+    icon: (
+      <Icon>
+        <path d="M9 3v5M15 3v5M6 8h12v3a6 6 0 0 1-12 0V8ZM12 17v4" />
+      </Icon>
+    ),
+  },
+  {
     path: '/settings',
     label: 'Settings',
     placement: 'tool',
@@ -112,7 +122,7 @@ export function navigationDestinations(tabs: boolean): readonly Destination[] {
     : DESTINATIONS;
 }
 
-/** The Inbox and Settings, for the top bar of a phone. */
+/** The Inbox, MCP, and Settings, for the top bar of a phone. */
 export const TOOLS: readonly Destination[] = DESTINATIONS.filter(
   (destination) => destination.placement === 'tool',
 );

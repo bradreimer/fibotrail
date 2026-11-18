@@ -5,14 +5,14 @@ import { countOf } from '../trips/dates';
 import { TOOLS } from './destinations';
 
 /**
- * The Inbox and Settings as icon buttons in the top bar. They're here only when the navigation is
+ * The Inbox, MCP, and Settings as icon buttons in the top bar. They're here only when the navigation is
  * a tab bar, under 600 px: the tab bar holds the screens you browse, and these are the tools. On
  * wider screens the sidebar holds all four. See ADR-007 and docs/specs/life-map.md.
  */
 export function HeaderTools() {
   const badge = useInboxBadge();
   return (
-    <nav className="app__tools" aria-label="Inbox and settings">
+    <nav className="app__tools" aria-label="Inbox, MCP, and settings">
       <ul className="app__tools-list">
         {TOOLS.map((tool) => (
           <li key={tool.path}>
