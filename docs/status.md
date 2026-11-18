@@ -28,6 +28,10 @@ checklist are also still unrecorded.
 
 ## Completed
 
+- [#149](https://github.com/bradreimer/fibotrail/issues/149) An opened collection loads with a
+  skeleton shaped like its content: a summary line, three resort rows, and a button. It replaces
+  one 4:3 block that collapsed when the data arrived. The row height is an estimate (1.5 times the
+  tap target), and it hasn't been measured against a real collection on a phone.
 - [#143](https://github.com/bradreimer/fibotrail/issues/143) A read-only MCP server and an **MCP**
   screen
   ([ADR-018](adr/ADR-018-an-mcp-server-answers-questions-with-coarse-read-only-data.md),

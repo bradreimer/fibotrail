@@ -5,6 +5,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 
 import { expectNoAccessibilityProblems } from '../accessibility/accessibility';
 import { App } from '../App';
+import { CollectionBodySkeleton } from '../collections/CollectionBody';
 import { fakeServer, status } from '../test/server';
 import { installMatchMedia } from '../test/window';
 
@@ -145,6 +146,16 @@ describe('the Collections screens', () => {
       '/collections/universal-parks/stamps',
     );
     await expectNoAccessibilityProblems(container);
+  });
+
+  it('loads an open collection as a summary line, three resort rows, and a button, not one block', () => {
+    const { container } = render(<CollectionBodySkeleton />);
+
+    expect(screen.getByRole('status')).toHaveTextContent('Loading the collection');
+    expect(container.querySelectorAll('.skeleton--text')).toHaveLength(1);
+    expect(container.querySelectorAll('.skeleton--row')).toHaveLength(3);
+    expect(container.querySelectorAll('.skeleton--button')).toHaveLength(1);
+    expect(container.querySelector('.skeleton--card')).toBeNull();
   });
 
   it('shows Try again when an open collection fails to load', async () => {
