@@ -29,6 +29,21 @@
   aspect-ratio: 4 / 3;
 }
 
+/* The parts of an open collection: a summary line, a resort card, and the Stamp book button. */
+.skeleton--lead {
+  width: 60%;
+}
+
+.skeleton--row {
+  height: calc(var(--fibo-tap) * 1.5);
+}
+
+.skeleton--button {
+  width: calc(var(--fibo-space-7) * 2);
+  height: var(--fibo-tap);
+  margin-top: var(--fibo-space-4);
+}
+
 .skeleton-list {
   display: grid;
   gap: var(--fibo-space-5);
