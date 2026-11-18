@@ -165,6 +165,9 @@ public class TripCommandTests
     [InlineData("remove", "abc")]
     [InlineData("list", "extra")]
     [InlineData("rename")]
+    [InlineData("rename", "1")]
+    [InlineData("rename", "abc", "New name")]
+    [InlineData("rename", "1", "New name", "extra")]
     public async Task Anything_else_exits_with_2_and_changes_nothing(params string[] arguments)
     {
         await using var app = await StartAsync();
@@ -185,5 +188,62 @@ public class TripCommandTests
 
         Assert.Equal(1, exitCode);
         Assert.Contains("There is no trip 7", output, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task Renaming_a_trip_changes_its_name_and_a_new_detection_run_keeps_it()
+    {
+        await using var app = await StartAsync();
+        var trip = Assert.Single(await TripsAsync(app));
+
+        var (exitCode, output) = await RunAsync(app, "rename", trip.Id.ToString(System.Globalization.CultureInfo.InvariantCulture), "  Ontario and Quebec ");
+
+        Assert.Equal(0, exitCode);
+        Assert.Contains($"from \"{trip.Name}\" to \"Ontario and Quebec\"", output, StringComparison.Ordinal);
+        Assert.Equal("Ontario and Quebec", Assert.Single(await TripsAsync(app)).Name);
+
+        await app.WithServicesAsync(services => services.GetRequiredService<DetectionService>().RunAsync(CancellationToken.None));
+
+        Assert.Equal("Ontario and Quebec", Assert.Single(await TripsAsync(app)).Name);
+    }
+
+    [Fact]
+    public async Task Renaming_a_trip_that_does_not_exist_exits_with_1_and_changes_nothing()
+    {
+        await using var app = await StartAsync();
+        var before = Assert.Single(await TripsAsync(app)).Name;
+
+        var (exitCode, output) = await RunAsync(app, "rename", "999", "Anything");
+
+        Assert.Equal(1, exitCode);
+        Assert.Contains("There is no trip 999", output, StringComparison.Ordinal);
+        Assert.Equal(before, Assert.Single(await TripsAsync(app)).Name);
+    }
+
+    [Theory]
+    [InlineData("   ")]
+    [InlineData("")]
+    public async Task Renaming_to_an_empty_name_exits_with_1_and_changes_nothing(string name)
+    {
+        await using var app = await StartAsync();
+        var trip = Assert.Single(await TripsAsync(app));
+
+        var (exitCode, output) = await RunAsync(app, "rename", trip.Id.ToString(System.Globalization.CultureInfo.InvariantCulture), name);
+
+        Assert.Equal(1, exitCode);
+        Assert.Contains("1 to 100 characters", output, StringComparison.Ordinal);
+        Assert.Equal(trip.Name, Assert.Single(await TripsAsync(app)).Name);
+    }
+
+    [Fact]
+    public async Task Renaming_to_a_name_over_100_characters_exits_with_1()
+    {
+        await using var app = await StartAsync();
+        var trip = Assert.Single(await TripsAsync(app));
+
+        var (exitCode, _) = await RunAsync(app, "rename", trip.Id.ToString(System.Globalization.CultureInfo.InvariantCulture), new string('x', 101));
+
+        Assert.Equal(1, exitCode);
+        Assert.Equal(trip.Name, Assert.Single(await TripsAsync(app)).Name);
     }
 }

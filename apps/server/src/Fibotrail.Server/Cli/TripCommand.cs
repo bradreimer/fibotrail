@@ -8,8 +8,8 @@ namespace Fibotrail.Server.Cli;
 
 /// <summary>
 /// <c>fibotrail trip</c>. It adds a trip by hand, for photos that carry no position, so that detection
-/// can't find them. The trip is a decision, so a rescan keeps it. See docs/specs/trip-detection.md and
-/// ADR-017. It reads and writes Fibotrail's own database only.
+/// can't find them. The trip is a decision, so a rescan keeps it. It also renames any trip, as a decision.
+/// See docs/specs/trip-detection.md and ADR-017. It reads and writes Fibotrail's own database only.
 /// </summary>
 public static class TripCommand
 {
@@ -20,6 +20,7 @@ public static class TripCommand
           fibotrail trip add --start <day> --end <day> [options]   Add a trip. Days look like 2005-07-31.
           fibotrail trip list                                      Show the trips you added by hand.
           fibotrail trip remove <id>                               Remove one of them, and its decision.
+          fibotrail trip rename <id> <name>                        Rename any trip. The id is the trip's id in the app.
 
         Options for add:
           --name <text>      The trip's name. Without it, the name is the place and the month, such as "Berlin, May 2005".
@@ -49,8 +50,9 @@ public static class TripCommand
 
         var list = arguments is ["list"];
         var remove = arguments is ["remove", var idText] && int.TryParse(idText, NumberStyles.None, CultureInfo.InvariantCulture, out _);
+        var rename = arguments is ["rename", var renameId, _] && int.TryParse(renameId, NumberStyles.None, CultureInfo.InvariantCulture, out _);
         var add = arguments is ["add", ..] ? ParseAdd(arguments.Skip(1).ToList(), console) : null;
-        if (!list && !remove && add is null)
+        if (!list && !remove && !rename && add is null)
         {
             // ParseAdd explains its own problem. Anything else gets the usage.
             if (arguments is not ["add", ..])
@@ -75,6 +77,11 @@ public static class TripCommand
         if (remove)
         {
             return await RemoveAsync(int.Parse(arguments[1], CultureInfo.InvariantCulture), console, db, detection, cancellationToken);
+        }
+
+        if (rename)
+        {
+            return await RenameAsync(int.Parse(arguments[1], CultureInfo.InvariantCulture), arguments[2], console, db, time, cancellationToken);
         }
 
         return await AddAsync(add!, console, db, detection, time, cancellationToken);
@@ -195,6 +202,24 @@ public static class TripCommand
             ? $"Removed trip {id}. Detection found {result.Trips} trips."
             : $"Removed trip {id}. Detection runs once you confirm a home location.");
         return 0;
+    }
+
+    private static async Task<int> RenameAsync(int id, string name, IConsoleIo console, FibotrailDbContext db, TimeProvider time, CancellationToken cancellationToken)
+    {
+        var before = await db.Trips.AsNoTracking().Where(trip => trip.Id == id).Select(trip => trip.Name).FirstOrDefaultAsync(cancellationToken);
+        var result = await new TripDecisions(db, time).SetDetailsAsync(id, name, null, cancellationToken);
+        switch (result.Outcome)
+        {
+            case DecisionOutcome.Done:
+                console.WriteLine($"Renamed trip {id} from \"{before}\" to \"{name.Trim()}\".");
+                return 0;
+            case DecisionOutcome.NotFound:
+                console.WriteLine($"There is no trip {id}. The id is the one the app shows for the trip.");
+                return 1;
+            default:
+                console.WriteLine(result.Problem!);
+                return 1;
+        }
     }
 
     private static async Task<int> AddAsync(

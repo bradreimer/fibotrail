@@ -233,6 +233,12 @@ is no web screen for it.
   home location is confirmed, it saves the trip and says detection runs once you confirm one.
 - `fibotrail trip list` shows each trip with its ID. `fibotrail trip remove <id>` deletes the trip
   and its decision, and runs detection. To change a trip, remove it and add it again.
+- `fibotrail trip rename <id> <name>` renames any trip, detected or added by hand, as the web
+  rename does. `<id>` is the trip ID the app shows, and the one `fibotrail join` prints. The name is
+  a decision, so a rescan keeps it. It prints the old and new names and exits 0. An unknown ID, or a
+  name that is empty or over 100 characters, prints the reason and exits 1 with no change. A
+  missing or non-numeric ID, a missing name, or extra arguments print the usage and exit 2. Tracking
+  issue: [#155](https://github.com/bradreimer/fibotrail/issues/155).
 - It refuses, with exit code 1 and no change, when no photo was taken in the days, or when an
   added trip or another manual trip shares a day. A missing or badly formed option, `--lat`
   without `--lon`, a position out of range, or an end before the start prints a message and exits
