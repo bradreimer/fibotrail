@@ -393,22 +393,6 @@ describe('rename and change cover', () => {
 });
 
 describe('the parks of a trip', () => {
-  const parkChoices = [
-    {
-      id: 'magic-kingdom',
-      name: 'Magic Kingdom',
-      group: 'Walt Disney World Resort',
-      collection: 'Disney parks',
-    },
-    { id: 'epcot', name: 'EPCOT', group: 'Walt Disney World Resort', collection: 'Disney parks' },
-    {
-      id: 'disneyland',
-      name: 'Disneyland Park',
-      group: 'Disneyland Resort',
-      collection: 'Disney parks',
-    },
-  ];
-
   it('says so when a trip has no park, and lists the parks it has with where each came from', async () => {
     fakeServer({ 'GET /api/trips/7': trip });
     const { unmount } = renderTrip();
@@ -437,45 +421,11 @@ describe('the parks of a trip', () => {
     expect(list.getByText('Marked by you')).toBeInTheDocument();
   });
 
-  it('marks the parks you tick, and shows the ones from photos as on and fixed', async () => {
-    const marked = {
-      ...trip,
-      parks: [
-        {
-          id: 'magic-kingdom',
-          name: 'Magic Kingdom',
-          group: 'Walt Disney World Resort',
-          source: 'you',
-        },
-      ],
-    };
-    const server = fakeServer({
-      'GET /api/trips/7': {
-        ...trip,
-        parks: [
-          { id: 'epcot', name: 'EPCOT', group: 'Walt Disney World Resort', source: 'photos' },
-        ],
-      },
-      'GET /api/parks': parkChoices,
-      'PUT /api/trips/7/parks': marked,
-    });
-    const { container } = renderTrip();
-    await userEvent.click(await screen.findByRole('button', { name: 'Mark parks visited' }));
-    const sheet = await screen.findByRole('dialog', { name: 'Parks you visited' });
-    const epcot = await within(sheet).findByRole('switch', { name: /EPCOT/ });
-    expect(epcot).toBeChecked();
-    expect(epcot).toBeDisabled();
-
-    await userEvent.click(within(sheet).getByRole('switch', { name: 'Magic Kingdom' }));
-    expectNoAccessibilityProblems(container);
-    server.set('GET /api/trips/7', marked);
-    await userEvent.click(within(sheet).getByRole('button', { name: 'Save' }));
-
-    const sent = server.sent('PUT', '/api/trips/7/parks')[0]!;
-    expect(sent.body).toEqual({ parks: ['magic-kingdom'] });
-    expect(sent.headers['X-CSRF-Token']).toBe('token-1');
-    expect(await screen.findByText('Marked by you')).toBeInTheDocument();
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  it('has no button to mark a park, because marking is a CLI task', async () => {
+    fakeServer({ 'GET /api/trips/7': trip });
+    renderTrip();
+    await screen.findByRole('region', { name: 'Parks' });
+    expect(screen.queryByRole('button', { name: /mark parks/i })).not.toBeInTheDocument();
   });
 });
 

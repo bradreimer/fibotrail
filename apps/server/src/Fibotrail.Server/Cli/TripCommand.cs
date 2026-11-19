@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Text.RegularExpressions;
 using Fibotrail.Detection;
+using Fibotrail.Server.Collections;
 using Fibotrail.Server.Data;
 using Fibotrail.Server.Trips;
 using Microsoft.EntityFrameworkCore;
@@ -10,7 +11,8 @@ namespace Fibotrail.Server.Cli;
 /// <summary>
 /// <c>fibotrail trip</c>. It adds a trip by hand, for photos that carry no position, so that detection
 /// can't find them. The trip is a decision, so a rescan keeps it. It also renames any trip, and pins a
-/// photo to a trip, both as decisions. See docs/specs/trip-detection.md and ADR-017. It reads and writes Fibotrail's own database only.
+/// photo to a trip, both as decisions. See docs/specs/trip-detection.md and ADR-017. It marks the parks of a
+/// trip whose photos have no position, also a decision, per docs/specs/collections.md. It reads and writes Fibotrail's own database only.
 /// </summary>
 public static partial class TripCommand
 {
@@ -24,6 +26,10 @@ public static partial class TripCommand
           fibotrail trip rename <id> <name>                        Rename any trip. The id is the trip's id in the app.
           fibotrail trip pin <id> <photo>                          Put a photo in a trip. The photo is an Immich asset ID or photo page URL.
           fibotrail trip unpin <photo>                             Let the photo go where its own time and position put it.
+          fibotrail trip parks <id>                                Show the trip's parks, each from photos or marked by you.
+          fibotrail trip parks <id> <park>...                      Mark the parks you visited. The list replaces the parks you marked before.
+          fibotrail trip parks <id> --clear                        Remove the parks you marked. Parks that photos place stay.
+          fibotrail trip parks --list                              Show every park id you can mark.
 
         Options for add:
           --name <text>      The trip's name. Without it, the name is the place and the month, such as "Berlin, May 2005".
@@ -42,6 +48,7 @@ public static partial class TripCommand
         DetectionService detection,
         ServerSettings settings,
         TimeProvider time,
+        CollectionCatalog catalog,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(arguments);
@@ -50,14 +57,22 @@ public static partial class TripCommand
         ArgumentNullException.ThrowIfNull(detection);
         ArgumentNullException.ThrowIfNull(settings);
         ArgumentNullException.ThrowIfNull(time);
+        ArgumentNullException.ThrowIfNull(catalog);
+
+        if (arguments is ["parks", "--list"])
+        {
+            return ListParks(console, catalog);
+        }
 
         var list = arguments is ["list"];
         var remove = arguments is ["remove", var idText] && int.TryParse(idText, NumberStyles.None, CultureInfo.InvariantCulture, out _);
         var rename = arguments is ["rename", var renameId, _] && int.TryParse(renameId, NumberStyles.None, CultureInfo.InvariantCulture, out _);
         var pin = arguments is ["pin", var pinId, _] && int.TryParse(pinId, NumberStyles.None, CultureInfo.InvariantCulture, out _);
         var unpin = arguments is ["unpin", _];
+        var parks = arguments is ["parks", var parksId, ..] && int.TryParse(parksId, NumberStyles.None, CultureInfo.InvariantCulture, out _)
+            && (arguments is [_, _, "--clear"] || !arguments.Skip(2).Any(argument => argument.StartsWith('-')));
         var add = arguments is ["add", ..] ? ParseAdd(arguments.Skip(1).ToList(), console) : null;
-        if (!list && !remove && !rename && !pin && !unpin && add is null)
+        if (!list && !remove && !rename && !pin && !unpin && !parks && add is null)
         {
             // ParseAdd explains its own problem. Anything else gets the usage.
             if (arguments is not ["add", ..])
@@ -97,6 +112,14 @@ public static partial class TripCommand
         if (unpin)
         {
             return await UnpinAsync(arguments[1], console, db, detection, cancellationToken);
+        }
+
+        if (parks)
+        {
+            var id = int.Parse(arguments[1], CultureInfo.InvariantCulture);
+            return arguments.Count == 2
+                ? await ShowParksAsync(id, console, db, settings, catalog, cancellationToken)
+                : await SetParksAsync(id, arguments[2] == "--clear" ? [] : [.. arguments.Skip(2)], console, db, settings, time, catalog, cancellationToken);
         }
 
         return await AddAsync(add!, console, db, detection, time, cancellationToken);
@@ -192,6 +215,85 @@ public static partial class TripCommand
             ? "The photo is in no trip now."
             : $"The photo is in trip {holder.Id}, \"{holder.Name}\", {holder.StartDate:yyyy-MM-dd} to {holder.EndDate:yyyy-MM-dd}, {holder.PhotoCount.ToString("N0", CultureInfo.InvariantCulture)} photos.");
         return 0;
+    }
+
+    /// <summary>The open parks of every collection, the only ones you can mark.</summary>
+    private static List<(CollectionDefinition Collection, CollectionPlace Place)> OpenParks(CollectionCatalog catalog) =>
+        [.. catalog.Collections.SelectMany(collection => collection.Places.Where(place => !place.Planned).Select(place => (collection, place)))];
+
+    private static int ListParks(IConsoleIo console, CollectionCatalog catalog)
+    {
+        var open = OpenParks(catalog);
+        if (open.Count == 0)
+        {
+            console.WriteLine("No collection has an open park.");
+            return 0;
+        }
+
+        foreach (var (collection, place) in open)
+        {
+            console.WriteLine($"{place.Park.Id}: {place.Park.Name}, {place.Park.Group}, {collection.Name}");
+        }
+
+        return 0;
+    }
+
+    private static async Task<int> ShowParksAsync(int id, IConsoleIo console, FibotrailDbContext db, ServerSettings settings, CollectionCatalog catalog, CancellationToken cancellationToken)
+    {
+        var trip = await TripPage.LoadAsync(db, settings, id, cancellationToken, catalog);
+        if (trip is null)
+        {
+            console.WriteLine($"There is no trip {id}. The id is the one the app shows for the trip.");
+            return 1;
+        }
+
+        if (trip.Parks.Count == 0)
+        {
+            console.WriteLine($"Trip {id} (\"{trip.Name}\") has no parks.");
+            return 0;
+        }
+
+        console.WriteLine($"Parks of trip {id} (\"{trip.Name}\"):");
+        foreach (var park in trip.Parks)
+        {
+            console.WriteLine($"  {park.Id}: {park.Name}, {(park.Source == "photos" ? "from photos" : "marked by you")}");
+        }
+
+        return 0;
+    }
+
+    private static async Task<int> SetParksAsync(
+        int id,
+        IReadOnlyList<string> parkIds,
+        IConsoleIo console,
+        FibotrailDbContext db,
+        ServerSettings settings,
+        TimeProvider time,
+        CollectionCatalog catalog,
+        CancellationToken cancellationToken)
+    {
+        var known = OpenParks(catalog).Select(item => item.Place.Park.Id).ToHashSet(StringComparer.Ordinal);
+        var unknown = parkIds.FirstOrDefault(park => !known.Contains(park));
+        if (unknown is not null)
+        {
+            console.WriteLine($"\"{unknown}\" isn't an open park of a collection. Run \"fibotrail trip parks --list\" to see the ids. Nothing was saved.");
+            return 1;
+        }
+
+        var result = await new TripDecisions(db, time).SetParksAsync(id, parkIds, known, cancellationToken);
+        switch (result.Outcome)
+        {
+            case DecisionOutcome.Done:
+                console.WriteLine(parkIds.Count == 0 ? $"Cleared the parks you marked on trip {id}." : $"Saved the parks you marked on trip {id}.");
+                db.ChangeTracker.Clear();
+                return await ShowParksAsync(id, console, db, settings, catalog, cancellationToken);
+            case DecisionOutcome.NotFound:
+                console.WriteLine($"There is no trip {id}. The id is the one the app shows for the trip.");
+                return 1;
+            default:
+                console.WriteLine(result.Problem!);
+                return 1;
+        }
     }
 
     /// <summary>Reads the options of <c>add</c>. Prints what is wrong and returns null when something is.</summary>

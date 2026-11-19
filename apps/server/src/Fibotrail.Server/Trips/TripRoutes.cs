@@ -20,12 +20,6 @@ public sealed record TripChange(string? Name = null, string? CoverPhotoId = null
 /// <summary>Put a photo on the way (true), or bring it back (false).</summary>
 public sealed record OnTheWayChange(bool OnTheWay);
 
-/// <summary>The parks you visited on a trip. Replaces the old list.</summary>
-public sealed record TripParksChange(IReadOnlyList<string> Parks);
-
-/// <summary>An open park of a collection, for the list on the trip page.</summary>
-public sealed record ParkChoice(string Id, string Name, string Group, string Collection);
-
 /// <summary>The API routes for the trips you added.</summary>
 public static class TripRoutes
 {
@@ -64,25 +58,6 @@ public static class TripRoutes
                 ? TypedResults.Ok(trip)
                 : TypedResults.NotFound();
         }).WithName("SetPhotoOnTheWay");
-
-        // The parks you visited on a trip with no photo positions. A decision, so it survives every rescan.
-        api.MapPut("/trips/{id:int}/parks", async Task<Results<Ok<TripDetail>, NotFound, BadRequest<ProblemDetail>>> (
-            int id, TripParksChange change, TripDecisions decisions, FibotrailDbContext db, ServerSettings settings, CollectionCatalog catalog, CancellationToken cancellationToken) =>
-        {
-            var known = catalog.Collections.SelectMany(collection => collection.Places).Where(place => !place.Planned).Select(place => place.Park.Id).ToHashSet(StringComparer.Ordinal);
-            var result = await decisions.SetParksAsync(id, change.Parks ?? [], known, cancellationToken);
-            if (result.Outcome == DecisionOutcome.Rejected) return TypedResults.BadRequest(new ProblemDetail(result.Problem!));
-            return result.Outcome == DecisionOutcome.Done && await TripPage.LoadAsync(db, settings, id, cancellationToken, catalog) is { } trip
-                ? TypedResults.Ok(trip)
-                : TypedResults.NotFound();
-        }).WithName("SetTripParks");
-
-        // Every open park, grouped by its collection, for the list you tick from.
-        api.MapGet("/parks", (CollectionCatalog catalog) =>
-            TypedResults.Ok<IReadOnlyList<ParkChoice>>([.. catalog.Collections.SelectMany(collection => collection.Places
-                .Where(place => !place.Planned)
-                .Select(place => new ParkChoice(place.Park.Id, place.Park.Name, place.Park.Group, collection.Name)))]))
-            .WithName("GetParks");
 
         // Rename and Change cover. Both are decisions, so they survive every rescan. See ADR-002.
         api.MapPut("/trips/{id:int}", async Task<Results<NoContent, NotFound, BadRequest<ProblemDetail>>> (

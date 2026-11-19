@@ -24,7 +24,8 @@ public class TripCommandTests
             services.GetRequiredService<FibotrailDbContext>(),
             services.GetRequiredService<DetectionService>(),
             app.Settings,
-            services.GetRequiredService<TimeProvider>()));
+            services.GetRequiredService<TimeProvider>(),
+            Fibotrail.Server.Collections.CollectionCatalog.Empty));
         return (exitCode, string.Join('\n', console.Lines));
     }
 
