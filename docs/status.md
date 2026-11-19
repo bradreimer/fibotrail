@@ -28,6 +28,15 @@ the accessibility checklist are also still unrecorded.
 
 ## Completed
 
+- [#166](https://github.com/bradreimer/fibotrail/issues/166) A **Games** tab with a daily
+  **Timeline** game ([games spec](specs/games.md), [Timeline spec](specs/timeline-game.md),
+  [ADR-022](adr/ADR-022-games-are-plug-in-modules-behind-a-games-api.md)). Timeline shows 5 photos
+  from 5 added trips; you put them in date order in up to 4 tries. The server grades every try and
+  keeps one result per day in a new `game_result` table, so played, win %, current and best streak,
+  and tries are the same on every device. Share copies a grid of squares with no trip names. Games
+  read only a game library built by `GameLibraryLoader`, and only the registries import a game, so
+  a game is cheap to add or remove. Checked in tests only, not yet on a phone or the maintainer's
+  library.
 - [#164](https://github.com/bradreimer/fibotrail/issues/164) Collections show where you've been,
   not what's left ([spec](specs/collections.md#insights-screens)). An open collection reads
   "7 parks · 34 days · 9 trips" instead of "7 / 12 parks". The stamp book drops the progress ring

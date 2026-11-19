@@ -68,3 +68,4 @@ What becomes easier, what becomes harder, and what must stay true?
 | [ADR-019](ADR-019-insights-replaces-the-stats-and-collections-tabs.md) | Insights replaces the Stats and Collections tabs | Accepted |
 | [ADR-020](ADR-020-trip-page-maps-use-the-1-10-million-outline.md) | Trip page maps use the 1:10 million outline | Accepted |
 | [ADR-021](ADR-021-a-pinned-photo-is-a-decision-that-detection-reads-as-a-day.md) | A pinned photo is a decision that detection reads as a day | Accepted |
+| [ADR-022](ADR-022-games-are-plug-in-modules-behind-a-games-api.md) | Games are plug-in modules behind a games API | Accepted |

@@ -56,10 +56,10 @@ describe('navigation by width', () => {
 describe('the app shell', () => {
   beforeEach(() => installMatchMedia(390));
 
-  it('has Trips, Map, and Insights in the tab bar, and Inbox, MCP, and Settings as icon buttons in the top bar', () => {
+  it('has Trips, Map, Insights, and Games in the tab bar, and Inbox, MCP, and Settings as icon buttons in the top bar', () => {
     renderApp();
     const tabs = within(screen.getByRole('navigation', { name: 'Main' })).getAllByRole('link');
-    expect(tabs.map((link) => link.textContent)).toEqual(['Trips', 'Map', 'Insights']);
+    expect(tabs.map((link) => link.textContent)).toEqual(['Trips', 'Map', 'Insights', 'Games']);
     tabs.forEach((link) => expect(link.querySelector('svg')).not.toBeNull());
 
     const tools = within(
@@ -119,6 +119,7 @@ describe('the Inbox and Settings by width', () => {
       'Trips',
       'Map',
       'Insights',
+      'Games',
       'Inbox',
       'MCP',
       'Settings',

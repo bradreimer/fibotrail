@@ -51,6 +51,7 @@ only in a production build, so `npm run dev` never serves a stale file.
 | `src/states/` | The four screen states: `Skeleton`, `ScanBanner`, `EmptyState`, and `ErrorState` |
 | `src/screens/` | One file for each screen |
 | `src/insights/` | The parts of the Insights screens: the totals, a collection's body, and the place sheet. See [insights.md](../specs/insights.md) |
+| `src/games/` | The Games tab: the registry, the card, the stats panel, sharing, and one folder per game. Only `registry.tsx` imports a game. See [games.md](../specs/games.md) |
 | `src/api/` | The API client, the OpenAPI document, and the types generated from it |
 | `src/service-worker.js` | The service worker. The build writes it to `sw.js` |
 | `vite-plugins/` | The build steps that write `sw.js` and the launch image links |

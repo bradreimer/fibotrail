@@ -68,5 +68,7 @@ None.
 | [on-the-way.md](on-the-way.md) | Photos and stops that belong to a trip but not to its map: hide a photo, and a set-aside idea for suggested stops |
 | [collections.md](collections.md) | Collections of places, such as Disney and Universal parks, with a stamp, days, and trips for each place |
 | [insights.md](insights.md) | The Insights screen: six travel totals above the collections, and the stats library behind them |
+| [games.md](games.md) | The Games tab, the games API, results, stats, and sharing |
+| [timeline-game.md](timeline-game.md) | The Timeline game: put five of your photos in date order |
 | [mcp-server.md](mcp-server.md) | A read-only MCP server that answers questions about your travel with coarse data and a token |
 | [release.md](release.md) | The accessibility checks, README, and tagged image for version 0.1 |
