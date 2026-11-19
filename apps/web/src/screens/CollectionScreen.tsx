@@ -7,11 +7,6 @@ import { EmptyState } from '../states/EmptyState';
 import { ErrorState } from '../states/ErrorState';
 import { countOf } from '../trips/dates';
 
-/** "3 trips", or "0 trips · Not visited yet", so a place with no trips says so in words. */
-export function tripsText(trips: number): string {
-  return trips === 0 ? '0 trips · Not visited yet' : countOf(trips, 'trip');
-}
-
 /** A collection, level 2: its trips, then one row for each resort. The stamp book is one tap deeper. */
 export function CollectionScreen() {
   const { id = '' } = useParams();
@@ -48,7 +43,7 @@ export function CollectionScreen() {
     <div className="insights-page">
       <BackLink to="/insights">Insights</BackLink>
       <h2 className="insights-page__title">{data.summary.name}</h2>
-      <p className="insights-page__lead">{tripsText(data.summary.trips)}</p>
+      <p className="insights-page__lead">{countOf(data.summary.trips, 'trip')}</p>
       {data.summary.trips === 0 && <p>Add a trip to start your stamp book.</p>}
       <ResortList id={id} detail={data} />
       <p>

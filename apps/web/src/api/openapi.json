@@ -795,6 +795,13 @@
             "items": {
               "$ref": "#/components/schemas/PlaceTrip"
             }
+          },
+          "lastVisit": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date"
           }
         }
       },

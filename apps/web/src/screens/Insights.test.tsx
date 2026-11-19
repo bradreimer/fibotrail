@@ -75,6 +75,7 @@ const detail = {
       days: 6,
       trips: 2,
       firstVisit: '2024-03-10',
+      lastVisit: '2025-06-03',
       tripList: [
         { tripId: 4, name: 'Orlando, March 2024', days: 3 },
         { tripId: 9, name: 'Orlando, June 2025', days: 3 },
@@ -88,6 +89,7 @@ const detail = {
       days: 0,
       trips: 0,
       firstVisit: null,
+      lastVisit: null,
       tripList: [],
     },
     {
@@ -98,6 +100,7 @@ const detail = {
       days: 0,
       trips: 0,
       firstVisit: null,
+      lastVisit: null,
       tripList: [],
     },
   ],
@@ -232,7 +235,8 @@ describe('the collection screens', () => {
 
     await userEvent.click(await screen.findByText('Universal parks'));
 
-    expect(await screen.findByText(/1 \/ 2 parks · 6 days · 2 trips/)).toBeInTheDocument();
+    expect(await screen.findByText('1 park · 6 days · 2 trips')).toBeInTheDocument();
+    expect(screen.queryByText(/\/ 2 parks/)).not.toBeInTheDocument();
     const card = screen.getByRole('link', { name: /Universal Orlando Resort/ });
     expect(card.textContent).toContain('2 trips');
     expect(screen.queryByText('Universal Studios Florida')).not.toBeInTheDocument();
@@ -278,7 +282,7 @@ describe('the collection screens', () => {
     ).toBeInTheDocument();
   });
 
-  it('lists the resorts of a collection with their trips, most trips first', async () => {
+  it('lists the resorts you have been to with their trips, and leaves out the rest', async () => {
     fakeServer({ 'GET /api/collections/universal-parks': detail });
     renderAt('/insights/universal-parks');
 
@@ -288,10 +292,8 @@ describe('the collection screens', () => {
       'href',
       '/insights/universal-parks/resorts/Universal%20Orlando%20Resort',
     );
-    expect(screen.getByRole('link', { name: /Hollywood/ }).textContent).toContain(
-      '0 trips · Not visited yet',
-    );
-    expect(screen.getByText('A trip to two resorts counts once for each.')).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: /Hollywood/ })).not.toBeInTheDocument();
+    expect(screen.queryByText(/Not visited yet/)).not.toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Stamp book' })).toHaveAttribute(
       'href',
       '/insights/universal-parks/stamps',
@@ -327,36 +329,55 @@ describe('the collection screens', () => {
     expect(await screen.findByText("That resort isn't in this collection.")).toBeInTheDocument();
   });
 
-  it('shows each stamp as one label, and tells the three states apart by words', async () => {
+  it('shows only the parks you have been to, each with its days, trips, and last visit', async () => {
     fakeServer({ 'GET /api/collections/universal-parks': detail });
-    renderAt('/insights/universal-parks/stamps');
+    const { container } = renderAt('/insights/universal-parks/stamps');
 
-    expect(
-      await screen.findByRole('button', { name: 'Universal Studios Florida, 6 days, 2 trips' }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole('group', { name: "Universal's Islands of Adventure, not visited yet" }),
-    ).toBeInTheDocument();
-    expect(screen.getByRole('group', { name: 'Epic Universe, coming' })).toBeInTheDocument();
+    const stamp = await screen.findByRole('button', {
+      name: 'Universal Studios Florida, 6 days, 2 trips, Last visit Jun 3, 2025',
+    });
+    expect(stamp.textContent).toContain('Last visit Jun 3, 2025');
+    expect(screen.getByText('6 days across 1 park')).toBeInTheDocument();
+    expect(screen.queryByText("Universal's Islands of Adventure")).not.toBeInTheDocument();
+    expect(screen.queryByText('Epic Universe')).not.toBeInTheDocument();
+    expect(screen.queryByText(/Not visited yet|Coming|\/ 2/)).not.toBeInTheDocument();
+    expect(container.querySelector('.ring')).toBeNull();
     expect(screen.getByText('Park boundaries © OpenStreetMap contributors')).toBeInTheDocument();
   });
 
-  it('opens a visited stamp into a sheet with its trips, and closes it', async () => {
+  it('opens a stamp into a sheet with its first and last visit and its trips, and closes it', async () => {
     fakeServer({ 'GET /api/collections/universal-parks': detail });
     renderAt('/insights/universal-parks/stamps');
 
     await userEvent.click(
-      await screen.findByRole('button', { name: 'Universal Studios Florida, 6 days, 2 trips' }),
+      await screen.findByRole('button', { name: /^Universal Studios Florida/ }),
     );
 
     const sheet = screen.getByRole('dialog', { name: 'Universal Studios Florida' });
     expect(within(sheet).getByText(/First visit Mar 10, 2024/)).toBeInTheDocument();
+    expect(within(sheet).getByText(/Last visit Jun 3, 2025/)).toBeInTheDocument();
     expect(within(sheet).getByRole('link', { name: /Orlando, June 2025/ })).toHaveAttribute(
       'href',
       '/trips/9',
     );
     await userEvent.click(within(sheet).getByRole('button', { name: 'Close' }));
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+
+  it('shows an empty stamp book with no count of parks left', async () => {
+    const usf = detail.places[0]!;
+    fakeServer({
+      'GET /api/collections/universal-parks': {
+        ...detail,
+        summary: { ...summary, visited: 0, totalDays: 0, trips: 0 },
+        places: [{ ...usf, days: 0, trips: 0, firstVisit: null, lastVisit: null, tripList: [] }],
+      },
+    });
+    renderAt('/insights/universal-parks/stamps');
+
+    expect(await screen.findByText('Add a trip to start your stamp book.')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Universal Studios Florida/ })).toBeNull();
+    expect(screen.queryByText(/across/)).not.toBeInTheDocument();
   });
 
   it('invites you to add a trip when nothing is visited', async () => {

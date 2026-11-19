@@ -25,7 +25,8 @@ public sealed record PlaceTrip(int TripId, string Name, int Days, bool Marked = 
 
 /// <summary>A place in a collection.</summary>
 /// <param name="Status">"open" or "planned".</param>
-public sealed record CollectionPlaceInfo(string Id, string Name, string Group, string Status, int Days, int Trips, DateOnly? FirstVisit, IReadOnlyList<PlaceTrip> TripList);
+/// <param name="LastVisit">The latest local day with a photo in the place, or the last day of the trip for a place only you marked. Null when not visited.</param>
+public sealed record CollectionPlaceInfo(string Id, string Name, string Group, string Status, int Days, int Trips, DateOnly? FirstVisit, IReadOnlyList<PlaceTrip> TripList, DateOnly? LastVisit = null);
 
 /// <summary>One collection with its places, grouped by resort in the order of the file.</summary>
 /// <param name="Attribution">The credit OpenStreetMap requires wherever the boundaries are shown.</param>
@@ -99,7 +100,8 @@ public static class CollectionRoutes
                     place.Planned ? 0 : found?.Days ?? 0,
                     place.Planned ? 0 : found?.Trips.Count ?? 0,
                     place.Planned ? null : found?.FirstVisit,
-                    place.Planned ? [] : [.. (found?.Trips ?? []).Select(visit => new PlaceTrip(visit.TripId, visit.Name, visit.Days, visit.Marked))]);
+                    place.Planned ? [] : [.. (found?.Trips ?? []).Select(visit => new PlaceTrip(visit.TripId, visit.Name, visit.Days, visit.Marked))],
+                    place.Planned ? null : found?.LastVisit);
             })],
             Attribution);
     }

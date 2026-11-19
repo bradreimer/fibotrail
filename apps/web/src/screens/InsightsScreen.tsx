@@ -6,7 +6,7 @@ import { CollectionBody } from '../insights/CollectionBody';
 import { InsightsTotals } from '../insights/InsightsTotals';
 import { CollapsibleSection } from '../map/CollapsibleSection';
 import { ErrorState } from '../states/ErrorState';
-import { tripsText } from './CollectionScreen';
+import { countOf } from '../trips/dates';
 
 /**
  * The Insights screen: the six totals, then one card for each collection, led by the trips taken
@@ -64,7 +64,7 @@ export function InsightsScreen() {
                 key={item.id}
                 id={`collection-${item.id}`}
                 title={item.name}
-                count={tripsText(item.trips)}
+                count={countOf(item.trips, 'trip')}
                 open={open.has(item.id)}
                 onToggle={(isOpen) =>
                   setOpen((before) => {

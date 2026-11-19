@@ -4,8 +4,8 @@ import { useApi } from '../api/useApi';
 import { BackLink } from '../shell/BackLink';
 import { EmptyState } from '../states/EmptyState';
 import { ErrorState } from '../states/ErrorState';
+import { countOf } from '../trips/dates';
 import { TripCard } from '../trips/TripCard';
-import { tripsText } from './CollectionScreen';
 
 /** A resort, level 3: every added trip that visits it, newest first, each with a badge for each park. */
 export function ResortScreen() {
@@ -48,7 +48,7 @@ export function ResortScreen() {
     <div className="insights-page">
       <BackLink to={`/insights/${encodeURIComponent(id)}`}>{data.summary.name}</BackLink>
       <h2 className="insights-page__title">{info.name}</h2>
-      <p className="insights-page__lead">{tripsText(info.trips)}</p>
+      <p className="insights-page__lead">{countOf(info.trips, 'trip')}</p>
       <ul className="resort-trips">
         {visits.map((trip) => {
           const parks = parksOf.get(trip.id) ?? [];

@@ -38,26 +38,6 @@
   font-size: var(--fibo-text-h3);
 }
 
-/* The progress ring of the stamp book. */
-.ring {
-  width: calc(var(--fibo-space-7) * 1.25);
-  height: calc(var(--fibo-space-7) * 1.25);
-}
-
-.ring__track {
-  stroke: var(--fibo-mist);
-}
-
-.ring__fill {
-  stroke: var(--fibo-teal);
-}
-
-.ring__text {
-  fill: var(--fibo-ink);
-  font-size: var(--fibo-text-caption);
-  font-weight: 700;
-}
-
 /* The collection cards, and the stamp book. */
 .collections {
   display: grid;
@@ -89,12 +69,6 @@
   cursor: pointer;
 }
 
-.stamp-book__summary {
-  display: flex;
-  align-items: center;
-  gap: var(--fibo-space-4);
-}
-
 .collection-card__name {
   grid-area: name;
   font-family: var(--fibo-font-display);
@@ -116,7 +90,7 @@
   list-style: none;
 }
 
-/* The three states differ by line and by words, never by color alone. */
+/* A stamp is a park you've been to. The stamp book shows no unvisited or planned parks. */
 .stamp {
   display: grid;
   align-content: center;
@@ -124,27 +98,13 @@
   width: 100%;
   min-height: calc(var(--fibo-space-7) * 2);
   padding: var(--fibo-space-3);
+  border: calc(var(--fibo-border) * 3) solid var(--fibo-gold);
   border-radius: var(--fibo-radius);
-  background: none;
+  background: color-mix(in srgb, var(--fibo-gold) 18%, var(--fibo-paper));
   color: inherit;
   font: inherit;
   text-align: center;
-}
-
-.stamp--visited {
-  border: calc(var(--fibo-border) * 3) solid var(--fibo-gold);
-  background: color-mix(in srgb, var(--fibo-gold) 18%, var(--fibo-paper));
   cursor: pointer;
-}
-
-.stamp--not-visited {
-  border: var(--fibo-border) dashed var(--fibo-ink-muted);
-  color: var(--fibo-ink-muted);
-}
-
-.stamp--planned {
-  border: var(--fibo-border) dotted var(--fibo-ink-muted);
-  color: var(--fibo-ink-muted);
 }
 
 .stamp__name {
