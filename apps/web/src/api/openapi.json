@@ -528,83 +528,6 @@
         }
       }
     },
-    "/api/trips/{id}/parks": {
-      "put": {
-        "tags": [
-          "Fibotrail"
-        ],
-        "operationId": "SetTripParks",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/TripParksChange"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TripDetail"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not Found"
-          },
-          "400": {
-            "description": "Bad Request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetail"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/parks": {
-      "get": {
-        "tags": [
-          "Fibotrail"
-        ],
-        "operationId": "GetParks",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/ParkChoice"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/map": {
       "get": {
         "tags": [
@@ -1574,29 +1497,6 @@
           }
         }
       },
-      "ParkChoice": {
-        "required": [
-          "id",
-          "name",
-          "group",
-          "collection"
-        ],
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "group": {
-            "type": "string"
-          },
-          "collection": {
-            "type": "string"
-          }
-        }
-      },
       "PhotoInfo": {
         "required": [
           "id",
@@ -2262,20 +2162,6 @@
           },
           "source": {
             "type": "string"
-          }
-        }
-      },
-      "TripParksChange": {
-        "required": [
-          "parks"
-        ],
-        "type": "object",
-        "properties": {
-          "parks": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
           }
         }
       },

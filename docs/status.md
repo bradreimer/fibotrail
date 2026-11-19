@@ -28,6 +28,13 @@ the accessibility checklist are also still unrecorded.
 
 ## Completed
 
+- [#174](https://github.com/bradreimer/fibotrail/issues/174) Marking parks moved from the trip
+  page to the command line ([spec](specs/collections.md#marking-a-park-by-hand)).
+  `fibotrail trip parks <id> <park>...` marks parks, `--clear` removes them, and `--list` shows the
+  ids. The trip page lists parks and has no **Mark parks visited** button.
+  `PUT /api/trips/{id}/parks` and `GET /api/parks` are removed. Marks saved before stay. Checked
+  in tests only, not yet against the maintainer's library.
+
 - [#170](https://github.com/bradreimer/fibotrail/issues/170) Timeline tiles are large photos you
   drag ([spec](specs/timeline-game.md#playing)). A press and hold lifts a tile on a phone, a mouse
   drags at once, a swipe still scrolls, and the page scrolls while a tile is near its edge. Tiles show

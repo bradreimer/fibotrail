@@ -219,7 +219,8 @@ public static class EntryPoint
             scope.ServiceProvider.GetRequiredService<FibotrailDbContext>(),
             scope.ServiceProvider.GetRequiredService<DetectionService>(),
             settings!,
-            provider.GetRequiredService<TimeProvider>());
+            provider.GetRequiredService<TimeProvider>(),
+            CollectionFiles.Load(CollectionFiles.DefaultDirectory));
     }
 
     private static async Task<int> PlacesAsync(IConfiguration configuration, string[] arguments)

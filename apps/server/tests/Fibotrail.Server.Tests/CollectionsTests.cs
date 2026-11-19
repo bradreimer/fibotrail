@@ -1,14 +1,21 @@
+using System.Globalization;
 using System.Net;
 using System.Text.Json;
 using Fibotrail.Detection;
 using Fibotrail.Detection.Parks;
+using Fibotrail.Server.Cli;
 using Fibotrail.Server.Collections;
+using Fibotrail.Server.Data;
+using Fibotrail.Server.Trips;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Fibotrail.Server.Tests;
 
 /// <summary>Collections, on a made-up park around the test Orlando trip. See docs/specs/collections.md.</summary>
 public class CollectionsTests
 {
+    private static readonly string[] FarOnly = ["far"];
+
     private static ParkPlace Park(string id, double south, double west, double size = 0.02) =>
         new(id, id.ToUpperInvariant(), "Test Resort", 3, 50,
             [[[new GeoPoint(south, west), new GeoPoint(south, west + size), new GeoPoint(south + size, west + size), new GeoPoint(south + size, west), new GeoPoint(south, west)]]]);
@@ -139,8 +146,22 @@ public class CollectionsTests
         Assert.Equal(HttpStatusCode.NotFound, (await browser.GetAsync("/api/collections/nope")).StatusCode);
     }
 
-    private static Task<HttpResponseMessage> MarkAsync(Browser browser, string path, params string[] parks) =>
-        browser.SendJsonAsync(HttpMethod.Put, path, new { parks });
+    /// <summary>Runs <c>fibotrail trip parks</c> against the test app, with its collections.</summary>
+    private static async Task<(int ExitCode, string Output)> ParksAsync(TestApp app, params string[] arguments)
+    {
+        var console = new ScriptedConsole();
+        var exitCode = await app.WithServicesAsync(services => TripCommand.RunAsync(
+            ["parks", .. arguments],
+            console,
+            services.GetRequiredService<FibotrailDbContext>(),
+            services.GetRequiredService<DetectionService>(),
+            app.Settings,
+            services.GetRequiredService<TimeProvider>(),
+            services.GetRequiredService<CollectionCatalog>()));
+        return (exitCode, string.Join('\n', console.Lines));
+    }
+
+    private static string Id(int trip) => trip.ToString(CultureInfo.InvariantCulture);
 
     [Fact]
     public async Task A_park_you_mark_counts_the_trip_and_shows_on_the_trip_page()
@@ -149,9 +170,11 @@ public class CollectionsTests
         await using var _ = app;
         await DecideAsync(browser, trip, "add");
 
-        var response = await MarkAsync(browser, $"/api/trips/{trip}/parks", "far");
+        var (exitCode, output) = await ParksAsync(app, Id(trip), "far");
 
-        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal(0, exitCode);
+        Assert.Contains("near: NEAR, from photos", output, StringComparison.Ordinal);
+        Assert.Contains("far: FAR, marked by you", output, StringComparison.Ordinal);
         var parks = (await browser.GetJsonAsync($"/api/trips/{trip}")).GetProperty("parks").EnumerateArray()
             .ToDictionary(park => park.GetProperty("id").GetString()!, park => park.GetProperty("source").GetString());
         Assert.Equal(new Dictionary<string, string?> { ["near"] = "photos", ["far"] = "you" }, parks);
@@ -163,37 +186,112 @@ public class CollectionsTests
     }
 
     [Fact]
-    public async Task Clearing_the_marked_parks_takes_the_trip_out_of_the_park()
+    public async Task Showing_the_parks_of_a_trip_lists_each_with_its_source()
+    {
+        var (app, _, trip) = await StartAsync();
+        await using var _app = app;
+
+        var (exitCode, output) = await ParksAsync(app, Id(trip));
+
+        Assert.Equal(0, exitCode);
+        Assert.Contains("near: NEAR, from photos", output, StringComparison.Ordinal);
+        Assert.DoesNotContain("far", output, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task Clearing_the_marked_parks_takes_the_trip_out_of_the_park_and_keeps_parks_from_photos()
     {
         var (app, browser, trip) = await StartAsync();
         await using var _ = app;
         await DecideAsync(browser, trip, "add");
-        await MarkAsync(browser, $"/api/trips/{trip}/parks", "far");
+        await ParksAsync(app, Id(trip), "far", "near");
 
-        await MarkAsync(browser, $"/api/trips/{trip}/parks");
+        var (exitCode, output) = await ParksAsync(app, Id(trip), "--clear");
 
+        Assert.Equal(0, exitCode);
+        Assert.Contains("near: NEAR, from photos", output, StringComparison.Ordinal);
         Assert.Equal(1, (await browser.GetJsonAsync("/api/collections"))[0].GetProperty("visited").GetInt32());
+        Assert.Equal(1, (await browser.GetJsonAsync("/api/collections"))[0].GetProperty("trips").GetInt32());
     }
 
     [Fact]
-    public async Task A_planned_or_unknown_park_cannot_be_marked()
+    public async Task Marking_a_park_that_photos_place_adds_no_second_trip()
+    {
+        var (app, browser, trip) = await StartAsync();
+        await using var _ = app;
+        await DecideAsync(browser, trip, "add");
+
+        await ParksAsync(app, Id(trip), "near");
+
+        var near = (await browser.GetJsonAsync("/api/collections/test-parks")).GetProperty("places").EnumerateArray()
+            .Single(place => place.GetProperty("id").GetString() == "near");
+        Assert.Equal(1, near.GetProperty("trips").GetInt32());
+    }
+
+    [Theory]
+    [InlineData("coming")]
+    [InlineData("nowhere")]
+    public async Task A_planned_or_unknown_park_is_refused_and_nothing_is_saved(string park)
+    {
+        var (app, browser, trip) = await StartAsync();
+        await using var _ = app;
+        await DecideAsync(browser, trip, "add");
+        await ParksAsync(app, Id(trip), "far");
+
+        var (exitCode, output) = await ParksAsync(app, Id(trip), "near", park);
+
+        Assert.Equal(1, exitCode);
+        Assert.Contains($"\"{park}\" isn't an open park", output, StringComparison.Ordinal);
+        Assert.Contains("fibotrail trip parks --list", output, StringComparison.Ordinal);
+        var sources = (await browser.GetJsonAsync($"/api/trips/{trip}")).GetProperty("parks").EnumerateArray()
+            .Select(item => item.GetProperty("id").GetString()).ToList();
+        Assert.Equal(["near", "far"], sources);
+    }
+
+    [Fact]
+    public async Task An_unknown_trip_is_refused()
+    {
+        var (app, _, _) = await StartAsync();
+        await using var _app = app;
+
+        Assert.Equal(1, (await ParksAsync(app, "9999", "far")).ExitCode);
+        Assert.Equal(1, (await ParksAsync(app, "9999")).ExitCode);
+    }
+
+    [Fact]
+    public async Task The_park_list_holds_the_open_parks_only()
+    {
+        var (app, _, _) = await StartAsync();
+        await using var _app = app;
+
+        var (exitCode, output) = await ParksAsync(app, "--list");
+
+        Assert.Equal(0, exitCode);
+        Assert.Equal(["near: NEAR, Test Resort, Test parks", "far: FAR, Test Resort, Test parks"], output.Split('\n'));
+    }
+
+    [Theory]
+    [InlineData("--clear", "far")]
+    [InlineData("--all")]
+    public async Task Other_options_print_the_usage(params string[] extra)
+    {
+        var (app, _, trip) = await StartAsync();
+        await using var _app = app;
+
+        var (exitCode, output) = await ParksAsync(app, [Id(trip), .. extra]);
+
+        Assert.Equal(2, exitCode);
+        Assert.Contains("Usage:", output, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task No_route_marks_a_park()
     {
         var (app, browser, trip) = await StartAsync();
         await using var _ = app;
 
-        Assert.Equal(HttpStatusCode.BadRequest, (await MarkAsync(browser, $"/api/trips/{trip}/parks", "coming")).StatusCode);
-        Assert.Equal(HttpStatusCode.BadRequest, (await MarkAsync(browser, $"/api/trips/{trip}/parks", "nowhere")).StatusCode);
-        Assert.Equal(HttpStatusCode.NotFound, (await MarkAsync(browser, "/api/trips/9999/parks", "far")).StatusCode);
-    }
-
-    [Fact]
-    public async Task The_parks_list_holds_the_open_parks_only()
-    {
-        var (app, browser, _) = await StartAsync();
-        await using var _app = app;
-
-        var ids = (await browser.GetJsonAsync("/api/parks")).EnumerateArray().Select(park => park.GetProperty("id").GetString()).ToList();
-
-        Assert.Equal(["near", "far"], ids);
+        Assert.Equal(HttpStatusCode.NotFound, (await browser.GetAsync("/api/parks")).StatusCode);
+        var put = await browser.SendJsonAsync(HttpMethod.Put, $"/api/trips/{trip}/parks", new { parks = FarOnly });
+        Assert.True(put.StatusCode is HttpStatusCode.NotFound or HttpStatusCode.MethodNotAllowed, put.StatusCode.ToString());
     }
 }

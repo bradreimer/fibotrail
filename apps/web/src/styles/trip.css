@@ -394,19 +394,7 @@
   gap: var(--fibo-space-3);
 }
 
-.trip-parks__source,
-.parks-sheet__note {
+.trip-parks__source {
   font-size: var(--fibo-text-caption);
   color: var(--fibo-ink-muted);
-}
-
-.parks-sheet {
-  max-height: 85vh;
-  overflow-y: auto;
-}
-
-.parks-sheet__group {
-  margin: 0;
-  padding: 0;
-  border: 0;
 }

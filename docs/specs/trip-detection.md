@@ -251,6 +251,9 @@ is no web screen for it.
   photo that isn't scanned or isn't an ID or URL, or an unpinned photo given to `unpin`, prints the
   reason and exits 1 with no change. A missing, extra, or non-numeric argument prints the usage and
   exits 2. Tracking issue: [#156](https://github.com/bradreimer/fibotrail/issues/156).
+- `fibotrail trip parks <id>` shows and marks the parks of a trip whose photos have no position.
+  The rules are in [collections.md](collections.md#marking-a-park-by-hand). Tracking issue:
+  [#174](https://github.com/bradreimer/fibotrail/issues/174).
 - It refuses, with exit code 1 and no change, when no photo was taken in the days, or when an
   added trip or another manual trip shares a day. A missing or badly formed option, `--lat`
   without `--lon`, a position out of range, or an end before the start prints a message and exits

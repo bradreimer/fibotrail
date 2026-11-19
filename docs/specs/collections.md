@@ -152,12 +152,27 @@ visit, such as a day your phone died after one photo. See open question 1.
 ### Marking a park by hand
 
 Photos from before cameras recorded a position have no location, so no photo is in a park, and the
-counting rule above can't see the trip. You mark the parks yourself.
+counting rule above can't see the trip. You mark the parks yourself, from the command line.
+
+- Marking is a CLI task, not a button, per
+  [#174](https://github.com/bradreimer/fibotrail/issues/174). It's needed only when you process old
+  photos, and a button on every trip page made a wrong mark too easy. It sits beside
+  `fibotrail trip add`, which covers the same photos with no position. An AI-driven workflow can run
+  it too. The MCP server can't, because it is read-only, per
+  [ADR-018](../adr/ADR-018-an-mcp-server-answers-questions-with-coarse-read-only-data.md).
+- The commands:
+
+  | Command | What it does |
+  | --- | --- |
+  | `fibotrail trip parks <id>` | Lists the trip's parks, each with its source. |
+  | `fibotrail trip parks <id> <park>…` | Replaces the trip's marked parks and prints the new list. |
+  | `fibotrail trip parks <id> --clear` | Removes every marked park. Parks that photos place stay. |
+  | `fibotrail trip parks --list` | Prints every open park id with its name, resort, and collection. |
 
 - The trip page has a **Parks** section. It lists the parks the trip visited, each with its source:
   "From photos" when at least `min_photos` photos of the trip are in the park, or "Marked by you".
-  **Mark parks visited** opens a sheet with one switch for each open park, grouped by collection
-  and resort. A park that photos place stays on and can't be turned off.
+  It is read-only: it has no button to mark a park.
+- Marking a park that photos already place changes nothing, and `--clear` never removes it.
 - A park you mark is saved as a decision on the trip, in the `decision` table, so it survives every
   rescan, per
   [ADR-002](../adr/ADR-002-decisions-are-stored-separately-from-detected-data.md). It follows the
@@ -167,7 +182,9 @@ counting rule above can't see the trip. You mark the parks yourself.
   that photos also place counts once, with its photo days.
 - The first visit of a park that only you marked is the first day of the trip.
 - The park sheet shows "Marked by you" for such a trip, where it shows "3 days here" for others.
-- Only an open park of a collection can be marked. A planned or unknown id is refused.
+- Only an open park of a collection can be marked. A planned or unknown id is refused, the message
+  names the id and points to `--list`, and nothing is saved. An unknown trip id is refused too. Both
+  exit with a non-zero code.
 - It counts only for added trips, like everything else here.
 
 ### Shared numbers
@@ -223,10 +240,9 @@ counting rule above can't see the trip. You mark the parks yourself.
 ### API
 
 - Every route needs a session.
-- `GET /api/parks` returns every open park with its id, name, resort, and collection.
-- `PUT /api/trips/{id}/parks` takes `{ "parks": ["magic-kingdom"] }`, replaces the trip's marked
-  parks, and answers with the trip page. An empty list clears them. `GET /api/trips/{id}` has a
-  `parks` list with each park's `source`, `photos` or `you`.
+- `GET /api/trips/{id}` has a `parks` list with each park's `source`, `photos` or `you`.
+- No route marks a park. `PUT /api/trips/{id}/parks` and `GET /api/parks`, which served the old
+  sheet, are removed, per [#174](https://github.com/bradreimer/fibotrail/issues/174).
 - `GET /api/collections` returns each collection with its name, visited count, open total, total
   days, and trips.
 - `GET /api/collections/{id}` returns the summary, each resort with its visited count, open total,
@@ -254,11 +270,13 @@ counting rule above can't see the trip. You mark the parks yourself.
 - A suggested, later, or ignored trip adds no days, and no stamp.
 - A photo on the way, such as one from a train inside a resort, adds no day.
 - A photo taken at 11:30 pm local time counts for that day, not the next.
-- An added trip with no photo positions, with Magic Kingdom marked, shows **1 trip** and **0 days**
-  for that park, **1 trip** for its resort and the collection, and "Marked by you" in the park
-  sheet. Clearing the mark removes it.
-- A park that photos place can't be turned off on the trip page, and marking it too adds no second
-  trip.
+- An added trip with no photo positions, with Magic Kingdom marked by
+  `fibotrail trip parks <id> magic-kingdom`, shows **1 trip** and **0 days** for that park,
+  **1 trip** for its resort and the collection, and "Marked by you" on the trip page and in the
+  park sheet. `--clear` removes it.
+- `--clear` doesn't remove a park that photos place, and marking it too adds no second trip.
+- `fibotrail trip parks <id> planned-park` is refused, and the trip's parks don't change.
+- The trip page has no **Mark parks visited** button.
 - A marked park survives a rescan.
 - A new collection file with a valid boundary shows up after a restart, with no code change. A
   file with a missing boundary stops the app with a message that names the file.
