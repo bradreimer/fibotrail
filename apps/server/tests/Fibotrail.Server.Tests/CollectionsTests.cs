@@ -66,6 +66,24 @@ public class CollectionsTests
     }
 
     [Fact]
+    public async Task A_visited_place_has_its_last_visit_and_an_unvisited_or_planned_place_has_none()
+    {
+        var (app, browser, trip) = await StartAsync();
+        await using var _ = app;
+        await DecideAsync(browser, trip, "add");
+
+        var detail = await browser.GetJsonAsync("/api/collections/test-parks");
+
+        var places = detail.GetProperty("places").EnumerateArray().ToDictionary(place => place.GetProperty("id").GetString()!);
+        var first = DateOnly.Parse(places["near"].GetProperty("firstVisit").GetString()!, System.Globalization.CultureInfo.InvariantCulture);
+        var last = DateOnly.Parse(places["near"].GetProperty("lastVisit").GetString()!, System.Globalization.CultureInfo.InvariantCulture);
+        Assert.Equal(new DateOnly(2027, 3, 15), first);
+        Assert.Equal(places["near"].GetProperty("days").GetInt32() - 1, last.DayNumber - first.DayNumber);
+        Assert.Equal(JsonValueKind.Null, places["far"].GetProperty("lastVisit").ValueKind);
+        Assert.Equal(JsonValueKind.Null, places["coming"].GetProperty("lastVisit").ValueKind);
+    }
+
+    [Fact]
     public async Task A_trip_in_the_library_has_its_park_resort_and_collection_as_keywords()
     {
         var (app, browser, trip) = await StartAsync();

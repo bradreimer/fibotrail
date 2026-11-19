@@ -378,6 +378,8 @@ export interface components {
             /** Format: date */
             firstVisit: null | string;
             tripList: components["schemas"]["PlaceTrip"][];
+            /** Format: date */
+            lastVisit?: null | string;
         };
         CollectionSummary: {
             id: string;

@@ -31,6 +31,12 @@ The collection screens lead with trips, per
 [#151](https://github.com/bradreimer/fibotrail/issues/151), they are part of the Insights tab, under
 the travel totals. See [insights.md](insights.md).
 
+The screens show where you've been, not what's left, per
+[#164](https://github.com/bradreimer/fibotrail/issues/164). A UX interview on 2026-11-19 found
+"7 / 12 parks" and the progress ring read like a to-do list. So no screen shows a total of parks,
+a ring, or a place you haven't visited. The API still returns the open totals, because the MCP
+server answers "How many of the Disney parks have I been to?"
+
 The Stats screen once had a Theme parks view of these days. It was removed in
 [#111](https://github.com/bradreimer/fibotrail/issues/111). This spec covers the data files, the
 counting rule, the shared numbers, and the collection screens of the Insights tab.
@@ -46,6 +52,7 @@ spent in Universal Studios Florida?"
 - The Collections list leads with trips: "How many separate trips have I taken to Disney parks?"
   Resorts and parks answer the same question one tap deeper.
 - Each park shows its days and its trips as numbers, not only as a stamp.
+- The screens show only what you've visited, with dates, and never a count of what's left.
 - A park day uses the same rule as a day in a country, so "6 days in Universal Studios Florida"
   reads like "19 days in Sweden."
 - Photos at CityWalk, a hotel, or a parking lot don't count as a park day.
@@ -179,14 +186,14 @@ counting rule above can't see the trip. You mark the parks yourself.
   `/insights/{id}/resorts/{resort}`, and `/insights/{id}/stamps`.
 - Collections drill down in three levels, then a stamp book:
   1. **List.** On the Insights screen, one row per collection: the name and its trips, such as "9 trips". The row has no
-     ring and no days. A collection with no trips reads "0 trips · Not visited yet". Each row
+     ring and no days. A collection with no trips reads "0 trips". Each row
      opens and closes in place, like a section under the map on the
      [life map](life-map.md), per [#116](https://github.com/bradreimer/fibotrail/issues/116).
      Rows start closed, and several can be open at once. An open row loads the collection the
-     first time it opens, and shows "7 / 12 parks · 34 days · 9 trips", one card for each
-     resort, the shared-trip note, and the **Stamp book** button. A failed load shows the error
+     first time it opens, and shows "7 parks · 34 days · 9 trips", one card for each
+     resort you've been to, the shared-trip note, and the **Stamp book** button. A failed load shows the error
      and **Try again**.
-  2. **Collection.** The trips again, then one card for each resort, most trips first and then by
+  2. **Collection.** The trips again, then one card for each resort you've been to, most trips first and then by
      name, such as "Walt Disney World Resort, 5 trips". A note says "A trip to two resorts counts
      once for each." A **Stamp book** button opens the stamp book.
   3. **Resort.** Every added trip that visits the resort, newest first, each opening its trip
@@ -194,22 +201,22 @@ counting rule above can't see the trip. You mark the parks yourself.
      the resort appears once, so the list length equals the resort's trip count, per
      [#127](https://github.com/bradreimer/fibotrail/issues/127).
 - A **resort card** (levels 1 and 2) shows the resort name and its trips, such as "5 trips". A
-  resort with no trips reads "0 trips · Not visited yet". Tapping the card opens the resort's trip
+  resort with no trips has no card. Tapping the card opens the resort's trip
   list. The card has no park cards under it. A park's days and first visit are in the stamp book.
 - A **trip row** in the resort list shows the trip and one **badge** for each park of the resort
   that the trip visited, such as "Magic Kingdom" and "EPCOT". A park the trip didn't visit has no
   badge. A badge is text with a check shape, never color alone, and wraps on a narrow phone. A
   park marked by hand has a badge too. The badges are a list labeled "Parks on" and the trip's
   name, so a screen reader reads the trip, then its parks.
-- The **stamp book** holds what the list used to show: the progress ring with the visited count
-  over the open total, such as "7 / 12", the total days, such as "34 days across 8 parks", and the
-  grid of stamps grouped by resort. A visited stamp is gold, with the name, "6 days", and "2 trips."
-  A stamp that isn't visited has a gray outline and "Not visited yet."
-- The stamp states differ by text and shape, never by color alone.
-- Tapping a visited stamp opens a sheet with the park's days, trips, and first visit. Each trip
+- The **stamp book** shows where you've been: the total days, such as "34 days across 8 parks",
+  and one gold stamp for each park you visited, grouped by resort. A stamp has the name, "6 days ·
+  2 trips", and the last visit, such as "Last visit Jun 3, 2025". A park you haven't visited, or one
+  that isn't open yet, has no stamp. There is no progress ring and no total of parks, per
+  [#164](https://github.com/bradreimer/fibotrail/issues/164).
+- Tapping a stamp opens a sheet with the park's days, trips, first visit, and last visit. Each trip
   links to its trip page and shows how many of that trip's days were in the park.
 - A screen reader reads each stamp once, as one label: the name, the days, and the trips, such as
-  "Universal Studios Florida, 6 days, 2 trips." The grid is also the text alternative to the ring.
+  "Universal Studios Florida, 6 days, 2 trips, Last visit Jun 3, 2025."
 - The four screen states of the app shell apply: loading, empty, error, and offline. With no added
   trips, a collection page says "Add a trip to start your stamp book."
 
@@ -223,8 +230,8 @@ counting rule above can't see the trip. You mark the parks yourself.
 - `GET /api/collections` returns each collection with its name, visited count, open total, total
   days, and trips.
 - `GET /api/collections/{id}` returns the summary, each resort with its visited count, open total,
-  days, trips, and trip IDs, and each place with its name, group, status, days, trips, first visit, and trip
-  IDs.
+  days, trips, and trip IDs, and each place with its name, group, status, days, trips, first visit, last visit, and trip
+  IDs. The screens don't show the open totals; the MCP server uses them.
 - The OpenAPI document and the TypeScript types are updated, per
   [web-app-development.md](../knowledge/web-app-development.md).
 
@@ -274,8 +281,10 @@ counting rule above can't see the trip. You mark the parks yourself.
 - A trip with only 2 photos in a park adds no trip at any level.
 - A resort never shows more trips than its collection. A park's trips equal its trips in the Theme
   parks view.
-- The list row shows trips and no days. The ring, the total days, and the stamps are in the stamp
-  book, one tap from the collection.
+- The list row shows trips and no days. The total days and the stamps are in the stamp book, one
+  tap from the collection.
+- No collection screen shows a total of parks, a progress ring, "Not visited yet", or a park that
+  isn't open. A stamp shows its last visit.
 - A resort card shows its trips. Tapping it lists every added trip at the resort once, and the
   list length equals the card's count. Each trip row has a badge for each park of the resort that
   the trip visited.

@@ -28,6 +28,13 @@ the accessibility checklist are also still unrecorded.
 
 ## Completed
 
+- [#164](https://github.com/bradreimer/fibotrail/issues/164) Collections show where you've been,
+  not what's left ([spec](specs/collections.md#insights-screens)). An open collection reads
+  "7 parks · 34 days · 9 trips" instead of "7 / 12 parks". The stamp book drops the progress ring
+  and shows only the parks you visited, each with its last visit. Resort cards and stamps with no
+  trips are gone, and "Not visited yet" no longer appears. `GET /api/collections/{id}` gains
+  `lastVisit` for each place, and still returns the open totals for the MCP server. The change
+  comes from a UX interview on 2026-11-19. Checked in tests only, not yet on a phone.
 - [#161](https://github.com/bradreimer/fibotrail/issues/161) A photo rotated in Immich now shows
   rotated after a rescan ([spec](specs/immich-scanning.md#thumbnail-proxy)). The scan stores
   Immich's `thumbhash` for each photo. The image cache and the browser's `ETag` follow it, so a

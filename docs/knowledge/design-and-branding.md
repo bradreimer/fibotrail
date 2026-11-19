@@ -19,7 +19,7 @@ Immich supplies photos and GPS. Fibotrail adds trips, places, collections, and s
 - Discover trips automatically and let you accept or ignore each one, much like Home Assistant discovers devices.
 - Give every trip a page with a route map, infographics, and a photo timeline.
 - Show your whole travel history on a life map, with a world map that fills in as you travel.
-- Track custom collections, such as Disney parks, with clear progress (for example, 7 of 12).
+- Track custom collections, such as Disney parks, showing where you've been (for example, 7 parks). Since #164, collections show no count of what's left.
 - Work well on phone and iPad, and run as a single Docker deployment next to Immich.
 
 ### Non-goals for version 1
@@ -123,7 +123,7 @@ Fibotrail sounds like a friend who loves your trips: warm, specific, and brief. 
 | --- | --- | --- |
 | Trip suggestion | "We found a possible trip: Orlando, Mar 15–24. 312 photos." | "Trip candidate detected." |
 | Accept and ignore | "Add trip" and "Not a trip" | "Confirm" and "Reject" |
-| Milestone | "That's 7 of 12 Disney parks. Five to go." | "Congratulations!!! You're amazing!" |
+| Milestone | "You've been to 7 Disney parks." | "Five to go." or "Congratulations!!! You're amazing!" |
 | Empty state | "No trips yet. Fibotrail is still scanning your library." | "Nothing found." |
 | Error | "Can't reach Immich. Check the server address in Settings." | "Error 502." |
 
@@ -146,7 +146,7 @@ Six principles guide every decision. When two ideas conflict, the one higher on 
 1. **Photos come first.** Your photos are the hero of every screen. Maps and statistics support them, never cover them.
 2. **You decide.** Fibotrail suggests trips and places, and nothing is added until you say yes.
 3. **Immich stays untouched.** Fibotrail only reads from Immich. It never edits, moves, or deletes your photos.
-4. **Celebrate progress.** Show what you've done ("7 of 12 parks") and avoid guilt, streaks, or pressure.
+4. **Celebrate progress.** Show what you've done ("7 parks") and avoid guilt, streaks, pressure, or a count of what's left.
 5. **Comfortable on a couch.** Design for phone and iPad first, with large touch targets and one-hand use.
 6. **Private by default.** The app runs on your own server and makes no outside calls unless you turn them on.
 

@@ -4,16 +4,18 @@ import { useApi } from '../api/useApi';
 import type { components } from '../api/schema';
 import { ErrorState } from '../states/ErrorState';
 import { countOf } from '../trips/dates';
-import { tripsText } from '../screens/CollectionScreen';
 
 type Detail = components['schemas']['CollectionDetail'];
 
-/** One card for each resort, most trips first and then by name, with the note about shared trips. */
+/**
+ * One card for each resort you've been to, most trips first and then by name, with the note about
+ * shared trips. A resort with no trips isn't shown, so the list is where you've been, not what's left.
+ */
 export function ResortList({ id, detail }: { id: string; detail: Detail }) {
   const base = `/insights/${encodeURIComponent(id)}`;
-  const resorts = [...detail.resorts].sort(
-    (a, b) => b.trips - a.trips || a.name.localeCompare(b.name),
-  );
+  const resorts = detail.resorts
+    .filter((resort) => resort.trips > 0)
+    .sort((a, b) => b.trips - a.trips || a.name.localeCompare(b.name));
   return (
     <>
       <ul className="collections">
@@ -24,7 +26,7 @@ export function ResortList({ id, detail }: { id: string; detail: Detail }) {
               to={`${base}/resorts/${encodeURIComponent(resort.name)}`}
             >
               <span className="collection-card__name">{resort.name}</span>
-              <span className="collection-card__count">{tripsText(resort.trips)}</span>
+              <span className="collection-card__count">{countOf(resort.trips, 'trip')}</span>
             </Link>
           </li>
         ))}
@@ -66,7 +68,7 @@ export function CollectionBody({ id }: { id: string }) {
   return (
     <div className="collection-body">
       <p className="insights-page__lead">
-        {summary.visited} / {summary.total} parks · {countOf(summary.totalDays, 'day')} ·{' '}
+        {countOf(summary.visited, 'park')} · {countOf(summary.totalDays, 'day')} ·{' '}
         {countOf(summary.trips, 'trip')}
       </p>
       <ResortList id={id} detail={detail} />

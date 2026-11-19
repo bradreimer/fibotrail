@@ -6,7 +6,7 @@ import { countOf, formatDateRange } from '../trips/dates';
 
 export type CollectionPlace = components['schemas']['CollectionPlaceInfo'];
 
-/** A park's days, trips, and first visit. Opens from a visited stamp. */
+/** A park's days, trips, and first and last visit. Opens from a visited stamp. */
 export function PlaceSheet({ place, onClose }: { place: CollectionPlace; onClose: () => void }) {
   const close = useRef<HTMLButtonElement>(null);
 
@@ -42,6 +42,9 @@ export function PlaceSheet({ place, onClose }: { place: CollectionPlace; onClose
           {countOf(place.days, 'day')} · {countOf(place.trips, 'trip')}
           {place.firstVisit && (
             <> · First visit {formatDateRange(place.firstVisit, place.firstVisit)}</>
+          )}
+          {place.lastVisit && place.lastVisit !== place.firstVisit && (
+            <> · Last visit {formatDateRange(place.lastVisit, place.lastVisit)}</>
           )}
         </p>
         <ul className="country-trips">
