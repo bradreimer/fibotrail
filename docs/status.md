@@ -28,6 +28,12 @@ the accessibility checklist are also still unrecorded.
 
 ## Completed
 
+- [#169](https://github.com/bradreimer/fibotrail/issues/169) `ServerApp.cs` goes from 393 lines to
+  25. Service registration, the middleware order, and the route list move to `Hosting/`. The
+  sign-in screens move to `Auth/AuthRoutes.cs`, the two middleware functions become classes, and
+  each startup task moves to its feature. Routes, status codes, headers, log lines, and the OpenAPI
+  document don't change. New `MiddlewareTests` and `PipelineTests` add 15 tests. See "Where server
+  code goes" in [web-app-development.md](knowledge/web-app-development.md).
 - [#166](https://github.com/bradreimer/fibotrail/issues/166) A **Games** tab with a daily
   **Timeline** game ([games spec](specs/games.md), [Timeline spec](specs/timeline-game.md),
   [ADR-022](adr/ADR-022-games-are-plug-in-modules-behind-a-games-api.md)). Timeline shows 5 photos
