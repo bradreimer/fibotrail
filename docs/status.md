@@ -2,27 +2,28 @@
 
 ## Current milestone
 
-Version 0.5.0 is the release after 0.4.0 (10 commits). One **Insights** tab replaces the
-Collections and Stats tabs ([#151](https://github.com/bradreimer/fibotrail/issues/151)), and the
-continent and country pages, Records, the Fibonacci spiral, and the season wheel are removed. The
-Trips screen gains search ([#157](https://github.com/bradreimer/fibotrail/issues/157)). The trip
-page maps draw the 1:10 million outline
-([#153](https://github.com/bradreimer/fibotrail/issues/153)). The command line gains
-`fibotrail trip rename` ([#155](https://github.com/bradreimer/fibotrail/issues/155)) and
-`fibotrail trip pin` and `unpin` ([#156](https://github.com/bradreimer/fibotrail/issues/156)). A
-photo changed in Immich now shows its new image after a rescan
-([#161](https://github.com/bradreimer/fibotrail/issues/161)), and an opened collection shows a
-skeleton shaped like its content ([#149](https://github.com/bradreimer/fibotrail/issues/149)).
-Version 0.4.0 added the read-only MCP server and the **MCP** screen
-([#143](https://github.com/bradreimer/fibotrail/issues/143)). The release workflow publishes
-`ghcr.io/bradreimer/fibotrail:0.5.0` and `:latest`. See [roadmap.md](roadmap.md) and
-[the releases](https://github.com/bradreimer/fibotrail/releases).
+Version 0.5.1 is the release after 0.5.0 (6 commits). Marking the parks of a trip with no photo
+positions moves from the trip page to `fibotrail trip parks`
+([#174](https://github.com/bradreimer/fibotrail/issues/174)). A **Games** tab adds a daily
+**Timeline** game ([#166](https://github.com/bradreimer/fibotrail/issues/166)), with large tiles you
+drag and no trip names until the end ([#170](https://github.com/bradreimer/fibotrail/issues/170)).
+Collections show where you've been, not what's left
+([#164](https://github.com/bradreimer/fibotrail/issues/164)). A restart during trip detection no
+longer leaves trips stale ([#168](https://github.com/bradreimer/fibotrail/issues/168)), and
+`ServerApp` is split into a composition root
+([#169](https://github.com/bradreimer/fibotrail/issues/169)). Version 0.5.0 added the **Insights**
+tab, trip search, finer trip page maps, and `fibotrail trip rename`, `pin`, and `unpin`. The release
+workflow publishes `ghcr.io/bradreimer/fibotrail:0.5.1` and `:latest`. See
+[roadmap.md](roadmap.md) and [the releases](https://github.com/bradreimer/fibotrail/releases).
+
+A minor feature, the Games tab, ships in a patch release because the maintainer chose the number
+0.5.1.
 
 **What wasn't recorded before the tag:** `./scripts/check.sh` and CI pass on the tagged commit.
-The finer trip maps were checked on an iPhone on 2026-11-18. The Insights tab, search, the
-thumbnail refresh, and the collection skeleton are checked in tests only, not yet on a phone or
-the maintainer's library. `fibotrail trip rename`, `pin`, and `unpin` are checked in tests only.
-The MCP connection steps still haven't been run against a real AI client (open question 1 of the
+`fibotrail trip parks`, the Games tab, the collection wording, and the detection restart fix are
+checked in tests only, not yet on a phone, the maintainer's library, or a real container. The
+Timeline drag was checked in Chromium with iPhone touch emulation, not on a real phone. The MCP
+connection steps still haven't been run against a real AI client (open question 1 of the
 [spec](specs/mcp-server.md)). The ADR-007 table lines for version 0.1 and the per-line results of
 the accessibility checklist are also still unrecorded.
 
