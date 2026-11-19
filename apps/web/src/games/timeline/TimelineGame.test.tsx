@@ -1,14 +1,14 @@
-import { render, screen, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { expectNoAccessibilityProblems } from '../../accessibility/accessibility';
 import { App } from '../../App';
 import { fakeServer, status } from '../../test/server';
 import { installMatchMedia } from '../../test/window';
 import { localDate } from '../today';
-import { moveCard, summary } from './TimelineGame';
+import { HOLD_MS } from './TimelineBoard';
 
 const answer = ['a', 'b', 'c', 'd', 'e'];
 const names: Record<string, string> = {
@@ -24,7 +24,7 @@ const puzzle = (result: unknown = null) => ({
   date: localDate(),
   maxTries: 4,
   tripsNeeded: 0,
-  cards: ['b', 'a', 'c', 'd', 'e'].map((id) => ({ photoId: id, tripName: names[id] })),
+  cards: ['b', 'a', 'c', 'd', 'e'].map((id) => ({ photoId: id })),
   result,
 });
 
@@ -39,6 +39,7 @@ const result = {
   share: 'Fibotrail Timeline #2 2/4\n🟨🟨🟩🟩🟩\n🟩🟩🟩🟩🟩',
   answer: answer.map((id, index) => ({
     photoId: id,
+    tripId: index + 10,
     tripName: names[id],
     date: `202${index}-06-01`,
   })),
@@ -64,17 +65,50 @@ function renderGame() {
   );
 }
 
-function cardNames() {
-  const list = document.querySelector('.timeline__cards') as HTMLElement;
-  return within(list)
-    .getAllByRole('listitem')
-    .map((item) => item.querySelector('.timeline-card__name')!.firstChild!.textContent);
+function board() {
+  return document.querySelector('.timeline__cards') as HTMLElement;
+}
+
+/** The photo IDs of the cards, top to bottom. */
+function cardIds() {
+  return within(board())
+    .getAllByRole('img')
+    .map((image) => image.getAttribute('src')!.split('/')[3]);
+}
+
+function card(index: number) {
+  return within(board()).getAllByRole('listitem')[index]!;
+}
+
+/** Lays the cards out 100 px apart, 90 px tall, as a phone would. */
+function layOutCards() {
+  vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function (
+    this: HTMLElement,
+  ) {
+    const index = this.parentElement ? Array.from(this.parentElement.children).indexOf(this) : 0;
+    const top = this.classList.contains('timeline-card') ? index * 100 : 0;
+    return {
+      top,
+      height: 90,
+      bottom: top + 90,
+      left: 0,
+      right: 300,
+      width: 300,
+      x: 0,
+      y: top,
+      toJSON: () => ({}),
+    };
+  });
 }
 
 beforeEach(() => installMatchMedia(390));
+afterEach(() => {
+  vi.restoreAllMocks();
+  vi.useRealTimers();
+});
 
 describe('the Timeline game', () => {
-  it('shows five cards, marks a try, and stores the result when solved', async () => {
+  it('shows photos with no trip name or number, and solves by dragging', async () => {
     const server = fakeServer({
       'GET /api/games/timeline/puzzle': puzzle(),
       'POST /api/games/timeline/check': grade,
@@ -83,24 +117,29 @@ describe('the Timeline game', () => {
     const { container } = renderGame();
 
     expect(await screen.findByRole('heading', { name: 'Timeline #2' })).toBeInTheDocument();
-    expect(cardNames()).toEqual(['Lisbon', 'Orlando, March 2024', 'Paris', 'Rome', 'Tokyo']);
+    expect(cardIds()).toEqual(['b', 'a', 'c', 'd', 'e']);
+    for (const name of Object.values(names)) {
+      expect(board()).not.toHaveTextContent(name);
+    }
+    expect(board().textContent).not.toMatch(/[1-5]/);
     expect(screen.getByText(/4 tries left/)).toBeInTheDocument();
     await expectNoAccessibilityProblems(container);
 
     await userEvent.click(screen.getByRole('button', { name: 'Check' }));
-
     expect(await screen.findByText('3 right, 2 close, 0 wrong')).toBeInTheDocument();
-    expect(screen.getByText(/3 tries left/)).toBeInTheDocument();
-    // A right card can't move.
-    expect(screen.getByRole('button', { name: 'Move Paris up' })).toBeDisabled();
+    expect(within(card(2)).getByText('Right')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Move card 3 up' })).toBeDisabled();
 
-    await userEvent.click(screen.getByRole('button', { name: 'Move Orlando, March 2024 up' }));
-    expect(cardNames()).toEqual(['Orlando, March 2024', 'Lisbon', 'Paris', 'Rome', 'Tokyo']);
+    // Drag the first card down one place with a mouse.
+    layOutCards();
+    fireEvent.pointerDown(card(0), { pointerId: 1, pointerType: 'mouse', button: 0, clientY: 45 });
+    fireEvent.pointerMove(card(0), { pointerId: 1, pointerType: 'mouse', clientY: 145 });
+    expect(card(1)).toHaveClass('timeline-card--dragging');
+    fireEvent.pointerUp(card(1), { pointerId: 1, pointerType: 'mouse', clientY: 145 });
+    expect(cardIds()).toEqual(['a', 'b', 'c', 'd', 'e']);
+
     await userEvent.click(screen.getByRole('button', { name: 'Check' }));
-
     expect(await screen.findByText('Solved in 2 tries.')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Share' })).toBeInTheDocument();
-    expect(screen.getByText('Current streak')).toBeInTheDocument();
     const sent = server.sent('POST', '/api/games/timeline/results')[0]?.body as {
       guesses: string[][];
     };
@@ -110,13 +149,48 @@ describe('the Timeline game', () => {
     ]);
   });
 
-  it('shows the stored result when today is played', async () => {
+  it('lifts a card after a press and hold on a touch screen', async () => {
+    fakeServer({ 'GET /api/games/timeline/puzzle': puzzle() });
+    renderGame();
+    await screen.findByRole('heading', { name: 'Timeline #2' });
+    layOutCards();
+    vi.useFakeTimers();
+
+    fireEvent.pointerDown(card(4), { pointerId: 2, pointerType: 'touch', clientY: 445 });
+    act(() => vi.advanceTimersByTime(HOLD_MS));
+    fireEvent.pointerMove(card(4), { pointerId: 2, pointerType: 'touch', clientY: 45 });
+    fireEvent.pointerUp(card(0), { pointerId: 2, pointerType: 'touch', clientY: 45 });
+
+    expect(cardIds()).toEqual(['e', 'b', 'a', 'c', 'd']);
+  });
+
+  it('lets a quick swipe scroll instead of dragging', async () => {
+    fakeServer({ 'GET /api/games/timeline/puzzle': puzzle() });
+    renderGame();
+    await screen.findByRole('heading', { name: 'Timeline #2' });
+    layOutCards();
+    vi.useFakeTimers();
+
+    fireEvent.pointerDown(card(4), { pointerId: 3, pointerType: 'touch', clientY: 445 });
+    fireEvent.pointerMove(card(4), { pointerId: 3, pointerType: 'touch', clientY: 300 });
+    act(() => vi.advanceTimersByTime(HOLD_MS));
+    fireEvent.pointerUp(card(4), { pointerId: 3, pointerType: 'touch', clientY: 100 });
+
+    expect(cardIds()).toEqual(['b', 'a', 'c', 'd', 'e']);
+    expect(document.querySelector('.timeline-card--dragging')).toBeNull();
+  });
+
+  it('shows each trip with its date and a link at the end', async () => {
     fakeServer({ 'GET /api/games/timeline/puzzle': puzzle(result) });
     const { container } = renderGame();
 
     expect(await screen.findByText('Solved in 2 tries.')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Check' })).not.toBeInTheDocument();
     expect(screen.getByLabelText('Try 1: 3 right, 2 close, 0 wrong')).toBeInTheDocument();
+    const orlando = screen.getByRole('link', { name: /Orlando, March 2024/ });
+    expect(orlando).toHaveAttribute('href', '/trips/10');
+    expect(orlando).toHaveTextContent('Jun 1, 2020');
+    expect(screen.getByRole('link', { name: /Tokyo/ })).toHaveAttribute('href', '/trips/14');
     await expectNoAccessibilityProblems(container);
   });
 
@@ -130,18 +204,5 @@ describe('the Timeline game', () => {
     await userEvent.click(await screen.findByRole('button', { name: 'Check' }));
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Only today can be played.');
-  });
-});
-
-describe('moving a card', () => {
-  it('swaps with its neighbor and jumps over locked cards', () => {
-    expect(moveCard(['a', 'b', 'c'], new Set(), 1, -1)).toEqual(['b', 'a', 'c']);
-    expect(moveCard(['a', 'b', 'c'], new Set(['b']), 0, 1)).toEqual(['c', 'b', 'a']);
-    expect(moveCard(['a', 'b', 'c'], new Set(['a']), 0, 1)).toEqual(['a', 'b', 'c']);
-    expect(moveCard(['a', 'b', 'c'], new Set(), 0, -1)).toEqual(['a', 'b', 'c']);
-  });
-
-  it('summarizes marks', () => {
-    expect(summary(['right', 'close', 'wrong', 'wrong'])).toBe('1 right, 1 close, 2 wrong');
   });
 });

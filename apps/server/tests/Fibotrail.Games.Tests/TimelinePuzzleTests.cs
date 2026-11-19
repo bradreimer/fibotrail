@@ -37,7 +37,8 @@ public class TimelinePuzzleTests
         var puzzle = Puzzle();
 
         Assert.Equal(5, puzzle.Answer.Count);
-        Assert.Equal(5, puzzle.Answer.Select(card => card.TripName).Distinct().Count());
+        Assert.Equal(5, puzzle.Answer.Select(card => card.TripId).Distinct().Count());
+        Assert.All(puzzle.Answer, card => Assert.Equal($"Trip {card.TripId}", card.TripName));
         Assert.Equal(puzzle.Answer.OrderBy(card => card.Taken), puzzle.Answer);
         Assert.Equal(puzzle.Answer.ToHashSet(), puzzle.Shown.ToHashSet());
     }

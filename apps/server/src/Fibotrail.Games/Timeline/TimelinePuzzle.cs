@@ -1,7 +1,7 @@
 namespace Fibotrail.Games.Timeline;
 
-/// <summary>A card: one photo from one trip.</summary>
-public sealed record TimelineCard(string PhotoId, string TripName, DateTime Taken);
+/// <summary>A card: one photo from one trip. Only the photo ID is shown until the game ends.</summary>
+public sealed record TimelineCard(string PhotoId, int TripId, string TripName, DateTime Taken);
 
 /// <summary>The graded tries of one day.</summary>
 public sealed record TimelineOutcome(bool Solved, IReadOnlyList<IReadOnlyList<Mark>> Rows);
@@ -43,7 +43,7 @@ public sealed record TimelinePuzzle(DateOnly Date, int Number, IReadOnlyList<Tim
         {
             var photos = trip.Photos.OrderBy(photo => photo.LocalTime).ThenBy(photo => photo.Id, StringComparer.Ordinal).ToList();
             var photo = photos[random.Next(photos.Count)];
-            return new TimelineCard(photo.Id, trip.Name, photo.LocalTime);
+            return new TimelineCard(photo.Id, trip.Id, trip.Name, photo.LocalTime);
         }).ToList();
 
         var answer = cards.OrderBy(card => card.Taken).ThenBy(card => card.PhotoId, StringComparer.Ordinal).ToList();

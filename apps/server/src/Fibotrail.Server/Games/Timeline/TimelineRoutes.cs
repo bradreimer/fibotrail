@@ -6,11 +6,14 @@ using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Fibotrail.Server.Games.Timeline;
 
-/// <summary>A card as it's shown before the answer: no date.</summary>
-public sealed record TimelineCardView(string PhotoId, string TripName);
+/// <summary>
+/// A card as it's shown while you play: the photo only. A trip name often gives the order away, so
+/// it isn't sent until the game ends.
+/// </summary>
+public sealed record TimelineCardView(string PhotoId);
 
-/// <summary>A card in the answer, with the day its photo was taken.</summary>
-public sealed record TimelineAnswerCard(string PhotoId, string TripName, DateOnly Date);
+/// <summary>A card in the answer: its trip, for a link to the trip page, and the day its photo was taken.</summary>
+public sealed record TimelineAnswerCard(string PhotoId, int TripId, string TripName, DateOnly Date);
 
 /// <summary>Today's puzzle.</summary>
 /// <param name="TripsNeeded">More trips with photos needed before there's a puzzle. 0 when there is one.</param>
@@ -68,7 +71,7 @@ public static class TimelineRoutes
                 date,
                 TimelinePuzzle.MaxTries,
                 0,
-                [.. puzzle.Shown.Select(card => new TimelineCardView(card.PhotoId, card.TripName))],
+                [.. puzzle.Shown.Select(card => new TimelineCardView(card.PhotoId))],
                 result));
         }).WithName("GetTimelinePuzzle");
 
@@ -142,7 +145,7 @@ public static class TimelineRoutes
             stored.MaxTries,
             rows,
             Marks.ShareText(TimelinePuzzle.Name, puzzle.Number, stored.Solved, rows, stored.MaxTries),
-            [.. puzzle.Answer.Select(card => new TimelineAnswerCard(card.PhotoId, card.TripName, DateOnly.FromDateTime(card.Taken)))],
+            [.. puzzle.Answer.Select(card => new TimelineAnswerCard(card.PhotoId, card.TripId, card.TripName, DateOnly.FromDateTime(card.Taken)))],
             stats);
     }
 }

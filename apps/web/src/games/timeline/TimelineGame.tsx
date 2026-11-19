@@ -6,43 +6,18 @@ import type { components } from '../../api/schema';
 import { useSession } from '../../api/session';
 import { useApi } from '../../api/useApi';
 import { ErrorState } from '../../states/ErrorState';
-import { countOf, formatDay } from '../../trips/dates';
+import { countOf, formatDateRange } from '../../trips/dates';
 import { GameStatsPanel } from '../GameStatsPanel';
 import { shareResult, type ShareOutcome } from '../share';
 import { localDate } from '../today';
+import { summary } from './order';
+import { TimelineBoard } from './TimelineBoard';
 
 type Mark = components['schemas']['Mark'];
-type Card = components['schemas']['TimelineCardView'];
 type Result = components['schemas']['TimelineResultView'];
 type Puzzle = components['schemas']['TimelinePuzzleView'];
 
 const SQUARE: Record<Mark, string> = { right: '🟩', close: '🟨', wrong: '⬜' };
-const WORD: Record<Mark, string> = { right: 'Right', close: 'Close', wrong: 'Wrong' };
-
-/** Moves the card at `from` one step, past any locked card, or returns the order unchanged. */
-export function moveCard(
-  order: readonly string[],
-  locked: ReadonlySet<string>,
-  from: number,
-  step: -1 | 1,
-): string[] {
-  const next = [...order];
-  const card = order[from];
-  if (card === undefined || locked.has(card)) return next;
-  let to = from + step;
-  while (to >= 0 && to < order.length && locked.has(order[to]!)) to += step;
-  const other = order[to];
-  if (other === undefined) return next;
-  next[from] = other;
-  next[to] = card;
-  return next;
-}
-
-/** "3 right, 1 close, 1 wrong", for screen readers after a check. */
-export function summary(marks: readonly Mark[]): string {
-  const count = (mark: Mark) => marks.filter((item) => item === mark).length;
-  return `${count('right')} right, ${count('close')} close, ${count('wrong')} wrong`;
-}
 
 /**
  * The Timeline game: put five photos from five trips in the order you took them, in up to four
@@ -103,19 +78,16 @@ function TimelinePlay({
   const [order, setOrder] = useState<string[]>(() => data.cards.map((card) => card.photoId));
   const [guesses, setGuesses] = useState<string[][]>([]);
   const [rows, setRows] = useState<Mark[][]>([]);
-  const [shownMarks, setShownMarks] = useState<ReadonlyMap<string, Mark>>(new Map());
+  const [marks, setMarks] = useState<ReadonlyMap<string, Mark>>(new Map());
   const [busy, setBusy] = useState(false);
   const [problem, setProblem] = useState<string | null>(null);
   const [announcement, setAnnouncement] = useState('');
-
-  const cards = new Map<string, Card>(data.cards.map((card) => [card.photoId, card]));
-  const locked = new Set(order.filter((id) => shownMarks.get(id) === 'right'));
   const triesLeft = data.maxTries - rows.length;
 
-  function move(index: number, step: -1 | 1) {
-    setOrder((before) => moveCard(before, locked, index, step));
+  function reorder(next: string[]) {
+    setOrder(next);
     // A mark belongs to a place, so moved cards lose theirs. Right cards never move.
-    setShownMarks((before) => new Map([...before].filter(([, mark]) => mark === 'right')));
+    setMarks((before) => new Map([...before].filter(([, mark]) => mark === 'right')));
   }
 
   async function check() {
@@ -133,7 +105,7 @@ function TimelinePlay({
       const nextRows = [...rows, answer.marks];
       setGuesses(nextGuesses);
       setRows(nextRows);
-      setShownMarks(
+      setMarks(
         new Map(order.map((id, index): [string, Mark] => [id, answer.marks[index] ?? 'wrong'])),
       );
       setAnnouncement(summary(answer.marks));
@@ -157,53 +129,10 @@ function TimelinePlay({
     <section className="timeline">
       {heading}
       <p className="games-page__lead">
-        Put these photos in the order you took them, oldest first.{' '}
+        Drag the photos into the order you took them, oldest first.{' '}
         {countOf(triesLeft, 'try', 'tries')} left.
       </p>
-      <ol className="timeline__cards">
-        {order.map((id, index) => {
-          const card = cards.get(id)!;
-          const mark = shownMarks.get(id);
-          const isLocked = locked.has(id);
-          return (
-            <li key={id} className={`timeline-card${mark ? ` timeline-card--${mark}` : ''}`}>
-              <span className="timeline-card__place" aria-hidden="true">
-                {index + 1}
-              </span>
-              <img
-                className="timeline-card__photo"
-                src={`/api/photos/${id}/thumbnail`}
-                alt={`From ${card.tripName}`}
-                loading="lazy"
-              />
-              <span className="timeline-card__name">
-                {card.tripName}
-                {mark && <span className="timeline-card__mark">{WORD[mark]}</span>}
-              </span>
-              <span className="timeline-card__moves">
-                <button
-                  type="button"
-                  className="timeline-card__move"
-                  aria-label={`Move ${card.tripName} up`}
-                  disabled={busy || isLocked || index === 0}
-                  onClick={() => move(index, -1)}
-                >
-                  ▲
-                </button>
-                <button
-                  type="button"
-                  className="timeline-card__move"
-                  aria-label={`Move ${card.tripName} down`}
-                  disabled={busy || isLocked || index === order.length - 1}
-                  onClick={() => move(index, 1)}
-                >
-                  ▼
-                </button>
-              </span>
-            </li>
-          );
-        })}
-      </ol>
+      <TimelineBoard order={order} marks={marks} disabled={busy} onChange={reorder} />
       {rows.length > 0 && <MarkGrid rows={rows} />}
       <p className="visually-hidden" role="status">
         {announcement}
@@ -237,6 +166,7 @@ function MarkGrid({ rows }: { rows: readonly (readonly Mark[])[] }) {
   );
 }
 
+/** The end of the game: the right order, each card with its trip and a link to it. */
 function TimelineResult({ heading, result }: { heading: ReactNode; result: Result }) {
   const [shared, setShared] = useState<ShareOutcome | null>(null);
   const label =
@@ -250,22 +180,19 @@ function TimelineResult({ heading, result }: { heading: ReactNode; result: Resul
           : 'Not this time. Here is the order you took them.'}
       </p>
       <MarkGrid rows={result.rows} />
-      <ol className="timeline__cards">
-        {result.answer.map((card, index) => (
-          <li key={card.photoId} className="timeline-card timeline-card--answer">
-            <span className="timeline-card__place" aria-hidden="true">
-              {index + 1}
-            </span>
-            <img
-              className="timeline-card__photo"
-              src={`/api/photos/${card.photoId}/thumbnail`}
-              alt={`From ${card.tripName}`}
-              loading="lazy"
-            />
-            <span className="timeline-card__name">
-              {card.tripName}
-              <span className="timeline-card__date">{formatDay(card.date)}</span>
-            </span>
+      <ol className="timeline__answer">
+        {result.answer.map((card) => (
+          <li key={card.photoId}>
+            <Link className="timeline-answer" to={`/trips/${card.tripId}`}>
+              <img
+                className="timeline-answer__photo"
+                src={`/api/photos/${card.photoId}/thumbnail`}
+                alt=""
+                loading="lazy"
+              />
+              <span className="timeline-answer__name">{card.tripName}</span>
+              <span className="timeline-answer__date">{formatDateRange(card.date, card.date)}</span>
+            </Link>
           </li>
         ))}
       </ol>
