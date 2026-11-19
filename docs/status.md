@@ -2,7 +2,7 @@
 
 ## Current milestone
 
-Version 0.5.1 is the release after 0.5.0 (6 commits). Marking the parks of a trip with no photo
+Version 0.6.0 is the release after 0.5.0 (6 commits). Marking the parks of a trip with no photo
 positions moves from the trip page to `fibotrail trip parks`
 ([#174](https://github.com/bradreimer/fibotrail/issues/174)). A **Games** tab adds a daily
 **Timeline** game ([#166](https://github.com/bradreimer/fibotrail/issues/166)), with large tiles you
@@ -13,11 +13,8 @@ longer leaves trips stale ([#168](https://github.com/bradreimer/fibotrail/issues
 `ServerApp` is split into a composition root
 ([#169](https://github.com/bradreimer/fibotrail/issues/169)). Version 0.5.0 added the **Insights**
 tab, trip search, finer trip page maps, and `fibotrail trip rename`, `pin`, and `unpin`. The release
-workflow publishes `ghcr.io/bradreimer/fibotrail:0.5.1` and `:latest`. See
+workflow publishes `ghcr.io/bradreimer/fibotrail:0.6.0` and `:latest`. See
 [roadmap.md](roadmap.md) and [the releases](https://github.com/bradreimer/fibotrail/releases).
-
-A minor feature, the Games tab, ships in a patch release because the maintainer chose the number
-0.5.1.
 
 **What wasn't recorded before the tag:** `./scripts/check.sh` and CI pass on the tagged commit.
 `fibotrail trip parks`, the Games tab, the collection wording, and the detection restart fix are
