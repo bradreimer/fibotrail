@@ -34,6 +34,12 @@ the accessibility checklist are also still unrecorded.
   no trip name or number, and the puzzle route no longer sends trip names. At the end, each card shows
   its trip name and date and links to the trip page. Checked in tests and in Chromium with iPhone
   touch emulation, not yet on a real phone.
+- [#169](https://github.com/bradreimer/fibotrail/issues/169) `ServerApp.cs` goes from 393 lines to
+  25. Service registration, the middleware order, and the route list move to `Hosting/`. The
+  sign-in screens move to `Auth/AuthRoutes.cs`, the two middleware functions become classes, and
+  each startup task moves to its feature. Routes, status codes, headers, log lines, and the OpenAPI
+  document don't change. New `MiddlewareTests` and `PipelineTests` add 15 tests. See "Where server
+  code goes" in [web-app-development.md](knowledge/web-app-development.md).
 - [#168](https://github.com/bradreimer/fibotrail/issues/168) A restart during trip detection no
   longer leaves trips stale. The scan run is "detecting" from its last page until detection
   commits, and a start resumes a "detecting" run by running detection alone, with no Immich reads.

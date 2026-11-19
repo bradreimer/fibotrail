@@ -112,7 +112,7 @@ public class DetectionRestartTests
         Assert.Equal("running", during.GetProperty("state").GetString());
 
         var searchesBefore = immich.SearchCount;
-        await ServerApp.StartImmichAsync(second.App);
+        await second.App.StartImmichAsync();
         await second.Scans.Current;
 
         var after = await TripLibrary.TripsAsync(second);
@@ -137,7 +137,7 @@ public class DetectionRestartTests
         await using var second = await TestApp.StartAsync(first.Settings.DataDirectory, first.Immich);
         Assert.Equal(ScanState.Detecting, (await LatestRunAsync(second)).State);
         Assert.Single(await TripLibrary.TripsAsync(second));
-        await ServerApp.StartImmichAsync(second.App);
+        await second.App.StartImmichAsync();
         await second.Scans.Current;
 
         Assert.Equal(2, (await TripLibrary.TripsAsync(second)).Count);

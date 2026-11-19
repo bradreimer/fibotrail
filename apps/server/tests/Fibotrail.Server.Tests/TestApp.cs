@@ -128,7 +128,7 @@ public sealed class TestApp : IAsyncDisposable
         });
 
         var app = ServerApp.Create(builder, settings, FastCost);
-        await ServerApp.PrepareDatabaseAsync(app);
+        await app.PrepareDatabaseAsync();
         await app.StartAsync();
         return new TestApp(app, settings, time, delay, immich);
     }
