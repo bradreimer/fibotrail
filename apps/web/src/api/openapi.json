@@ -1931,6 +1931,7 @@
       "TimelineAnswerCard": {
         "required": [
           "photoId",
+          "tripId",
           "tripName",
           "date"
         ],
@@ -1938,6 +1939,10 @@
         "properties": {
           "photoId": {
             "type": "string"
+          },
+          "tripId": {
+            "type": "integer",
+            "format": "int32"
           },
           "tripName": {
             "type": "string"
@@ -1950,15 +1955,11 @@
       },
       "TimelineCardView": {
         "required": [
-          "photoId",
-          "tripName"
+          "photoId"
         ],
         "type": "object",
         "properties": {
           "photoId": {
-            "type": "string"
-          },
-          "tripName": {
             "type": "string"
           }
         }

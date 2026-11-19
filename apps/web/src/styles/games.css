@@ -89,63 +89,88 @@
 .timeline__cards {
   display: grid;
   gap: var(--fibo-space-3);
+  /* Large on a phone, and no wider than a phone on a wide screen. */
+  max-inline-size: calc(var(--fibo-space-7) * 9);
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
+/*
+ * A card while you play: the photo only, full width and large enough to see. A swipe still scrolls
+ * the page (pan-y); a press and hold lifts the card, and the board stops the scroll while it's up.
+ */
 .timeline-card {
-  display: grid;
-  grid-template-columns: auto auto minmax(0, 1fr) auto;
-  gap: var(--fibo-space-3);
-  align-items: center;
-  padding: var(--fibo-space-3);
-  border: calc(var(--fibo-border) * 2) solid var(--fibo-mist);
+  position: relative;
+  overflow: hidden;
+  border: calc(var(--fibo-border) * 3) solid var(--fibo-mist);
   border-radius: var(--fibo-radius);
-  transition: border-color var(--fibo-dur-fast) ease-out;
+  background: var(--fibo-mist);
+  cursor: grab;
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
 }
 
 .timeline-card--right {
   border-color: var(--fibo-meadow);
-  background: color-mix(in srgb, var(--fibo-meadow) 18%, var(--fibo-paper));
 }
 
 .timeline-card--close {
   border-color: var(--fibo-gold);
-  background: color-mix(in srgb, var(--fibo-gold) 18%, var(--fibo-paper));
 }
 
-.timeline-card__place {
-  min-inline-size: var(--fibo-space-5);
-  color: var(--fibo-ink-muted);
-  font-variant-numeric: tabular-nums;
-  text-align: center;
+.timeline-card--locked {
+  cursor: default;
+}
+
+/* Lifted under your finger, as an iOS list row is while you reorder it. */
+.timeline-card--dragging {
+  z-index: 1;
+  box-shadow: var(--fibo-switch-shadow);
+  cursor: grabbing;
 }
 
 .timeline-card__photo {
-  inline-size: var(--fibo-space-7);
-  block-size: var(--fibo-space-7);
-  border-radius: calc(var(--fibo-radius) / 2);
-  background: var(--fibo-mist);
+  display: block;
+  inline-size: 100%;
+  aspect-ratio: 3 / 2;
   object-fit: cover;
+  pointer-events: none;
 }
 
-.timeline-card__name {
-  display: grid;
-  gap: var(--fibo-space-1);
-  overflow-wrap: anywhere;
-}
-
-.timeline-card__mark,
-.timeline-card__date {
-  color: var(--fibo-ink-muted);
+.timeline-card__mark {
+  position: absolute;
+  inset-block-start: var(--fibo-space-2);
+  inset-inline-start: var(--fibo-space-2);
+  padding: var(--fibo-space-1) var(--fibo-space-3);
+  border-radius: var(--fibo-radius);
+  background: var(--fibo-paper);
+  color: var(--fibo-ink);
   font-size: var(--fibo-text-caption);
   font-weight: 600;
 }
 
+/* Move buttons for a keyboard or VoiceOver. Hidden until one has focus. */
 .timeline-card__moves {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+.timeline-card__moves:focus-within {
+  inset-block: 0;
+  inset-inline-end: var(--fibo-space-2);
   display: grid;
+  align-content: center;
   gap: var(--fibo-space-1);
+  width: auto;
+  height: auto;
+  overflow: visible;
+  clip-path: none;
 }
 
 .timeline-card__move {
@@ -163,6 +188,52 @@
   color: var(--fibo-ink-muted);
   opacity: 0.4;
   cursor: default;
+}
+
+/* The answer at the end: each card links to its trip. */
+.timeline__answer {
+  display: grid;
+  gap: var(--fibo-space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.timeline-answer {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-areas:
+    'photo name'
+    'photo date';
+  column-gap: var(--fibo-space-4);
+  align-items: center;
+  padding: var(--fibo-space-3);
+  border: var(--fibo-border) solid var(--fibo-mist);
+  border-radius: var(--fibo-radius);
+  color: inherit;
+  text-decoration: none;
+}
+
+.timeline-answer__photo {
+  grid-area: photo;
+  inline-size: var(--fibo-space-7);
+  block-size: var(--fibo-space-7);
+  border-radius: calc(var(--fibo-radius) / 2);
+  background: var(--fibo-mist);
+  object-fit: cover;
+}
+
+.timeline-answer__name {
+  grid-area: name;
+  align-self: end;
+  overflow-wrap: anywhere;
+}
+
+.timeline-answer__date {
+  grid-area: date;
+  align-self: start;
+  color: var(--fibo-ink-muted);
+  font-size: var(--fibo-text-caption);
 }
 
 .timeline__grid {

@@ -28,6 +28,12 @@ the accessibility checklist are also still unrecorded.
 
 ## Completed
 
+- [#170](https://github.com/bradreimer/fibotrail/issues/170) Timeline tiles are large photos you
+  drag ([spec](specs/timeline-game.md#playing)). A press and hold lifts a tile on a phone, a mouse
+  drags at once, a swipe still scrolls, and the page scrolls while a tile is near its edge. Tiles show
+  no trip name or number, and the puzzle route no longer sends trip names. At the end, each card shows
+  its trip name and date and links to the trip page. Checked in tests and in Chromium with iPhone
+  touch emulation, not yet on a real phone.
 - [#169](https://github.com/bradreimer/fibotrail/issues/169) `ServerApp.cs` goes from 393 lines to
   25. Service registration, the middleware order, and the route list move to `Hosting/`. The
   sign-in screens move to `Auth/AuthRoutes.cs`, the two middleware functions become classes, and

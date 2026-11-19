@@ -717,13 +717,14 @@ export interface components {
         };
         TimelineAnswerCard: {
             photoId: string;
+            /** Format: int32 */
+            tripId: number;
             tripName: string;
             /** Format: date */
             date: string;
         };
         TimelineCardView: {
             photoId: string;
-            tripName: string;
         };
         TimelineCheckRequest: {
             /** Format: date */

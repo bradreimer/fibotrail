@@ -87,6 +87,9 @@ public class GamesTests
         Assert.Equal(2, puzzle.GetProperty("number").GetInt32());
         Assert.DoesNotContain("Rome", puzzle.GetRawText(), StringComparison.Ordinal);
         Assert.False(cards[0].TryGetProperty("date", out JsonElement _));
+        Assert.Equal(["photoId"], cards[0].EnumerateObject().Select(property => property.Name));
+        var names = (await TripLibrary.TripsAsync(app)).Select(trip => trip.Name);
+        Assert.All(names, name => Assert.DoesNotContain(name, puzzle.GetRawText(), StringComparison.Ordinal));
         Assert.Equal(puzzle.GetRawText(), again.GetRawText());
         Assert.Equal(JsonValueKind.Null, puzzle.GetProperty("result").ValueKind);
     }
@@ -121,6 +124,13 @@ public class GamesTests
         Assert.Equal(2, result.GetProperty("tries").GetInt32());
         Assert.Equal("Fibotrail Timeline #2 2/4\n🟨🟨🟩🟩🟩\n🟩🟩🟩🟩🟩", result.GetProperty("share").GetString());
         Assert.Equal(answer, result.GetProperty("answer").EnumerateArray().Select(card => card.GetProperty("photoId").GetString()!));
+        var trips = await TripLibrary.TripsAsync(app);
+        foreach (var card in result.GetProperty("answer").EnumerateArray())
+        {
+            var trip = Assert.Single(trips, trip => trip.Id == card.GetProperty("tripId").GetInt32());
+            Assert.Equal(trip.Name, card.GetProperty("tripName").GetString());
+            Assert.Contains(trip.Photos, photo => photo.PhotoId == card.GetProperty("photoId").GetString());
+        }
         Assert.Equal((1, 100, 1), (result.GetProperty("stats").GetProperty("played").GetInt32(), result.GetProperty("stats").GetProperty("winPercent").GetInt32(), result.GetProperty("stats").GetProperty("currentStreak").GetInt32()));
 
         // A second send, even a better one, keeps the first.
