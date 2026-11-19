@@ -42,7 +42,7 @@ public static class RescanCommand
         }
 
         var latest = await db.ScanRuns.AsNoTracking().OrderByDescending(run => run.Id).FirstOrDefaultAsync(cancellationToken);
-        if (latest?.State == ScanState.Running)
+        if (latest?.State is ScanState.Running or ScanState.Detecting)
         {
             console.WriteLine("A scan is running. Wait for the banner in Fibotrail to finish, then run this command again. If no scan is running, restart the container, which resumes it.");
             return 1;
