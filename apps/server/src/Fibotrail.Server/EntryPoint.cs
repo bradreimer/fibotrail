@@ -2,6 +2,7 @@ using Fibotrail.Server.Collections;
 using Fibotrail.Server.Auth;
 using Fibotrail.Server.Cli;
 using Fibotrail.Server.Data;
+using Fibotrail.Server.Hosting;
 using Fibotrail.Server.Immich;
 using Fibotrail.Server.Trips;
 
