@@ -61,7 +61,7 @@ public static class ImmichRoutes
         // A run that is "running" while this server isn't scanning belongs to `fibotrail rescan`, which
         // runs in its own process. Starting here would resume that run and write it from two places.
         var latest = await db.ScanRuns.AsNoTracking().OrderByDescending(run => run.Id).Select(run => (ScanState?)run.State).FirstOrDefaultAsync(cancellationToken);
-        if (latest == ScanState.Running || !scans.TryStart(fullPass))
+        if (latest is ScanState.Running or ScanState.Detecting || !scans.TryStart(fullPass))
         {
             return TypedResults.Conflict(new ProblemDetail("A scan is already running."));
         }
@@ -73,7 +73,7 @@ public static class ImmichRoutes
     {
         var photos = await db.Photos.CountAsync(cancellationToken);
         var run = await db.ScanRuns.AsNoTracking().OrderByDescending(candidate => candidate.Id).FirstOrDefaultAsync(cancellationToken);
-        if (scans.IsRunning && run?.State != ScanState.Running)
+        if (scans.IsRunning && run?.State is not (ScanState.Running or ScanState.Detecting))
         {
             // The scan has started, and it hasn't written its first row yet.
             return new ScanStatus(ScanStatusState.Running, 0, null, null, null, photos);
@@ -86,7 +86,8 @@ public static class ImmichRoutes
 
         var state = run.State switch
         {
-            ScanState.Running => ScanStatusState.Running,
+            // The banner shows detection as part of the scan.
+            ScanState.Running or ScanState.Detecting => ScanStatusState.Running,
             ScanState.Completed => ScanStatusState.Completed,
             _ => ScanStatusState.Failed,
         };

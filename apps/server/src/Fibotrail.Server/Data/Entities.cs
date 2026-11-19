@@ -77,6 +77,12 @@ public enum ScanState
     /// <summary>The scan is reading pages, or it was interrupted and resumes from its cursor.</summary>
     Running,
 
+    /// <summary>
+    /// Every page is stored, and trip detection hasn't committed yet. A restart runs detection again,
+    /// with no Immich reads. Stored as text, so it needs no migration.
+    /// </summary>
+    Detecting,
+
     Completed,
 
     /// <summary>Immich stopped answering. The next scan resumes from the cursor.</summary>
