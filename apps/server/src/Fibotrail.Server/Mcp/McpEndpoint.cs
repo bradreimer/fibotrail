@@ -28,6 +28,26 @@ public static partial class McpEndpoint
         app.Map(Route, branch => branch.Run(HandleAsync));
     }
 
+    /// <summary>Writes whether the MCP server is on. The token is never part of the line.</summary>
+    public static void LogMcpState(this WebApplication app)
+    {
+        ArgumentNullException.ThrowIfNull(app);
+        if (app.Services.GetRequiredService<ServerSettings>().McpEnabled)
+        {
+            LogMcpOn(app.Logger);
+        }
+        else
+        {
+            LogMcpOff(app.Logger);
+        }
+    }
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "MCP is on at /mcp.")]
+    private static partial void LogMcpOn(ILogger logger);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "MCP is off. Set MCP_TOKEN to turn it on.")]
+    private static partial void LogMcpOff(ILogger logger);
+
     private static async Task HandleAsync(HttpContext context)
     {
         var services = context.RequestServices;

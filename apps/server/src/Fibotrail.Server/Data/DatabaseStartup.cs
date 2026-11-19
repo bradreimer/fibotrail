@@ -5,8 +5,26 @@ using Microsoft.EntityFrameworkCore;
 namespace Fibotrail.Server.Data;
 
 /// <summary>Brings the database file up to date when the server starts.</summary>
-public static class DatabaseStartup
+public static partial class DatabaseStartup
 {
+    /// <summary>Brings the server's database up to date, and writes to the log when it saved a copy first.</summary>
+    public static async Task PrepareDatabaseAsync(this WebApplication app)
+    {
+        ArgumentNullException.ThrowIfNull(app);
+        await using var scope = app.Services.CreateAsyncScope();
+        var db = scope.ServiceProvider.GetRequiredService<FibotrailDbContext>();
+        var settings = scope.ServiceProvider.GetRequiredService<ServerSettings>();
+        var time = scope.ServiceProvider.GetRequiredService<TimeProvider>();
+        var backup = await PrepareAsync(db, settings, time);
+        if (backup is not null)
+        {
+            LogBackup(app.Logger, backup);
+        }
+    }
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Saved a copy of the database at {Path} before updating it.")]
+    private static partial void LogBackup(ILogger logger, string path);
+
     /// <summary>
     /// Applies pending migrations and turns on WAL mode. Before a migration changes a database
     /// that already has data, it saves a copy of the file next to it.

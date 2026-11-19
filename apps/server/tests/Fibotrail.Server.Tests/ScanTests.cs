@@ -227,7 +227,7 @@ public class ScanTests
         Assert.Equal(1000, (await PhotosAsync(second)).Count);
         var searchesBefore = immich.SearchCount;
 
-        await ServerApp.StartImmichAsync(second.App);
+        await second.App.StartImmichAsync();
         await second.Scans.Current;
 
         var run = await LatestRunAsync(second);
@@ -351,7 +351,7 @@ public class ScanTests
         var browser = await app.SignedInBrowserAsync();
         app.Immich.Assets.AddRange(Library(1200));
 
-        await ServerApp.StartImmichAsync(app.App);
+        await app.App.StartImmichAsync();
         await browser.GetJsonAsync("/api/immich");
         await app.ScanAsync();
         await app.ScanAsync();
@@ -381,7 +381,7 @@ public class ScanTests
         var browser = await app.SignedInBrowserAsync();
         app.Immich.Assets.AddRange(Library(3));
 
-        await ServerApp.StartImmichAsync(app.App);
+        await app.App.StartImmichAsync();
         await app.ScanAsync();
         app.Immich.FailNext(10);
         await app.ScanAsync();

@@ -4,6 +4,7 @@ using Fibotrail.Server.Cli;
 using Fibotrail.Server.Data;
 using Fibotrail.Server.Hosting;
 using Fibotrail.Server.Immich;
+using Fibotrail.Server.Mcp;
 using Fibotrail.Server.Trips;
 
 namespace Fibotrail.Server;
@@ -90,10 +91,10 @@ public static class EntryPoint
         }
 
         var app = ServerApp.Create(builder, settings);
-        await ServerApp.PrepareDatabaseAsync(app);
+        await app.PrepareDatabaseAsync();
         await app.StartAsync();
-        ServerApp.LogMcpState(app);
-        await ServerApp.StartImmichAsync(app);
+        app.LogMcpState();
+        await app.StartImmichAsync();
         await app.WaitForShutdownAsync();
         return 0;
     }
