@@ -414,6 +414,9 @@ Nothing is in progress.
 
 The plan is in [roadmap.md](roadmap.md). Specs are in [specs/](specs/README.md).
 
+- [#174](https://github.com/bradreimer/fibotrail/issues/174) Move marking parks from the trip
+  page to `fibotrail trip parks`. The [collections spec](specs/collections.md) is updated; the code
+  isn't written yet.
 - Record what hasn't been checked on devices: the Map, the top bar buttons, the sidebar, and **Hide**
   on a phone and an iPad, and the rest of the ADR-007 table for
   [#6](https://github.com/bradreimer/fibotrail/issues/6),
