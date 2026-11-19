@@ -258,7 +258,7 @@ public static partial class ServerApp
                 }
                 else
                 {
-                    await WriteHtmlAsync(context.Response, Pages.Expired());
+                    await context.Response.WriteHtmlAsync(Pages.Expired());
                 }
 
                 return;
@@ -282,7 +282,7 @@ public static partial class ServerApp
         app.MapGet("/setup", async (HttpContext context, AuthService auth, IAntiforgery antiforgery) =>
             await auth.IsPasswordSetAsync(context.RequestAborted)
                 ? Results.Redirect("/sign-in")
-                : Html(Pages.Setup(CsrfField(context, antiforgery), null, IsInsecure(context.Request))))
+                : HtmlResults.Html(Pages.Setup(CsrfField(context, antiforgery), null, IsInsecure(context.Request))))
             .AllowAnonymous();
 
         app.MapPost("/setup", async (HttpContext context, AuthService auth, IAntiforgery antiforgery) =>
@@ -295,7 +295,7 @@ public static partial class ServerApp
                     // The setup route stops working once a password is stored.
                     return Results.NotFound();
                 case SetupOutcome.Rejected:
-                    return Html(
+                    return HtmlResults.Html(
                         Pages.Setup(CsrfField(context, antiforgery), change.Problem, IsInsecure(context.Request)),
                         StatusCodes.Status400BadRequest);
                 default:
@@ -306,7 +306,7 @@ public static partial class ServerApp
 
         app.MapGet("/sign-in", async (HttpContext context, AuthService auth, IAntiforgery antiforgery) =>
             await auth.IsPasswordSetAsync(context.RequestAborted)
-                ? Html(Pages.SignIn(CsrfField(context, antiforgery), null, IsInsecure(context.Request)))
+                ? HtmlResults.Html(Pages.SignIn(CsrfField(context, antiforgery), null, IsInsecure(context.Request)))
                 : Results.Redirect("/setup"))
             .AllowAnonymous();
 
@@ -324,7 +324,7 @@ public static partial class ServerApp
             if (!await auth.VerifyPasswordAsync(form["password"], context.RequestAborted))
             {
                 await throttle.RecordFailureAsync(address, context.RequestAborted);
-                return Html(
+                return HtmlResults.Html(
                     Pages.SignIn(CsrfField(context, antiforgery), Pages.WrongPassword, IsInsecure(context.Request)),
                     StatusCodes.Status401Unauthorized);
             }
@@ -381,13 +381,4 @@ public static partial class ServerApp
         !request.IsHttps
         && !string.Equals(request.Host.Host, "localhost", StringComparison.OrdinalIgnoreCase)
         && !(IPAddress.TryParse(request.Host.Host, out var address) && IPAddress.IsLoopback(address));
-
-    private static IResult Html(string html, int statusCode = StatusCodes.Status200OK) =>
-        Results.Content(html, "text/html; charset=utf-8", statusCode: statusCode);
-
-    private static Task WriteHtmlAsync(HttpResponse response, string html)
-    {
-        response.ContentType = "text/html; charset=utf-8";
-        return response.WriteAsync(html);
-    }
 }

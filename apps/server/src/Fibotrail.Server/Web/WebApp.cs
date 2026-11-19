@@ -18,7 +18,7 @@ public static class WebApp
         var file = environment.WebRootFileProvider.GetFileInfo(ShellFile);
         if (!file.Exists)
         {
-            return Results.Content(Pages.NotBuilt(), "text/html; charset=utf-8");
+            return HtmlResults.Html(Pages.NotBuilt());
         }
 
         // The page names the current script files, so the browser must ask for it every time.
@@ -42,7 +42,7 @@ public static class WebApp
     {
         public async Task ExecuteAsync(HttpContext httpContext)
         {
-            httpContext.Response.ContentType = "text/html; charset=utf-8";
+            httpContext.Response.ContentType = HtmlResults.ContentType;
             httpContext.Response.Headers.CacheControl = "no-cache";
             await httpContext.Response.SendFileAsync(file, httpContext.RequestAborted);
         }
