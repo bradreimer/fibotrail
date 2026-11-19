@@ -33,7 +33,8 @@ that shows my travel totals above my collections, so that the tab bar holds only
 ## Goals
 
 - The six totals and every collection are on one screen, one tap from the tab bar.
-- The tab bar has three destinations: Trips, Map, and Insights.
+- The tab bar has three destinations: Trips, Map, and Insights. Games became the fourth in
+  [#166](https://github.com/bradreimer/fibotrail/issues/166) ([games.md](games.md)).
 - Every number comes from the trips you've added, and nothing from a suggestion.
 - Every number uses the same rules as the trip page, the life map, and the MCP server, so the same
   question gets the same answer everywhere.
@@ -135,7 +136,8 @@ From top to bottom:
 
 ## Acceptance criteria
 
-- The tab bar holds Trips, Map, and Insights. There is no Stats tab and no Collections tab.
+- The tab bar holds Trips, Map, and Insights, and since #166 Games. There is no Stats tab and no
+  Collections tab.
 - The Insights screen shows the six totals, then one card for each collection.
 - With no added trip, the totals read 0, the lead line links to the inbox, and the collections
   still show.

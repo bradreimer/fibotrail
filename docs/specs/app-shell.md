@@ -74,7 +74,10 @@ behave like an app, so that browsing my trips feels as comfortable as a native i
   fourth. Since [#151](https://github.com/bradreimer/fibotrail/issues/151), one Insights tab
   ([insights.md](insights.md)) replaces both, per
   [ADR-019](../adr/ADR-019-insights-replaces-the-stats-and-collections-tabs.md). The tab bar holds
-  Trips, Map, and Insights, and the sidebar holds those three plus Inbox, MCP, and Settings. The MCP screen
+  Trips, Map, and Insights. Since [#166](https://github.com/bradreimer/fibotrail/issues/166),
+  Games ([games.md](games.md)) is the fourth tab, per
+  [ADR-022](../adr/ADR-022-games-are-plug-in-modules-behind-a-games-api.md). The sidebar holds
+  those four plus Inbox, MCP, and Settings. The MCP screen
   ([mcp-server.md](mcp-server.md#the-mcp-screen)) is a third tool. It is an icon button in the top
   bar under 600 px, between Inbox and Settings, and an item in the sidebar from 600 px. Its address
   is `/mcp-setup`, because `/mcp` is the server's own route.

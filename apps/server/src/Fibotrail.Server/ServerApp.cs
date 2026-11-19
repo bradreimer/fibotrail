@@ -1,5 +1,6 @@
 using Fibotrail.Places;
 using Fibotrail.Server.Collections;
+using Fibotrail.Server.Games;
 using Fibotrail.Server.Map;
 using Fibotrail.Server.Mcp;
 using Fibotrail.Server.Insights;
@@ -354,6 +355,7 @@ public static partial class ServerApp
         api.MapInsightsRoutes();
         api.MapCollectionRoutes();
         api.MapMcpRoutes();
+        api.MapGameRoutes();
 
         app.MapOpenApi();
 

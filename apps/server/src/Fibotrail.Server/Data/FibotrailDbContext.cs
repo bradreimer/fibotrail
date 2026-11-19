@@ -31,6 +31,8 @@ public sealed class FibotrailDbContext(DbContextOptions<FibotrailDbContext> opti
 
     public DbSet<Setting> Settings => Set<Setting>();
 
+    public DbSet<GameResult> GameResults => Set<GameResult>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Credential>(entity =>
@@ -101,6 +103,12 @@ public sealed class FibotrailDbContext(DbContextOptions<FibotrailDbContext> opti
         {
             entity.ToTable("setting");
             entity.HasKey(setting => setting.Key);
+        });
+
+        modelBuilder.Entity<GameResult>(entity =>
+        {
+            entity.ToTable("game_result");
+            entity.HasIndex(result => new { result.Game, result.PuzzleDate }).IsUnique();
         });
 
         modelBuilder.Entity<ScanRun>(entity =>

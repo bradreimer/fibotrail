@@ -31,8 +31,8 @@ function Icon({ children }: { children: ReactNode }) {
 }
 
 /**
- * The destinations, per ADR-007. The tab bar holds Trips, Map, and Insights. Insights replaced the
- * Collections and Stats tabs, per ADR-019.
+ * The destinations, per ADR-007. The tab bar holds Trips, Map, Insights, and Games. Insights replaced
+ * the Collections and Stats tabs, per ADR-019. Games came fourth, per ADR-022.
  */
 export const DESTINATIONS: readonly Destination[] = [
   {
@@ -64,6 +64,19 @@ export const DESTINATIONS: readonly Destination[] = [
     icon: (
       <Icon>
         <path d="M4 20V10M10 20V4M16 20v-7M22 20H2" />
+      </Icon>
+    ),
+  },
+  {
+    path: '/games',
+    label: 'Games',
+    placement: 'main',
+    icon: (
+      <Icon>
+        <rect x="3" y="3" width="18" height="18" rx="4" />
+        <circle cx="8.5" cy="8.5" r="1" />
+        <circle cx="15.5" cy="15.5" r="1" />
+        <circle cx="12" cy="12" r="1" />
       </Icon>
     ),
   },

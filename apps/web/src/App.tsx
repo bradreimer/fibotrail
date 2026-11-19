@@ -4,6 +4,8 @@ import { InboxProvider } from './api/inbox';
 import { ScanProvider } from './api/scan';
 import { SessionProvider } from './api/session';
 import { CollectionScreen } from './screens/CollectionScreen';
+import { GameScreen } from './screens/GameScreen';
+import { GamesScreen } from './screens/GamesScreen';
 import { ResortScreen } from './screens/ResortScreen';
 import { StampBookScreen } from './screens/StampBookScreen';
 import { InboxScreen } from './screens/InboxScreen';
@@ -41,6 +43,8 @@ export function App() {
               <Route path="/insights/:id/stamps" element={<StampBookScreen />} />
               <Route path="/collections/*" element={<MovedToInsights />} />
               <Route path="/stats/*" element={<Navigate to="/insights" replace />} />
+              <Route path="/games" element={<GamesScreen />} />
+              <Route path="/games/:id" element={<GameScreen />} />
               <Route path="/inbox" element={<InboxScreen />} />
               <Route path="/mcp-setup" element={<McpScreen />} />
               <Route path="/settings" element={<SettingsScreen />} />

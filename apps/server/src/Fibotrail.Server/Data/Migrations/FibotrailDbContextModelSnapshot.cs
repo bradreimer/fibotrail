@@ -73,6 +73,43 @@ namespace Fibotrail.Server.Data.Migrations
                     b.ToTable("decision", (string)null);
                 });
 
+            modelBuilder.Entity("Fibotrail.Server.Data.GameResult", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Game")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Marks")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("MaxTries")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("PlayedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateOnly>("PuzzleDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("Solved")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Tries")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Game", "PuzzleDate")
+                        .IsUnique();
+
+                    b.ToTable("game_result", (string)null);
+                });
+
             modelBuilder.Entity("Fibotrail.Server.Data.ManualTrip", b =>
                 {
                     b.Property<int>("Id")

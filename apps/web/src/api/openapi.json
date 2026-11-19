@@ -717,6 +717,171 @@
           }
         }
       }
+    },
+    "/api/games": {
+      "get": {
+        "tags": [
+          "Fibotrail"
+        ],
+        "operationId": "GetGames",
+        "parameters": [
+          {
+            "name": "date",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GameEntry"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/games/timeline/puzzle": {
+      "get": {
+        "tags": [
+          "Fibotrail"
+        ],
+        "operationId": "GetTimelinePuzzle",
+        "parameters": [
+          {
+            "name": "date",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TimelinePuzzleView"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/games/timeline/check": {
+      "post": {
+        "tags": [
+          "Fibotrail"
+        ],
+        "operationId": "CheckTimeline",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TimelineCheckRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TimelineMarks"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/games/timeline/results": {
+      "post": {
+        "tags": [
+          "Fibotrail"
+        ],
+        "operationId": "PostTimelineResult",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TimelineResultRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TimelineResultView"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -872,6 +1037,75 @@
               "null",
               "string"
             ]
+          }
+        }
+      },
+      "GameEntry": {
+        "required": [
+          "id",
+          "name",
+          "description",
+          "playedToday",
+          "solvedToday",
+          "stats"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "playedToday": {
+            "type": "boolean"
+          },
+          "solvedToday": {
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          "stats": {
+            "$ref": "#/components/schemas/GameStats"
+          }
+        }
+      },
+      "GameStats": {
+        "required": [
+          "played",
+          "winPercent",
+          "currentStreak",
+          "bestStreak",
+          "tries"
+        ],
+        "type": "object",
+        "properties": {
+          "played": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "winPercent": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "currentStreak": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "bestStreak": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "tries": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            }
           }
         }
       },
@@ -1304,6 +1538,13 @@
           }
         }
       },
+      "Mark": {
+        "enum": [
+          "right",
+          "close",
+          "wrong"
+        ]
+      },
       "McpStatus": {
         "required": [
           "enabled",
@@ -1684,6 +1925,187 @@
             "items": {
               "$ref": "#/components/schemas/RoutePoint"
             }
+          }
+        }
+      },
+      "TimelineAnswerCard": {
+        "required": [
+          "photoId",
+          "tripName",
+          "date"
+        ],
+        "type": "object",
+        "properties": {
+          "photoId": {
+            "type": "string"
+          },
+          "tripName": {
+            "type": "string"
+          },
+          "date": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      },
+      "TimelineCardView": {
+        "required": [
+          "photoId",
+          "tripName"
+        ],
+        "type": "object",
+        "properties": {
+          "photoId": {
+            "type": "string"
+          },
+          "tripName": {
+            "type": "string"
+          }
+        }
+      },
+      "TimelineCheckRequest": {
+        "required": [
+          "date",
+          "order"
+        ],
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "order": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "TimelineMarks": {
+        "required": [
+          "marks"
+        ],
+        "type": "object",
+        "properties": {
+          "marks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Mark"
+            }
+          }
+        }
+      },
+      "TimelinePuzzleView": {
+        "required": [
+          "number",
+          "date",
+          "maxTries",
+          "tripsNeeded",
+          "cards",
+          "result"
+        ],
+        "type": "object",
+        "properties": {
+          "number": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "maxTries": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "tripsNeeded": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "cards": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TimelineCardView"
+            }
+          },
+          "result": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/TimelineResultView"
+              }
+            ]
+          }
+        }
+      },
+      "TimelineResultRequest": {
+        "required": [
+          "date",
+          "guesses"
+        ],
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "guesses": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "TimelineResultView": {
+        "required": [
+          "solved",
+          "tries",
+          "maxTries",
+          "rows",
+          "share",
+          "answer",
+          "stats"
+        ],
+        "type": "object",
+        "properties": {
+          "solved": {
+            "type": "boolean"
+          },
+          "tries": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "maxTries": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "rows": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/Mark"
+              }
+            }
+          },
+          "share": {
+            "type": "string"
+          },
+          "answer": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TimelineAnswerCard"
+            }
+          },
+          "stats": {
+            "$ref": "#/components/schemas/GameStats"
           }
         }
       },

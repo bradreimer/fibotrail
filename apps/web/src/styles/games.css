@@ -1,0 +1,264 @@
+/*
+ * The Games screens: the game cards, the stats panel, and the Timeline game. See
+ * docs/specs/games.md and docs/specs/timeline-game.md.
+ */
+.games-page {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--fibo-space-5);
+}
+
+.games-page__lead {
+  margin: 0;
+  color: var(--fibo-ink-muted);
+}
+
+.games-list {
+  display: grid;
+  gap: var(--fibo-space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.game-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-areas:
+    'icon name'
+    'icon description'
+    'icon state';
+  column-gap: var(--fibo-space-4);
+  align-items: center;
+  min-height: var(--fibo-tap);
+  padding: var(--fibo-space-4);
+  border: var(--fibo-border) solid var(--fibo-mist);
+  border-radius: var(--fibo-radius);
+  color: inherit;
+  text-decoration: none;
+}
+
+.game-card__icon {
+  grid-area: icon;
+  inline-size: var(--fibo-space-6);
+  block-size: var(--fibo-space-6);
+  color: var(--fibo-teal);
+}
+
+.game-card__name {
+  grid-area: name;
+  font-family: var(--fibo-font-display);
+  font-size: var(--fibo-text-h3);
+}
+
+.game-card__description {
+  grid-area: description;
+  color: var(--fibo-ink-muted);
+}
+
+.game-card__state {
+  grid-area: state;
+  color: var(--fibo-teal);
+  font-size: var(--fibo-text-caption);
+  font-weight: 600;
+}
+
+/* The Timeline game. */
+.timeline {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--fibo-space-4);
+}
+
+.timeline__title {
+  margin: 0;
+  font-family: var(--fibo-font-display);
+  font-size: var(--fibo-text-h2);
+}
+
+.timeline__number {
+  color: var(--fibo-ink-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.timeline__verdict {
+  margin: 0;
+  font-size: var(--fibo-text-h3);
+}
+
+.timeline__cards {
+  display: grid;
+  gap: var(--fibo-space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.timeline-card {
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr) auto;
+  gap: var(--fibo-space-3);
+  align-items: center;
+  padding: var(--fibo-space-3);
+  border: calc(var(--fibo-border) * 2) solid var(--fibo-mist);
+  border-radius: var(--fibo-radius);
+  transition: border-color var(--fibo-dur-fast) ease-out;
+}
+
+.timeline-card--right {
+  border-color: var(--fibo-meadow);
+  background: color-mix(in srgb, var(--fibo-meadow) 18%, var(--fibo-paper));
+}
+
+.timeline-card--close {
+  border-color: var(--fibo-gold);
+  background: color-mix(in srgb, var(--fibo-gold) 18%, var(--fibo-paper));
+}
+
+.timeline-card__place {
+  min-inline-size: var(--fibo-space-5);
+  color: var(--fibo-ink-muted);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.timeline-card__photo {
+  inline-size: var(--fibo-space-7);
+  block-size: var(--fibo-space-7);
+  border-radius: calc(var(--fibo-radius) / 2);
+  background: var(--fibo-mist);
+  object-fit: cover;
+}
+
+.timeline-card__name {
+  display: grid;
+  gap: var(--fibo-space-1);
+  overflow-wrap: anywhere;
+}
+
+.timeline-card__mark,
+.timeline-card__date {
+  color: var(--fibo-ink-muted);
+  font-size: var(--fibo-text-caption);
+  font-weight: 600;
+}
+
+.timeline-card__moves {
+  display: grid;
+  gap: var(--fibo-space-1);
+}
+
+.timeline-card__move {
+  min-inline-size: var(--fibo-tap);
+  min-block-size: var(--fibo-tap);
+  border: var(--fibo-border) solid var(--fibo-mist);
+  border-radius: calc(var(--fibo-radius) / 2);
+  background: var(--fibo-paper);
+  color: var(--fibo-teal);
+  font: inherit;
+  cursor: pointer;
+}
+
+.timeline-card__move:disabled {
+  color: var(--fibo-ink-muted);
+  opacity: 0.4;
+  cursor: default;
+}
+
+.timeline__grid {
+  display: grid;
+  gap: var(--fibo-space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--fibo-text-h3);
+  letter-spacing: var(--fibo-space-1);
+}
+
+.timeline__problem {
+  margin: 0;
+  color: var(--fibo-coral);
+}
+
+.timeline__check {
+  justify-self: start;
+}
+
+/* The stats panel. */
+.game-stats {
+  display: grid;
+  gap: var(--fibo-space-3);
+}
+
+.game-stats__title {
+  margin: 0;
+  font-family: var(--fibo-font-display);
+  font-size: var(--fibo-text-h3);
+}
+
+.game-stats__subtitle {
+  margin: 0;
+  font-size: var(--fibo-text-body);
+}
+
+.game-stats__tiles {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--fibo-space-3);
+  margin: 0;
+}
+
+.game-stats__tile {
+  display: grid;
+  gap: var(--fibo-space-1);
+  padding: var(--fibo-space-3);
+  border-radius: var(--fibo-radius);
+  background: var(--fibo-mist);
+  text-align: center;
+}
+
+.game-stats__label {
+  order: 2;
+  color: var(--fibo-ink-muted);
+  font-size: var(--fibo-text-caption);
+}
+
+.game-stats__value {
+  order: 1;
+  margin: 0;
+  font-family: var(--fibo-font-display);
+  font-size: var(--fibo-text-h2);
+  font-variant-numeric: tabular-nums;
+}
+
+.game-stats__bars {
+  display: grid;
+  gap: var(--fibo-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.game-stats__row {
+  display: grid;
+  grid-template-columns: var(--fibo-space-5) minmax(0, 1fr);
+  gap: var(--fibo-space-3);
+  align-items: center;
+}
+
+.game-stats__tries {
+  font-variant-numeric: tabular-nums;
+}
+
+.game-stats__bar {
+  padding: var(--fibo-space-1) var(--fibo-space-3);
+  border-radius: calc(var(--fibo-radius) / 3);
+  background: var(--fibo-mist);
+  font-variant-numeric: tabular-nums;
+  text-align: end;
+}
+
+.game-stats__bar--today {
+  background: var(--fibo-teal);
+  color: var(--fibo-on-teal);
+}

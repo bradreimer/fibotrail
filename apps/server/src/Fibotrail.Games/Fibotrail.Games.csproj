@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Games reference no other Fibotrail project. They read only the game library. See ADR-022. -->
+
+</Project>

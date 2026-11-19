@@ -311,3 +311,30 @@ public sealed class Setting
 
     public required string Value { get; set; }
 }
+
+/// <summary>
+/// One day's result of one game, graded by the server. The only state a game stores. Removing a
+/// game leaves its rows, which are small and unused. See docs/specs/games.md and ADR-022.
+/// </summary>
+public sealed class GameResult
+{
+    public int Id { get; set; }
+
+    /// <summary>The game's ID, such as "timeline".</summary>
+    public required string Game { get; set; }
+
+    /// <summary>The day of the puzzle, in the player's time zone.</summary>
+    public DateOnly PuzzleDate { get; set; }
+
+    public bool Solved { get; set; }
+
+    public int Tries { get; set; }
+
+    public int MaxTries { get; set; }
+
+    /// <summary>The marks of each try, such as "CRWCR,RRRRR". See <c>Fibotrail.Games.Marks</c>.</summary>
+    public required string Marks { get; set; }
+
+    /// <summary>When the result was stored, in UTC.</summary>
+    public DateTime PlayedAt { get; set; }
+}
