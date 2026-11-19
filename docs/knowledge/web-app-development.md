@@ -57,6 +57,30 @@ only in a production build, so `npm run dev` never serves a stale file.
 | `vite-plugins/` | The build steps that write `sw.js` and the launch image links |
 | `public/` | The manifest, the icons, and the launch images |
 
+## Where server code goes
+
+The server in `apps/server/src/Fibotrail.Server` follows one rule: static extension methods wire
+things together, and classes hold behavior. `ServerApp.Create` is the composition root. It runs
+three steps, and each step lives in `Hosting/`:
+
+```text
+ServerApp.Create
+ ├ AddFibotrailServer    Hosting/ServiceRegistration.cs   core, Immich, features, web, auth
+ ├ UseFibotrailPipeline  Hosting/RequestPipeline.cs       the middleware, in order
+ └ MapFibotrailRoutes    Hosting/RouteMap.cs              every route group, then the fallback
+```
+
+| Change | Where it goes |
+| --- | --- |
+| A new service | The matching set in `Hosting/ServiceRegistration.cs`. A command uses only `AddFibotrailCore` and `AddFibotrailImmich` |
+| New middleware | A class with `InvokeAsync` in the feature's folder, such as `Auth/AntiforgeryMiddleware.cs`, added in `Hosting/RequestPipeline.cs`. The order is part of the security model, and `PipelineTests` checks it |
+| New routes | A `<Feature>Routes.cs` file in the feature's folder with a `Map<Feature>Routes` extension method, called from `Hosting/RouteMap.cs`. The sign-in screens are in `Auth/AuthRoutes.cs` |
+| Work after the server starts | An extension method on `WebApplication` in the feature's folder, such as `Immich/ImmichStartup.cs`, called from `EntryPoint.ServeAsync` |
+| An HTML screen from the server | `Web/Pages.cs` for the markup, `Web/HtmlResults.cs` to send it |
+
+A public route must also be added to `ServerApp.PublicRoutes`, or `RouteProtectionTests` fails.
+This layout was set by [#169](https://github.com/bradreimer/fibotrail/issues/169).
+
 ## After you change an API route
 
 The TypeScript types come from the server's OpenAPI document, in two steps:

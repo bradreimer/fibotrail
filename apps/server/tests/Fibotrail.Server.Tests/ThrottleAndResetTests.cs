@@ -1,3 +1,4 @@
+using Fibotrail.Server.Hosting;
 using System.Net;
 using Fibotrail.Server.Auth;
 using Fibotrail.Server.Cli;

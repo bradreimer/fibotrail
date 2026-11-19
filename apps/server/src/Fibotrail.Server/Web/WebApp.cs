@@ -18,11 +18,24 @@ public static class WebApp
         var file = environment.WebRootFileProvider.GetFileInfo(ShellFile);
         if (!file.Exists)
         {
-            return Results.Content(Pages.NotBuilt(), "text/html; charset=utf-8");
+            return HtmlResults.Html(Pages.NotBuilt());
         }
 
         // The page names the current script files, so the browser must ask for it every time.
         return new ShellResult(file);
+    }
+
+    /// <summary>
+    /// Every other page address belongs to the web app, which does its own routing. An address
+    /// under /api, or a request that isn't a GET, is not found.
+    /// </summary>
+    public static void MapWebAppFallback(this IEndpointRouteBuilder app)
+    {
+        ArgumentNullException.ThrowIfNull(app);
+        app.MapFallback("{*path:nonfile}", (HttpContext context, IWebHostEnvironment environment) =>
+            HttpMethods.IsGet(context.Request.Method) && !context.Request.Path.StartsWithSegments("/api")
+                ? Shell(environment)
+                : Results.NotFound());
     }
 
     /// <summary>
@@ -42,7 +55,7 @@ public static class WebApp
     {
         public async Task ExecuteAsync(HttpContext httpContext)
         {
-            httpContext.Response.ContentType = "text/html; charset=utf-8";
+            httpContext.Response.ContentType = HtmlResults.ContentType;
             httpContext.Response.Headers.CacheControl = "no-cache";
             await httpContext.Response.SendFileAsync(file, httpContext.RequestAborted);
         }
