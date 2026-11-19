@@ -49,7 +49,10 @@ public static class ServiceRegistration
         services.TryAddSingleton(TimeProvider.System);
         services.TryAddSingleton(new PasswordHasher(cost ?? Argon2Cost.Default));
         services.TryAddSingleton<ISignInDelay, SignInDelay>();
-        services.AddDbContext<FibotrailDbContext>(options => options.UseSqlite(settings.ConnectionString));
+        // A test registers interceptors to stop detection at a set point. The server registers none.
+        services.AddDbContext<FibotrailDbContext>((provider, options) => options
+            .UseSqlite(settings.ConnectionString)
+            .AddInterceptors(provider.GetServices<Microsoft.EntityFrameworkCore.Diagnostics.IInterceptor>()));
         services.AddScoped<AuthService>();
         services.AddScoped<SignInThrottle>();
         services.AddScoped<HomeLocation>();

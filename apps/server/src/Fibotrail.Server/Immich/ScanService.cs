@@ -16,7 +16,8 @@ public sealed record ScanOutcome(ScanState State, int PhotosSeen, int RowsChange
 /// <summary>
 /// Reads the Immich library into the photo table, one page at a time, in the background. One scan
 /// runs at a time. The cursor is saved after each page, so a scan that stops resumes where it was.
-/// See docs/specs/immich-scanning.md.
+/// After the last page the run is "detecting" until trip detection commits, so a restart during
+/// detection runs it again. See docs/specs/immich-scanning.md.
 /// </summary>
 public sealed partial class ScanService(
     IServiceScopeFactory scopes,
@@ -28,6 +29,8 @@ public sealed partial class ScanService(
     public const string TimeoutMessage = "Immich didn't answer in time. Your progress is saved.";
 
     public const string StoppedMessage = "The scan was stopped from the command line. Your progress is saved.";
+
+    public const string DetectionFailedMessage = "Finding trips stopped because of a problem in Fibotrail. Your photos are saved, and your trips are as they were. The log has the details.";
 
     private readonly Lock _gate = new();
     private Task _current = Task.CompletedTask;
@@ -72,14 +75,14 @@ public sealed partial class ScanService(
     public Task<ScanOutcome> RunFullPassAsync(Action<ScanRun>? onPage, CancellationToken cancellationToken) =>
         RunAsync(fullPass: true, onPage, cancellationToken);
 
-    /// <summary>Continues a scan that the last shutdown interrupted.</summary>
+    /// <summary>Continues a scan, or the trip detection after it, that the last shutdown interrupted.</summary>
     /// <returns>True when there was one.</returns>
     public async Task<bool> ResumeInterruptedAsync(CancellationToken cancellationToken)
     {
         await using var scope = scopes.CreateAsyncScope();
         var db = scope.ServiceProvider.GetRequiredService<FibotrailDbContext>();
         var latest = await db.ScanRuns.OrderByDescending(run => run.Id).FirstOrDefaultAsync(cancellationToken);
-        return latest?.State == ScanState.Running && TryStart();
+        return latest?.State is ScanState.Running or ScanState.Detecting && TryStart();
     }
 
     private async Task<ScanOutcome> RunAsync(bool fullPass, Action<ScanRun>? onPage, CancellationToken cancellationToken)
@@ -91,47 +94,32 @@ public sealed partial class ScanService(
         try
         {
             run = await OpenRunAsync(db, fullPass, cancellationToken);
-            if (run.Cursor is null && run.ChangedSince is null && run.Total is null)
+            if (run.State != ScanState.Detecting)
             {
-                // The search doesn't say how large the library is. The statistics do.
-                run.Total = await immich.GetTotalAsync(cancellationToken);
-                await db.SaveChangesAsync(cancellationToken);
+                await ReadPagesAsync(db, run, onPage, count => rowsChanged += count, cancellationToken);
             }
 
-            while (true)
+            // Detection commits in its own transaction. Until it does, the run stays "detecting".
+            foreach (var handler in scope.ServiceProvider.GetServices<IScanCompletedHandler>())
             {
-                var page = await immich.SearchAsync(run.Cursor, run.ChangedSince, ImmichClient.MaxPageSize, cancellationToken);
-                await StoreAsync(db, page.Assets, cancellationToken);
-                rowsChanged += db.ChangeTracker.Entries<Photo>().Count(entry => entry.State is EntityState.Added or EntityState.Modified or EntityState.Deleted);
-                run.PhotosSeen += page.Assets.Count;
-                run.Cursor = page.NextCursor;
-                await db.SaveChangesAsync(cancellationToken);
-                db.ChangeTracker.Clear();
-                db.Attach(run);
-                onPage?.Invoke(run);
-                if (page.NextCursor is null)
-                {
-                    break;
-                }
+                await handler.OnScanCompletedAsync(cancellationToken);
             }
 
             run.State = ScanState.Completed;
             run.FinishedAt = time.GetUtcNow().UtcDateTime;
-            run.LatestUpdatedAt = await db.Photos.MaxAsync(photo => (DateTime?)photo.ImmichUpdatedAt, cancellationToken) ?? run.ChangedSince;
             await db.SaveChangesAsync(cancellationToken);
-            LogCompleted(logger, run.PhotosSeen);
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
-            // The server is stopping. The run stays "running", and the next start resumes it. A command
-            // that was stopped has no restart to resume it, so its run is marked failed and the next scan resumes it.
+            // The server is stopping. The run stays "running" or "detecting", and the next start resumes it. A
+            // command that was stopped has no restart to resume it, so its run is marked failed and the next scan resumes it.
             if (fullPass && !lifetime.ApplicationStopping.IsCancellationRequested)
             {
                 await FailAsync(db, run, StoppedMessage);
                 return new ScanOutcome(ScanState.Failed, run?.PhotosSeen ?? 0, rowsChanged, StoppedMessage);
             }
 
-            return new ScanOutcome(ScanState.Running, run?.PhotosSeen ?? 0, rowsChanged, null);
+            return new ScanOutcome(run?.State ?? ScanState.Running, run?.PhotosSeen ?? 0, rowsChanged, null);
         }
         catch (ImmichException exception)
         {
@@ -144,24 +132,62 @@ public sealed partial class ScanService(
         catch (Exception exception)
 #pragma warning restore CA1031
         {
-            const string message = "The scan stopped because of a problem in Fibotrail. Your progress is saved. The log has the details.";
+            // Detection rolled back, so the trips are as they were. The next scan reads again from the cursor.
+            var detecting = run?.State == ScanState.Detecting;
+            var message = detecting
+                ? DetectionFailedMessage
+                : "The scan stopped because of a problem in Fibotrail. Your progress is saved. The log has the details.";
             await FailAsync(db, run, message);
             LogCrashed(logger, exception);
             return new ScanOutcome(ScanState.Failed, run?.PhotosSeen ?? 0, rowsChanged, message);
         }
 
-        foreach (var handler in scope.ServiceProvider.GetServices<IScanCompletedHandler>())
+        return new ScanOutcome(ScanState.Completed, run?.PhotosSeen ?? 0, rowsChanged, null);
+    }
+
+    /// <summary>Stores every page that is left, then marks the run "detecting".</summary>
+    private async Task ReadPagesAsync(FibotrailDbContext db, ScanRun run, Action<ScanRun>? onPage, Action<int> addRowsChanged, CancellationToken cancellationToken)
+    {
+        if (run.Cursor is null && run.ChangedSince is null && run.Total is null)
         {
-            await handler.OnScanCompletedAsync(cancellationToken);
+            // The search doesn't say how large the library is. The statistics do.
+            run.Total = await immich.GetTotalAsync(cancellationToken);
+            await db.SaveChangesAsync(cancellationToken);
         }
 
-        return new ScanOutcome(ScanState.Completed, run?.PhotosSeen ?? 0, rowsChanged, null);
+        while (true)
+        {
+            var page = await immich.SearchAsync(run.Cursor, run.ChangedSince, ImmichClient.MaxPageSize, cancellationToken);
+            await StoreAsync(db, page.Assets, cancellationToken);
+            addRowsChanged(db.ChangeTracker.Entries<Photo>().Count(entry => entry.State is EntityState.Added or EntityState.Modified or EntityState.Deleted));
+            run.PhotosSeen += page.Assets.Count;
+            run.Cursor = page.NextCursor;
+            await db.SaveChangesAsync(cancellationToken);
+            db.ChangeTracker.Clear();
+            db.Attach(run);
+            onPage?.Invoke(run);
+            if (page.NextCursor is null)
+            {
+                break;
+            }
+        }
+
+        run.State = ScanState.Detecting;
+        run.LatestUpdatedAt = await db.Photos.MaxAsync(photo => (DateTime?)photo.ImmichUpdatedAt, cancellationToken) ?? run.ChangedSince;
+        await db.SaveChangesAsync(cancellationToken);
+        LogCompleted(logger, run.PhotosSeen);
     }
 
     /// <summary>Returns the run to continue, or a new one. A full pass always starts a new run.</summary>
     private async Task<ScanRun> OpenRunAsync(FibotrailDbContext db, bool fullPass, CancellationToken cancellationToken)
     {
         var latest = await db.ScanRuns.OrderByDescending(run => run.Id).FirstOrDefaultAsync(cancellationToken);
+        if (latest is { State: ScanState.Detecting } && !fullPass)
+        {
+            // Every page is stored. Only detection is left.
+            return latest;
+        }
+
         if (latest is not null && latest.State != ScanState.Completed && !fullPass)
         {
             // A scan that stopped for any reason resumes from its saved cursor.
@@ -249,7 +275,7 @@ public sealed partial class ScanService(
         await db.SaveChangesAsync(CancellationToken.None);
     }
 
-    [LoggerMessage(Level = LogLevel.Information, Message = "The scan completed. It read {Count} photos from Immich.")]
+    [LoggerMessage(Level = LogLevel.Information, Message = "The scan read {Count} photos from Immich. Finding trips is next.")]
     private static partial void LogCompleted(ILogger logger, int count);
 
     [LoggerMessage(Level = LogLevel.Warning, Message = "The scan stopped: {Reason}")]

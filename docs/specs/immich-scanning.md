@@ -110,7 +110,21 @@ them.
   complete scan. It adds `updatedAt` with `gt` to the `filter`, set to the latest updated time in
   the `photo` table when that scan completed.
 - One scan runs at a time. **Scan now** is disabled while a scan runs.
-- When a scan completes, trip detection runs.
+- When the last page is stored, the run is "detecting", and trip detection runs. The run is
+  "completed" only after detection commits
+  ([#168](https://github.com/bradreimer/fibotrail/issues/168)). The scan runs in the web process,
+  with no queue, so the transaction is the safety boundary:
+  - Detection writes trips and trip photos in one SQLite transaction. A crash or kill before the
+    commit leaves the `trip` and `trip_photo` tables exactly as they were. The first start after
+    it rolls back the open transaction.
+  - A run that a restart left "detecting" runs detection again by itself when the server starts.
+    It reads no pages from Immich, because every page is already stored.
+  - A problem in detection marks the run "failed" with "Finding trips stopped because of a problem
+    in Fibotrail. Your photos are saved, and your trips are as they were. The log has the details."
+    The next scan resumes the run. Its cursor is past the last page, so it reads the run's pages
+    again from the start: the changed photos for a scan of changes, or the whole library for a
+    first scan. A problem in detection is a bug, so this cost is accepted.
+  - The banner, **Scan now**, and the rescan command treat "detecting" as "running".
 
 ### Timeouts and retries
 

@@ -34,6 +34,15 @@ the accessibility checklist are also still unrecorded.
   each startup task moves to its feature. Routes, status codes, headers, log lines, and the OpenAPI
   document don't change. New `MiddlewareTests` and `PipelineTests` add 15 tests. See "Where server
   code goes" in [web-app-development.md](knowledge/web-app-development.md).
+- [#168](https://github.com/bradreimer/fibotrail/issues/168) A restart during trip detection no
+  longer leaves trips stale. The scan run is "detecting" from its last page until detection
+  commits, and a start resumes a "detecting" run by running detection alone, with no Immich reads.
+  Detection was already one SQLite transaction, so a kill never damaged the `trip` table; the
+  run was marked "completed" too early, so nothing ran detection again. A detection exception now
+  fails the run with a plain message instead of vanishing. A server test pauses detection right
+  before its commit, copies the database and WAL files as a kill leaves them, and starts a second
+  server on the copy: `PRAGMA integrity_check` is ok, the trips match the rows before the crash,
+  and the second server finds the new trip. Not yet checked with `docker kill` on a real container.
 - [#166](https://github.com/bradreimer/fibotrail/issues/166) A **Games** tab with a daily
   **Timeline** game ([games spec](specs/games.md), [Timeline spec](specs/timeline-game.md),
   [ADR-022](adr/ADR-022-games-are-plug-in-modules-behind-a-games-api.md)). Timeline shows 5 photos
