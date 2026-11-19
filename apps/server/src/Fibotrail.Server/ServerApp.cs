@@ -25,22 +25,8 @@ public static partial class ServerApp
         builder.Services.AddFibotrailServer(settings, cost);
 
         var app = builder.Build();
-
-        app.UseForwardedHeaders();
-        app.UseMiddleware<SecurityHeadersMiddleware>();
-        // The MCP server answers before the session and anti-forgery checks. It has its own token.
-        app.UseMcp();
-        // API answers aren't compressed. They're small, and a compressed answer that holds a secret
-        // next to text an attacker chose can leak the secret through its length.
-        app.UseWhen(
-            context => !context.Request.Path.StartsWithSegments("/api"),
-            branch => branch.UseResponseCompression());
-        app.UseStaticFiles(new StaticFileOptions { OnPrepareResponse = WebApp.SetCacheHeaders });
-        app.UseAuthentication();
-        app.UseAuthorization();
-        app.UseMiddleware<AntiforgeryMiddleware>();
-
-        MapRoutes(app);
+        app.UseFibotrailPipeline();
+        app.MapFibotrailRoutes();
         return app;
     }
 
@@ -112,39 +98,4 @@ public static partial class ServerApp
 
     [LoggerMessage(Level = LogLevel.Information, Message = "Saved a copy of the database at {Path} before updating it.")]
     private static partial void LogBackup(ILogger logger, string path);
-
-    private static void MapRoutes(WebApplication app)
-    {
-        // The release image sets FIBOTRAIL_VERSION. A build from source reports "dev".
-        var version = app.Configuration["FIBOTRAIL_VERSION"] is { Length: > 0 } configured ? configured : "dev";
-
-        app.MapGet("/healthz", async (FibotrailDbContext db, CancellationToken cancellationToken) =>
-            await db.Database.CanConnectAsync(cancellationToken)
-                ? Results.Text($"ok {version}")
-                : Results.Text("The database didn't open.", statusCode: StatusCodes.Status503ServiceUnavailable))
-            .AllowAnonymous();
-
-        app.MapAuthRoutes();
-
-        var api = app.MapGroup("/api").WithTags("Fibotrail");
-
-        api.MapSessionRoute();
-        api.MapImmichRoutes();
-        api.MapHomeRoutes();
-        api.MapInboxRoutes();
-        api.MapTripRoutes();
-        api.MapMapRoutes();
-        api.MapInsightsRoutes();
-        api.MapCollectionRoutes();
-        api.MapMcpRoutes();
-        api.MapGameRoutes();
-
-        app.MapOpenApi();
-
-        // Every other page address belongs to the web app, which does its own routing.
-        app.MapFallback("{*path:nonfile}", (HttpContext context, IWebHostEnvironment environment) =>
-            HttpMethods.IsGet(context.Request.Method) && !context.Request.Path.StartsWithSegments("/api")
-                ? WebApp.Shell(environment)
-                : Results.NotFound());
-    }
 }

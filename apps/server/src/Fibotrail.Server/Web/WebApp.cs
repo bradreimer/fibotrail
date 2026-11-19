@@ -26,6 +26,19 @@ public static class WebApp
     }
 
     /// <summary>
+    /// Every other page address belongs to the web app, which does its own routing. An address
+    /// under /api, or a request that isn't a GET, is not found.
+    /// </summary>
+    public static void MapWebAppFallback(this IEndpointRouteBuilder app)
+    {
+        ArgumentNullException.ThrowIfNull(app);
+        app.MapFallback("{*path:nonfile}", (HttpContext context, IWebHostEnvironment environment) =>
+            HttpMethods.IsGet(context.Request.Method) && !context.Request.Path.StartsWithSegments("/api")
+                ? Shell(environment)
+                : Results.NotFound());
+    }
+
+    /// <summary>
     /// Files under /assets have a hash in their names, so they never change and can be kept for a
     /// year. Everything else is checked with the server on each use.
     /// </summary>
