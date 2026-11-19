@@ -5,7 +5,6 @@ using Fibotrail.Server.Map;
 using Fibotrail.Server.Mcp;
 using Fibotrail.Server.Insights;
 using Fibotrail.Server.Stats;
-using System.Net;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Fibotrail.Server.Auth;
@@ -279,74 +278,11 @@ public static partial class ServerApp
                 : Results.Text("The database didn't open.", statusCode: StatusCodes.Status503ServiceUnavailable))
             .AllowAnonymous();
 
-        app.MapGet("/setup", async (HttpContext context, AuthService auth, IAntiforgery antiforgery) =>
-            await auth.IsPasswordSetAsync(context.RequestAborted)
-                ? Results.Redirect("/sign-in")
-                : HtmlResults.Html(Pages.Setup(CsrfField(context, antiforgery), null, IsInsecure(context.Request))))
-            .AllowAnonymous();
-
-        app.MapPost("/setup", async (HttpContext context, AuthService auth, IAntiforgery antiforgery) =>
-        {
-            var form = await context.Request.ReadFormAsync(context.RequestAborted);
-            var change = await auth.SetUpAsync(form["password"], form["confirmation"], context.RequestAborted);
-            switch (change.Outcome)
-            {
-                case SetupOutcome.AlreadySetUp:
-                    // The setup route stops working once a password is stored.
-                    return Results.NotFound();
-                case SetupOutcome.Rejected:
-                    return HtmlResults.Html(
-                        Pages.Setup(CsrfField(context, antiforgery), change.Problem, IsInsecure(context.Request)),
-                        StatusCodes.Status400BadRequest);
-                default:
-                    SessionCookie.Write(context.Response, await auth.CreateSessionAsync(context.RequestAborted));
-                    return Results.Redirect("/");
-            }
-        }).AllowAnonymous();
-
-        app.MapGet("/sign-in", async (HttpContext context, AuthService auth, IAntiforgery antiforgery) =>
-            await auth.IsPasswordSetAsync(context.RequestAborted)
-                ? HtmlResults.Html(Pages.SignIn(CsrfField(context, antiforgery), null, IsInsecure(context.Request)))
-                : Results.Redirect("/setup"))
-            .AllowAnonymous();
-
-        app.MapPost("/sign-in", async (HttpContext context, AuthService auth, SignInThrottle throttle, IAntiforgery antiforgery) =>
-        {
-            if (!await auth.IsPasswordSetAsync(context.RequestAborted))
-            {
-                return Results.Redirect("/setup");
-            }
-
-            var address = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
-            await throttle.WaitIfNeededAsync(address, context.RequestAborted);
-
-            var form = await context.Request.ReadFormAsync(context.RequestAborted);
-            if (!await auth.VerifyPasswordAsync(form["password"], context.RequestAborted))
-            {
-                await throttle.RecordFailureAsync(address, context.RequestAborted);
-                return HtmlResults.Html(
-                    Pages.SignIn(CsrfField(context, antiforgery), Pages.WrongPassword, IsInsecure(context.Request)),
-                    StatusCodes.Status401Unauthorized);
-            }
-
-            await throttle.ClearAsync(address, context.RequestAborted);
-            SessionCookie.Write(context.Response, await auth.CreateSessionAsync(context.RequestAborted));
-            return Results.Redirect("/");
-        }).AllowAnonymous();
-
-        app.MapPost("/sign-out", async (HttpContext context, AuthService auth) =>
-        {
-            await auth.EndSessionAsync(context.Request.Cookies[SessionCookie.Name], context.RequestAborted);
-            SessionCookie.Clear(context.Response);
-            return Results.Redirect("/sign-in");
-        });
+        app.MapAuthRoutes();
 
         var api = app.MapGroup("/api").WithTags("Fibotrail");
 
-        api.MapGet("/session", (HttpContext context, IAntiforgery antiforgery) =>
-            TypedResults.Ok(new SessionInfo(antiforgery.GetAndStoreTokens(context).RequestToken ?? string.Empty)))
-            .WithName("GetSession");
-
+        api.MapSessionRoute();
         api.MapImmichRoutes();
         api.MapHomeRoutes();
         api.MapInboxRoutes();
@@ -365,20 +301,4 @@ public static partial class ServerApp
                 ? WebApp.Shell(environment)
                 : Results.NotFound());
     }
-
-    private static string CsrfField(HttpContext context, IAntiforgery antiforgery)
-    {
-        var tokens = antiforgery.GetAndStoreTokens(context);
-        var value = System.Text.Encodings.Web.HtmlEncoder.Default.Encode(tokens.RequestToken ?? string.Empty);
-        return $"<input type=\"hidden\" name=\"{tokens.FormFieldName}\" value=\"{value}\">";
-    }
-
-    /// <summary>
-    /// True when the browser won't keep the Secure session cookie: the request isn't HTTPS and
-    /// isn't to this machine. The screen then says so.
-    /// </summary>
-    private static bool IsInsecure(HttpRequest request) =>
-        !request.IsHttps
-        && !string.Equals(request.Host.Host, "localhost", StringComparison.OrdinalIgnoreCase)
-        && !(IPAddress.TryParse(request.Host.Host, out var address) && IPAddress.IsLoopback(address));
 }
