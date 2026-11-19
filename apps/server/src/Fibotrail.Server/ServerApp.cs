@@ -13,7 +13,6 @@ using Fibotrail.Server.Data;
 using Fibotrail.Server.Immich;
 using Fibotrail.Server.Trips;
 using Fibotrail.Server.Web;
-using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.DataProtection;
@@ -144,7 +143,7 @@ public static partial class ServerApp
         var app = builder.Build();
 
         app.UseForwardedHeaders();
-        app.Use(SecurityHeaders);
+        app.UseMiddleware<SecurityHeadersMiddleware>();
         // The MCP server answers before the session and anti-forgery checks. It has its own token.
         app.UseMcp();
         // API answers aren't compressed. They're small, and a compressed answer that holds a secret
@@ -155,7 +154,7 @@ public static partial class ServerApp
         app.UseStaticFiles(new StaticFileOptions { OnPrepareResponse = WebApp.SetCacheHeaders });
         app.UseAuthentication();
         app.UseAuthorization();
-        app.Use(RejectForgedRequests);
+        app.UseMiddleware<AntiforgeryMiddleware>();
 
         MapRoutes(app);
         return app;
@@ -229,43 +228,6 @@ public static partial class ServerApp
 
     [LoggerMessage(Level = LogLevel.Information, Message = "Saved a copy of the database at {Path} before updating it.")]
     private static partial void LogBackup(ILogger logger, string path);
-
-    private static Task SecurityHeaders(HttpContext context, RequestDelegate next)
-    {
-        var headers = context.Response.Headers;
-        headers.ContentSecurityPolicy = "default-src 'self'; frame-ancestors 'none'; form-action 'self'; base-uri 'none'";
-        headers.XContentTypeOptions = "nosniff";
-        headers["Referrer-Policy"] = "no-referrer";
-        return next(context);
-    }
-
-    /// <summary>Every request that changes state must carry a valid anti-forgery token.</summary>
-    private static async Task RejectForgedRequests(HttpContext context, RequestDelegate next)
-    {
-        var method = context.Request.Method;
-        var readsOnly = HttpMethods.IsGet(method) || HttpMethods.IsHead(method)
-            || HttpMethods.IsOptions(method) || HttpMethods.IsTrace(method);
-        if (!readsOnly && context.GetEndpoint() is not null)
-        {
-            var antiforgery = context.RequestServices.GetRequiredService<IAntiforgery>();
-            if (!await antiforgery.IsRequestValidAsync(context))
-            {
-                context.Response.StatusCode = StatusCodes.Status400BadRequest;
-                if (context.Request.Path.StartsWithSegments("/api"))
-                {
-                    await context.Response.WriteAsJsonAsync(new ProblemDetail("This page is out of date. Reload it, then try again."));
-                }
-                else
-                {
-                    await context.Response.WriteHtmlAsync(Pages.Expired());
-                }
-
-                return;
-            }
-        }
-
-        await next(context);
-    }
 
     private static void MapRoutes(WebApplication app)
     {
