@@ -26,6 +26,15 @@ the accessibility checklist are also still unrecorded.
 
 ## Completed
 
+- [#177](https://github.com/bradreimer/fibotrail/issues/177) Timeline has a twist for each day of
+  the week ([spec](specs/timeline-game.md#daily-twists)), not yet in a release. Monday and Thursday
+  are Classic. Tuesday is Arrows: a card out of place says Earlier or Later. Wednesday is Neighbors:
+  5 trips in a row by start date. Friday is Six cards. Saturday is One trip: 5 photos of one trip
+  from 5 days. Sunday is Count only: a check says only how many are in place, with 6 tries. A twist
+  the library can't support plays as Classic and says why. The share text names the twist. In a
+  simulation of 3,000 random-guess games, Classic was solved by try 2 in 72% of games; the twists
+  range from 41% (Six cards) to 3% (Count only) by try 2. Checked in tests only, not yet in real
+  play.
 - [#174](https://github.com/bradreimer/fibotrail/issues/174) Marking parks moved from the trip
   page to the command line ([spec](specs/collections.md#marking-a-park-by-hand)).
   `fibotrail trip parks <id> <park>...` marks parks, `--clear` removes them, and `--list` shows the

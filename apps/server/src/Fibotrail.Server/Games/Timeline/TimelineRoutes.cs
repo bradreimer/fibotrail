@@ -15,11 +15,28 @@ public sealed record TimelineCardView(string PhotoId);
 /// <summary>A card in the answer: its trip, for a link to the trip page, and the day its photo was taken.</summary>
 public sealed record TimelineAnswerCard(string PhotoId, int TripId, string TripName, DateOnly Date);
 
+/// <summary>The day's twist: which one, its name, and the one-line rule shown above the cards.</summary>
+/// <param name="Planned">The weekday's twist. It differs from <paramref name="Id"/> when the library can't support it.</param>
+public sealed record TimelineTwistView(TimelineTwist Id, TimelineTwist Planned, string Name, string Rule)
+{
+    public static TimelineTwistView Of(TimelinePuzzle puzzle)
+    {
+        ArgumentNullException.ThrowIfNull(puzzle);
+        return new(puzzle.Twist, puzzle.Planned, TimelineTwists.Name(puzzle.Twist), puzzle.Rule);
+    }
+
+    public static TimelineTwistView ForDate(DateOnly date)
+    {
+        var twist = TimelineTwists.For(date);
+        return new(twist, twist, TimelineTwists.Name(twist), TimelineTwists.Rule(twist));
+    }
+}
+
 /// <summary>Today's puzzle.</summary>
 /// <param name="TripsNeeded">More trips with photos needed before there's a puzzle. 0 when there is one.</param>
 /// <param name="Cards">The cards in shown order. Empty when there's no puzzle.</param>
 /// <param name="Result">The day's result, when it's played.</param>
-public sealed record TimelinePuzzleView(int Number, DateOnly Date, int MaxTries, int TripsNeeded, IReadOnlyList<TimelineCardView> Cards, TimelineResultView? Result);
+public sealed record TimelinePuzzleView(int Number, DateOnly Date, TimelineTwistView Twist, int MaxTries, int TripsNeeded, IReadOnlyList<TimelineCardView> Cards, TimelineResultView? Result);
 
 /// <summary>One try to grade, without storing it.</summary>
 public sealed record TimelineCheckRequest(DateOnly Date, IReadOnlyList<string> Order);
@@ -41,12 +58,12 @@ public static class TimelineRoutes
     public static readonly GameDefinition Definition = new(
         TimelinePuzzle.Id,
         TimelinePuzzle.Name,
-        "Put five of your photos in the order you took them.",
-        TimelinePuzzle.MaxTries,
+        "Put your photos in the order you took them, with a new twist each day.",
+        TimelineTwists.MostTries,
         Map);
 
     private static readonly ProblemDetail NoPuzzle = new("There's no puzzle today. Add more trips with photos.");
-    private static readonly ProblemDetail NotValid = new("Each try must hold every card once, in no more than 4 tries.");
+    private static readonly ProblemDetail NotValid = new("Each try must hold every card once, within the tries allowed.");
 
     private static void Map(RouteGroupBuilder game)
     {
@@ -61,7 +78,7 @@ public static class TimelineRoutes
             var number = DailySeed.PuzzleNumber(date);
             if (TimelinePuzzle.Create(library, date) is not { } puzzle)
             {
-                return TypedResults.Ok(new TimelinePuzzleView(number, date, TimelinePuzzle.MaxTries, TimelinePuzzle.TripsNeeded(library), [], null));
+                return TypedResults.Ok(new TimelinePuzzleView(number, date, TimelineTwistView.ForDate(date), TimelineTwists.MaxTries(TimelineTwists.For(date)), TimelinePuzzle.TripsNeeded(library), [], null));
             }
 
             var stored = await GameResultStore.FindAsync(db, TimelinePuzzle.Id, date, cancellationToken);
@@ -69,7 +86,8 @@ public static class TimelineRoutes
             return TypedResults.Ok(new TimelinePuzzleView(
                 number,
                 date,
-                TimelinePuzzle.MaxTries,
+                TimelineTwistView.Of(puzzle),
+                puzzle.MaxTries,
                 0,
                 [.. puzzle.Shown.Select(card => new TimelineCardView(card.PhotoId))],
                 result));
@@ -114,7 +132,7 @@ public static class TimelineRoutes
                 }
 
                 // The game ends when it's solved or out of tries. An unfinished game isn't a result.
-                if (!outcome.Solved && outcome.Rows.Count < TimelinePuzzle.MaxTries)
+                if (!outcome.Solved && outcome.Rows.Count < puzzle.MaxTries)
                 {
                     return TypedResults.BadRequest(NotValid);
                 }
@@ -125,7 +143,7 @@ public static class TimelineRoutes
                     PuzzleDate = request.Date,
                     Solved = outcome.Solved,
                     Tries = outcome.Rows.Count,
-                    MaxTries = TimelinePuzzle.MaxTries,
+                    MaxTries = puzzle.MaxTries,
                     Marks = Marks.Encode(outcome.Rows),
                     PlayedAt = time.GetUtcNow().UtcDateTime,
                 }, cancellationToken);
@@ -138,13 +156,13 @@ public static class TimelineRoutes
     private static async Task<TimelineResultView> ViewAsync(FibotrailDbContext db, TimelinePuzzle puzzle, GameResult stored, CancellationToken cancellationToken)
     {
         var rows = Marks.Decode(stored.Marks);
-        var stats = await GameResultStore.StatsAsync(db, TimelinePuzzle.Id, TimelinePuzzle.MaxTries, puzzle.Date, cancellationToken);
+        var stats = await GameResultStore.StatsAsync(db, TimelinePuzzle.Id, TimelineTwists.MostTries, puzzle.Date, cancellationToken);
         return new TimelineResultView(
             stored.Solved,
             stored.Tries,
             stored.MaxTries,
             rows,
-            Marks.ShareText(TimelinePuzzle.Name, puzzle.Number, stored.Solved, rows, stored.MaxTries),
+            Marks.ShareText(TimelinePuzzle.Name, puzzle.Number, stored.Solved, rows, stored.MaxTries, puzzle.Twist == TimelineTwist.Classic ? null : TimelineTwists.Name(puzzle.Twist)),
             [.. puzzle.Answer.Select(card => new TimelineAnswerCard(card.PhotoId, card.TripId, card.TripName, DateOnly.FromDateTime(card.Taken)))],
             stats);
     }

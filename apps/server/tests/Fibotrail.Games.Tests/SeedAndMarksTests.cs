@@ -47,4 +47,14 @@ public class SeedAndMarksTests
         Assert.Equal("Fibotrail Timeline #7 2/4\n🟨🟩⬜\n🟩🟩🟩", Marks.ShareText("Timeline", 7, true, rows, 4));
         Assert.StartsWith("Fibotrail Timeline #7 X/4\n", Marks.ShareText("Timeline", 7, false, rows, 4), StringComparison.Ordinal);
     }
+
+    [Fact]
+    public void Arrow_marks_round_trip_and_share_with_the_variant()
+    {
+        IReadOnlyList<IReadOnlyList<Mark>> rows = [[Mark.Earlier, Mark.Right, Mark.Later], [Mark.Right, Mark.Right, Mark.Right]];
+
+        Assert.Equal("ERL,RRR", Marks.Encode(rows));
+        Assert.Equal(rows, Marks.Decode("ERL,RRR"));
+        Assert.Equal("Fibotrail Timeline #7 Arrows 2/4\n⬆️🟩⬇️\n🟩🟩🟩", Marks.ShareText("Timeline", 7, true, rows, 4, "Arrows"));
+    }
 }

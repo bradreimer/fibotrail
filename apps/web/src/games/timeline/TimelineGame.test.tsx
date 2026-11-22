@@ -19,10 +19,27 @@ const names: Record<string, string> = {
   e: 'Tokyo',
 };
 
-const puzzle = (result: unknown = null) => ({
+const TWISTS = {
+  classic: { name: 'Classic', rule: 'Green is in place. Yellow is one place away.', tries: 4 },
+  arrows: {
+    name: 'Arrows',
+    rule: 'A photo out of place shows whether it goes earlier or later.',
+    tries: 4,
+  },
+  countOnly: {
+    name: 'Count only',
+    rule: 'A check shows only how many photos are in place, not which ones. You get 6 tries.',
+    tries: 6,
+  },
+} as const;
+
+type TwistId = keyof typeof TWISTS;
+
+const puzzle = (result: unknown = null, twist: TwistId = 'classic') => ({
   number: 2,
   date: localDate(),
-  maxTries: 4,
+  twist: { id: twist, planned: twist, name: TWISTS[twist].name, rule: TWISTS[twist].rule },
+  maxTries: TWISTS[twist].tries,
   tripsNeeded: 0,
   cards: ['b', 'a', 'c', 'd', 'e'].map((id) => ({ photoId: id })),
   result,
@@ -46,16 +63,24 @@ const result = {
   stats: { played: 1, winPercent: 100, currentStreak: 1, bestStreak: 1, tries: [0, 1, 0, 0] },
 };
 
-/** Grades an order the way the server does. */
-function grade(init?: RequestInit) {
-  const { order } = JSON.parse(String(init?.body)) as { order: string[] };
-  return {
-    marks: order.map((id, index) => {
-      const off = Math.abs(answer.indexOf(id) - index);
-      return off === 0 ? 'right' : off === 1 ? 'close' : 'wrong';
-    }),
+/** Grades an order the way the server does, for a twist. */
+function gradeFor(twist: TwistId) {
+  return (init?: RequestInit) => {
+    const { order } = JSON.parse(String(init?.body)) as { order: string[] };
+    const marks = order.map((id, index) => {
+      const off = answer.indexOf(id) - index;
+      if (off === 0) return 'right';
+      if (twist === 'arrows') return off < 0 ? 'earlier' : 'later';
+      return Math.abs(off) === 1 && twist === 'classic' ? 'close' : 'wrong';
+    });
+    if (twist !== 'countOnly') return { marks };
+    // Count only puts the Right marks first, so the row doesn't say which cards they are.
+    const right = marks.filter((mark) => mark === 'right');
+    return { marks: [...right, ...marks.filter((mark) => mark !== 'right')] };
   };
 }
+
+const grade = gradeFor('classic');
 
 function renderGame() {
   return render(
@@ -204,5 +229,48 @@ describe('the Timeline game', () => {
     await userEvent.click(await screen.findByRole('button', { name: 'Check' }));
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Only today can be played.');
+  });
+
+  it("names the day's twist and its rule", async () => {
+    fakeServer({ 'GET /api/games/timeline/puzzle': puzzle() });
+    renderGame();
+
+    expect(await screen.findByText('Classic:')).toBeInTheDocument();
+    expect(screen.getByText(/Green is in place/)).toBeInTheDocument();
+  });
+
+  it('shows arrows on cards out of place on an Arrows day', async () => {
+    fakeServer({
+      'GET /api/games/timeline/puzzle': puzzle(null, 'arrows'),
+      'POST /api/games/timeline/check': gradeFor('arrows'),
+    });
+    const { container } = renderGame();
+    expect(await screen.findByText('Arrows:')).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Check' }));
+
+    expect(await screen.findByText('3 right, 1 earlier, 1 later')).toBeInTheDocument();
+    expect(within(card(0)).getByText('↓ Later')).toBeInTheDocument();
+    expect(within(card(1)).getByText('↑ Earlier')).toBeInTheDocument();
+    expect(card(0)).toHaveClass('timeline-card--later');
+    await expectNoAccessibilityProblems(container);
+  });
+
+  it('says only how many are in place on a Count only day, and locks nothing', async () => {
+    fakeServer({
+      'GET /api/games/timeline/puzzle': puzzle(null, 'countOnly'),
+      'POST /api/games/timeline/check': gradeFor('countOnly'),
+    });
+    renderGame();
+    expect(await screen.findByText(/6 tries left/)).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Check' }));
+
+    expect(await screen.findByText('Last check: 3 of 5 in place.')).toBeInTheDocument();
+    expect(screen.getByLabelText('Try 1: 3 of 5 in place')).toBeInTheDocument();
+    expect(screen.getByText(/5 tries left/)).toBeInTheDocument();
+    expect(board().querySelector('.timeline-card__mark')).toBeNull();
+    expect(board().querySelector('.timeline-card--locked')).toBeNull();
+    expect(screen.getByRole('button', { name: 'Move card 3 up' })).toBeEnabled();
   });
 });

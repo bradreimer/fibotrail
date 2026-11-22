@@ -1465,7 +1465,9 @@
         "enum": [
           "right",
           "close",
-          "wrong"
+          "wrong",
+          "earlier",
+          "later"
         ]
       },
       "McpStatus": {
@@ -1901,6 +1903,7 @@
         "required": [
           "number",
           "date",
+          "twist",
           "maxTries",
           "tripsNeeded",
           "cards",
@@ -1915,6 +1918,9 @@
           "date": {
             "type": "string",
             "format": "date"
+          },
+          "twist": {
+            "$ref": "#/components/schemas/TimelineTwistView"
           },
           "maxTries": {
             "type": "integer",
@@ -2007,6 +2013,39 @@
           },
           "stats": {
             "$ref": "#/components/schemas/GameStats"
+          }
+        }
+      },
+      "TimelineTwist": {
+        "enum": [
+          "classic",
+          "arrows",
+          "neighbors",
+          "sixCards",
+          "oneTrip",
+          "countOnly"
+        ]
+      },
+      "TimelineTwistView": {
+        "required": [
+          "id",
+          "planned",
+          "name",
+          "rule"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/TimelineTwist"
+          },
+          "planned": {
+            "$ref": "#/components/schemas/TimelineTwist"
+          },
+          "name": {
+            "type": "string"
+          },
+          "rule": {
+            "type": "string"
           }
         }
       },

@@ -5,7 +5,13 @@ import { dropCard, moveCard } from './order';
 
 type Mark = components['schemas']['Mark'];
 
-const WORD: Record<Mark, string> = { right: 'Right', close: 'Close', wrong: 'Wrong' };
+const WORD: Record<Mark, string> = {
+  right: 'Right',
+  close: 'Close',
+  wrong: 'Wrong',
+  earlier: '↑ Earlier',
+  later: '↓ Later',
+};
 
 /** How long a finger rests on a card before it lifts, as on an iOS home screen. */
 export const HOLD_MS = 250;
