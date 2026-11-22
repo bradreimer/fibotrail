@@ -90,7 +90,8 @@ with friends.
   - **Current streak**: solved days in a row that end today, or end yesterday when today isn't
     played yet. An unsolved day ends a streak.
   - **Best streak**: the longest run of solved days in a row.
-  - **Tries**: for each number of tries, how many solved days used it.
+  - **Tries**: for each number of tries, up to the most the game allows on any day, how many solved
+    days used it.
 - "Today" is the date the browser sends, in its own time zone. The server accepts a date only from
   yesterday to tomorrow of its own clock, which covers every time zone.
 - Removing a game leaves its rows in `game_result`. They're small and harmless, and come back if the
