@@ -70,6 +70,7 @@ describe('the Games screen', () => {
       'GET /api/games/timeline/puzzle': {
         number: 2,
         date: localDate(),
+        twist: { id: 'classic', planned: 'classic', name: 'Classic', rule: 'Green is in place.' },
         maxTries: 4,
         tripsNeeded: 2,
         cards: [],

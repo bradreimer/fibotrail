@@ -81,6 +81,25 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* The day's twist, under the title: its name, then its one-line rule. */
+.timeline__twist {
+  margin: 0;
+  color: var(--fibo-ink-muted);
+}
+
+.timeline__twist-name {
+  color: var(--fibo-teal);
+  font-weight: 600;
+}
+
+/* Count only: the one thing a check says. */
+.timeline__count {
+  margin: 0;
+  font-size: var(--fibo-text-h3);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
 .timeline__verdict {
   margin: 0;
   font-size: var(--fibo-text-h3);
@@ -119,6 +138,12 @@
 
 .timeline-card--close {
   border-color: var(--fibo-gold);
+}
+
+/* Arrows: a card out of place says which way it goes. */
+.timeline-card--earlier,
+.timeline-card--later {
+  border-color: var(--fibo-teal);
 }
 
 .timeline-card--locked {

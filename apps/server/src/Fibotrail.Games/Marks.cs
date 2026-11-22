@@ -5,7 +5,7 @@ namespace Fibotrail.Games;
 
 /// <summary>
 /// The marks of a game's tries, as stored text and as a share text. Stored, each try is a row of
-/// letters (R, C, W) and rows are joined by commas, such as "CRWCR,RRRRR".
+/// letters (R, C, W, E for Earlier, L for Later) and rows are joined by commas, such as "CRWCR,RRRRR".
 /// </summary>
 public static class Marks
 {
@@ -22,15 +22,16 @@ public static class Marks
     }
 
     /// <summary>
-    /// The text you paste to brag: the game, the puzzle number, the tries (X when not solved), and
-    /// one line of squares per try. It holds no trip name, place, date, or photo.
+    /// The text you paste to brag: the game, the puzzle number, the day's variant when there is one,
+    /// the tries (X when not solved), and one line of squares per try. It holds no trip name, place,
+    /// date, or photo.
     /// </summary>
-    public static string ShareText(string gameName, int puzzleNumber, bool solved, IReadOnlyList<IReadOnlyList<Mark>> rows, int maxTries)
+    public static string ShareText(string gameName, int puzzleNumber, bool solved, IReadOnlyList<IReadOnlyList<Mark>> rows, int maxTries, string? variant = null)
     {
         ArgumentNullException.ThrowIfNull(gameName);
         ArgumentNullException.ThrowIfNull(rows);
         var text = new StringBuilder();
-        text.Append(CultureInfo.InvariantCulture, $"Fibotrail {gameName} #{puzzleNumber} {(solved ? rows.Count.ToString(CultureInfo.InvariantCulture) : "X")}/{maxTries}");
+        text.Append(CultureInfo.InvariantCulture, $"Fibotrail {gameName} #{puzzleNumber} {(variant is null ? string.Empty : variant + " ")}{(solved ? rows.Count.ToString(CultureInfo.InvariantCulture) : "X")}/{maxTries}");
         foreach (var row in rows)
         {
             text.Append('\n').Append(string.Concat(row.Select(Square)));
@@ -43,6 +44,8 @@ public static class Marks
     {
         Mark.Right => 'R',
         Mark.Close => 'C',
+        Mark.Earlier => 'E',
+        Mark.Later => 'L',
         _ => 'W',
     };
 
@@ -50,6 +53,8 @@ public static class Marks
     {
         'R' => Mark.Right,
         'C' => Mark.Close,
+        'E' => Mark.Earlier,
+        'L' => Mark.Later,
         _ => Mark.Wrong,
     };
 
@@ -57,6 +62,8 @@ public static class Marks
     {
         Mark.Right => "🟩",
         Mark.Close => "🟨",
+        Mark.Earlier => "⬆️",
+        Mark.Later => "⬇️",
         _ => "⬜",
     };
 }

@@ -7,7 +7,11 @@ namespace Fibotrail.Server.Tests;
 /// <summary>The Games tab and the Timeline game. See docs/specs/games.md and docs/specs/timeline-game.md.</summary>
 public class GamesTests
 {
+    /// <summary>A Friday. Six cards needs 6 added trips, and these tests add 5, so it plays as Classic.</summary>
     private const string Today = "2026-11-20";
+
+    /// <summary>The Sunday after, with the Count only twist.</summary>
+    private const string Sunday = "2026-11-22";
 
     /// <summary>Six trips, with the first <paramref name="added"/> of them added.</summary>
     private static async Task<(TestApp App, Browser Browser)> StartAsync(int added = 5)
@@ -92,6 +96,37 @@ public class GamesTests
         Assert.All(names, name => Assert.DoesNotContain(name, puzzle.GetRawText(), StringComparison.Ordinal));
         Assert.Equal(puzzle.GetRawText(), again.GetRawText());
         Assert.Equal(JsonValueKind.Null, puzzle.GetProperty("result").ValueKind);
+        var twist = puzzle.GetProperty("twist");
+        Assert.Equal(("classic", "sixCards", "Classic"), (twist.GetProperty("id").GetString(), twist.GetProperty("planned").GetString(), twist.GetProperty("name").GetString()));
+        Assert.StartsWith("Six cards needs 6 trips", twist.GetProperty("rule").GetString(), StringComparison.Ordinal);
+        Assert.Equal(4, puzzle.GetProperty("maxTries").GetInt32());
+    }
+
+    [Fact]
+    public async Task Sunday_counts_only_and_allows_six_tries()
+    {
+        var (app, browser) = await StartAsync();
+        await using var _ = app;
+        app.Time.Advance(TimeSpan.FromDays(2));
+        var puzzle = await browser.GetJsonAsync($"/api/games/timeline/puzzle?date={Sunday}");
+        var answer = await AnswerAsync(app, puzzle);
+        string[] swapped = [answer[1], answer[0], answer[2], answer[3], answer[4]];
+        string[] wrong = [.. Enumerable.Reverse(answer)];
+
+        var check = await browser.SendJsonAsync(HttpMethod.Post, "/api/games/timeline/check", new { date = Sunday, order = swapped });
+        var marks = JsonDocument.Parse(await check.Content.ReadAsStringAsync()).RootElement.GetProperty("marks").EnumerateArray().Select(mark => mark.GetString()).ToList();
+        var early = await browser.SendJsonAsync(HttpMethod.Post, "/api/games/timeline/results", new { date = Sunday, guesses = new[] { wrong, wrong, wrong, wrong } });
+        var lost = await browser.SendJsonAsync(HttpMethod.Post, "/api/games/timeline/results", new { date = Sunday, guesses = new[] { wrong, wrong, wrong, wrong, wrong, wrong } });
+        var result = JsonDocument.Parse(await lost.Content.ReadAsStringAsync()).RootElement;
+
+        Assert.Equal("countOnly", puzzle.GetProperty("twist").GetProperty("id").GetString());
+        Assert.Equal(6, puzzle.GetProperty("maxTries").GetInt32());
+        Assert.Equal(["right", "right", "right", "wrong", "wrong"], marks);
+        Assert.Equal(HttpStatusCode.BadRequest, early.StatusCode);
+        Assert.Equal(HttpStatusCode.OK, lost.StatusCode);
+        Assert.False(result.GetProperty("solved").GetBoolean());
+        Assert.StartsWith("Fibotrail Timeline #4 Count only X/6\n", result.GetProperty("share").GetString(), StringComparison.Ordinal);
+        Assert.Equal(6, result.GetProperty("stats").GetProperty("tries").GetArrayLength());
     }
 
     [Fact]

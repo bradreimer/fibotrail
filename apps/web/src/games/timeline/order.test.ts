@@ -50,5 +50,7 @@ describe('the place under a dragged card', () => {
 describe('marks', () => {
   it('are summarized for screen readers', () => {
     expect(summary(['right', 'close', 'wrong', 'wrong'])).toBe('1 right, 1 close, 2 wrong');
+    expect(summary(['right', 'earlier', 'later', 'later'])).toBe('1 right, 1 earlier, 2 later');
+    expect(summary(['right', 'right', 'wrong', 'wrong', 'wrong'], true)).toBe('2 of 5 in place');
   });
 });

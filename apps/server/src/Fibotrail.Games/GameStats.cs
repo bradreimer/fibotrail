@@ -11,6 +11,12 @@ public enum Mark
 
     /// <summary>Not close. ⬜</summary>
     Wrong,
+
+    /// <summary>Out of place, and it goes earlier in the order. ⬆️</summary>
+    Earlier,
+
+    /// <summary>Out of place, and it goes later in the order. ⬇️</summary>
+    Later,
 }
 
 /// <summary>One played day of a game, as the stats read it.</summary>

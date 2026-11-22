@@ -10,18 +10,26 @@ import { countOf, formatDateRange } from '../../trips/dates';
 import { GameStatsPanel } from '../GameStatsPanel';
 import { shareResult, type ShareOutcome } from '../share';
 import { localDate } from '../today';
-import { summary } from './order';
+import { inPlace, summary } from './order';
 import { TimelineBoard } from './TimelineBoard';
 
 type Mark = components['schemas']['Mark'];
 type Result = components['schemas']['TimelineResultView'];
 type Puzzle = components['schemas']['TimelinePuzzleView'];
+type Twist = components['schemas']['TimelineTwistView'];
 
-const SQUARE: Record<Mark, string> = { right: '🟩', close: '🟨', wrong: '⬜' };
+const SQUARE: Record<Mark, string> = {
+  right: '🟩',
+  close: '🟨',
+  wrong: '⬜',
+  earlier: '⬆️',
+  later: '⬇️',
+};
 
 /**
- * The Timeline game: put five photos from five trips in the order you took them, in up to four
- * tries. The server grades every try and stores the day's result. See docs/specs/timeline-game.md.
+ * The Timeline game: put your photos in the order you took them. Each weekday has a twist, which
+ * the server picks and names. The server grades every try and stores the day's result. See
+ * docs/specs/timeline-game.md.
  */
 export default function TimelineGame() {
   const date = localDate();
@@ -41,16 +49,22 @@ export default function TimelineGame() {
   if (!puzzle.data) return null;
 
   const data = puzzle.data;
-  const heading = (
+  const title = (
     <h2 className="timeline__title">
       Timeline <span className="timeline__number">#{data.number}</span>
     </h2>
+  );
+  const heading = (
+    <>
+      {title}
+      <TwistLine twist={data.twist} />
+    </>
   );
 
   if (data.tripsNeeded > 0) {
     return (
       <section className="timeline">
-        {heading}
+        {title}
         <p className="games-page__lead">
           Timeline needs 5 trips with photos. Add {countOf(data.tripsNeeded, 'more trip')}, and
           today's puzzle is ready. <Link to="/inbox">Open the inbox</Link>
@@ -60,8 +74,17 @@ export default function TimelineGame() {
   }
 
   const result = finished ?? data.result;
-  if (result) return <TimelineResult heading={heading} result={result} />;
+  if (result) return <TimelineResult heading={heading} result={result} twist={data.twist} />;
   return <TimelinePlay heading={heading} puzzle={data} onFinish={setFinished} />;
+}
+
+/** The day's twist and its one-line rule, such as "Arrows: A photo out of place shows…". */
+function TwistLine({ twist }: { twist: Twist }) {
+  return (
+    <p className="timeline__twist">
+      <span className="timeline__twist-name">{twist.name}:</span> {twist.rule}
+    </p>
+  );
 }
 
 /** Today's puzzle while you play it. The order and the tries live here until the game ends. */
@@ -83,6 +106,8 @@ function TimelinePlay({
   const [problem, setProblem] = useState<string | null>(null);
   const [announcement, setAnnouncement] = useState('');
   const triesLeft = data.maxTries - rows.length;
+  // Count only says how many cards are in place, not which, so no card gets a mark or locks.
+  const countOnly = data.twist.id === 'countOnly';
 
   function reorder(next: string[]) {
     setOrder(next);
@@ -105,10 +130,11 @@ function TimelinePlay({
       const nextRows = [...rows, answer.marks];
       setGuesses(nextGuesses);
       setRows(nextRows);
-      setMarks(
-        new Map(order.map((id, index): [string, Mark] => [id, answer.marks[index] ?? 'wrong'])),
-      );
-      setAnnouncement(summary(answer.marks));
+      if (!countOnly)
+        setMarks(
+          new Map(order.map((id, index): [string, Mark] => [id, answer.marks[index] ?? 'wrong'])),
+        );
+      setAnnouncement(summary(answer.marks, countOnly));
       const solved = answer.marks.every((mark) => mark === 'right');
       if (solved || nextRows.length >= data.maxTries) {
         onFinish(
@@ -133,7 +159,10 @@ function TimelinePlay({
         {countOf(triesLeft, 'try', 'tries')} left.
       </p>
       <TimelineBoard order={order} marks={marks} disabled={busy} onChange={reorder} />
-      {rows.length > 0 && <MarkGrid rows={rows} />}
+      {countOnly && rows.length > 0 && (
+        <p className="timeline__count">Last check: {inPlace(rows[rows.length - 1]!)}.</p>
+      )}
+      {rows.length > 0 && <MarkGrid rows={rows} countOnly={countOnly} />}
       <p className="visually-hidden" role="status">
         {announcement}
       </p>
@@ -154,11 +183,17 @@ function TimelinePlay({
   );
 }
 
-function MarkGrid({ rows }: { rows: readonly (readonly Mark[])[] }) {
+function MarkGrid({
+  rows,
+  countOnly = false,
+}: {
+  rows: readonly (readonly Mark[])[];
+  countOnly?: boolean;
+}) {
   return (
     <ol className="timeline__grid" aria-label="Your tries">
       {rows.map((row, index) => (
-        <li key={index} aria-label={`Try ${index + 1}: ${summary(row)}`}>
+        <li key={index} aria-label={`Try ${index + 1}: ${summary(row, countOnly)}`}>
           <span aria-hidden="true">{row.map((mark) => SQUARE[mark]).join('')}</span>
         </li>
       ))}
@@ -167,7 +202,15 @@ function MarkGrid({ rows }: { rows: readonly (readonly Mark[])[] }) {
 }
 
 /** The end of the game: the right order, each card with its trip and a link to it. */
-function TimelineResult({ heading, result }: { heading: ReactNode; result: Result }) {
+function TimelineResult({
+  heading,
+  result,
+  twist,
+}: {
+  heading: ReactNode;
+  result: Result;
+  twist: Twist;
+}) {
   const [shared, setShared] = useState<ShareOutcome | null>(null);
   const label =
     shared === 'copied' ? 'Copied' : shared === 'failed' ? "Couldn't share. Try again." : 'Share';
@@ -179,7 +222,7 @@ function TimelineResult({ heading, result }: { heading: ReactNode; result: Resul
           ? `Solved in ${countOf(result.tries, 'try', 'tries')}.`
           : 'Not this time. Here is the order you took them.'}
       </p>
-      <MarkGrid rows={result.rows} />
+      <MarkGrid rows={result.rows} countOnly={twist.id === 'countOnly'} />
       <ol className="timeline__answer">
         {result.answer.map((card) => (
           <li key={card.photoId}>

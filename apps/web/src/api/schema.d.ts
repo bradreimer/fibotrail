@@ -571,7 +571,7 @@ export interface components {
             endDate: string;
         };
         /** @enum {unknown} */
-        Mark: "right" | "close" | "wrong";
+        Mark: "right" | "close" | "wrong" | "earlier" | "later";
         McpStatus: {
             enabled: boolean;
             tools: string[];
@@ -701,6 +701,7 @@ export interface components {
             number: number;
             /** Format: date */
             date: string;
+            twist: components["schemas"]["TimelineTwistView"];
             /** Format: int32 */
             maxTries: number;
             /** Format: int32 */
@@ -723,6 +724,14 @@ export interface components {
             share: string;
             answer: components["schemas"]["TimelineAnswerCard"][];
             stats: components["schemas"]["GameStats"];
+        };
+        /** @enum {unknown} */
+        TimelineTwist: "classic" | "arrows" | "neighbors" | "sixCards" | "oneTrip" | "countOnly";
+        TimelineTwistView: {
+            id: components["schemas"]["TimelineTwist"];
+            planned: components["schemas"]["TimelineTwist"];
+            name: string;
+            rule: string;
         };
         TripChange: {
             name?: null | string;
