@@ -4,7 +4,8 @@ type GameStats = components['schemas']['GameStats'];
 
 /**
  * A game's stats: played, win percentage, streaks, and how many tries each win took. The bar of
- * today's tries is highlighted. See docs/specs/games.md#results-and-stats.
+ * today's tries is highlighted. A game that is always one try, such as Slide, has no bars. See
+ * docs/specs/games.md#results-and-stats.
  */
 export function GameStatsPanel({ stats, today }: { stats: GameStats; today?: number }) {
   const most = Math.max(1, ...stats.tries);
@@ -19,21 +20,25 @@ export function GameStatsPanel({ stats, today }: { stats: GameStats; today?: num
         <Tile label="Current streak" value={stats.currentStreak} />
         <Tile label="Best streak" value={stats.bestStreak} />
       </dl>
-      <h3 className="game-stats__subtitle">Tries to win</h3>
-      <ol className="game-stats__bars">
-        {stats.tries.map((count, index) => (
-          <li key={index} className="game-stats__row">
-            <span className="game-stats__tries">{index + 1}</span>
-            <span
-              className={`game-stats__bar${today === index + 1 ? ' game-stats__bar--today' : ''}`}
-              style={{ inlineSize: `${Math.max(8, (count / most) * 100)}%` }}
-              aria-label={`${index + 1} ${index === 0 ? 'try' : 'tries'}: ${count}`}
-            >
-              {count}
-            </span>
-          </li>
-        ))}
-      </ol>
+      {stats.tries.length > 1 && (
+        <>
+          <h3 className="game-stats__subtitle">Tries to win</h3>
+          <ol className="game-stats__bars">
+            {stats.tries.map((count, index) => (
+              <li key={index} className="game-stats__row">
+                <span className="game-stats__tries">{index + 1}</span>
+                <span
+                  className={`game-stats__bar${today === index + 1 ? ' game-stats__bar--today' : ''}`}
+                  style={{ inlineSize: `${Math.max(8, (count / most) * 100)}%` }}
+                  aria-label={`${index + 1} ${index === 0 ? 'try' : 'tries'}: ${count}`}
+                >
+                  {count}
+                </span>
+              </li>
+            ))}
+          </ol>
+        </>
+      )}
     </section>
   );
 }

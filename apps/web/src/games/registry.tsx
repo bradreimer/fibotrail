@@ -50,6 +50,16 @@ export const GAMES: readonly GameModule[] = [
     ),
     Component: lazy(() => import('./timeline/TimelineGame')),
   },
+  {
+    id: 'slide',
+    icon: (
+      <Icon>
+        <rect x="3" y="3" width="18" height="18" rx="2" />
+        <path d="M9 3v18M15 3v12M3 9h18M3 15h12" />
+      </Icon>
+    ),
+    Component: lazy(() => import('./slide/SlideGame')),
+  },
 ];
 
 export function gameFor(id: string | undefined): GameModule | undefined {

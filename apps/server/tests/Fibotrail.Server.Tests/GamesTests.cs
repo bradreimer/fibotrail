@@ -1,5 +1,6 @@
 using System.Net;
 using System.Text.Json;
+using Fibotrail.Games.Slide;
 using Microsoft.EntityFrameworkCore;
 
 namespace Fibotrail.Server.Tests;
@@ -42,15 +43,15 @@ public class GamesTests
     }
 
     [Fact]
-    public async Task The_games_list_has_Timeline_with_empty_stats()
+    public async Task The_games_list_has_Timeline_and_Slide_with_empty_stats()
     {
         var (app, browser) = await StartAsync();
         await using var _ = app;
 
         var games = await browser.GetJsonAsync($"/api/games?date={Today}");
 
-        var timeline = Assert.Single(games.EnumerateArray());
-        Assert.Equal("timeline", timeline.GetProperty("id").GetString());
+        Assert.Equal(["timeline", "slide"], games.EnumerateArray().Select(game => game.GetProperty("id").GetString()));
+        var timeline = games[0];
         Assert.False(timeline.GetProperty("playedToday").GetBoolean());
         Assert.Equal(0, timeline.GetProperty("stats").GetProperty("played").GetInt32());
     }
@@ -177,6 +178,7 @@ public class GamesTests
         Assert.True(puzzle.GetProperty("result").GetProperty("solved").GetBoolean());
         var games = await browser.GetJsonAsync($"/api/games?date={Today}");
         Assert.True(games[0].GetProperty("playedToday").GetBoolean());
+        Assert.False(games[1].GetProperty("playedToday").GetBoolean());
     }
 
     [Fact]
@@ -193,5 +195,122 @@ public class GamesTests
 
         var lost = await browser.SendJsonAsync(HttpMethod.Post, "/api/games/timeline/results", new { date = Today, guesses = new[] { wrong, wrong, wrong, wrong } });
         Assert.False(JsonDocument.Parse(await lost.Content.ReadAsStringAsync()).RootElement.GetProperty("solved").GetBoolean());
+    }
+
+    /// <summary>The fewest moves from a board to solved, by breadth-first search.</summary>
+    private static List<int> Solve(IReadOnlyList<int> start)
+    {
+        var solved = string.Concat(SlidePuzzle.Solved);
+        var from = new Dictionary<string, (string Previous, int Tile)> { [string.Concat(start)] = (string.Empty, 0) };
+        var queue = new Queue<int[]>([[.. start]]);
+        while (queue.TryDequeue(out var board))
+        {
+            var here = string.Concat(board);
+            if (here == solved)
+            {
+                var moves = new List<int>();
+                for (var at = here; from[at].Previous.Length > 0; at = from[at].Previous)
+                {
+                    moves.Add(from[at].Tile);
+                }
+
+                moves.Reverse();
+                return moves;
+            }
+
+            foreach (var tile in Enumerable.Range(1, 8))
+            {
+                if (SlidePuzzle.Move(board, tile) is { } next && from.TryAdd(string.Concat(next), (here, tile)))
+                {
+                    queue.Enqueue(next);
+                }
+            }
+        }
+
+        throw new InvalidOperationException("The board can't be solved.");
+    }
+
+    private static readonly int[] OneMove = [1];
+
+    private static List<int> TilesOf(JsonElement puzzle) => [.. puzzle.GetProperty("tiles").EnumerateArray().Select(tile => tile.GetInt32())];
+
+    [Fact]
+    public async Task Slide_needs_one_added_trip_with_photos()
+    {
+        var (app, browser) = await StartAsync(added: 0);
+        await using var _ = app;
+
+        var puzzle = await browser.GetJsonAsync($"/api/games/slide/puzzle?date={Today}");
+
+        Assert.Equal(1, puzzle.GetProperty("tripsNeeded").GetInt32());
+        Assert.Equal(JsonValueKind.Null, puzzle.GetProperty("photoId").ValueKind);
+        Assert.Empty(puzzle.GetProperty("tiles").EnumerateArray());
+    }
+
+    [Fact]
+    public async Task The_slide_puzzle_is_a_shuffled_photo_with_no_trip_name()
+    {
+        var (app, browser) = await StartAsync();
+        await using var _ = app;
+
+        var puzzle = await browser.GetJsonAsync($"/api/games/slide/puzzle?date={Today}");
+        var again = await browser.GetJsonAsync($"/api/games/slide/puzzle?date={Today}");
+
+        var tiles = TilesOf(puzzle);
+        Assert.Equal(Enumerable.Range(0, 9), tiles.Order());
+        Assert.Equal(0, tiles[^1]);
+        Assert.NotEqual(SlidePuzzle.Solved, tiles);
+        var trips = await TripLibrary.TripsAsync(app);
+        Assert.Contains(trips.Take(5), trip => trip.Photos.Any(photo => photo.PhotoId == puzzle.GetProperty("photoId").GetString()));
+        Assert.All(trips.Select(trip => trip.Name), name => Assert.DoesNotContain(name, puzzle.GetRawText(), StringComparison.Ordinal));
+        Assert.Equal(puzzle.GetRawText(), again.GetRawText());
+    }
+
+    [Fact]
+    public async Task Solving_the_slide_puzzle_stores_the_moves_once_and_shows_the_trip()
+    {
+        var (app, browser) = await StartAsync();
+        await using var _ = app;
+        var puzzle = await browser.GetJsonAsync($"/api/games/slide/puzzle?date={Today}");
+        var moves = Solve(TilesOf(puzzle));
+
+        var response = await browser.SendJsonAsync(HttpMethod.Post, "/api/games/slide/results", new { date = Today, moves });
+        var result = JsonDocument.Parse(await response.Content.ReadAsStringAsync()).RootElement;
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.True(result.GetProperty("solved").GetBoolean());
+        Assert.Equal(moves.Count, result.GetProperty("moves").GetInt32());
+        Assert.Equal($"Fibotrail Slide #2 {moves.Count} moves", result.GetProperty("share").GetString());
+        var answer = result.GetProperty("answer");
+        var trip = Assert.Single(await TripLibrary.TripsAsync(app), trip => trip.Id == answer.GetProperty("tripId").GetInt32());
+        Assert.Equal(trip.Name, answer.GetProperty("tripName").GetString());
+        Assert.Equal(puzzle.GetProperty("photoId").GetString(), answer.GetProperty("photoId").GetString());
+        Assert.False(string.IsNullOrEmpty(answer.GetProperty("startDate").GetString()));
+        Assert.Equal(1, result.GetProperty("stats").GetProperty("played").GetInt32());
+
+        // A second send keeps the first.
+        var second = await browser.SendJsonAsync(HttpMethod.Post, "/api/games/slide/results", new { date = Today, moves = OneMove });
+        Assert.Equal(moves.Count, JsonDocument.Parse(await second.Content.ReadAsStringAsync()).RootElement.GetProperty("moves").GetInt32());
+        var stored = await app.WithDbAsync(db => db.GameResults.SingleAsync());
+        Assert.Equal(("slide", 1, 1), (stored.Game, stored.Tries, stored.MaxTries));
+        Assert.Equal(string.Concat(moves), stored.Marks);
+
+        var again = await browser.GetJsonAsync($"/api/games/slide/puzzle?date={Today}");
+        Assert.Equal(moves.Count, again.GetProperty("result").GetProperty("moves").GetInt32());
+        var games = await browser.GetJsonAsync($"/api/games?date={Today}");
+        Assert.True(games[1].GetProperty("solvedToday").GetBoolean());
+    }
+
+    [Fact]
+    public async Task Moves_that_do_not_solve_the_slide_puzzle_are_refused()
+    {
+        var (app, browser) = await StartAsync();
+        await using var _ = app;
+        var moves = Solve(TilesOf(await browser.GetJsonAsync($"/api/games/slide/puzzle?date={Today}")));
+
+        Assert.Equal(HttpStatusCode.BadRequest, (await browser.SendJsonAsync(HttpMethod.Post, "/api/games/slide/results", new { date = Today, moves = moves[..^1] })).StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, (await browser.SendJsonAsync(HttpMethod.Post, "/api/games/slide/results", new { date = Today, moves = Array.Empty<int>() })).StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, (await browser.SendJsonAsync(HttpMethod.Post, "/api/games/slide/results", new { date = "2026-11-25", moves })).StatusCode);
+        Assert.Equal(0, await app.WithDbAsync(db => db.GameResults.CountAsync()));
     }
 }

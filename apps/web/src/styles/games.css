@@ -1,6 +1,6 @@
 /*
- * The Games screens: the game cards, the stats panel, and the Timeline game. See
- * docs/specs/games.md and docs/specs/timeline-game.md.
+ * The Games screens: the game cards, the stats panel, and the Timeline and Slide games. See
+ * docs/specs/games.md, docs/specs/timeline-game.md, and docs/specs/slide-game.md.
  */
 .games-page {
   display: grid;
@@ -357,4 +357,174 @@
 .game-stats__bar--today {
   background: var(--fibo-teal);
   color: var(--fibo-on-teal);
+}
+
+/*
+ * Slide. The board is a square container, so a tile places its slice of the photo in board units
+ * (cqw). A tile sits at its cell by transform, so a move is a GPU slide, not a layout change. While
+ * a finger drags, the transition is off and the tile follows it exactly; on release, the tile
+ * settles with a slight overshoot, which reads as a piece clicking into its slot.
+ */
+.slide {
+  display: grid;
+  gap: var(--fibo-space-4);
+  inline-size: 100%;
+  max-inline-size: calc(var(--fibo-space-7) * 9);
+  justify-self: center;
+}
+
+.slide-board {
+  position: relative;
+  container-type: size;
+  inline-size: 100%;
+  aspect-ratio: 1;
+  border-radius: var(--fibo-radius);
+  background: var(--fibo-mist);
+  overflow: hidden;
+  /* The board owns every touch: no scroll, pinch, or double-tap zoom under a finger. */
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.slide-tile {
+  --slide-gap: var(--fibo-tile-seam);
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  inline-size: calc(100% / 3);
+  block-size: calc(100% / 3);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: grab;
+  -webkit-tap-highlight-color: transparent;
+  transform: translate(
+    calc(var(--slide-col) * 100% + var(--slide-dx)),
+    calc(var(--slide-row) * 100% + var(--slide-dy))
+  );
+  transition: transform var(--fibo-dur-base) cubic-bezier(0.25, 1.35, 0.5, 1);
+  will-change: transform;
+}
+
+.slide-tile[aria-disabled='true'] {
+  cursor: default;
+}
+
+.slide-tile--dragging {
+  z-index: 1;
+  cursor: grabbing;
+  transition: none;
+}
+
+.slide-tile__face {
+  position: absolute;
+  inset: var(--slide-gap);
+  overflow: hidden;
+  border-radius: var(--fibo-space-1);
+  background: var(--fibo-paper);
+  box-shadow: var(--fibo-tile-shadow);
+  transition:
+    transform var(--fibo-dur-fast) ease-out,
+    box-shadow var(--fibo-dur-fast) ease-out,
+    border-radius var(--fibo-dur-page) ease-out,
+    inset var(--fibo-dur-page) ease-out;
+}
+
+/* A pressed or lifted tile rises a little under the finger. */
+.slide-tile:active:not([aria-disabled='true']) .slide-tile__face,
+.slide-tile--dragging .slide-tile__face {
+  transform: scale(0.97);
+  box-shadow: var(--fibo-tile-lift-shadow);
+}
+
+.slide-tile:focus-visible {
+  outline: none;
+}
+
+.slide-tile:focus-visible .slide-tile__face {
+  box-shadow:
+    0 0 0 var(--fibo-space-1) var(--fibo-teal),
+    var(--fibo-tile-shadow);
+}
+
+.slide-tile__photo {
+  position: absolute;
+  inset-block-start: calc(var(--slide-home-row) * -100cqh / 3 - var(--slide-gap));
+  inset-inline-start: calc(var(--slide-home-col) * -100cqw / 3 - var(--slide-gap));
+  inline-size: 100cqw;
+  block-size: 100cqh;
+  max-inline-size: none;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+.slide-tile--last {
+  opacity: 0;
+  cursor: default;
+  /* It shares the bottom-right cell with whichever tile is there, so it never takes a touch. */
+  pointer-events: none;
+  transition: opacity var(--fibo-dur-page) ease-out;
+}
+
+/* Solved: the missing tile fades in and the seams close, so the photo is whole. */
+.slide-board--solved .slide-tile--last {
+  opacity: 1;
+}
+
+.slide-board--solved .slide-tile__face {
+  inset: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.slide-board--solved .slide-tile__photo {
+  inset-block-start: calc(var(--slide-home-row) * -100cqh / 3);
+  inset-inline-start: calc(var(--slide-home-col) * -100cqw / 3);
+}
+
+.slide__moves {
+  margin: 0;
+  color: var(--fibo-ink-muted);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.slide-photo {
+  display: grid;
+  gap: var(--fibo-space-3);
+  margin: 0;
+}
+
+.slide-photo__image {
+  inline-size: 100%;
+  border-radius: var(--fibo-radius);
+  background: var(--fibo-mist);
+  animation: slide-photo-in var(--fibo-dur-page) ease-out;
+}
+
+.slide-photo__caption {
+  display: grid;
+  gap: var(--fibo-space-1);
+}
+
+.slide-photo__name {
+  color: inherit;
+  font-family: var(--fibo-font-display);
+  font-size: var(--fibo-text-h3);
+  overflow-wrap: anywhere;
+}
+
+.slide-photo__detail {
+  color: var(--fibo-ink-muted);
+  font-size: var(--fibo-text-caption);
+}
+
+@keyframes slide-photo-in {
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
 }
