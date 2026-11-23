@@ -26,6 +26,14 @@ the accessibility checklist are also still unrecorded.
 
 ## Completed
 
+- [#179](https://github.com/bradreimer/fibotrail/issues/179) A **Slide** game
+  ([spec](specs/slide-game.md)), not yet in a release. One trip photo a day, cut into a 3 by 3
+  grid with the bottom-right tile removed and the other 8 shuffled into a start that can always be
+  solved. You tap or drag tiles into the empty space; a drag follows the finger along one axis and
+  snaps past 40% of a cell or on a flick, and springs back otherwise. When the photo is whole, it
+  shows with the trip's name, dates, and place. The server replays the moves before it stores a
+  result, and stores the moves as the marks, so no new table is needed. Checked in tests and in
+  Chromium with touch emulation, not yet on a real iPhone.
 - [#177](https://github.com/bradreimer/fibotrail/issues/177) Timeline has a twist for each day of
   the week ([spec](specs/timeline-game.md#daily-twists)), not yet in a release. Monday and Thursday
   are Classic. Tuesday is Arrows: a card out of place says Earlier or Later. Wednesday is Neighbors:

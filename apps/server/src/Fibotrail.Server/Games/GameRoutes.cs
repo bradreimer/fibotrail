@@ -1,5 +1,6 @@
 using Fibotrail.Games;
 using Fibotrail.Server.Data;
+using Fibotrail.Server.Games.Slide;
 using Fibotrail.Server.Games.Timeline;
 using Fibotrail.Server.Immich;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -25,6 +26,7 @@ public static class GameRegistry
     public static readonly IReadOnlyList<GameDefinition> Games =
     [
         TimelineRoutes.Definition,
+        SlideRoutes.Definition,
     ];
 }
 

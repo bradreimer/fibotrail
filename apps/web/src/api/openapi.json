@@ -805,6 +805,87 @@
           }
         }
       }
+    },
+    "/api/games/slide/puzzle": {
+      "get": {
+        "tags": [
+          "Fibotrail"
+        ],
+        "operationId": "GetSlidePuzzle",
+        "parameters": [
+          {
+            "name": "date",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SlidePuzzleView"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/games/slide/results": {
+      "post": {
+        "tags": [
+          "Fibotrail"
+        ],
+        "operationId": "PostSlideResult",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SlideResultRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SlideResultView"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1756,6 +1837,139 @@
           "newSuggestions": {
             "type": "integer",
             "format": "int32"
+          }
+        }
+      },
+      "SlideAnswerView": {
+        "required": [
+          "photoId",
+          "tripId",
+          "tripName",
+          "startDate",
+          "endDate",
+          "place"
+        ],
+        "type": "object",
+        "properties": {
+          "photoId": {
+            "type": "string"
+          },
+          "tripId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "tripName": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "place": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "SlidePuzzleView": {
+        "required": [
+          "number",
+          "date",
+          "tripsNeeded",
+          "photoId",
+          "tiles",
+          "result"
+        ],
+        "type": "object",
+        "properties": {
+          "number": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "tripsNeeded": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "photoId": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "tiles": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          "result": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/SlideResultView"
+              }
+            ]
+          }
+        }
+      },
+      "SlideResultRequest": {
+        "required": [
+          "date",
+          "moves"
+        ],
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "moves": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        }
+      },
+      "SlideResultView": {
+        "required": [
+          "solved",
+          "moves",
+          "share",
+          "answer",
+          "stats"
+        ],
+        "type": "object",
+        "properties": {
+          "solved": {
+            "type": "boolean"
+          },
+          "moves": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "share": {
+            "type": "string"
+          },
+          "answer": {
+            "$ref": "#/components/schemas/SlideAnswerView"
+          },
+          "stats": {
+            "$ref": "#/components/schemas/GameStats"
           }
         }
       },
