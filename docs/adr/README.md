@@ -64,8 +64,9 @@ What becomes easier, what becomes harder, and what must stay true?
 | [ADR-015](ADR-015-cities-are-merged-places-and-theme-parks-keep-their-own-identity.md) | Cities are merged places, and theme parks keep their own identity | Accepted |
 | [ADR-016](ADR-016-a-join-is-a-decision-over-a-range-of-days.md) | A join is a decision over a range of days | Accepted |
 | [ADR-017](ADR-017-a-manual-trip-is-a-decision-that-detection-builds-from-photos.md) | A manual trip is a decision that detection builds from photos | Accepted |
-| [ADR-018](ADR-018-an-mcp-server-answers-questions-with-coarse-read-only-data.md) | An MCP server answers questions with coarse, read-only data | Accepted |
+| [ADR-018](ADR-018-an-mcp-server-answers-questions-with-coarse-read-only-data.md) | An MCP server answers questions with coarse, read-only data | Superseded by ADR-023 |
 | [ADR-019](ADR-019-insights-replaces-the-stats-and-collections-tabs.md) | Insights replaces the Stats and Collections tabs | Accepted |
 | [ADR-020](ADR-020-trip-page-maps-use-the-1-10-million-outline.md) | Trip page maps use the 1:10 million outline | Accepted |
 | [ADR-021](ADR-021-a-pinned-photo-is-a-decision-that-detection-reads-as-a-day.md) | A pinned photo is a decision that detection reads as a day | Accepted |
 | [ADR-022](ADR-022-games-are-plug-in-modules-behind-a-games-api.md) | Games are plug-in modules behind a games API | Accepted |
+| [ADR-023](ADR-023-the-mcp-server-may-return-a-trips-main-city.md) | The MCP server may return a trip's main city | Accepted |
