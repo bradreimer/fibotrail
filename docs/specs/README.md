@@ -71,5 +71,6 @@ None.
 | [games.md](games.md) | The Games tab, the games API, results, stats, and sharing |
 | [timeline-game.md](timeline-game.md) | The Timeline game: put five of your photos in date order |
 | [slide-game.md](slide-game.md) | The Slide game: slide the tiles of a trip photo back into place |
+| [pin-game.md](pin-game.md) | The Pin game: tap the map where you took one of your photos |
 | [mcp-server.md](mcp-server.md) | A read-only MCP server that answers questions about your travel with coarse data and a token |
 | [release.md](release.md) | The accessibility checks, README, and tagged image for version 0.1 |

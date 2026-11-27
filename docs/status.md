@@ -26,6 +26,14 @@ the accessibility checklist are also still unrecorded.
 
 ## Completed
 
+- [#183](https://github.com/bradreimer/fibotrail/issues/183) A **Pin** game
+  ([spec](specs/pin-game.md)), not yet in a release. One trip photo a day with a world map: tap
+  where you took it. Each miss shows a band (50, 500, and 2,000 km edges), an arrow to one of 8
+  compass points, and the distance; a pin within 50 km solves it, in up to 4 tries. The game
+  library gains each photo's latitude and longitude, and only located photos are picked. The
+  server grades every pin and stores the pins as the marks, so no new table is needed. A country
+  and region list places a pin without the map. Tapping the end photo opens it in Immich, as in
+  Timeline and Slide. Checked in tests only, not yet in a browser or on a phone.
 - [#186](https://github.com/bradreimer/fibotrail/issues/186) The MCP server returns each trip's
   main city, not yet in a release
   ([ADR-023](adr/ADR-023-the-mcp-server-may-return-a-trips-main-city.md)). `list_trips` and

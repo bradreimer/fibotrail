@@ -6,7 +6,7 @@ Tracking issue: [#166](https://github.com/bradreimer/fibotrail/issues/166).
 
 This spec defines the Games tab: a hub of small daily games made from your own trips, the games API
 that every game reads, and the stats that each game remembers. Each game has its own spec:
-[Timeline](timeline-game.md) and [Slide](slide-game.md).
+[Timeline](timeline-game.md), [Slide](slide-game.md), and [Pin](pin-game.md).
 
 Think of the Games tab as a game shelf. The shelf (the hub), its labels (the registry), and the
 scorebook (game stats) stay put. A game is a box you put on the shelf or take off, without moving
@@ -49,7 +49,8 @@ with friends.
 ### The game library: the games API
 
 - The game library is the one input of every game. It holds the added trips, each with its ID, name,
-  start and end dates, main place, and its photos with an ID and the local time taken.
+  start and end dates, main place, and its photos with an ID, the local time taken, and the
+  latitude and longitude when the photo has them (read by [Pin](pin-game.md)).
 - A photo is in the game library when it's an image, not a video, and it isn't on the way
   ([on the way](on-the-way.md)).
 - Only trips with the status "added" are in it, as for the [insights](insights.md).

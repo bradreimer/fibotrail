@@ -2,7 +2,8 @@ import type { MapViewProps } from '../map/MapView';
 
 /**
  * Stands in for the MapLibre map in tests. jsdom has no WebGL, so the real map can't draw. This
- * shows what the map was asked to show, and a button that moves the draggable pin.
+ * shows what the map was asked to show, a button that moves the draggable pin, and buttons that
+ * tap the map near Paris and in Sydney.
  */
 export default function MapViewMock({
   label,
@@ -20,12 +21,15 @@ export default function MapViewMock({
   onDrag,
   onSelect,
   detail = 'coarse',
+  onMapTap,
+  fit = true,
 }: MapViewProps) {
   return (
     <div
       role="application"
       aria-label={label}
       data-detail={detail}
+      data-fit={String(fit)}
       data-route={JSON.stringify(route)}
       data-routes={routes ? JSON.stringify(routes) : undefined}
       data-visited={visited ? JSON.stringify(visited) : undefined}
@@ -62,6 +66,16 @@ export default function MapViewMock({
           {marker.label}
         </button>
       ))}
+      {onMapTap && (
+        <>
+          <button type="button" onClick={() => onMapTap({ latitude: 48.86, longitude: 2.35 })}>
+            Tap the map near Paris
+          </button>
+          <button type="button" onClick={() => onMapTap({ latitude: -33.87, longitude: 151.21 })}>
+            Tap the map in Sydney
+          </button>
+        </>
+      )}
       {draggableId && (
         <button type="button" onClick={() => onDrag?.({ latitude: -33.87, longitude: 151.21 })}>
           Drag the pin to Sydney

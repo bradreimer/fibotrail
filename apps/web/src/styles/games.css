@@ -542,3 +542,59 @@
     transform: scale(0.98);
   }
 }
+
+/* The Pin game: the photo, then the map you place a pin on. See docs/specs/pin-game.md. */
+.pin {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--fibo-space-4);
+  max-inline-size: calc(var(--fibo-space-7) * 9);
+}
+
+.pin__photo {
+  inline-size: 100%;
+  aspect-ratio: 3 / 2;
+  object-fit: cover;
+  border-radius: var(--fibo-radius);
+  background: var(--fibo-mist);
+}
+
+/* Taller than the 3:2 default, so there's room to pinch and pan with one thumb. */
+.pin__map {
+  aspect-ratio: 1;
+}
+
+.pin__picker summary {
+  min-block-size: var(--fibo-tap);
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.pin__picker-fields {
+  display: grid;
+  gap: var(--fibo-space-2);
+}
+
+.pin__picker-fields select {
+  min-block-size: var(--fibo-tap);
+  font: inherit;
+}
+
+.pin__marks {
+  display: grid;
+  gap: var(--fibo-space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pin__square,
+.pin__arrow {
+  font-size: var(--fibo-text-h3);
+  margin-inline-end: var(--fibo-space-2);
+}
+
+.pin__detail {
+  color: var(--fibo-ink-muted);
+}

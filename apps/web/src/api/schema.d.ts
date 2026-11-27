@@ -420,6 +420,54 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/games/pin/puzzle": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["GetPinPuzzle"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/games/pin/check": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["CheckPin"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/games/pin/results": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["PostPinResult"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -459,6 +507,8 @@ export interface components {
             trips: number;
         };
         /** @enum {unknown} */
+        Compass: "n" | "ne" | "e" | "se" | "s" | "sw" | "w" | "nw" | null;
+        /** @enum {unknown} */
         DecisionAction: "add" | "ignore" | "later" | "restore";
         DecisionRequest: {
             action: components["schemas"]["DecisionAction"];
@@ -483,6 +533,13 @@ export interface components {
             /** Format: int32 */
             bestStreak: number;
             tries: number[];
+        };
+        GeoPoint: {
+            /** Format: double */
+            latitude: number;
+            /** Format: double */
+            longitude: number;
+            isValid?: boolean;
         };
         HomeState: {
             confirmed: null | components["schemas"]["PlaceInfo"];
@@ -615,6 +672,65 @@ export interface components {
             id: string;
             alt: string;
             isVideo: boolean;
+        };
+        PinAnswerView: {
+            photoId: string;
+            /** Format: double */
+            latitude: number;
+            /** Format: double */
+            longitude: number;
+            /** Format: int32 */
+            tripId: number;
+            tripName: string;
+            /** Format: date */
+            startDate: string;
+            /** Format: date */
+            endDate: string;
+            place: null | string;
+            immichUrl: null | string;
+        };
+        /** @enum {unknown} */
+        PinBand: "green" | "yellow" | "orange" | "red";
+        PinCheckRequest: {
+            /** Format: date */
+            date: string;
+            pin: components["schemas"]["GeoPoint"];
+        };
+        PinMark: {
+            pin: components["schemas"]["GeoPoint"];
+            band: components["schemas"]["PinBand"];
+            direction: null | components["schemas"]["Compass"];
+            /** Format: int32 */
+            distanceKm: number;
+            solved?: boolean;
+        };
+        PinPuzzleView: {
+            /** Format: int32 */
+            number: number;
+            /** Format: date */
+            date: string;
+            /** Format: int32 */
+            maxTries: number;
+            /** Format: int32 */
+            tripsNeeded: number;
+            photoId: null | string;
+            result: null | components["schemas"]["PinResultView"];
+        };
+        PinResultRequest: {
+            /** Format: date */
+            date: string;
+            pins: components["schemas"]["GeoPoint"][];
+        };
+        PinResultView: {
+            solved: boolean;
+            /** Format: int32 */
+            tries: number;
+            /** Format: int32 */
+            maxTries: number;
+            marks: components["schemas"]["PinMark"][];
+            share: string;
+            answer: components["schemas"]["PinAnswerView"];
+            stats: components["schemas"]["GameStats"];
         };
         PlaceInfo: {
             /** Format: double */
@@ -1653,6 +1769,103 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SlideResultView"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+        };
+    };
+    GetPinPuzzle: {
+        parameters: {
+            query: {
+                date: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PinPuzzleView"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+        };
+    };
+    CheckPin: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PinCheckRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PinMark"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+        };
+    };
+    PostPinResult: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PinResultRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PinResultView"];
                 };
             };
             /** @description Bad Request */
