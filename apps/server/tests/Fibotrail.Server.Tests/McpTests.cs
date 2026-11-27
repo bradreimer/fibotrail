@@ -253,6 +253,35 @@ public class McpTests
     }
 
     [Fact]
+    public async Task A_trip_reports_its_main_city_and_null_when_no_photo_has_a_city()
+    {
+        var app = await TestApp.StartAsync(collections: Catalog(), mcpToken: Token);
+        await using var _ = app;
+        app.Immich.Assets.AddRange(TripLibrary.AtHome());
+        app.Immich.Assets.AddRange(TripLibrary.Trip(new DateTime(2027, 3, 15, 9, 0, 0), 6, 60));
+        // A trip whose photos have a state and no city: its main place is the state, which is no city.
+        app.Immich.Assets.AddRange(Enumerable.Range(0, 40).Select(index =>
+            TripLibrary.Asset(new DateTime(2027, 6, 1, 9, 0, 0).AddHours(index * 3), 44.4, -110.6, null, "Wyoming", "United States of America")));
+        var browser = await TripLibrary.ScanAndConfirmHomeAsync(app);
+        var trips = await TripLibrary.TripsAsync(app);
+        Assert.Equal(2, trips.Count);
+        foreach (var trip in trips) await AddAsync(browser, trip.Id);
+        var orlando = trips.Single(trip => trip.MainPlace == "Orlando").Id;
+        var wyoming = trips.Single(trip => trip.MainPlace == "Wyoming").Id;
+
+        var listed = (await CallToolAsync(app, "list_trips")).GetProperty("trips").EnumerateArray()
+            .ToDictionary(trip => trip.GetProperty("id").GetInt32(), trip => trip.TryGetProperty("mainCity", out var city) ? city.GetString() : null);
+        var filtered = (await CallToolAsync(app, "list_trips", """{"city":"ORLANDO"}""")).GetProperty("trips").EnumerateArray()
+            .Select(trip => trip.GetProperty("id").GetInt32()).ToArray();
+
+        // An empty field is left out of a result, so a trip with no main city has no mainCity at all.
+        Assert.Equal("Orlando", listed[orlando]);
+        Assert.Null(listed[wyoming]);
+        Assert.Equal([orlando], filtered);
+        Assert.DoesNotContain("Wyoming", (await CallToolAsync(app, "get_trip", $$"""{"id":{{wyoming}}}""")).GetRawText(), StringComparison.Ordinal);
+    }
+
+    [Fact]
     public async Task A_trip_name_and_a_position_never_appear_in_a_result()
     {
         var (app, browser, trip) = await StartWithTripAsync();

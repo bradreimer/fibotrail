@@ -26,6 +26,14 @@ the accessibility checklist are also still unrecorded.
 
 ## Completed
 
+- [#186](https://github.com/bradreimer/fibotrail/issues/186) The MCP server returns each trip's
+  main city, not yet in a release
+  ([ADR-023](adr/ADR-023-the-mcp-server-may-return-a-trips-main-city.md)). `list_trips` and
+  `get_trip` give `mainCity`, the same main place the trip card shows, and leave it out when no
+  photo of the trip has a city. `list_trips` takes a `city` filter that matches the main city only.
+  A new `City` kind is allowed on that one field, and a test fails on a city anywhere else, so no
+  stop name or route reaches a result. The MCP screen adds "When was I last in Orlando?". Checked
+  in tests only, not yet with a real client or the maintainer's library.
 - [#181](https://github.com/bradreimer/fibotrail/issues/181) At the end of Timeline and Slide,
   tapping an answer photo opens it in Immich, in a new tab, not yet in a release. The trip name
   still opens the trip page. The results send each photo's Immich address, built from

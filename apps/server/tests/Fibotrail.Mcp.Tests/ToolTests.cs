@@ -245,11 +245,42 @@ public class TripToolTests
     }
 
     [Fact]
+    public void A_trip_names_its_main_city_and_null_when_no_photo_has_one()
+    {
+        var result = Fixture.Run<TripList>("list_trips", Fixture.Data());
+
+        var cities = result.Trips.ToDictionary(trip => trip.Id, trip => trip.MainCity);
+        Assert.Equal("Tokyo", cities[5]);
+        Assert.Equal("Orlando", cities[3]);
+        Assert.Equal("Orlando", cities[1]);
+        Assert.Null(cities[6]);
+    }
+
+    [Fact]
+    public void A_city_filter_matches_the_main_city_ignoring_case()
+    {
+        var result = Fixture.Run<TripList>("list_trips", Fixture.Data(), """{"city":"orlando"}""");
+
+        Assert.Equal([3, 2, 1], result.Trips.Select(trip => trip.Id).ToArray());
+    }
+
+    [Fact]
+    public void A_city_filter_skips_a_city_the_trip_only_passed_through()
+    {
+        // Trip 3 stops in Kissimmee, and its main city is Orlando.
+        var result = Fixture.Run<TripList>("list_trips", Fixture.Data(), """{"city":"Kissimmee"}""");
+
+        Assert.Empty(result.Trips);
+        Assert.Equal(0, result.Total);
+    }
+
+    [Fact]
     public void One_trip_is_read_by_its_id()
     {
         var trip = Fixture.Run<TripEntry>("get_trip", Fixture.Data(), """{"id":3}""");
 
         Assert.Equal((3, 5), (trip.Id, trip.Days));
+        Assert.Equal("Orlando", trip.MainCity);
         Assert.Equal(["United States of America"], trip.Countries);
         Assert.Equal(["Disneyland Park", "Magic Kingdom"], trip.Parks);
     }

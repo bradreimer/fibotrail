@@ -106,7 +106,7 @@ describe('the MCP screen', () => {
       expect(within(limits).getByText(limit.question)).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'What your AI client sees' })).toBeInTheDocument();
     expect(
-      screen.getByText(/Never photos, coordinates, trip names, or city names/),
+      screen.getByText(/Never photos, coordinates, routes, trip names, or any other city/),
     ).toBeInTheDocument();
   });
 

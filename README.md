@@ -154,11 +154,13 @@ writes to Immich, and it never sends photo data or location data anywhere on its
 is bundled in the image.
 
 The one door is the optional MCP server. It is off until you set `MCP_TOKEN`. A client that you
-connect with that token can ask for counts, dates, distances, and the names of countries,
-continents, collections, and parks. It never gets photos, coordinates, trip names, or city names,
-and it can't change anything. If the client uses a model in the cloud, its answers go to that
-model. To keep them at home, connect a client that uses a model on your own computer. The reasons
-are in [ADR-018](docs/adr/ADR-018-an-mcp-server-answers-questions-with-coarse-read-only-data.md).
+connect with that token can ask for counts, dates, distances, the names of countries,
+continents, collections, and parks, and each trip's main city. It never gets photos, coordinates,
+routes, trip names, or any other city, and it can't change anything. If the client uses a model in
+the cloud, its answers go to that model. To keep them at home, connect a client that uses a model
+on your own computer. The reasons are in
+[ADR-018](docs/adr/ADR-018-an-mcp-server-answers-questions-with-coarse-read-only-data.md) and
+[ADR-023](docs/adr/ADR-023-the-mcp-server-may-return-a-trips-main-city.md).
 
 ## Updating and resetting
 
