@@ -177,9 +177,10 @@ function Privacy() {
         What your AI client sees
       </h2>
       <p>
-        Only counts, dates, distances in kilometers, and the names of countries, continents,
-        collections, and parks. Never photos, coordinates, trip names, or city names. The server
-        only reads: it can't change a trip, and it never calls Immich.
+        Only counts, dates, distances in kilometers, the names of countries, continents,
+        collections, and parks, and each trip’s main city. Never photos, coordinates, routes, trip
+        names, or any other city. The server only reads: it can't change a trip, and it never calls
+        Immich.
       </p>
       <p>
         If your client uses a model in the cloud, those answers go to that model. To keep them at

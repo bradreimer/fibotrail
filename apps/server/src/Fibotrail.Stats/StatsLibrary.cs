@@ -14,6 +14,10 @@ public sealed record NamedStop(string? Name, double Latitude, double Longitude, 
 /// <summary>An added trip, as the stats library reads it.</summary>
 /// <param name="Stops">The stored stops. Photos on the way aren't among them.</param>
 /// <param name="Photos">The positioned away photos of the trip, without photos on the way.</param>
+/// <param name="MainCity">
+/// The trip's main place when it is a city, by the main destination rule. Null when no photo of the
+/// trip has a city, so the main place is a state or a country. See ADR-023.
+/// </param>
 public sealed record StatsTrip(
     int Id,
     string Name,
@@ -25,7 +29,8 @@ public sealed record StatsTrip(
     IReadOnlyList<(double Latitude, double Longitude)> Stops,
     IReadOnlyList<PhotoPosition> Photos,
     IReadOnlyList<NamedStop>? NamedStops = null,
-    IReadOnlyList<string>? MarkedParks = null);
+    IReadOnlyList<string>? MarkedParks = null,
+    string? MainCity = null);
 
 /// <summary>A local day with a positioned away photo in a country, and the latitude of the first such photo.</summary>
 public sealed record CountryDay(DateOnly Day, double Latitude);

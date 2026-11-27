@@ -2,6 +2,9 @@
 
 Tracking issue: [#143](https://github.com/bradreimer/fibotrail/issues/143).
 
+The main city of [ADR-023](../adr/ADR-023-the-mcp-server-may-return-a-trips-main-city.md) is
+tracked by [#186](https://github.com/bradreimer/fibotrail/issues/186).
+
 ## Purpose
 
 This spec defines the MCP server decided in
@@ -113,7 +116,8 @@ a thumbnail, camera data, a trip name or note, an Immich URL, a key, or a user n
 - **Main city.** A trip's `mainCity` is its main place, chosen by the
   [main destination](main-destination.md) rule: the city with the most days with an away photo,
   then the most away photos. It is the same value the trip card shows. When no photo of the trip has
-  a city, the main place is a state or a country, and `mainCity` is `null`.
+  a city, the main place is a state or a country, and the trip has no main city: `mainCity` is
+  left out of the result, as every empty field is.
 
 - Every result field is declared with its kind in the code (`[Coarse(...)]`, or `[Nested]` for a
   field that holds another result). A test walks every tool's result type and fails on a field with
@@ -267,7 +271,8 @@ to the server. Settings has an **Open MCP** button that goes to it.
   name, a coordinate, or a photo ID.
 - A trip with 3 days in Orlando and 1 day with 300 photos in Kissimmee has `mainCity: "Orlando"` in
   `list_trips` and `get_trip`, and "Kissimmee" appears in no result.
-- A trip whose photos have a state but no city has `mainCity: null`.
+- A trip whose photos have a state but no city has no `mainCity`, and the state appears in no
+  result.
 - `list_trips(city: "orlando")` lists the Orlando trip, and not a trip whose main city is elsewhere.
 - A test fails when a `City` field is added to any result but a trip's `mainCity`.
 - `country_summary("sweden")` and `country_summary("Sweden")` return the same result.

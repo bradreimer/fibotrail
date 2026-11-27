@@ -4,6 +4,7 @@ namespace Fibotrail.Mcp;
 /// The kinds of value a tool result may hold. This is the vocabulary of ADR-018: counts, dates,
 /// country, continent, collection and park names, trip IDs, and kilometers. A field of any other
 /// kind doesn't exist, so a result can't hold a coordinate, a photo, or a trip name by accident.
+/// ADR-023 adds one city per trip: its main city.
 /// </summary>
 public enum Coarse
 {
@@ -24,6 +25,12 @@ public enum Coarse
 
     /// <summary>The ID of a collection or a country, such as <c>disney-parks</c> or <c>752</c>.</summary>
     Identifier,
+
+    /// <summary>
+    /// A trip's main city, by the main destination rule. Allowed only on <c>TripEntry.MainCity</c>, so
+    /// no other city, and no list of cities that traces a route, can reach a result. See ADR-023.
+    /// </summary>
+    City,
 
     /// <summary>The ID of an added trip.</summary>
     TripId,

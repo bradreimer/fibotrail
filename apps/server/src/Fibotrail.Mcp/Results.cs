@@ -74,6 +74,7 @@ public sealed record CountrySummary(
     [property: Coarse(Coarse.Date)] DateOnly LastVisit);
 
 /// <summary>An added trip. It has an ID and no name, because a name is text you typed.</summary>
+/// <param name="MainCity">The trip's main city, or null when no photo has a city. The only city in any result.</param>
 public sealed record TripEntry(
     [property: Coarse(Coarse.TripId)] int Id,
     [property: Coarse(Coarse.Date)] DateOnly StartDate,
@@ -81,6 +82,7 @@ public sealed record TripEntry(
     [property: Coarse(Coarse.Count)] int Days,
     [property: Coarse(Coarse.DistanceKm)] double DistanceKm,
     [property: Coarse(Coarse.DistanceKm)] double FarthestFromHomeKm,
+    [property: Coarse(Coarse.City)] string? MainCity,
     [property: Coarse(Coarse.Country)] IReadOnlyList<string> Countries,
     [property: Coarse(Coarse.Place)] IReadOnlyList<string> Collections,
     [property: Coarse(Coarse.Place)] IReadOnlyList<string> Parks);

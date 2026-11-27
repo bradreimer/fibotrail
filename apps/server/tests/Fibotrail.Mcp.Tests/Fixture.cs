@@ -61,31 +61,41 @@ internal static class Fixture
     public static StatsTrip Trip(int id, string name, DateOnly start, int days, (double Latitude, double Longitude) place, params int[] photoDayOffsets) =>
         Trip(id, name, start, days, [.. photoDayOffsets.Select(offset => (place, offset))]);
 
-    public static StatsTrip Trip(int id, string name, DateOnly start, int days, IEnumerable<((double Latitude, double Longitude) Place, int Offset)> photos, IReadOnlyList<string>? marked = null, double distanceKm = 1000)
+    public static StatsTrip Trip(int id, string name, DateOnly start, int days, IEnumerable<((double Latitude, double Longitude) Place, int Offset)> photos, IReadOnlyList<string>? marked = null, double distanceKm = 1000, string? mainCity = null, IReadOnlyList<NamedStop>? namedStops = null)
     {
         var list = photos.ToList();
         return new StatsTrip(
             id, name, start, start.AddDays(days - 1), days, distanceKm, distanceKm / 2,
             [.. list.Select(photo => photo.Place).Distinct()],
             [.. list.Select(photo => new PhotoPosition(start.AddDays(photo.Offset), photo.Place.Latitude, photo.Place.Longitude))],
-            MarkedParks: marked);
+            NamedStops: namedStops,
+            MarkedParks: marked,
+            MainCity: mainCity);
     }
 
-    /// <summary>The trips of the made-up library. Disney trips 1, 2, 3 have 4, 5, and 5 days and 14 park days in all.</summary>
+    /// <summary>
+    /// The trips of the made-up library. Disney trips 1, 2, 3 have 4, 5, and 5 days and 14 park days in all.
+    /// Trips 1, 2, and 3 have the main city Orlando, trip 4 Stockholm, and trip 5 Tokyo. Trip 6 has no main
+    /// city, because no photo has one. Trip 3 stops in Kissimmee and Anaheim, which are no trip's main city.
+    /// </summary>
     public static List<StatsTrip> Trips()
     {
         var mk = InMagicKingdom;
         var dl = InDisneyland;
         return
         [
-            Trip(1, "Spring break", new DateOnly(2019, 3, 1), 4, mk, 0, 1, 2, 3),
-            Trip(2, "Summer", new DateOnly(2021, 6, 10), 5, mk, 0, 1, 2, 3, 4),
-            Trip(3, "Mom's 70th", new DateOnly(2023, 11, 1), 5, [(mk, 0), (mk, 1), (mk, 2), (dl, 3), (dl, 4)]),
-            Trip(4, "Midsummer", new DateOnly(2022, 7, 1), 7, (59, 15), 0, 1, 2, 3, 4, 5, 6),
-            Trip(5, "Cherry blossoms", new DateOnly(2024, 4, 1), 6, (35, 139), 0, 1, 2, 3, 4, 5),
+            Trip(1, "Spring break", new DateOnly(2019, 3, 1), 4, Days(mk, 0, 1, 2, 3), mainCity: "Orlando"),
+            Trip(2, "Summer", new DateOnly(2021, 6, 10), 5, Days(mk, 0, 1, 2, 3, 4), mainCity: "Orlando"),
+            Trip(3, "Mom's 70th", new DateOnly(2023, 11, 1), 5, [(mk, 0), (mk, 1), (mk, 2), (dl, 3), (dl, 4)], mainCity: "Orlando",
+                namedStops: [new("Kissimmee", mk.Latitude, mk.Longitude, 3), new("Anaheim", dl.Latitude, dl.Longitude, 2)]),
+            Trip(4, "Midsummer", new DateOnly(2022, 7, 1), 7, Days((59, 15), 0, 1, 2, 3, 4, 5, 6), mainCity: "Stockholm"),
+            Trip(5, "Cherry blossoms", new DateOnly(2024, 4, 1), 6, Days((35, 139), 0, 1, 2, 3, 4, 5), mainCity: "Tokyo"),
             Trip(6, "Universal", new DateOnly(2020, 1, 10), 3, InUniversal, 0, 1, 2),
         ];
     }
+
+    private static IEnumerable<((double Latitude, double Longitude) Place, int Offset)> Days((double Latitude, double Longitude) place, params int[] offsets) =>
+        offsets.Select(offset => (place, offset));
 
     public static StatsLibrary Library(IEnumerable<StatsTrip>? trips = null)
     {
