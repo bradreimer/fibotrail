@@ -468,6 +468,54 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/games/fetch/puzzle": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["GetFetchPuzzle"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/games/fetch/check": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["CheckFetchRun"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/games/fetch/results": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["PostFetchResult"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -514,6 +562,124 @@ export interface components {
             action: components["schemas"]["DecisionAction"];
             name?: null | string;
             coverPhotoId?: null | string;
+        };
+        FetchBox: {
+            /** Format: int32 */
+            left: number;
+            /** Format: int32 */
+            top: number;
+            /** Format: int32 */
+            right: number;
+            /** Format: int32 */
+            bottom: number;
+        };
+        FetchCheckRequest: {
+            /** Format: date */
+            date: string;
+            taps: number[];
+        };
+        FetchCourse: {
+            physics: components["schemas"]["FetchPhysics"];
+            gates: components["schemas"]["FetchGate"][];
+            treats: components["schemas"]["FetchTreat"][];
+            /** Format: int32 */
+            finishX: number;
+        };
+        /** @enum {unknown} */
+        FetchEnd: "finish" | "gate" | "ceiling" | "ground";
+        FetchGate: {
+            /** Format: int32 */
+            x: number;
+            /** Format: int32 */
+            gapTop: number;
+            /** Format: int32 */
+            gapBottom: number;
+            /** Format: int32 */
+            day: number;
+        };
+        FetchPhysics: {
+            /** Format: int32 */
+            gravity: number;
+            /** Format: int32 */
+            flap: number;
+            /** Format: int32 */
+            speed: number;
+            /** Format: int32 */
+            worldWidth: number;
+            /** Format: int32 */
+            worldHeight: number;
+            /** Format: int32 */
+            ground: number;
+            /** Format: int32 */
+            dogX: number;
+            /** Format: int32 */
+            dogSize: number;
+            body: components["schemas"]["FetchBox"];
+            /** Format: int32 */
+            startY: number;
+            /** Format: int32 */
+            gateWidth: number;
+            /** Format: int32 */
+            gapHeight: number;
+            /** Format: int32 */
+            treatRadius: number;
+        };
+        FetchPuzzleView: {
+            /** Format: int32 */
+            number: number;
+            /** Format: date */
+            date: string;
+            /** Format: int32 */
+            maxTries: number;
+            /** Format: int32 */
+            tripsNeeded: number;
+            course: null | components["schemas"]["FetchCourse"];
+            result: null | components["schemas"]["FetchResultView"];
+        };
+        FetchResultRequest: {
+            /** Format: date */
+            date: string;
+            runs: number[][];
+        };
+        FetchResultView: {
+            solved: boolean;
+            /** Format: int32 */
+            tries: number;
+            /** Format: int32 */
+            maxTries: number;
+            runs: components["schemas"]["FetchRunGrade"][];
+            /** Format: int32 */
+            treats: number;
+            caughtPhotoIds: string[];
+            share: string;
+            trip: components["schemas"]["FetchTripView"];
+            stats: components["schemas"]["GameStats"];
+        };
+        FetchRunGrade: {
+            end: components["schemas"]["FetchEnd"];
+            /** Format: int32 */
+            tick: number;
+            /** Format: int32 */
+            gatesPassed: number;
+            caught: number[];
+            finished?: boolean;
+        };
+        FetchTreat: {
+            /** Format: int32 */
+            x: number;
+            /** Format: int32 */
+            y: number;
+            photoId: string;
+        };
+        FetchTripView: {
+            /** Format: int32 */
+            tripId: number;
+            tripName: string;
+            /** Format: date */
+            startDate: string;
+            /** Format: date */
+            endDate: string;
+            place: null | string;
         };
         GameEntry: {
             id: string;
@@ -1866,6 +2032,103 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PinResultView"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+        };
+    };
+    GetFetchPuzzle: {
+        parameters: {
+            query: {
+                date: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FetchPuzzleView"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+        };
+    };
+    CheckFetchRun: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FetchCheckRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FetchRunGrade"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+        };
+    };
+    PostFetchResult: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FetchResultRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FetchResultView"];
                 };
             };
             /** @description Bad Request */

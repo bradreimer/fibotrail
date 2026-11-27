@@ -43,14 +43,14 @@ public class GamesTests
     }
 
     [Fact]
-    public async Task The_games_list_has_Timeline_Slide_and_Pin_with_empty_stats()
+    public async Task The_games_list_has_every_game_with_empty_stats()
     {
         var (app, browser) = await StartAsync();
         await using var _ = app;
 
         var games = await browser.GetJsonAsync($"/api/games?date={Today}");
 
-        Assert.Equal(["timeline", "slide", "pin"], games.EnumerateArray().Select(game => game.GetProperty("id").GetString()));
+        Assert.Equal(["timeline", "slide", "pin", "fetch"], games.EnumerateArray().Select(game => game.GetProperty("id").GetString()));
         var timeline = games[0];
         Assert.False(timeline.GetProperty("playedToday").GetBoolean());
         Assert.Equal(0, timeline.GetProperty("stats").GetProperty("played").GetInt32());

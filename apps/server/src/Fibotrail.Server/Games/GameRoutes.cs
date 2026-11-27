@@ -1,5 +1,6 @@
 using Fibotrail.Games;
 using Fibotrail.Server.Data;
+using Fibotrail.Server.Games.Fetch;
 using Fibotrail.Server.Games.Pin;
 using Fibotrail.Server.Games.Slide;
 using Fibotrail.Server.Games.Timeline;
@@ -29,6 +30,7 @@ public static class GameRegistry
         TimelineRoutes.Definition,
         SlideRoutes.Definition,
         PinRoutes.Definition,
+        FetchRoutes.Definition,
     ];
 }
 

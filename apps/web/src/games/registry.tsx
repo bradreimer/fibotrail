@@ -70,6 +70,17 @@ export const GAMES: readonly GameModule[] = [
     ),
     Component: lazy(() => import('./pin/PinGame')),
   },
+  {
+    id: 'fetch',
+    icon: (
+      <Icon>
+        <path d="M3 17c3-6 6-9 9-9s5 2 9-3" />
+        <circle cx="7" cy="7" r="2" />
+        <circle cx="17" cy="15" r="2" />
+      </Icon>
+    ),
+    Component: lazy(() => import('./fetch/FetchGame')),
+  },
 ];
 
 export function gameFor(id: string | undefined): GameModule | undefined {
