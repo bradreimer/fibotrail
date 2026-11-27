@@ -701,6 +701,7 @@ export interface components {
             /** Format: date */
             endDate: string;
             place: null | string;
+            immichUrl: null | string;
         };
         SlidePuzzleView: {
             /** Format: int32 */
@@ -751,6 +752,7 @@ export interface components {
             tripName: string;
             /** Format: date */
             date: string;
+            immichUrl: null | string;
         };
         TimelineCardView: {
             photoId: string;

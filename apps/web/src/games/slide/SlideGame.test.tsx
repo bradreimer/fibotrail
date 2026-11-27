@@ -31,6 +31,7 @@ const result = {
     startDate: '2025-07-03',
     endDate: '2025-07-09',
     place: 'Banff, Alberta',
+    immichUrl: 'https://photos.example.com/photos/photo-1',
   },
   stats,
 };
@@ -198,9 +199,30 @@ describe('the Slide game', () => {
       '/trips/12',
     );
     expect(within(figure).getByText('Jul 3–9, 2025 · Banff, Alberta')).toBeInTheDocument();
+    const immich = within(figure).getByRole('link', {
+      name: 'Open the photo from Banff, July 2025 in Immich',
+    });
+    expect(immich).toHaveAttribute('href', 'https://photos.example.com/photos/photo-1');
+    expect(immich).toHaveAttribute('target', '_blank');
+    expect(screen.getByText('Tap the photo to open it in Immich.')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Share' })).toBeInTheDocument();
     expect(screen.queryByText('Tries to win')).not.toBeInTheDocument();
     await expectNoAccessibilityProblems(container);
+  });
+
+  it('shows the photo without an Immich link when there is no Immich address', async () => {
+    fakeServer({
+      'GET /api/games/slide/puzzle': puzzle({
+        ...result,
+        answer: { ...result.answer, immichUrl: null },
+      }),
+    });
+    renderGame();
+
+    const figure = (await screen.findByRole('figure')) as HTMLElement;
+    expect(within(figure).getByRole('img')).toHaveAttribute('src', '/api/photos/photo-1/preview');
+    expect(within(figure).queryByRole('link', { name: /in Immich/ })).not.toBeInTheDocument();
+    expect(screen.queryByText('Tap the photo to open it in Immich.')).not.toBeInTheDocument();
   });
 
   it('says a trip with photos is needed', async () => {

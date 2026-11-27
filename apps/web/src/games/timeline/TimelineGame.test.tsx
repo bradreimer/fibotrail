@@ -59,6 +59,7 @@ const result = {
     tripId: index + 10,
     tripName: names[id],
     date: `202${index}-06-01`,
+    immichUrl: `https://photos.example.com/photos/${id}`,
   })),
   stats: { played: 1, winPercent: 100, currentStreak: 1, bestStreak: 1, tries: [0, 1, 0, 0] },
 };
@@ -212,10 +213,41 @@ describe('the Timeline game', () => {
     expect(await screen.findByText('Solved in 2 tries.')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Check' })).not.toBeInTheDocument();
     expect(screen.getByLabelText('Try 1: 3 right, 2 close, 0 wrong')).toBeInTheDocument();
-    const orlando = screen.getByRole('link', { name: /Orlando, March 2024/ });
+    const orlando = screen.getByRole('link', { name: /^Orlando, March 2024/ });
     expect(orlando).toHaveAttribute('href', '/trips/10');
     expect(orlando).toHaveTextContent('Jun 1, 2020');
-    expect(screen.getByRole('link', { name: /Tokyo/ })).toHaveAttribute('href', '/trips/14');
+    expect(screen.getByRole('link', { name: /^Tokyo/ })).toHaveAttribute('href', '/trips/14');
+    await expectNoAccessibilityProblems(container);
+  });
+
+  it('opens each answer photo in Immich, in a new tab', async () => {
+    fakeServer({ 'GET /api/games/timeline/puzzle': puzzle(result) });
+    const { container } = renderGame();
+
+    const photo = await screen.findByRole('link', {
+      name: 'Open the photo from Orlando, March 2024 in Immich',
+    });
+    expect(photo).toHaveAttribute('href', 'https://photos.example.com/photos/a');
+    expect(photo).toHaveAttribute('target', '_blank');
+    expect(photo).toHaveAttribute('rel', 'noopener noreferrer');
+    expect(screen.getByText('Tap a photo to open it in Immich.')).toBeInTheDocument();
+    await expectNoAccessibilityProblems(container);
+  });
+
+  it('opens the trip from the photo when there is no Immich address', async () => {
+    fakeServer({
+      'GET /api/games/timeline/puzzle': puzzle({
+        ...result,
+        answer: result.answer.map((card) => ({ ...card, immichUrl: null })),
+      }),
+    });
+    const { container } = renderGame();
+
+    expect(await screen.findByText('Solved in 2 tries.')).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: /in Immich/ })).not.toBeInTheDocument();
+    expect(screen.queryByText('Tap a photo to open it in Immich.')).not.toBeInTheDocument();
+    const photoLink = container.querySelector('.timeline-answer__photo-link');
+    expect(photoLink).toHaveAttribute('href', '/trips/10');
     await expectNoAccessibilityProblems(container);
   });
 

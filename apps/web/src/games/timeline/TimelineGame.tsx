@@ -17,6 +17,7 @@ type Mark = components['schemas']['Mark'];
 type Result = components['schemas']['TimelineResultView'];
 type Puzzle = components['schemas']['TimelinePuzzleView'];
 type Twist = components['schemas']['TimelineTwistView'];
+type AnswerCard = components['schemas']['TimelineAnswerCard'];
 
 const SQUARE: Record<Mark, string> = {
   right: '🟩',
@@ -223,16 +224,14 @@ function TimelineResult({
           : 'Not this time. Here is the order you took them.'}
       </p>
       <MarkGrid rows={result.rows} countOnly={twist.id === 'countOnly'} />
+      {result.answer.some((card) => card.immichUrl) && (
+        <p className="games-page__lead">Tap a photo to open it in Immich.</p>
+      )}
       <ol className="timeline__answer">
         {result.answer.map((card) => (
-          <li key={card.photoId}>
-            <Link className="timeline-answer" to={`/trips/${card.tripId}`}>
-              <img
-                className="timeline-answer__photo"
-                src={`/api/photos/${card.photoId}/thumbnail`}
-                alt=""
-                loading="lazy"
-              />
+          <li key={card.photoId} className="timeline-answer">
+            <AnswerPhoto card={card} />
+            <Link className="timeline-answer__trip" to={`/trips/${card.tripId}`}>
               <span className="timeline-answer__name">{card.tripName}</span>
               <span className="timeline-answer__date">{formatDateRange(card.date, card.date)}</span>
             </Link>
@@ -249,5 +248,43 @@ function TimelineResult({
       <GameStatsPanel stats={result.stats} today={result.solved ? result.tries : undefined} />
       <p className="games-page__lead">A new puzzle comes tomorrow.</p>
     </section>
+  );
+}
+
+/**
+ * An answer card's photo. It opens the photo in Immich, in a new tab. With no Immich address, it
+ * opens the trip, as the name beside it does, so it's hidden from assistive tech as a repeat link.
+ */
+function AnswerPhoto({ card }: { card: AnswerCard }) {
+  const photo = (
+    <img
+      className="timeline-answer__photo"
+      src={`/api/photos/${card.photoId}/thumbnail`}
+      alt=""
+      loading="lazy"
+    />
+  );
+  if (!card.immichUrl) {
+    return (
+      <Link
+        className="timeline-answer__photo-link"
+        to={`/trips/${card.tripId}`}
+        tabIndex={-1}
+        aria-hidden="true"
+      >
+        {photo}
+      </Link>
+    );
+  }
+  return (
+    <a
+      className="timeline-answer__photo-link"
+      href={card.immichUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label={`Open the photo from ${card.tripName} in Immich`}
+    >
+      {photo}
+    </a>
   );
 }

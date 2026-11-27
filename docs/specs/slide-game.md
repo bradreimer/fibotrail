@@ -89,6 +89,9 @@ into place each day, so that I have a calm puzzle that ends with a look back at 
 - The whole photo shows, with a caption: the trip name, which links to the trip page, then its date
   range and its main place, such as "Jul 3–9, 2025 · Banff, Alberta". A trip with no known place
   shows the dates alone.
+- Tapping the photo opens it in Immich, in a new tab, at the `IMMICH_EXTERNAL_URL` address, and a
+  line says "Tap the photo to open it in Immich." With that address empty, the photo isn't a link
+  ([#181](https://github.com/bradreimer/fibotrail/issues/181)).
 - "Solved in 42 moves.", Share, and the stats show too. Slide is always one try, so the stats show
   no "Tries to win" bars.
 
@@ -118,6 +121,7 @@ into place each day, so that I have a calm puzzle that ends with a look back at 
 - A move list that doesn't end solved is refused with 400, and nothing is stored.
 - A second result for the same day keeps the first.
 - At the end, the whole photo shows with the trip name, dates, and place, and links to the trip.
+- At the end, tapping the photo opens it in Immich, when `IMMICH_EXTERNAL_URL` is set.
 
 ## Open questions
 

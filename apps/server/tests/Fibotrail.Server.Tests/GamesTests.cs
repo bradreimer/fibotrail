@@ -166,6 +166,7 @@ public class GamesTests
             var trip = Assert.Single(trips, trip => trip.Id == card.GetProperty("tripId").GetInt32());
             Assert.Equal(trip.Name, card.GetProperty("tripName").GetString());
             Assert.Contains(trip.Photos, photo => photo.PhotoId == card.GetProperty("photoId").GetString());
+            Assert.Equal($"https://photos.example.com/photos/{card.GetProperty("photoId").GetString()}", card.GetProperty("immichUrl").GetString());
         }
         Assert.Equal((1, 100, 1), (result.GetProperty("stats").GetProperty("played").GetInt32(), result.GetProperty("stats").GetProperty("winPercent").GetInt32(), result.GetProperty("stats").GetProperty("currentStreak").GetInt32()));
 
@@ -286,6 +287,7 @@ public class GamesTests
         Assert.Equal(trip.Name, answer.GetProperty("tripName").GetString());
         Assert.Equal(puzzle.GetProperty("photoId").GetString(), answer.GetProperty("photoId").GetString());
         Assert.False(string.IsNullOrEmpty(answer.GetProperty("startDate").GetString()));
+        Assert.Equal($"https://photos.example.com/photos/{answer.GetProperty("photoId").GetString()}", answer.GetProperty("immichUrl").GetString());
         Assert.Equal(1, result.GetProperty("stats").GetProperty("played").GetInt32());
 
         // A second send keeps the first.
