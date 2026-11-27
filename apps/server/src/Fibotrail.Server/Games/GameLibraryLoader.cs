@@ -25,7 +25,7 @@ public static class GameLibraryLoader
         var photos = await (from tripPhoto in db.TripPhotos.AsNoTracking()
                             join photo in db.Photos.AsNoTracking() on tripPhoto.PhotoId equals photo.Id
                             where ids.Contains(tripPhoto.TripId) && !photo.IsVideo && !onTheWay.Contains(photo.Id)
-                            select new { tripPhoto.TripId, photo.Id, photo.LocalTime })
+                            select new { tripPhoto.TripId, photo.Id, photo.LocalTime, photo.Latitude, photo.Longitude })
             .ToListAsync(cancellationToken);
         var byTrip = photos.ToLookup(photo => photo.TripId);
 
@@ -35,6 +35,6 @@ public static class GameLibraryLoader
             trip.StartDate,
             trip.EndDate,
             trip.MainPlace,
-            [.. byTrip[trip.Id].Select(photo => new GamePhoto(photo.Id, photo.LocalTime))]))]);
+            [.. byTrip[trip.Id].Select(photo => new GamePhoto(photo.Id, photo.LocalTime, photo.Latitude, photo.Longitude))]))]);
     }
 }

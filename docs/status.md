@@ -26,6 +26,14 @@ the accessibility checklist are also still unrecorded.
 
 ## Completed
 
+- [#183](https://github.com/bradreimer/fibotrail/issues/183) A **Pin** game
+  ([spec](specs/pin-game.md)), not yet in a release. One trip photo a day with a world map: tap
+  where you took it. Each miss shows a band (50, 500, and 2,000 km edges), an arrow to one of 8
+  compass points, and the distance; a pin within 50 km solves it, in up to 4 tries. The game
+  library gains each photo's latitude and longitude, and only located photos are picked. The
+  server grades every pin and stores the pins as the marks, so no new table is needed. A country
+  and region list places a pin without the map. Checked in tests only, not yet in a browser or on
+  a phone.
 - [#179](https://github.com/bradreimer/fibotrail/issues/179) A **Slide** game
   ([spec](specs/slide-game.md)), not yet in a release. One trip photo a day, cut into a 3 by 3
   grid with the bottom-right tile removed and the other 8 shuffled into a start that can always be
@@ -436,9 +444,6 @@ Nothing is in progress.
 
 The plan is in [roadmap.md](roadmap.md). Specs are in [specs/](specs/README.md).
 
-- Build the **Pin** game ([#183](https://github.com/bradreimer/fibotrail/issues/183),
-  [spec](specs/pin-game.md)): tap the map where you took one of your photos, in 4 tries, with a
-  distance band and an arrow after each miss. Written as a spec only; nothing is built yet.
 - Record what hasn't been checked on devices: the Map, the top bar buttons, the sidebar, and **Hide**
   on a phone and an iPad, and the rest of the ADR-007 table for
   [#6](https://github.com/bradreimer/fibotrail/issues/6),

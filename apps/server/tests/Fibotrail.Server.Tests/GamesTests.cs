@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Fibotrail.Server.Tests;
 
-/// <summary>The Games tab and the Timeline game. See docs/specs/games.md and docs/specs/timeline-game.md.</summary>
+/// <summary>The Games tab and its games. See docs/specs/games.md and each game's spec.</summary>
 public class GamesTests
 {
     /// <summary>A Friday. Six cards needs 6 added trips, and these tests add 5, so it plays as Classic.</summary>
@@ -43,14 +43,14 @@ public class GamesTests
     }
 
     [Fact]
-    public async Task The_games_list_has_Timeline_and_Slide_with_empty_stats()
+    public async Task The_games_list_has_Timeline_Slide_and_Pin_with_empty_stats()
     {
         var (app, browser) = await StartAsync();
         await using var _ = app;
 
         var games = await browser.GetJsonAsync($"/api/games?date={Today}");
 
-        Assert.Equal(["timeline", "slide"], games.EnumerateArray().Select(game => game.GetProperty("id").GetString()));
+        Assert.Equal(["timeline", "slide", "pin"], games.EnumerateArray().Select(game => game.GetProperty("id").GetString()));
         var timeline = games[0];
         Assert.False(timeline.GetProperty("playedToday").GetBoolean());
         Assert.Equal(0, timeline.GetProperty("stats").GetProperty("played").GetInt32());
@@ -312,5 +312,123 @@ public class GamesTests
         Assert.Equal(HttpStatusCode.BadRequest, (await browser.SendJsonAsync(HttpMethod.Post, "/api/games/slide/results", new { date = Today, moves = Array.Empty<int>() })).StatusCode);
         Assert.Equal(HttpStatusCode.BadRequest, (await browser.SendJsonAsync(HttpMethod.Post, "/api/games/slide/results", new { date = "2026-11-25", moves })).StatusCode);
         Assert.Equal(0, await app.WithDbAsync(db => db.GameResults.CountAsync()));
+    }
+
+    private static async Task<(double Latitude, double Longitude)> LocationAsync(TestApp app, JsonElement puzzle)
+    {
+        var id = puzzle.GetProperty("photoId").GetString();
+        var photo = await app.WithDbAsync(db => db.Photos.AsNoTracking().SingleAsync(photo => photo.Id == id));
+        return (photo.Latitude!.Value, photo.Longitude!.Value);
+    }
+
+    [Fact]
+    public async Task Pin_needs_one_added_trip_with_a_located_photo()
+    {
+        var (app, browser) = await StartAsync(added: 0);
+        await using var _ = app;
+
+        var puzzle = await browser.GetJsonAsync($"/api/games/pin/puzzle?date={Today}");
+
+        Assert.Equal(1, puzzle.GetProperty("tripsNeeded").GetInt32());
+        Assert.Equal(JsonValueKind.Null, puzzle.GetProperty("photoId").ValueKind);
+    }
+
+    [Fact]
+    public async Task The_pin_puzzle_sends_a_photo_with_no_location_or_trip_name()
+    {
+        var (app, browser) = await StartAsync();
+        await using var _ = app;
+
+        var puzzle = await browser.GetJsonAsync($"/api/games/pin/puzzle?date={Today}");
+        var again = await browser.GetJsonAsync($"/api/games/pin/puzzle?date={Today}");
+
+        Assert.Equal(4, puzzle.GetProperty("maxTries").GetInt32());
+        var trips = await TripLibrary.TripsAsync(app);
+        Assert.Contains(trips.Take(5), trip => trip.Photos.Any(photo => photo.PhotoId == puzzle.GetProperty("photoId").GetString()));
+        var raw = puzzle.GetRawText();
+        Assert.All(trips.Select(trip => trip.Name), name => Assert.DoesNotContain(name, raw, StringComparison.Ordinal));
+        Assert.DoesNotContain("latitude", raw, StringComparison.OrdinalIgnoreCase);
+        Assert.Equal(raw, again.GetRawText());
+    }
+
+    [Fact]
+    public async Task A_pin_check_grades_one_pin_without_storing_it()
+    {
+        var (app, browser) = await StartAsync();
+        await using var _ = app;
+        var (latitude, longitude) = await LocationAsync(app, await browser.GetJsonAsync($"/api/games/pin/puzzle?date={Today}"));
+
+        // 10 degrees of latitude south is about 1,112 km, so the answer is Orange and to the north.
+        var response = await browser.SendJsonAsync(HttpMethod.Post, "/api/games/pin/check", new { date = Today, pin = new { latitude = latitude - 10, longitude } });
+        var mark = JsonDocument.Parse(await response.Content.ReadAsStringAsync()).RootElement;
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal("orange", mark.GetProperty("band").GetString());
+        Assert.Equal("n", mark.GetProperty("direction").GetString());
+        Assert.Equal(1200, mark.GetProperty("distanceKm").GetInt32());
+        Assert.Equal(0, await app.WithDbAsync(db => db.GameResults.CountAsync()));
+        Assert.Equal(HttpStatusCode.BadRequest, (await browser.SendJsonAsync(HttpMethod.Post, "/api/games/pin/check", new { date = Today, pin = new { latitude = 95, longitude } })).StatusCode);
+    }
+
+    [Fact]
+    public async Task Solving_the_pin_puzzle_stores_the_pins_once_and_shows_the_trip()
+    {
+        var (app, browser) = await StartAsync();
+        await using var _ = app;
+        var puzzle = await browser.GetJsonAsync($"/api/games/pin/puzzle?date={Today}");
+        var (latitude, longitude) = await LocationAsync(app, puzzle);
+        object[] pins = [new { latitude = latitude - 30, longitude }, new { latitude = latitude + 0.1, longitude }];
+
+        var response = await browser.SendJsonAsync(HttpMethod.Post, "/api/games/pin/results", new { date = Today, pins });
+        var result = JsonDocument.Parse(await response.Content.ReadAsStringAsync()).RootElement;
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.True(result.GetProperty("solved").GetBoolean());
+        Assert.Equal(2, result.GetProperty("tries").GetInt32());
+        Assert.Equal(["red", "green"], result.GetProperty("marks").EnumerateArray().Select(mark => mark.GetProperty("band").GetString()));
+        Assert.Equal("Fibotrail Pin #2 2/4\n🟥⬆️\n🟩", result.GetProperty("share").GetString());
+        var answer = result.GetProperty("answer");
+        var trip = Assert.Single(await TripLibrary.TripsAsync(app), trip => trip.Id == answer.GetProperty("tripId").GetInt32());
+        Assert.Equal(trip.Name, answer.GetProperty("tripName").GetString());
+        Assert.Equal(latitude, answer.GetProperty("latitude").GetDouble(), 6);
+        Assert.Equal(1, result.GetProperty("stats").GetProperty("played").GetInt32());
+
+        // A second send keeps the first.
+        object[] other = [new { latitude, longitude }];
+        var second = await browser.SendJsonAsync(HttpMethod.Post, "/api/games/pin/results", new { date = Today, pins = other });
+        Assert.Equal(2, JsonDocument.Parse(await second.Content.ReadAsStringAsync()).RootElement.GetProperty("tries").GetInt32());
+        var stored = await app.WithDbAsync(db => db.GameResults.SingleAsync());
+        Assert.Equal(("pin", 2, 4), (stored.Game, stored.Tries, stored.MaxTries));
+
+        var again = await browser.GetJsonAsync($"/api/games/pin/puzzle?date={Today}");
+        Assert.Equal(2, again.GetProperty("result").GetProperty("marks").GetArrayLength());
+        var games = await browser.GetJsonAsync($"/api/games?date={Today}");
+        Assert.True(games[2].GetProperty("solvedToday").GetBoolean());
+    }
+
+    [Fact]
+    public async Task Pins_that_do_not_end_the_pin_game_are_refused()
+    {
+        var (app, browser) = await StartAsync();
+        await using var _ = app;
+        var (latitude, longitude) = await LocationAsync(app, await browser.GetJsonAsync($"/api/games/pin/puzzle?date={Today}"));
+        var far = new { latitude = latitude - 30, longitude };
+        var right = new { latitude, longitude };
+
+        async Task<HttpStatusCode> SendAsync(object[] pins, string date = Today) =>
+            (await browser.SendJsonAsync(HttpMethod.Post, "/api/games/pin/results", new { date, pins })).StatusCode;
+
+        Assert.Equal(HttpStatusCode.BadRequest, await SendAsync([far]));
+        Assert.Equal(HttpStatusCode.BadRequest, await SendAsync([]));
+        Assert.Equal(HttpStatusCode.BadRequest, await SendAsync([right, far]));
+        Assert.Equal(HttpStatusCode.BadRequest, await SendAsync([far, far, far, far, far]));
+        Assert.Equal(HttpStatusCode.BadRequest, await SendAsync([new { latitude = 0, longitude = 200 }, right]));
+        Assert.Equal(HttpStatusCode.BadRequest, await SendAsync([right], "2026-11-25"));
+        Assert.Equal(0, await app.WithDbAsync(db => db.GameResults.CountAsync()));
+
+        // Four misses end the game, unsolved.
+        Assert.Equal(HttpStatusCode.OK, await SendAsync([far, far, far, far]));
+        var stored = await app.WithDbAsync(db => db.GameResults.SingleAsync());
+        Assert.False(stored.Solved);
     }
 }

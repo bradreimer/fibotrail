@@ -239,3 +239,25 @@ button.map-marker::after {
 .life-map__note {
   margin: 0;
 }
+
+/* The Pin game's pins: the one you're placing, earlier tries, and the answer. */
+.map-marker--guess,
+.map-marker--past,
+.map-marker--answer {
+  width: var(--fibo-space-5);
+  height: var(--fibo-space-5);
+  cursor: default;
+}
+
+.map-marker--guess {
+  background: var(--fibo-coral);
+}
+
+.map-marker--past {
+  background: var(--fibo-coral);
+  opacity: 0.45;
+}
+
+.map-marker--answer {
+  background: var(--fibo-meadow);
+}

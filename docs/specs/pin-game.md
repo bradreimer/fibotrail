@@ -63,11 +63,14 @@ so that I remember where my trips went and can share how close I got.
 - While you play, the screen shows no trip name, date, place, or country name.
 - The map pans and zooms with a pinch on a touch screen, and with drag and scroll on a computer, as
   on the Map screen.
-- A tap places a pin. A second tap moves it. **Check** sends the pin. A tap that moves more than
-  8 px is a pan, and places no pin.
+- A tap places a pin. A second tap moves it. **Check** sends the pin. A press that moves more than
+  8 px is a pan, and places no pin. While you play, the map stays where you left it; it doesn't
+  zoom to a new pin.
 - You have **4 tries**. Earlier pins stay on the map, dimmed, each with its mark.
-- **Keyboard and VoiceOver.** The map has a text alternative: a country picker, then a region picker
-  for the country. Choosing a region places the pin at its center. Check is a button.
+- **Keyboard and VoiceOver.** Under the map, **Pick a place from a list** opens a country picker,
+  then, for Canada and the USA, a region picker. Choosing one places the pin at the center of the
+  bounding box of its largest piece of land. Check is a button. The places come from the same
+  outlines as the map, so no other host is asked.
 
 ### Marks
 
@@ -84,8 +87,8 @@ the answer.
 - A miss also shows an arrow: the direction from the pin to the answer, as the initial bearing
   rounded to one of 8 compass points (↑ ↗ → ↘ ↓ ↙ ← ↖). The arrow is part of the mark, so it never
   shows by color alone.
-- A miss shows the distance under the mark, rounded to 10 km below 1,000 km and to 100 km above,
-  such as "310 km" or "2,400 km". The distance shows on screen only. It isn't in the share text.
+- A miss shows the distance under the mark, rounded up to 10 km below 1,000 km and to 100 km from
+  there, such as "310 km" or "2,400 km". Rounding up keeps a 51 km miss from showing "50 km". The distance shows on screen only. It isn't in the share text.
 - VoiceOver reads a mark as words, such as "Close, 310 kilometers, go east".
 
 ### The end
@@ -102,13 +105,17 @@ the answer.
 - `GET /api/games/pin/puzzle?date=YYYY-MM-DD` returns the puzzle number, the photo ID, the most
   tries, and, when the day is played, its result. It sends no location, trip name, date, or place.
   With no puzzle, it returns `tripsNeeded: 1` and no photo.
+- `POST /api/games/pin/check` with a date and one pin returns its mark: the pin, the band, the
+  direction, and the shown distance. It stores nothing. A pin off the map is 400.
 - `POST /api/games/pin/results` with a date and the pins, each a latitude and longitude, grades
   them. There must be 1 to 4 pins, each latitude from −90 to 90 and each longitude from −180 to 180,
-  and no pin may follow a solved one, or the answer is 400. The browser never sends a distance,
-  a mark, or a score.
+  and no pin may follow a solved one, or the answer is 400. The game must end solved or with 4
+  pins, or the answer is 400. The browser never sends a distance, a mark, or a score.
 - A result is stored in `game_result` as solved or not, the tries used, and 4 tries allowed. Its
-  marks are one row per try: the band letter (G, Y, O, R) and, for a miss, the compass point, such
-  as "RNE,YE,G". No new table is needed.
+  marks are the pins, as Slide's marks are its moves: "latitude longitude" with 4 decimals (about
+  11 m), joined by ";", such as "45.5 -73.6;48.8566 2.3522". Pins are rounded before they're
+  graded, so a stored result grades the same when it's shown again, and the end map can draw it.
+  No new table is needed. The pins are in Fibotrail's own database only.
 - The result has the marks, each try's distance, the answer's location, the share text, the photo's
   trip (ID, name, start and end dates, place), and the stats.
 - The share text reads like `Fibotrail Pin #9 3/4`, then one line per try of the square and the

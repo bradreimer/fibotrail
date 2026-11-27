@@ -17,4 +17,10 @@ public sealed record GameTrip(int Id, string Name, DateOnly StartDate, DateOnly 
 /// <summary>An image on a trip, not a video and not on the way.</summary>
 /// <param name="Id">The Immich asset ID, for the thumbnail.</param>
 /// <param name="LocalTime">The wall-clock time at the place of capture.</param>
-public sealed record GamePhoto(string Id, DateTime LocalTime);
+/// <param name="Latitude">Where the photo was taken, or null when it has no location. Read by Pin.</param>
+/// <param name="Longitude">Where the photo was taken, or null when it has no location.</param>
+public sealed record GamePhoto(string Id, DateTime LocalTime, double? Latitude = null, double? Longitude = null)
+{
+    /// <summary>True when the photo has a latitude and a longitude.</summary>
+    public bool HasLocation => Latitude is not null && Longitude is not null;
+}

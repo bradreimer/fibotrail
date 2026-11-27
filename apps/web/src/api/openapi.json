@@ -886,6 +886,127 @@
           }
         }
       }
+    },
+    "/api/games/pin/puzzle": {
+      "get": {
+        "tags": [
+          "Fibotrail"
+        ],
+        "operationId": "GetPinPuzzle",
+        "parameters": [
+          {
+            "name": "date",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PinPuzzleView"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/games/pin/check": {
+      "post": {
+        "tags": [
+          "Fibotrail"
+        ],
+        "operationId": "CheckPin",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PinCheckRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PinMark"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/games/pin/results": {
+      "post": {
+        "tags": [
+          "Fibotrail"
+        ],
+        "operationId": "PostPinResult",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PinResultRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PinResultView"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1013,6 +1134,19 @@
           }
         }
       },
+      "Compass": {
+        "enum": [
+          "n",
+          "ne",
+          "e",
+          "se",
+          "s",
+          "sw",
+          "w",
+          "nw",
+          null
+        ]
+      },
       "DecisionAction": {
         "enum": [
           "add",
@@ -1110,6 +1244,26 @@
               "type": "integer",
               "format": "int32"
             }
+          }
+        }
+      },
+      "GeoPoint": {
+        "required": [
+          "latitude",
+          "longitude"
+        ],
+        "type": "object",
+        "properties": {
+          "latitude": {
+            "type": "number",
+            "format": "double"
+          },
+          "longitude": {
+            "type": "number",
+            "format": "double"
+          },
+          "isValid": {
+            "type": "boolean"
           }
         }
       },
@@ -1596,6 +1750,215 @@
           },
           "isVideo": {
             "type": "boolean"
+          }
+        }
+      },
+      "PinAnswerView": {
+        "required": [
+          "photoId",
+          "latitude",
+          "longitude",
+          "tripId",
+          "tripName",
+          "startDate",
+          "endDate",
+          "place"
+        ],
+        "type": "object",
+        "properties": {
+          "photoId": {
+            "type": "string"
+          },
+          "latitude": {
+            "type": "number",
+            "format": "double"
+          },
+          "longitude": {
+            "type": "number",
+            "format": "double"
+          },
+          "tripId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "tripName": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "place": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "PinBand": {
+        "enum": [
+          "green",
+          "yellow",
+          "orange",
+          "red"
+        ]
+      },
+      "PinCheckRequest": {
+        "required": [
+          "date",
+          "pin"
+        ],
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "pin": {
+            "$ref": "#/components/schemas/GeoPoint"
+          }
+        }
+      },
+      "PinMark": {
+        "required": [
+          "pin",
+          "band",
+          "direction",
+          "distanceKm"
+        ],
+        "type": "object",
+        "properties": {
+          "pin": {
+            "$ref": "#/components/schemas/GeoPoint"
+          },
+          "band": {
+            "$ref": "#/components/schemas/PinBand"
+          },
+          "direction": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/Compass"
+              }
+            ]
+          },
+          "distanceKm": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "solved": {
+            "type": "boolean"
+          }
+        }
+      },
+      "PinPuzzleView": {
+        "required": [
+          "number",
+          "date",
+          "maxTries",
+          "tripsNeeded",
+          "photoId",
+          "result"
+        ],
+        "type": "object",
+        "properties": {
+          "number": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "maxTries": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "tripsNeeded": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "photoId": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "result": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/PinResultView"
+              }
+            ]
+          }
+        }
+      },
+      "PinResultRequest": {
+        "required": [
+          "date",
+          "pins"
+        ],
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "pins": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GeoPoint"
+            }
+          }
+        }
+      },
+      "PinResultView": {
+        "required": [
+          "solved",
+          "tries",
+          "maxTries",
+          "marks",
+          "share",
+          "answer",
+          "stats"
+        ],
+        "type": "object",
+        "properties": {
+          "solved": {
+            "type": "boolean"
+          },
+          "tries": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "maxTries": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "marks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PinMark"
+            }
+          },
+          "share": {
+            "type": "string"
+          },
+          "answer": {
+            "$ref": "#/components/schemas/PinAnswerView"
+          },
+          "stats": {
+            "$ref": "#/components/schemas/GameStats"
           }
         }
       },

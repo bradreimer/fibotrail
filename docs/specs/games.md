@@ -49,7 +49,8 @@ with friends.
 ### The game library: the games API
 
 - The game library is the one input of every game. It holds the added trips, each with its ID, name,
-  start and end dates, main place, and its photos with an ID and the local time taken.
+  start and end dates, main place, and its photos with an ID, the local time taken, and the
+  latitude and longitude when the photo has them (read by [Pin](pin-game.md)).
 - A photo is in the game library when it's an image, not a video, and it isn't on the way
   ([on the way](on-the-way.md)).
 - Only trips with the status "added" are in it, as for the [insights](insights.md).

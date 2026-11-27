@@ -34,8 +34,11 @@ setWorkerUrl(workerUrl);
 
 export interface MapMarker extends Position {
   id: string;
-  /** "home" and "start" are gold dots. "stop" is a coral pin, with a photo count when it has one. */
-  kind: 'home' | 'start' | 'stop';
+  /**
+   * "home" and "start" are gold dots. "stop" is a coral pin, with a photo count when it has one.
+   * The Pin game's "guess" is a coral dot, "past" a dimmed one, and "answer" a meadow dot.
+   */
+  kind: 'home' | 'start' | 'stop' | 'guess' | 'past' | 'answer';
   /** What a screen reader says for the marker. */
   label: string;
   count?: number;
@@ -74,7 +77,17 @@ export interface MapViewProps {
   interactive?: boolean;
   /** How detailed the country outline is. `fine` is for the trip page (ADR-020). */
   detail?: OutlineDetail;
+  /**
+   * Called with the point the person taps, anywhere on the map. A press that moves more than
+   * `TAP_TOLERANCE_PX` is a pan, not a tap.
+   */
+  onMapTap?: (position: Position) => void;
+  /** False to keep the view where the person left it when the markers change. */
+  fit?: boolean;
 }
+
+/** How far a press may move and still be a tap, for `onMapTap`. MapLibre's own default is 3 px. */
+export const TAP_TOLERANCE_PX = 8;
 
 /** The zoom for a single point: about 2,000 km across on a phone. */
 const SINGLE_POINT_ZOOM = 4;
@@ -129,14 +142,31 @@ export default function MapView({
   onSelect,
   interactive = true,
   detail = 'coarse',
+  onMapTap,
+  fit = true,
 }: MapViewProps) {
   const container = useRef<HTMLDivElement>(null);
   const map = useRef<MapLibreMap | null>(null);
   const shown = useRef<Marker[]>([]);
-  const handlers = useRef({ onDrag, onSelect, onCountrySelect, onRegionSelect, onCitySelect });
+  const handlers = useRef({
+    onDrag,
+    onSelect,
+    onCountrySelect,
+    onRegionSelect,
+    onCitySelect,
+    onMapTap,
+  });
   const wantsRegions = detailCountries !== undefined;
+  const wantsTaps = onMapTap !== undefined;
   useEffect(() => {
-    handlers.current = { onDrag, onSelect, onCountrySelect, onRegionSelect, onCitySelect };
+    handlers.current = {
+      onDrag,
+      onSelect,
+      onCountrySelect,
+      onRegionSelect,
+      onCitySelect,
+      onMapTap,
+    };
   });
 
   // Create the map once.
@@ -154,6 +184,7 @@ export default function MapView({
       dragRotate: false,
       pitchWithRotate: false,
       touchPitch: false,
+      ...(wantsTaps ? { clickTolerance: TAP_TOLERANCE_PX } : {}),
     });
     created.touchZoomRotate.disableRotation();
     map.current = created;
@@ -168,6 +199,13 @@ export default function MapView({
         });
       }
     });
+
+    // A tap anywhere reports its point, for a map you place a pin on.
+    if (interactive && wantsTaps) {
+      created.on('click', (event) => {
+        handlers.current.onMapTap?.({ latitude: event.lngLat.lat, longitude: event.lngLat.lng });
+      });
+    }
 
     // A visited country opens its sheet. The pointer shows that it can be tapped.
     if (interactive) {
@@ -230,7 +268,7 @@ export default function MapView({
       created.remove();
       map.current = null;
     };
-  }, [interactive, wantsRegions, detail]);
+  }, [interactive, wantsRegions, wantsTaps, detail]);
 
   // Fill the visited countries. A detail country fills whole only until its regions are drawn.
   useEffect(() => {
@@ -306,7 +344,7 @@ export default function MapView({
       return added;
     });
 
-    const bounds = boundsOf([...markers, ...route]);
+    const bounds = fit ? boundsOf([...markers, ...route]) : null;
     if (bounds) {
       const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       // The outlines are drawn for a world map. One point is shown from far enough away that the
@@ -314,7 +352,7 @@ export default function MapView({
       const maxZoom = bounds[0] === bounds[2] && bounds[1] === bounds[3] ? SINGLE_POINT_ZOOM : 11;
       current.fitBounds(bounds, { padding: 48, maxZoom, animate: !reduceMotion, duration: 377 });
     }
-  }, [markers, route, routes, draggableId, onSelect]);
+  }, [markers, route, routes, draggableId, onSelect, fit]);
 
   return <div ref={container} className="map" role="application" aria-label={label} />;
 }
