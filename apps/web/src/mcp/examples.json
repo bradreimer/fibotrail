@@ -74,6 +74,13 @@
       "calls": [{ "tool": "list_trips", "arguments": { "limit": 200 } }]
     },
     {
+      "id": "orlando-last",
+      "group": "Trips and time",
+      "question": "When was I last in Orlando?",
+      "answer": "Your trips whose main city is Orlando, newest first, with their dates.",
+      "calls": [{ "tool": "list_trips", "arguments": { "city": "Orlando", "limit": 1 } }]
+    },
+    {
       "id": "busiest-year",
       "group": "Trips and time",
       "question": "Which year did I spend the most days away?",
@@ -88,15 +95,15 @@
     },
     {
       "question": "Where exactly did I stay in Orlando?",
-      "why": "No tool returns a coordinate or a place below a park."
+      "why": "No tool returns a coordinate, a route, or a place below a trip's main city."
     },
     {
       "question": "What did I call my 2019 trip?",
       "why": "A trip name is text you typed, so it stays in the app. Tools give a trip's ID, dates, and countries."
     },
     {
-      "question": "Which city have I visited most?",
-      "why": "A city is finer than a country, so no tool returns one."
+      "question": "Which cities did I pass through on my road trip?",
+      "why": "A trip reports only its main city. A list of cities would trace the route."
     }
   ]
 }

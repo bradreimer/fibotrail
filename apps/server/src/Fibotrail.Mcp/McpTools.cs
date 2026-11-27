@@ -51,10 +51,12 @@ public static class McpTools
             CountrySummaryOf),
         new(
             "list_trips",
-            "Lists added trips, newest first, with dates, days, distance, countries, collections, and parks. A trip has an id and no " +
-            "name. A date range matches a trip that has any day inside it, and the trip's numbers are for the whole trip. " +
+            "Lists added trips, newest first, with dates, days, distance, main city, countries, collections, and parks. A trip has an id " +
+            "and no name. The main city is where the trip spent the most days, the same city the trip card shows; it is null when no " +
+            "photo has a city, and it is the only city a trip reports. The city filter matches the main city only. " +
+            "A date range matches a trip that has any day inside it, and the trip's numbers are for the whole trip. " +
             "The list holds at most 200 trips and says when it was cut short.",
-            """{"type":"object","properties":{"from":{"type":"string","description":"Optional first date, such as 2023-01-01."},"to":{"type":"string","description":"Optional last date, such as 2023-12-31."},"country":{"type":"string","description":"Optional country name or id."},"collection":{"type":"string","description":"Optional collection id or name."},"limit":{"type":"integer","description":"Optional. Most trips to return. The default is 50 and the most is 200."}},"additionalProperties":false}""",
+            """{"type":"object","properties":{"from":{"type":"string","description":"Optional first date, such as 2023-01-01."},"to":{"type":"string","description":"Optional last date, such as 2023-12-31."},"country":{"type":"string","description":"Optional country name or id."},"collection":{"type":"string","description":"Optional collection id or name."},"city":{"type":"string","description":"Optional. A main city, such as Orlando. Trips that only passed through it aren't listed."},"limit":{"type":"integer","description":"Optional. Most trips to return. The default is 50 and the most is 200."}},"additionalProperties":false}""",
             typeof(TripList),
             TripsOf),
         new(
@@ -207,6 +209,7 @@ public static class McpTools
             trip.Days,
             Math.Round(trip.DistanceKm, 1),
             Math.Round(trip.FarthestFromHomeKm, 1),
+            trip.MainCity,
             countries,
             collections,
             [.. parks.Order(StringComparer.Ordinal)]);
@@ -251,10 +254,13 @@ public static class McpTools
             inCollection = [.. library.Parks.Where(park => openIds.Contains(park.Place.Id)).SelectMany(park => park.Trips).Select(visit => visit.TripId)];
         }
 
+        var city = args.Text("city");
+
         var matching = library.Trips
             .Where(trip => (from is null || trip.EndDate >= from) && (to is null || trip.StartDate <= to))
             .Where(trip => inCountry is null || inCountry.Contains(trip.Id))
             .Where(trip => inCollection is null || inCollection.Contains(trip.Id))
+            .Where(trip => city is null || Same(trip.MainCity, city))
             .OrderByDescending(trip => trip.StartDate)
             .ThenByDescending(trip => trip.Id)
             .ToList();
@@ -266,7 +272,7 @@ public static class McpTools
             matching.Count,
             listed.Count,
             truncated,
-            truncated ? $"The list is cut short: {matching.Count} trips match and {listed.Count} are listed. Narrow the dates, or filter by country or collection." : null,
+            truncated ? $"The list is cut short: {matching.Count} trips match and {listed.Count} are listed. Narrow the dates, or filter by country, collection, or city." : null,
             listed);
     }
 

@@ -16,6 +16,9 @@ public class VocabularyTests
         "file", "camera", "immich", "url", "key", "token", "user", "city", "address", "note text",
     ];
 
+    // The one field allowed to carry a city, and so to hold the word, per ADR-023.
+    private static readonly (Type Owner, string Property) MainCity = (typeof(TripEntry), nameof(TripEntry.MainCity));
+
     private static IEnumerable<(Type Owner, PropertyInfo Property)> Walk(Type type)
     {
         foreach (var property in type.GetProperties(BindingFlags.Public | BindingFlags.Instance))
@@ -59,6 +62,7 @@ public class VocabularyTests
             var lowered = property.Name.ToUpperInvariant();
             foreach (var word in Forbidden)
             {
+                if (word == "city" && (owner, property.Name) == MainCity) continue;
                 Assert.False(lowered.Contains(word.ToUpperInvariant(), StringComparison.Ordinal), $"{owner.Name}.{property.Name} is named for '{word}'.");
             }
         }
@@ -78,6 +82,43 @@ public class VocabularyTests
         }
 
         Assert.DoesNotContain(typeof(TripEntry).GetProperties(), property => property.Name == "Name");
+    }
+
+    [Fact]
+    public void A_city_is_only_ever_the_main_city_of_a_trip()
+    {
+        var cities = McpTools.All
+            .SelectMany(tool => Walk(tool.ResultType))
+            .Where(item => item.Property.GetCustomAttribute<CoarseAttribute>()?.Kind == Coarse.City)
+            .Select(item => (item.Owner, item.Property.Name))
+            .Distinct()
+            .ToList();
+
+        Assert.Equal([MainCity], cities);
+        Assert.Equal(typeof(string), typeof(TripEntry).GetProperty(nameof(TripEntry.MainCity))!.PropertyType);
+    }
+
+    [Fact]
+    public void No_city_but_a_main_city_reaches_any_tool()
+    {
+        // Trip 3 stops in Kissimmee and Anaheim, and has the main city Orlando.
+        var data = Fixture.Data();
+        foreach (var tool in McpTools.All)
+        {
+            var json = tool.Name switch
+            {
+                "collection_visits" => """{"collection":"disney-parks"}""",
+                "country_summary" => """{"country":"United States of America"}""",
+                "get_trip" => """{"id":3}""",
+                "days_away" => """{"by":"month"}""",
+                _ => "{}",
+            };
+            using var document = JsonDocument.Parse(json);
+            var text = McpProtocol.Serialize(tool.Run(data, new ToolArgs(document.RootElement.Clone())));
+
+            Assert.DoesNotContain("Kissimmee", text, StringComparison.Ordinal);
+            Assert.DoesNotContain("Anaheim", text, StringComparison.Ordinal);
+        }
     }
 
     [Fact]
