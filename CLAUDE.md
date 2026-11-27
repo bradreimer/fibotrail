@@ -92,9 +92,11 @@ that came later wins.
 - Keep the trip-detection rules in their own C# project, as pure functions, so they can be tested
   with plain data and no running Immich.
 - Never write to Immich. Never send photo data or location data to an outside service. The one
-  exception is the MCP server, which may return counts, dates, and country, continent, collection,
-  and park names. See
-  [docs/adr/ADR-018-an-mcp-server-answers-questions-with-coarse-read-only-data.md](docs/adr/ADR-018-an-mcp-server-answers-questions-with-coarse-read-only-data.md).
+  exception is the MCP server, which may return counts, dates, country, continent, collection, and
+  park names, and each trip's main city, but never coordinates or a route. See
+  [docs/adr/ADR-018-an-mcp-server-answers-questions-with-coarse-read-only-data.md](docs/adr/ADR-018-an-mcp-server-answers-questions-with-coarse-read-only-data.md)
+  and
+  [docs/adr/ADR-023-the-mcp-server-may-return-a-trips-main-city.md](docs/adr/ADR-023-the-mcp-server-may-return-a-trips-main-city.md).
 - Your decisions (added, ignored, renamed, merged) are stored separately from detected data and
   always win. See
   [docs/adr/ADR-002-decisions-are-stored-separately-from-detected-data.md](docs/adr/ADR-002-decisions-are-stored-separately-from-detected-data.md).
