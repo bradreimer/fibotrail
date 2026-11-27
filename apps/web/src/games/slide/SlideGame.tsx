@@ -149,16 +149,31 @@ function SlideResult({ heading, result }: { heading: ReactNode; result: Result }
   const label =
     shared === 'copied' ? 'Copied' : shared === 'failed' ? "Couldn't share. Try again." : 'Share';
   const { answer } = result;
+  const image = (
+    <img
+      className="slide-photo__image"
+      src={`/api/photos/${answer.photoId}/preview`}
+      alt={answer.tripName}
+    />
+  );
   return (
     <section className="slide">
       {heading}
       <p className="timeline__verdict">Solved in {countOf(result.moves, 'move')}.</p>
       <figure className="slide-photo">
-        <img
-          className="slide-photo__image"
-          src={`/api/photos/${answer.photoId}/preview`}
-          alt={answer.tripName}
-        />
+        {answer.immichUrl ? (
+          <a
+            className="slide-photo__link"
+            href={answer.immichUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={`Open the photo from ${answer.tripName} in Immich`}
+          >
+            {image}
+          </a>
+        ) : (
+          image
+        )}
         <figcaption className="slide-photo__caption">
           <Link className="slide-photo__name" to={`/trips/${answer.tripId}`}>
             {answer.tripName}
@@ -169,6 +184,7 @@ function SlideResult({ heading, result }: { heading: ReactNode; result: Result }
           </span>
         </figcaption>
       </figure>
+      {answer.immichUrl && <p className="games-page__lead">Tap the photo to open it in Immich.</p>}
       <button
         type="button"
         className="button timeline__check"
