@@ -2,32 +2,32 @@
 
 ## Current milestone
 
-Version 0.6.0 is the release after 0.5.0 (6 commits). Marking the parks of a trip with no photo
-positions moves from the trip page to `fibotrail trip parks`
-([#174](https://github.com/bradreimer/fibotrail/issues/174)). A **Games** tab adds a daily
-**Timeline** game ([#166](https://github.com/bradreimer/fibotrail/issues/166)), with large tiles you
-drag and no trip names until the end ([#170](https://github.com/bradreimer/fibotrail/issues/170)).
-Collections show where you've been, not what's left
-([#164](https://github.com/bradreimer/fibotrail/issues/164)). A restart during trip detection no
-longer leaves trips stale ([#168](https://github.com/bradreimer/fibotrail/issues/168)), and
-`ServerApp` is split into a composition root
-([#169](https://github.com/bradreimer/fibotrail/issues/169)). Version 0.5.0 added the **Insights**
-tab, trip search, finer trip page maps, and `fibotrail trip rename`, `pin`, and `unpin`. The release
-workflow publishes `ghcr.io/bradreimer/fibotrail:0.6.0` and `:latest`. See
-[roadmap.md](roadmap.md) and [the releases](https://github.com/bradreimer/fibotrail/releases).
+Version 0.7.0 is the release after 0.6.0 (6 commits). The Games tab grows to three daily games.
+Timeline has a twist for each day of the week
+([#177](https://github.com/bradreimer/fibotrail/issues/177)). **Slide** cuts a trip photo into a
+3 by 3 sliding puzzle ([#179](https://github.com/bradreimer/fibotrail/issues/179)). **Pin** asks
+you to tap the map where you took a photo, with a distance band and an arrow after each miss
+([#183](https://github.com/bradreimer/fibotrail/issues/183)). At the end of every game, tapping an
+answer photo opens it in Immich ([#181](https://github.com/bradreimer/fibotrail/issues/181)). The
+MCP server returns each trip's main city and filters trips by it
+([#186](https://github.com/bradreimer/fibotrail/issues/186),
+[ADR-023](adr/ADR-023-the-mcp-server-may-return-a-trips-main-city.md)). Version 0.6.0 added the
+Games tab with Timeline, `fibotrail trip parks`, and the collection wording. The release workflow
+publishes `ghcr.io/bradreimer/fibotrail:0.7.0` and `:latest`. See [roadmap.md](roadmap.md) and
+[the releases](https://github.com/bradreimer/fibotrail/releases).
 
 **What wasn't recorded before the tag:** `./scripts/check.sh` and CI pass on the tagged commit.
-`fibotrail trip parks`, the Games tab, the collection wording, and the detection restart fix are
-checked in tests only, not yet on a phone, the maintainer's library, or a real container. The
-Timeline drag was checked in Chromium with iPhone touch emulation, not on a real phone. The MCP
-connection steps still haven't been run against a real AI client (open question 1 of the
-[spec](specs/mcp-server.md)). The ADR-007 table lines for version 0.1 and the per-line results of
-the accessibility checklist are also still unrecorded.
+The Timeline twists, Slide, Pin, the Immich links, and the MCP main city are checked in tests only,
+not yet on a phone, the maintainer's library, or a real container. Slide's drag was checked in
+Chromium with touch emulation, not on a real iPhone; Pin's map taps weren't checked in a browser at
+all. The MCP connection steps still haven't been run against a real AI client (open question 1 of
+the [spec](specs/mcp-server.md)). The ADR-007 table lines for version 0.1 and the per-line results
+of the accessibility checklist are also still unrecorded.
 
 ## Completed
 
 - [#183](https://github.com/bradreimer/fibotrail/issues/183) A **Pin** game
-  ([spec](specs/pin-game.md)), not yet in a release. One trip photo a day with a world map: tap
+  ([spec](specs/pin-game.md)), in 0.7.0. One trip photo a day with a world map: tap
   where you took it. Each miss shows a band (50, 500, and 2,000 km edges), an arrow to one of 8
   compass points, and the distance; a pin within 50 km solves it, in up to 4 tries. The game
   library gains each photo's latitude and longitude, and only located photos are picked. The
@@ -35,7 +35,7 @@ the accessibility checklist are also still unrecorded.
   and region list places a pin without the map. Tapping the end photo opens it in Immich, as in
   Timeline and Slide. Checked in tests only, not yet in a browser or on a phone.
 - [#186](https://github.com/bradreimer/fibotrail/issues/186) The MCP server returns each trip's
-  main city, not yet in a release
+  main city, in 0.7.0
   ([ADR-023](adr/ADR-023-the-mcp-server-may-return-a-trips-main-city.md)). `list_trips` and
   `get_trip` give `mainCity`, the same main place the trip card shows, and leave it out when no
   photo of the trip has a city. `list_trips` takes a `city` filter that matches the main city only.
@@ -43,12 +43,12 @@ the accessibility checklist are also still unrecorded.
   stop name or route reaches a result. The MCP screen adds "When was I last in Orlando?". Checked
   in tests only, not yet with a real client or the maintainer's library.
 - [#181](https://github.com/bradreimer/fibotrail/issues/181) At the end of Timeline and Slide,
-  tapping an answer photo opens it in Immich, in a new tab, not yet in a release. The trip name
+  tapping an answer photo opens it in Immich, in a new tab, in 0.7.0. The trip name
   still opens the trip page. The results send each photo's Immich address, built from
   `IMMICH_EXTERNAL_URL` as on the trip page; with that address empty, there's no Immich link.
   Checked in tests only, not yet on a phone.
 - [#179](https://github.com/bradreimer/fibotrail/issues/179) A **Slide** game
-  ([spec](specs/slide-game.md)), not yet in a release. One trip photo a day, cut into a 3 by 3
+  ([spec](specs/slide-game.md)), in 0.7.0. One trip photo a day, cut into a 3 by 3
   grid with the bottom-right tile removed and the other 8 shuffled into a start that can always be
   solved. You tap or drag tiles into the empty space; a drag follows the finger along one axis and
   snaps past 40% of a cell or on a flick, and springs back otherwise. When the photo is whole, it
@@ -56,7 +56,7 @@ the accessibility checklist are also still unrecorded.
   result, and stores the moves as the marks, so no new table is needed. Checked in tests and in
   Chromium with touch emulation, not yet on a real iPhone.
 - [#177](https://github.com/bradreimer/fibotrail/issues/177) Timeline has a twist for each day of
-  the week ([spec](specs/timeline-game.md#daily-twists)), not yet in a release. Monday and Thursday
+  the week ([spec](specs/timeline-game.md#daily-twists)), in 0.7.0. Monday and Thursday
   are Classic. Tuesday is Arrows: a card out of place says Earlier or Later. Wednesday is Neighbors:
   5 trips in a row by start date. Friday is Six cards. Saturday is One trip: 5 photos of one trip
   from 5 days. Sunday is Count only: a check says only how many are in place, with 6 tries. A twist
