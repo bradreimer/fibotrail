@@ -227,20 +227,20 @@
 .timeline-answer {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
-  grid-template-areas:
-    'photo name'
-    'photo date';
   column-gap: var(--fibo-space-4);
   align-items: center;
   padding: var(--fibo-space-3);
   border: var(--fibo-border) solid var(--fibo-mist);
   border-radius: var(--fibo-radius);
-  color: inherit;
-  text-decoration: none;
+}
+
+.timeline-answer__photo-link {
+  display: block;
+  border-radius: calc(var(--fibo-radius) / 2);
 }
 
 .timeline-answer__photo {
-  grid-area: photo;
+  display: block;
   inline-size: var(--fibo-space-7);
   block-size: var(--fibo-space-7);
   border-radius: calc(var(--fibo-radius) / 2);
@@ -248,15 +248,20 @@
   object-fit: cover;
 }
 
+/* The trip link fills the rest of the card, so the whole text side is one tap target. */
+.timeline-answer__trip {
+  display: grid;
+  align-self: stretch;
+  align-content: center;
+  color: inherit;
+  text-decoration: none;
+}
+
 .timeline-answer__name {
-  grid-area: name;
-  align-self: end;
   overflow-wrap: anywhere;
 }
 
 .timeline-answer__date {
-  grid-area: date;
-  align-self: start;
   color: var(--fibo-ink-muted);
   font-size: var(--fibo-text-caption);
 }
@@ -503,6 +508,15 @@
   border-radius: var(--fibo-radius);
   background: var(--fibo-mist);
   animation: slide-photo-in var(--fibo-dur-page) ease-out;
+}
+
+.slide-photo__link {
+  display: block;
+  border-radius: var(--fibo-radius);
+}
+
+.slide-photo__link .slide-photo__image {
+  display: block;
 }
 
 .slide-photo__caption {

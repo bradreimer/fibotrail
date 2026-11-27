@@ -2,6 +2,7 @@ using Fibotrail.Games;
 using Fibotrail.Games.Timeline;
 using Fibotrail.Server.Data;
 using Fibotrail.Server.Immich;
+using Fibotrail.Server.Trips;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Fibotrail.Server.Games.Timeline;
@@ -13,7 +14,8 @@ namespace Fibotrail.Server.Games.Timeline;
 public sealed record TimelineCardView(string PhotoId);
 
 /// <summary>A card in the answer: its trip, for a link to the trip page, and the day its photo was taken.</summary>
-public sealed record TimelineAnswerCard(string PhotoId, int TripId, string TripName, DateOnly Date);
+/// <param name="ImmichUrl">The photo in Immich, at the address your browser uses. Null when IMMICH_EXTERNAL_URL is empty.</param>
+public sealed record TimelineAnswerCard(string PhotoId, int TripId, string TripName, DateOnly Date, string? ImmichUrl);
 
 /// <summary>The day's twist: which one, its name, and the one-line rule shown above the cards.</summary>
 /// <param name="Planned">The weekday's twist. It differs from <paramref name="Id"/> when the library can't support it.</param>
@@ -67,7 +69,7 @@ public static class TimelineRoutes
 
     private static void Map(RouteGroupBuilder game)
     {
-        game.MapGet("/puzzle", async Task<Results<Ok<TimelinePuzzleView>, BadRequest<ProblemDetail>>> (DateOnly date, FibotrailDbContext db, TimeProvider time, CancellationToken cancellationToken) =>
+        game.MapGet("/puzzle", async Task<Results<Ok<TimelinePuzzleView>, BadRequest<ProblemDetail>>> (DateOnly date, FibotrailDbContext db, ServerSettings settings, TimeProvider time, CancellationToken cancellationToken) =>
         {
             if (!GameDates.IsToday(date, time))
             {
@@ -82,7 +84,7 @@ public static class TimelineRoutes
             }
 
             var stored = await GameResultStore.FindAsync(db, TimelinePuzzle.Id, date, cancellationToken);
-            var result = stored is null ? null : await ViewAsync(db, puzzle, stored, cancellationToken);
+            var result = stored is null ? null : await ViewAsync(db, settings, puzzle, stored, cancellationToken);
             return TypedResults.Ok(new TimelinePuzzleView(
                 number,
                 date,
@@ -109,7 +111,7 @@ public static class TimelineRoutes
             return puzzle.Grade(request.Order ?? []) is { } marks ? TypedResults.Ok(new TimelineMarks(marks)) : TypedResults.BadRequest(NotValid);
         }).WithName("CheckTimeline");
 
-        game.MapPost("/results", async Task<Results<Ok<TimelineResultView>, BadRequest<ProblemDetail>>> (TimelineResultRequest request, FibotrailDbContext db, TimeProvider time, CancellationToken cancellationToken) =>
+        game.MapPost("/results", async Task<Results<Ok<TimelineResultView>, BadRequest<ProblemDetail>>> (TimelineResultRequest request, FibotrailDbContext db, ServerSettings settings, TimeProvider time, CancellationToken cancellationToken) =>
         {
             if (!GameDates.IsToday(request.Date, time))
             {
@@ -149,11 +151,11 @@ public static class TimelineRoutes
                 }, cancellationToken);
             }
 
-            return TypedResults.Ok(await ViewAsync(db, puzzle, stored, cancellationToken));
+            return TypedResults.Ok(await ViewAsync(db, settings, puzzle, stored, cancellationToken));
         }).WithName("PostTimelineResult");
     }
 
-    private static async Task<TimelineResultView> ViewAsync(FibotrailDbContext db, TimelinePuzzle puzzle, GameResult stored, CancellationToken cancellationToken)
+    private static async Task<TimelineResultView> ViewAsync(FibotrailDbContext db, ServerSettings settings, TimelinePuzzle puzzle, GameResult stored, CancellationToken cancellationToken)
     {
         var rows = Marks.Decode(stored.Marks);
         var stats = await GameResultStore.StatsAsync(db, TimelinePuzzle.Id, TimelineTwists.MostTries, puzzle.Date, cancellationToken);
@@ -163,7 +165,7 @@ public static class TimelineRoutes
             stored.MaxTries,
             rows,
             Marks.ShareText(TimelinePuzzle.Name, puzzle.Number, stored.Solved, rows, stored.MaxTries, puzzle.Twist == TimelineTwist.Classic ? null : TimelineTwists.Name(puzzle.Twist)),
-            [.. puzzle.Answer.Select(card => new TimelineAnswerCard(card.PhotoId, card.TripId, card.TripName, DateOnly.FromDateTime(card.Taken)))],
+            [.. puzzle.Answer.Select(card => new TimelineAnswerCard(card.PhotoId, card.TripId, card.TripName, DateOnly.FromDateTime(card.Taken), TripPage.ImmichPhotoUrl(settings.ImmichExternalUrl, card.PhotoId)))],
             stats);
     }
 }

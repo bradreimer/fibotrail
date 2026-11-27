@@ -5,7 +5,8 @@ Tracking issue: [#143](https://github.com/bradreimer/fibotrail/issues/143).
 ## Purpose
 
 This spec defines the MCP server decided in
-[ADR-018](../adr/ADR-018-an-mcp-server-answers-questions-with-coarse-read-only-data.md). It lets
+[ADR-018](../adr/ADR-018-an-mcp-server-answers-questions-with-coarse-read-only-data.md), with the
+vocabulary of [ADR-023](../adr/ADR-023-the-mcp-server-may-return-a-trips-main-city.md). It lets
 you ask Fibotrail questions in plain language from an MCP client, such as "How many times have I
 been to a Disney park?", without a new Stats view for each question.
 
@@ -35,8 +36,8 @@ each question.
   number of separate trips and the number of park days.
 - A new question needs no new code when the existing tools can answer it.
 - Every tool gives the same number as the screen that shows it, because both call the same code.
-- A tool result never holds a coordinate, a photo, a trip name, or a city name, and a test fails
-  when it would.
+- A tool result never holds a coordinate, a route, a photo, a trip name, or a city name other than
+  a trip's main city, and a test fails when it would.
 - The feature is off until you set `MCP_TOKEN`.
 - The MCP screen tells you how to turn the server on and how to connect an AI client, and it lists
   example questions. A test runs every example against a made-up library, so no example promises a
@@ -90,7 +91,7 @@ each question.
 
 ### What a result may hold
 
-Every field in every result is one of these kinds. This is the vocabulary of ADR-018.
+Every field in every result is one of these kinds. This is the vocabulary of ADR-023.
 
 | Kind | Examples |
 | --- | --- |
@@ -100,18 +101,25 @@ Every field in every result is one of these kinds. This is the vocabulary of ADR
 | Collection, resort, or park name | `Disney parks`, `Walt Disney World Resort`, `Magic Kingdom` |
 | Collection or country ID | `disney-parks`, `752` |
 | Trip ID | `42` |
+| A trip's main city, only on the `mainCity` field of a trip | `mainCity: "Orlando"` |
 | Distance in kilometers, per trip | `distanceKm: 8120` |
 | Yes or no | `markedByYou: false`, `truncated: true` |
 | A fixed sentence that the code writes | "The list is cut short: 212 trips match and 200 are listed." |
 
-These never appear in a result: latitude, longitude, a route or stop center, a photo ID, a file
-name, a thumbnail, camera data, a trip name or note, a city or place name below a park, an Immich
-URL, a key, or a user name.
+These never appear in a result: latitude, longitude, a route, a stop or its center or name, a
+state, any city other than a trip's main city, a place name below a park, a photo ID, a file name,
+a thumbnail, camera data, a trip name or note, an Immich URL, a key, or a user name.
+
+- **Main city.** A trip's `mainCity` is its main place, chosen by the
+  [main destination](main-destination.md) rule: the city with the most days with an away photo,
+  then the most away photos. It is the same value the trip card shows. When no photo of the trip has
+  a city, the main place is a state or a country, and `mainCity` is `null`.
 
 - Every result field is declared with its kind in the code (`[Coarse(...)]`, or `[Nested]` for a
   field that holds another result). A test walks every tool's result type and fails on a field with
   neither, on a field named for data the table leaves out, such as a coordinate, a photo, or a
-  city, and on a field whose type doesn't fit its kind. See the acceptance criteria.
+  stop, on a field whose type doesn't fit its kind, and on a `City` field anywhere but `mainCity`
+  of a trip result. See the acceptance criteria.
 - Error messages follow the same table. They hold no stack trace, file path, or SQL.
 
 ### What counts
@@ -144,7 +152,7 @@ to explain. Every list result states its total and says when it was cut short.
 | `collection_visits` | `collection` (an `id` such as `disney-parks`) | The collection's trips, days, parks visited out of total, first visit, last visit, one entry for each resort (trips), and one for each visited park (resort, trips, days, first visit, last visit, and whether you marked it) |
 | `list_countries` | `continent` (optional) | Each visited country with trips and days, then the visited and total counts for the continent or the world |
 | `country_summary` | `country` (a name or an `id`) | The continent, trips, days, first visit, and last visit |
-| `list_trips` | `from`, `to` (dates), `country`, `collection`, `limit` (default 50, most 200) | For each added trip, newest first: its ID, start and end dates, days, distance in kilometers, countries, and the collections it visited |
+| `list_trips` | `from`, `to` (dates), `country`, `collection`, `city`, `limit` (default 50, most 200) | For each added trip, newest first: its ID, start and end dates, days, distance in kilometers, main city, countries, and the collections it visited |
 | `get_trip` | `id` | The same fields as one `list_trips` entry, plus the visited parks |
 | `days_away` | `by` (`month` or `year`) | Days away for each period with a trip, and the total |
 
@@ -154,6 +162,9 @@ to explain. Every list result states its total and says when it was cut short.
   matches two countries is an error that lists both.
 - An empty library is a result with zero counts, never an error.
 - Names are matched ignoring case, so "sweden" finds Sweden.
+- The `city` input of `list_trips` matches a trip's main city only, ignoring case. A trip that only
+  passed through the city isn't listed. An unknown city is an empty list, not an error, because the
+  server never lists the cities it knows.
 - A date range counts a trip when any of its days falls inside the range. Counts are for the whole
   trip, not the clipped part.
 
@@ -222,7 +233,7 @@ to the server. Settings has an **Open MCP** button that goes to it.
   Disney park?". Every call in the file is run by a test against a made-up library, and every tool
   appears in at least one example.
 - **What it can't answer** comes from the same file, with a reason for each: photos, exact places,
-  trip names, and cities.
+  trip names, and every city but a trip's main city.
 - Every copy button says "Copied", or "Couldn't copy. Select the text and copy it." The result is
   in a live region, and a button's accessible name says what it copies.
 - The screen has the four screen states of the app shell: loading, error with **Try again**, and
@@ -254,6 +265,11 @@ to the server. Settings has an **Open MCP** button that goes to it.
   in the table.
 - A test seeds a trip named "Mom's 70th" with a position, and shows that no tool result holds the
   name, a coordinate, or a photo ID.
+- A trip with 3 days in Orlando and 1 day with 300 photos in Kissimmee has `mainCity: "Orlando"` in
+  `list_trips` and `get_trip`, and "Kissimmee" appears in no result.
+- A trip whose photos have a state but no city has `mainCity: null`.
+- `list_trips(city: "orlando")` lists the Orlando trip, and not a trip whose main city is elsewhere.
+- A test fails when a `City` field is added to any result but a trip's `mainCity`.
 - `country_summary("sweden")` and `country_summary("Sweden")` return the same result.
 - An unknown collection returns an error that lists `disney-parks` and `universal-parks`.
 - An empty library returns zero counts from every tool.

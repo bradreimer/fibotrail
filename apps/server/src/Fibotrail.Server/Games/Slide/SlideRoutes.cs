@@ -2,6 +2,7 @@ using Fibotrail.Games;
 using Fibotrail.Games.Slide;
 using Fibotrail.Server.Data;
 using Fibotrail.Server.Immich;
+using Fibotrail.Server.Trips;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Fibotrail.Server.Games.Slide;
@@ -17,7 +18,8 @@ public sealed record SlidePuzzleView(int Number, DateOnly Date, int TripsNeeded,
 public sealed record SlideResultRequest(DateOnly Date, IReadOnlyList<int> Moves);
 
 /// <summary>The trip the photo comes from, for the caption under the whole photo.</summary>
-public sealed record SlideAnswerView(string PhotoId, int TripId, string TripName, DateOnly StartDate, DateOnly EndDate, string? Place);
+/// <param name="ImmichUrl">The photo in Immich, at the address your browser uses. Null when IMMICH_EXTERNAL_URL is empty.</param>
+public sealed record SlideAnswerView(string PhotoId, int TripId, string TripName, DateOnly StartDate, DateOnly EndDate, string? Place, string? ImmichUrl);
 
 /// <summary>A day's stored result, with the photo's trip and the stats after it.</summary>
 /// <param name="Share">The text to paste to friends. It has no trip name, place, date, or photo.</param>
@@ -41,7 +43,7 @@ public static class SlideRoutes
 
     private static void Map(RouteGroupBuilder game)
     {
-        game.MapGet("/puzzle", async Task<Results<Ok<SlidePuzzleView>, BadRequest<ProblemDetail>>> (DateOnly date, FibotrailDbContext db, TimeProvider time, CancellationToken cancellationToken) =>
+        game.MapGet("/puzzle", async Task<Results<Ok<SlidePuzzleView>, BadRequest<ProblemDetail>>> (DateOnly date, FibotrailDbContext db, ServerSettings settings, TimeProvider time, CancellationToken cancellationToken) =>
         {
             if (!GameDates.IsToday(date, time))
             {
@@ -55,11 +57,11 @@ public static class SlideRoutes
             }
 
             var stored = await GameResultStore.FindAsync(db, SlidePuzzle.Id, date, cancellationToken);
-            var result = stored is null ? null : await ViewAsync(db, puzzle, stored, cancellationToken);
+            var result = stored is null ? null : await ViewAsync(db, settings, puzzle, stored, cancellationToken);
             return TypedResults.Ok(new SlidePuzzleView(puzzle.Number, date, 0, puzzle.Photo.PhotoId, puzzle.Start, result));
         }).WithName("GetSlidePuzzle");
 
-        game.MapPost("/results", async Task<Results<Ok<SlideResultView>, BadRequest<ProblemDetail>>> (SlideResultRequest request, FibotrailDbContext db, TimeProvider time, CancellationToken cancellationToken) =>
+        game.MapPost("/results", async Task<Results<Ok<SlideResultView>, BadRequest<ProblemDetail>>> (SlideResultRequest request, FibotrailDbContext db, ServerSettings settings, TimeProvider time, CancellationToken cancellationToken) =>
         {
             if (!GameDates.IsToday(request.Date, time))
             {
@@ -95,11 +97,11 @@ public static class SlideRoutes
                 }, cancellationToken);
             }
 
-            return TypedResults.Ok(await ViewAsync(db, puzzle, stored, cancellationToken));
+            return TypedResults.Ok(await ViewAsync(db, settings, puzzle, stored, cancellationToken));
         }).WithName("PostSlideResult");
     }
 
-    private static async Task<SlideResultView> ViewAsync(FibotrailDbContext db, SlidePuzzle puzzle, GameResult stored, CancellationToken cancellationToken)
+    private static async Task<SlideResultView> ViewAsync(FibotrailDbContext db, ServerSettings settings, SlidePuzzle puzzle, GameResult stored, CancellationToken cancellationToken)
     {
         // The stored marks are the moves, one digit per tile, so the move count is their length.
         var moves = stored.Marks.Length;
@@ -109,7 +111,7 @@ public static class SlideRoutes
             stored.Solved,
             moves,
             SlidePuzzle.ShareText(puzzle.Number, moves),
-            new SlideAnswerView(photo.PhotoId, photo.TripId, photo.TripName, photo.StartDate, photo.EndDate, photo.Place),
+            new SlideAnswerView(photo.PhotoId, photo.TripId, photo.TripName, photo.StartDate, photo.EndDate, photo.Place, TripPage.ImmichPhotoUrl(settings.ImmichExternalUrl, photo.PhotoId)),
             stats);
     }
 }

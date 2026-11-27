@@ -34,6 +34,11 @@ the accessibility checklist are also still unrecorded.
   server grades every pin and stores the pins as the marks, so no new table is needed. A country
   and region list places a pin without the map. Checked in tests only, not yet in a browser or on
   a phone.
+- [#181](https://github.com/bradreimer/fibotrail/issues/181) At the end of Timeline and Slide,
+  tapping an answer photo opens it in Immich, in a new tab, not yet in a release. The trip name
+  still opens the trip page. The results send each photo's Immich address, built from
+  `IMMICH_EXTERNAL_URL` as on the trip page; with that address empty, there's no Immich link.
+  Checked in tests only, not yet on a phone.
 - [#179](https://github.com/bradreimer/fibotrail/issues/179) A **Slide** game
   ([spec](specs/slide-game.md)), not yet in a release. One trip photo a day, cut into a 3 by 3
   grid with the bottom-right tile removed and the other 8 shuffled into a start that can always be

@@ -71,7 +71,10 @@ so that I remember my trips and can share how I did.
 - The Arrows and Count only twists change these marks. See [Daily twists](#daily-twists).
 - The game ends when every card is Right (solved), or after the last try (not solved).
 - At the end, solved or not, the cards show in the right order with each trip's name and the date.
-  Each card links to its trip page. The stats and Share show too.
+  Each card's name and date link to its trip page. Its photo opens that photo in Immich, in a new
+  tab, at the `IMMICH_EXTERNAL_URL` address, and a line says "Tap a photo to open it in Immich."
+  With that address empty, the photo links to the trip page instead
+  ([#181](https://github.com/bradreimer/fibotrail/issues/181)). The stats and Share show too.
 
 ### Daily twists
 
@@ -113,8 +116,8 @@ The puzzle date's weekday picks the twist. The date is the browser's own, as for
   result.
 - `POST /api/games/timeline/check` with a date and an order of photo IDs returns the marks.
 - `POST /api/games/timeline/results` with a date and every try returns the graded result: solved,
-  tries, the marks of each try, the share text, the answer with each card's trip ID, trip name, and
-  date, and the stats. Each try must
+  tries, the marks of each try, the share text, the answer with each card's trip ID, trip name,
+  date, and Immich address (null when `IMMICH_EXTERNAL_URL` is empty), and the stats. Each try must
   hold every card once, no try may follow a solved one, and the game must be over (solved, or 4
   tries), or the answer is 400. The share text names the twist after the puzzle number, except
   on Classic.
@@ -127,6 +130,7 @@ The puzzle date's weekday picks the twist. The date is the browser's own, as for
 - While you play, no trip name or number shows, and the puzzle route sends no trip name.
 - Dragging a card drops it in the new place, and locked cards don't move.
 - At the end, each card shows its trip name and date and opens its trip page.
+- At the end, tapping a card's photo opens it in Immich, when `IMMICH_EXTERNAL_URL` is set.
 - A puzzle needs 5 trips with photos, and says how many more are needed otherwise.
 - Marks follow the Right, Close, and Wrong rules above.
 - A solved puzzle on the second try is stored as solved in 2, and shows in the stats.

@@ -2210,7 +2210,8 @@
           "tripName",
           "startDate",
           "endDate",
-          "place"
+          "place",
+          "immichUrl"
         ],
         "type": "object",
         "properties": {
@@ -2233,6 +2234,12 @@
             "format": "date"
           },
           "place": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "immichUrl": {
             "type": [
               "null",
               "string"
@@ -2412,7 +2419,8 @@
           "photoId",
           "tripId",
           "tripName",
-          "date"
+          "date",
+          "immichUrl"
         ],
         "type": "object",
         "properties": {
@@ -2429,6 +2437,12 @@
           "date": {
             "type": "string",
             "format": "date"
+          },
+          "immichUrl": {
+            "type": [
+              "null",
+              "string"
+            ]
           }
         }
       },
