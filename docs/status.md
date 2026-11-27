@@ -436,6 +436,9 @@ Nothing is in progress.
 
 The plan is in [roadmap.md](roadmap.md). Specs are in [specs/](specs/README.md).
 
+- Build the **Pin** game ([#183](https://github.com/bradreimer/fibotrail/issues/183),
+  [spec](specs/pin-game.md)): tap the map where you took one of your photos, in 4 tries, with a
+  distance band and an arrow after each miss. Written as a spec only; nothing is built yet.
 - Record what hasn't been checked on devices: the Map, the top bar buttons, the sidebar, and **Hide**
   on a phone and an iPad, and the rest of the ADR-007 table for
   [#6](https://github.com/bradreimer/fibotrail/issues/6),
