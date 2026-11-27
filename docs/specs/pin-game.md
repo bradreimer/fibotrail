@@ -97,6 +97,9 @@ the answer.
   zooms to fit both.
 - The photo shows with a caption, as in Slide: the trip name, which links to the trip page, then
   its date range and its main place. A trip with no known place shows the dates alone.
+- Tapping the photo opens it in Immich, in a new tab, at the `IMMICH_EXTERNAL_URL` address, and a
+  line says "Tap the photo to open it in Immich." With that address empty, the photo isn't a link,
+  as in Slide ([#181](https://github.com/bradreimer/fibotrail/issues/181)).
 - "Solved in 3." or "So close. It was 310 km away.", Share, and the stats show too, with the
   "Tries to win" bars for 1 to 4.
 
@@ -117,7 +120,7 @@ the answer.
   graded, so a stored result grades the same when it's shown again, and the end map can draw it.
   No new table is needed. The pins are in Fibotrail's own database only.
 - The result has the marks, each try's distance, the answer's location, the share text, the photo's
-  trip (ID, name, start and end dates, place), and the stats.
+  trip (ID, name, start and end dates, place), the photo's Immich address, and the stats.
 - The share text reads like `Fibotrail Pin #9 3/4`, then one line per try of the square and the
   arrow. An unsolved day shows `X/4`. It holds no distance, place, trip name, date, or photo.
 
@@ -134,6 +137,7 @@ the answer.
 - A second result for the same day keeps the first.
 - At the end, a line joins the last pin and the answer, and the photo shows with its trip name,
   dates, and place.
+- At the end, tapping the photo opens it in Immich, when `IMMICH_EXTERNAL_URL` is set.
 - The share text has squares and arrows only.
 - The map makes no outside request.
 

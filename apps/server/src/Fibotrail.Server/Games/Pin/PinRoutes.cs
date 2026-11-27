@@ -2,6 +2,7 @@ using Fibotrail.Games;
 using Fibotrail.Games.Pin;
 using Fibotrail.Server.Data;
 using Fibotrail.Server.Immich;
+using Fibotrail.Server.Trips;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Fibotrail.Server.Games.Pin;
@@ -19,7 +20,8 @@ public sealed record PinCheckRequest(DateOnly Date, GeoPoint Pin);
 public sealed record PinResultRequest(DateOnly Date, IReadOnlyList<GeoPoint> Pins);
 
 /// <summary>The trip the photo comes from and where it was taken, shown at the end.</summary>
-public sealed record PinAnswerView(string PhotoId, double Latitude, double Longitude, int TripId, string TripName, DateOnly StartDate, DateOnly EndDate, string? Place);
+/// <param name="ImmichUrl">The photo in Immich, at the address your browser uses. Null when IMMICH_EXTERNAL_URL is empty.</param>
+public sealed record PinAnswerView(string PhotoId, double Latitude, double Longitude, int TripId, string TripName, DateOnly StartDate, DateOnly EndDate, string? Place, string? ImmichUrl);
 
 /// <summary>A day's graded result, with the answer and the stats after it.</summary>
 /// <param name="Marks">The grade of each pin, in order.</param>
@@ -42,7 +44,7 @@ public static class PinRoutes
 
     private static void Map(RouteGroupBuilder game)
     {
-        game.MapGet("/puzzle", async Task<Results<Ok<PinPuzzleView>, BadRequest<ProblemDetail>>> (DateOnly date, FibotrailDbContext db, TimeProvider time, CancellationToken cancellationToken) =>
+        game.MapGet("/puzzle", async Task<Results<Ok<PinPuzzleView>, BadRequest<ProblemDetail>>> (DateOnly date, FibotrailDbContext db, ServerSettings settings, TimeProvider time, CancellationToken cancellationToken) =>
         {
             if (!GameDates.IsToday(date, time))
             {
@@ -56,7 +58,7 @@ public static class PinRoutes
             }
 
             var stored = await GameResultStore.FindAsync(db, PinPuzzle.Id, date, cancellationToken);
-            var result = stored is null ? null : await ViewAsync(db, puzzle, stored, cancellationToken);
+            var result = stored is null ? null : await ViewAsync(db, settings, puzzle, stored, cancellationToken);
             return TypedResults.Ok(new PinPuzzleView(puzzle.Number, date, PinPuzzle.MaxTries, 0, puzzle.Photo.PhotoId, result));
         }).WithName("GetPinPuzzle");
 
@@ -76,7 +78,7 @@ public static class PinRoutes
             return puzzle.Grade(request.Pin) is { } mark ? TypedResults.Ok(mark) : TypedResults.BadRequest(NotValid);
         }).WithName("CheckPin");
 
-        game.MapPost("/results", async Task<Results<Ok<PinResultView>, BadRequest<ProblemDetail>>> (PinResultRequest request, FibotrailDbContext db, TimeProvider time, CancellationToken cancellationToken) =>
+        game.MapPost("/results", async Task<Results<Ok<PinResultView>, BadRequest<ProblemDetail>>> (PinResultRequest request, FibotrailDbContext db, ServerSettings settings, TimeProvider time, CancellationToken cancellationToken) =>
         {
             if (!GameDates.IsToday(request.Date, time))
             {
@@ -117,11 +119,11 @@ public static class PinRoutes
                 }, cancellationToken);
             }
 
-            return TypedResults.Ok(await ViewAsync(db, puzzle, stored, cancellationToken));
+            return TypedResults.Ok(await ViewAsync(db, settings, puzzle, stored, cancellationToken));
         }).WithName("PostPinResult");
     }
 
-    private static async Task<PinResultView> ViewAsync(FibotrailDbContext db, PinPuzzle puzzle, GameResult stored, CancellationToken cancellationToken)
+    private static async Task<PinResultView> ViewAsync(FibotrailDbContext db, ServerSettings settings, PinPuzzle puzzle, GameResult stored, CancellationToken cancellationToken)
     {
         // The stored marks are the pins, so the grades come back from them. A stored result outlives
         // a library change, so a pin that no longer grades is skipped rather than failing the page.
@@ -134,7 +136,7 @@ public static class PinRoutes
             stored.MaxTries,
             marks,
             PinPuzzle.ShareText(puzzle.Number, new PinOutcome(stored.Solved, marks)),
-            new PinAnswerView(photo.PhotoId, photo.Location.Latitude, photo.Location.Longitude, photo.TripId, photo.TripName, photo.StartDate, photo.EndDate, photo.Place),
+            new PinAnswerView(photo.PhotoId, photo.Location.Latitude, photo.Location.Longitude, photo.TripId, photo.TripName, photo.StartDate, photo.EndDate, photo.Place, TripPage.ImmichPhotoUrl(settings.ImmichExternalUrl, photo.PhotoId)),
             stats);
     }
 }

@@ -687,6 +687,7 @@ export interface components {
             /** Format: date */
             endDate: string;
             place: null | string;
+            immichUrl: null | string;
         };
         /** @enum {unknown} */
         PinBand: "green" | "yellow" | "orange" | "red";

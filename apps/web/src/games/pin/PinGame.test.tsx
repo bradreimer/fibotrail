@@ -54,6 +54,7 @@ const result = (marks = [far, close], solved = true) => ({
     startDate: '2027-09-01',
     endDate: '2027-09-05',
     place: 'Paris, Île-de-France',
+    immichUrl: 'https://photos.example.com/photos/photo-1' as string | null,
   },
   stats,
 });
@@ -139,8 +140,30 @@ describe('the Pin game', () => {
       '/trips/12',
     );
     expect(screen.getByText(/Paris, Île-de-France/)).toBeInTheDocument();
+    const immich = screen.getByRole('link', {
+      name: 'Open the photo from Paris, September 2027 in Immich',
+    });
+    expect(immich).toHaveAttribute('href', 'https://photos.example.com/photos/photo-1');
+    expect(immich).toHaveAttribute('target', '_blank');
+    expect(screen.getByText('Tap the photo to open it in Immich.')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Share' })).toBeInTheDocument();
     await expectNoAccessibilityProblems(container);
+  });
+
+  it('shows the photo without an Immich link when there is no Immich address', async () => {
+    const shown = result();
+    fakeServer({
+      'GET /api/games/pin/puzzle': puzzle({
+        ...shown,
+        answer: { ...shown.answer, immichUrl: null },
+      }),
+    });
+    renderGame();
+
+    const figure = (await screen.findByRole('figure')) as HTMLElement;
+    expect(within(figure).getByRole('img')).toHaveAttribute('src', '/api/photos/photo-1/preview');
+    expect(within(figure).queryByRole('link', { name: /in Immich/ })).not.toBeInTheDocument();
+    expect(screen.queryByText('Tap the photo to open it in Immich.')).not.toBeInTheDocument();
   });
 
   it('says how far off the last pin was when the tries run out', async () => {

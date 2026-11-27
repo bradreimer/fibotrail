@@ -1762,7 +1762,8 @@
           "tripName",
           "startDate",
           "endDate",
-          "place"
+          "place",
+          "immichUrl"
         ],
         "type": "object",
         "properties": {
@@ -1793,6 +1794,12 @@
             "format": "date"
           },
           "place": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "immichUrl": {
             "type": [
               "null",
               "string"

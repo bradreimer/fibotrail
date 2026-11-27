@@ -393,6 +393,7 @@ public class GamesTests
         var trip = Assert.Single(await TripLibrary.TripsAsync(app), trip => trip.Id == answer.GetProperty("tripId").GetInt32());
         Assert.Equal(trip.Name, answer.GetProperty("tripName").GetString());
         Assert.Equal(latitude, answer.GetProperty("latitude").GetDouble(), 6);
+        Assert.Equal($"https://photos.example.com/photos/{puzzle.GetProperty("photoId").GetString()}", answer.GetProperty("immichUrl").GetString());
         Assert.Equal(1, result.GetProperty("stats").GetProperty("played").GetInt32());
 
         // A second send keeps the first.

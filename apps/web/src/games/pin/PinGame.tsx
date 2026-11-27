@@ -299,6 +299,13 @@ function PinResult({ heading, result }: { heading: ReactNode; result: Result }) 
     ],
     [marks, answer],
   );
+  const image = (
+    <img
+      className="slide-photo__image"
+      src={`/api/photos/${answer.photoId}/preview`}
+      alt={answer.tripName}
+    />
+  );
   const route = useMemo(
     () => (last ? [last.pin, { latitude: answer.latitude, longitude: answer.longitude }] : []),
     [last, answer],
@@ -320,11 +327,19 @@ function PinResult({ heading, result }: { heading: ReactNode; result: Result }) 
         route={route}
       />
       <figure className="slide-photo">
-        <img
-          className="slide-photo__image"
-          src={`/api/photos/${answer.photoId}/preview`}
-          alt={answer.tripName}
-        />
+        {answer.immichUrl ? (
+          <a
+            className="slide-photo__link"
+            href={answer.immichUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={`Open the photo from ${answer.tripName} in Immich`}
+          >
+            {image}
+          </a>
+        ) : (
+          image
+        )}
         <figcaption className="slide-photo__caption">
           <Link className="slide-photo__name" to={`/trips/${answer.tripId}`}>
             {answer.tripName}
@@ -335,6 +350,7 @@ function PinResult({ heading, result }: { heading: ReactNode; result: Result }) 
           </span>
         </figcaption>
       </figure>
+      {answer.immichUrl && <p className="games-page__lead">Tap the photo to open it in Immich.</p>}
       <button
         type="button"
         className="button timeline__check"
