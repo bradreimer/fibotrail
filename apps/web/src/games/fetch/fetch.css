@@ -1,0 +1,109 @@
+/*
+ * The Fetch game. Its styles live in its own folder, so removing the folder removes them. See
+ * docs/specs/fetch-game.md.
+ */
+.fetch {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--fibo-space-4);
+  max-inline-size: calc(var(--fibo-space-7) * 9);
+}
+
+/*
+ * The world keeps its 4:7 shape, as large as fits under the header and above the tab bar, with no
+ * page scroll. A press flaps: it doesn't zoom, select, or show the tap highlight.
+ */
+.fetch__stage {
+  position: relative;
+  justify-self: center;
+  inline-size: min(100%, calc((100dvh - 15rem) * 4 / 7));
+  aspect-ratio: 4 / 7;
+  padding: 0;
+  border: 0;
+  border-radius: var(--fibo-radius);
+  overflow: hidden;
+  background: var(--fibo-mist);
+  cursor: pointer;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.fetch__stage:focus-visible {
+  outline: 3px solid var(--fibo-gold);
+  outline-offset: 3px;
+}
+
+.fetch__canvas {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+}
+
+.fetch__hint {
+  position: absolute;
+  inset-inline: var(--fibo-space-4);
+  inset-block-start: 38%;
+  padding: var(--fibo-space-3);
+  border-radius: var(--fibo-radius);
+  background: var(--fibo-scrim-strong);
+  color: var(--fibo-on-ocean);
+  font: inherit;
+  font-weight: 600;
+  text-align: center;
+}
+
+/* A caught treat shows its photo for a moment, in the top corner. */
+.fetch__pop {
+  position: absolute;
+  inset-block-start: var(--fibo-space-3);
+  inset-inline-end: var(--fibo-space-3);
+  inline-size: 30%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border: 3px solid var(--fibo-gold);
+  border-radius: var(--fibo-radius);
+  animation: fetch-pop var(--fibo-dur-page) ease-out;
+}
+
+@keyframes fetch-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+}
+
+.fetch__runs {
+  display: grid;
+  gap: var(--fibo-space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--fibo-text-h3);
+}
+
+.fetch__caught {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--fibo-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.fetch__caught img {
+  display: block;
+  inline-size: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: var(--fibo-radius);
+  background: var(--fibo-mist);
+}
+
+.fetch__trip {
+  display: grid;
+  gap: var(--fibo-space-1);
+  margin: 0;
+}

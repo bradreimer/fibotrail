@@ -1007,6 +1007,127 @@
           }
         }
       }
+    },
+    "/api/games/fetch/puzzle": {
+      "get": {
+        "tags": [
+          "Fibotrail"
+        ],
+        "operationId": "GetFetchPuzzle",
+        "parameters": [
+          {
+            "name": "date",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FetchPuzzleView"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/games/fetch/check": {
+      "post": {
+        "tags": [
+          "Fibotrail"
+        ],
+        "operationId": "CheckFetchRun",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FetchCheckRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FetchRunGrade"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/games/fetch/results": {
+      "post": {
+        "tags": [
+          "Fibotrail"
+        ],
+        "operationId": "PostFetchResult",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FetchResultRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FetchResultView"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1171,6 +1292,399 @@
             ]
           },
           "coverPhotoId": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "FetchBox": {
+        "required": [
+          "left",
+          "top",
+          "right",
+          "bottom"
+        ],
+        "type": "object",
+        "properties": {
+          "left": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "top": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "right": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "bottom": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "FetchCheckRequest": {
+        "required": [
+          "date",
+          "taps"
+        ],
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "taps": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        }
+      },
+      "FetchCourse": {
+        "required": [
+          "physics",
+          "gates",
+          "treats",
+          "finishX"
+        ],
+        "type": "object",
+        "properties": {
+          "physics": {
+            "$ref": "#/components/schemas/FetchPhysics"
+          },
+          "gates": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FetchGate"
+            }
+          },
+          "treats": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FetchTreat"
+            }
+          },
+          "finishX": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "FetchEnd": {
+        "enum": [
+          "finish",
+          "gate",
+          "ceiling",
+          "ground"
+        ]
+      },
+      "FetchGate": {
+        "required": [
+          "x",
+          "gapTop",
+          "gapBottom",
+          "day"
+        ],
+        "type": "object",
+        "properties": {
+          "x": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "gapTop": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "gapBottom": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "day": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "FetchPhysics": {
+        "required": [
+          "gravity",
+          "flap",
+          "speed",
+          "worldWidth",
+          "worldHeight",
+          "ground",
+          "dogX",
+          "dogSize",
+          "body",
+          "startY",
+          "gateWidth",
+          "gapHeight",
+          "treatRadius"
+        ],
+        "type": "object",
+        "properties": {
+          "gravity": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "flap": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "speed": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "worldWidth": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "worldHeight": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "ground": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "dogX": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "dogSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "body": {
+            "$ref": "#/components/schemas/FetchBox"
+          },
+          "startY": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "gateWidth": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "gapHeight": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "treatRadius": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "FetchPuzzleView": {
+        "required": [
+          "number",
+          "date",
+          "maxTries",
+          "tripsNeeded",
+          "course",
+          "result"
+        ],
+        "type": "object",
+        "properties": {
+          "number": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "maxTries": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "tripsNeeded": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "course": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/FetchCourse"
+              }
+            ]
+          },
+          "result": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/FetchResultView"
+              }
+            ]
+          }
+        }
+      },
+      "FetchResultRequest": {
+        "required": [
+          "date",
+          "runs"
+        ],
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "runs": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "format": "int32"
+              }
+            }
+          }
+        }
+      },
+      "FetchResultView": {
+        "required": [
+          "solved",
+          "tries",
+          "maxTries",
+          "runs",
+          "treats",
+          "caughtPhotoIds",
+          "share",
+          "trip",
+          "stats"
+        ],
+        "type": "object",
+        "properties": {
+          "solved": {
+            "type": "boolean"
+          },
+          "tries": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "maxTries": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "runs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FetchRunGrade"
+            }
+          },
+          "treats": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "caughtPhotoIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "share": {
+            "type": "string"
+          },
+          "trip": {
+            "$ref": "#/components/schemas/FetchTripView"
+          },
+          "stats": {
+            "$ref": "#/components/schemas/GameStats"
+          }
+        }
+      },
+      "FetchRunGrade": {
+        "required": [
+          "end",
+          "tick",
+          "gatesPassed",
+          "caught"
+        ],
+        "type": "object",
+        "properties": {
+          "end": {
+            "$ref": "#/components/schemas/FetchEnd"
+          },
+          "tick": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "gatesPassed": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "caught": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          "finished": {
+            "type": "boolean"
+          }
+        }
+      },
+      "FetchTreat": {
+        "required": [
+          "x",
+          "y",
+          "photoId"
+        ],
+        "type": "object",
+        "properties": {
+          "x": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "y": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "photoId": {
+            "type": "string"
+          }
+        }
+      },
+      "FetchTripView": {
+        "required": [
+          "tripId",
+          "tripName",
+          "startDate",
+          "endDate",
+          "place"
+        ],
+        "type": "object",
+        "properties": {
+          "tripId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "tripName": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "place": {
             "type": [
               "null",
               "string"

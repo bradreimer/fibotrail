@@ -6,7 +6,8 @@ Tracking issue: [#166](https://github.com/bradreimer/fibotrail/issues/166).
 
 This spec defines the Games tab: a hub of small daily games made from your own trips, the games API
 that every game reads, and the stats that each game remembers. Each game has its own spec:
-[Timeline](timeline-game.md), [Slide](slide-game.md), and [Pin](pin-game.md).
+[Timeline](timeline-game.md), [Slide](slide-game.md), [Pin](pin-game.md), and
+[Fetch](fetch-game.md).
 
 Think of the Games tab as a game shelf. The shelf (the hub), its labels (the registry), and the
 scorebook (game stats) stay put. A game is a box you put on the shelf or take off, without moving

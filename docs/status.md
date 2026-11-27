@@ -26,6 +26,13 @@ of the accessibility checklist are also still unrecorded.
 
 ## Completed
 
+- [#189](https://github.com/bradreimer/fibotrail/issues/189) A **Fetch** game
+  ([spec](specs/fetch-game.md)), an experiment after 0.7.0. A schnauzer flies one of your trips:
+  8 gates follow the trip's photo latitudes, north up, and 8 treats are its photos, in up to 3
+  runs. The physics uses integers only, so the browser and the server fly a run the same way; the
+  browser sends tap ticks and the server grades them. It's drawn with Canvas 2D. Fetch lives in its
+  own folders with one registry line on each side, so it can be removed in the steps the spec lists.
+  Checked in tests only, not yet on a phone; the 250 px gap is a guess to revisit after play.
 - [#183](https://github.com/bradreimer/fibotrail/issues/183) A **Pin** game
   ([spec](specs/pin-game.md)), in 0.7.0. One trip photo a day with a world map: tap
   where you took it. Each miss shows a band (50, 500, and 2,000 km edges), an arrow to one of 8
