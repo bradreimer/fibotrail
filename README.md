@@ -105,6 +105,7 @@ Everything Fibotrail stores is in `/data`. In the example compose file that's th
 | --- | --- | --- |
 | `fibotrail.db` | Your trips, decisions, and settings | Yes |
 | `keys/` | The keys that keep your sign-in sessions valid | Yes |
+| `trails/` | The GPX files you added to trips, kept as you uploaded them | Yes |
 | `thumbnails/` | A cache of thumbnails | No. Fibotrail rebuilds it |
 | `fibotrail-backup-<time>.db` | A copy that Fibotrail makes before it changes the database for a new version | Optional |
 

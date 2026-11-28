@@ -71,7 +71,11 @@ lines between photo stops.
 | Moving time | The sum of the intervals between consecutive points where the speed is above 1 km/h |
 | Points | The number of usable points |
 
-- Dates are shown in the trip's local time, using the offset of the trip's photos on that day.
+- Dates are shown in the device's time zone. A trip's days are local, and Fibotrail doesn't store
+  the trip's time zone, so the server returns UTC times and the browser converts them.
+- A trail overlaps its trip when its time span shares a moment with the trip's days, with 14 hours
+  allowed either side for the trip's unknown time zone. Without the allowance, a walk on the
+  trip's last evening in Tokyo would look like the next day.
 
 ### Gaps
 
@@ -81,28 +85,37 @@ lines between photo stops.
 
 ### Storage
 
-- The uploaded file is kept byte for byte at `/data/trails/<trip id>/<trail id>.gpx`.
-- A `trail` table holds the trip ID, the original file name, the start and end, the distance, the
-  moving time, the point count, and the simplified line for display.
-- A trail belongs to the trip, not to detection. It survives a rescan, and it follows the trip the
-  same way a decision does ([ADR-010](../adr/ADR-010-stops-and-routes-are-stored-with-the-trip.md)).
+- The uploaded file is kept byte for byte at `/data/trails/<random name>.gpx`. The name you picked
+  is stored as text only, without any folder, so it never becomes part of a path.
+- A `trail` table holds the trip's decision, the original file name, the start and end, the
+  distance, the moving time, the point count, and the simplified line for display.
+- A trail belongs to the trip's decision, not to the trip row, so it survives a rescan and follows
+  the trip when its fingerprint moves
+  ([ADR-024](../adr/ADR-024-a-gps-trail-is-a-kept-file-that-belongs-to-a-trips-decision.md),
+  [ADR-010](../adr/ADR-010-stops-and-routes-are-stored-with-the-trip.md)). Adding a trail to a
+  trip with no decision creates one with no choice in it, as a rename does.
 - Removing a trail deletes its row and its file.
 
 ### Display
 
-- The trail is a 3 px line under the photo route and the pins, in a color from the design tokens
-  that differs from Trail Teal.
-- For display, each trail is simplified with Douglas–Peucker to about 5 m, and to no more than
-  5,000 points. Storage keeps every point.
+- The trail is a 3 px line under the photo route and the pins, in Deep Ocean in light mode and
+  Golden Gold in dark mode, so it differs from the Trail Teal photo route.
+- For display, each trail is simplified with Douglas–Peucker to about 5 m, and the tolerance is
+  doubled until the trail has no more than 5,000 points. A trail of more than 20,000 points is
+  first thinned to evenly spaced points, because Douglas–Peucker is slow on a long, jagged track.
+  Storage keeps every point.
 - The map opens fitted to the photo route and the trails together.
 - A caption under the map says "GPS trail: the path your logger recorded."
-- A **GPS trails** list under the map shows each trail's file name, dates, and distance, with
-  **Remove**.
+- A **GPS trails** section under the stat tiles lists each trail's file name, dates, and
+  distance, with **Remove**, and has the **Add GPS trail** button. With no trail, it says "No GPS
+  trail yet."
 
 ### API
 
-- `POST /api/trips/{id}/trails?preview=true` checks the file and returns the summary, without
-  saving.
+- A file is sent as the raw request body, with its name in the `name` query parameter, and the
+  anti-forgery token in the `X-CSRF-Token` header like every change.
+- `POST /api/trips/{id}/trails/preview` checks the file and returns the summary and whether it
+  overlaps the trip, without saving.
 - `POST /api/trips/{id}/trails` checks and saves the file, and returns the trail.
 - `GET /api/trips/{id}/trails` returns the trip's trails with their simplified lines.
 - `DELETE /api/trips/{id}/trails/{trailId}` removes a trail.
