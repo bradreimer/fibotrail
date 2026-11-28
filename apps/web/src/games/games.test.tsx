@@ -10,6 +10,7 @@ import { expectNoAccessibilityProblems } from '../accessibility/accessibility';
 import { App } from '../App';
 import { fakeServer } from '../test/server';
 import { installMatchMedia } from '../test/window';
+import { dailyLine } from './DailyRing';
 import { GAMES } from './registry';
 import { localDate } from './today';
 
@@ -82,6 +83,33 @@ describe('the Games screen', () => {
     expect(screen.getByRole('link', { name: /Timeline/ })).not.toHaveTextContent('best');
   });
 
+  it('shows today’s progress, counting lost games and only games both registries list', async () => {
+    fakeServer({
+      'GET /api/games': [
+        { ...timeline, playedToday: true, solvedToday: false },
+        { ...timeline, id: 'slide', name: 'Slide' },
+        { ...timeline, id: 'not-in-the-web-app', name: 'Ghost', playedToday: true },
+      ],
+    });
+    const { container } = renderAt('/games');
+
+    expect(await screen.findByText('1 of 2 done today')).toBeInTheDocument();
+    expect(container.querySelector('.daily-ring__ring')).toHaveAttribute('aria-hidden', 'true');
+    await expectNoAccessibilityProblems(container);
+  });
+
+  it('says when every game is done for today', async () => {
+    fakeServer({
+      'GET /api/games': [
+        { ...timeline, playedToday: true, solvedToday: true },
+        { ...timeline, id: 'slide', name: 'Slide', playedToday: true, solvedToday: true },
+      ],
+    });
+    renderAt('/games');
+
+    expect(await screen.findByText('All done for today ✨')).toBeInTheDocument();
+  });
+
   it('says when today is solved', async () => {
     fakeServer({ 'GET /api/games': [{ ...timeline, playedToday: true, solvedToday: true }] });
     renderAt('/games');
@@ -117,6 +145,15 @@ describe('the Games screen', () => {
     renderAt('/games/nothing-here');
 
     expect(await screen.findByRole('link', { name: /Timeline/ })).toBeInTheDocument();
+  });
+});
+
+describe('the daily ring', () => {
+  it('counts played games, and says when all are done', () => {
+    expect(dailyLine(0, 5)).toBe('0 of 5 done today');
+    expect(dailyLine(3, 5)).toBe('3 of 5 done today');
+    expect(dailyLine(5, 5)).toBe('All done for today ✨');
+    expect(dailyLine(0, 0)).toBe('0 of 0 done today');
   });
 });
 

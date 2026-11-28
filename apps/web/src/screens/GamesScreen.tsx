@@ -1,12 +1,13 @@
 import { useApi } from '../api/useApi';
+import { DailyRing } from '../games/DailyRing';
 import { GameCard } from '../games/GameCard';
 import { GAMES } from '../games/registry';
 import { localDate } from '../games/today';
 import { ErrorState } from '../states/ErrorState';
 
 /**
- * The Games screen: one card for each game that both the server and the web registry list. See
- * docs/specs/games.md.
+ * The Games screen: today's progress ring, then one card for each game that both the server and
+ * the web registry list. See docs/specs/games.md and docs/specs/daily-set.md.
  */
 export function GamesScreen() {
   const games = useApi('/api/games', `/api/games?date=${localDate()}`);
@@ -28,6 +29,10 @@ export function GamesScreen() {
   });
   return (
     <div className="games-page">
+      <DailyRing
+        played={cards.filter(({ entry }) => entry.playedToday).length}
+        total={cards.length}
+      />
       <p className="games-page__lead">A new puzzle each day, made from your trips.</p>
       <ul className="games-list">
         {cards.map(({ game, entry }) => (
