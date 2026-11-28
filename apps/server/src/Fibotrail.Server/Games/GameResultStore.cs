@@ -58,4 +58,24 @@ public static class GameResultStore
             return await FindAsync(db, result.Game, result.PuzzleDate, cancellationToken) ?? throw new InvalidOperationException("The game result wasn't stored.");
         }
     }
+
+    /// <summary>
+    /// Keeps a result's share text in its row, for Share today on the Games screen, unless the row
+    /// already has one. Rows from before the share column have none until a result is sent again.
+    /// See docs/specs/daily-set.md#share-today.
+    /// </summary>
+    public static async Task KeepShareAsync(FibotrailDbContext db, GameResult result, string share, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(db);
+        ArgumentNullException.ThrowIfNull(result);
+        if (result.Share is not null)
+        {
+            return;
+        }
+
+        await db.GameResults
+            .Where(row => row.Id == result.Id && row.Share == null)
+            .ExecuteUpdateAsync(set => set.SetProperty(row => row.Share, share), cancellationToken);
+        result.Share = share;
+    }
 }

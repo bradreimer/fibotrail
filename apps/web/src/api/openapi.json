@@ -1820,7 +1820,8 @@
           "description",
           "playedToday",
           "solvedToday",
-          "stats"
+          "stats",
+          "share"
         ],
         "type": "object",
         "properties": {
@@ -1844,6 +1845,12 @@
           },
           "stats": {
             "$ref": "#/components/schemas/GameStats"
+          },
+          "share": {
+            "type": [
+              "null",
+              "string"
+            ]
           }
         }
       },

@@ -19,7 +19,8 @@ public sealed record GameDefinition(string Id, string Name, string Description, 
 
 /// <summary>A card on the Games screen.</summary>
 /// <param name="SolvedToday">Null when today isn't played yet.</param>
-public sealed record GameEntry(string Id, string Name, string Description, bool PlayedToday, bool? SolvedToday, GameStats Stats);
+/// <param name="Share">Today's share text, for Share today. Null when today isn't played, or its result has no stored text.</param>
+public sealed record GameEntry(string Id, string Name, string Description, bool PlayedToday, bool? SolvedToday, GameStats Stats, string? Share);
 
 /// <summary>
 /// The list of games. Adding or removing a game is one line here and one in the web registry. See
@@ -74,7 +75,7 @@ public static class GameRoutes
             {
                 var today = await GameResultStore.FindAsync(db, game.Id, date, cancellationToken);
                 var stats = await GameResultStore.StatsAsync(db, game.Id, game.MaxTries, date, game.TimeLabel, cancellationToken);
-                entries.Add(new GameEntry(game.Id, game.Name, game.Description, today is not null, today?.Solved, stats));
+                entries.Add(new GameEntry(game.Id, game.Name, game.Description, today is not null, today?.Solved, stats, today?.Share));
             }
 
             return TypedResults.Ok<IReadOnlyList<GameEntry>>(entries);

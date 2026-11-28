@@ -159,7 +159,11 @@ public static class StampsRoutes
                 }, cancellationToken);
             }
 
-            return TypedResults.Ok(await ViewAsync(db, settings, puzzle, stored, cancellationToken));
+            var view = await ViewAsync(db, settings, puzzle, stored, cancellationToken);
+
+            // The share text is kept with the result, for Share today on the Games screen.
+            await GameResultStore.KeepShareAsync(db, stored, view.Share, cancellationToken);
+            return TypedResults.Ok(view);
         }).WithName("PostStampsResult");
     }
 
