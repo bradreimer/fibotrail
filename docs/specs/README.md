@@ -74,5 +74,6 @@ None.
 | [pin-game.md](pin-game.md) | The Pin game: tap the map where you took one of your photos |
 | [fetch-game.md](fetch-game.md) | The Fetch game: fly a schnauzer along one of your trips and catch its photos |
 | [stamps-game.md](stamps-game.md) | The Stamps game: place one stamp in each row, column, and trip, with no two touching |
+| [daily-set.md](daily-set.md) | The day's games as one set: a progress ring, Share today, and a shared end screen |
 | [mcp-server.md](mcp-server.md) | A read-only MCP server that answers questions about your travel with coarse data and a token |
 | [release.md](release.md) | The accessibility checks, README, and tagged image for version 0.1 |

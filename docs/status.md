@@ -475,6 +475,12 @@ Nothing is in progress.
 
 The plan is in [roadmap.md](roadmap.md). Specs are in [specs/](specs/README.md).
 
+- [#194](https://github.com/bradreimer/fibotrail/issues/194) The day's games as one set
+  ([spec](specs/daily-set.md)): a progress ring on the Games screen
+  ([#195](https://github.com/bradreimer/fibotrail/issues/195)), one "Share today" message from a
+  stored share text per result ([#196](https://github.com/bradreimer/fibotrail/issues/196)), and a
+  shared end screen with a next-game link
+  ([#197](https://github.com/bradreimer/fibotrail/issues/197)). Specified, not built.
 - Record what hasn't been checked on devices: the Map, the top bar buttons, the sidebar, and **Hide**
   on a phone and an iPad, and the rest of the ADR-007 table for
   [#6](https://github.com/bradreimer/fibotrail/issues/6),
