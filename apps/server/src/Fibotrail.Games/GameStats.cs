@@ -20,7 +20,16 @@ public enum Mark
 }
 
 /// <summary>One played day of a game, as the stats read it.</summary>
-public sealed record GameDay(DateOnly Date, bool Solved, int Tries);
+/// <param name="Seconds">How long a timed game took, or null for a game without a clock.</param>
+/// <param name="TimeLabel">What the time stats are split by, such as a board size, or null for no split.</param>
+public sealed record GameDay(DateOnly Date, bool Solved, int Tries, int? Seconds = null, string? TimeLabel = null);
+
+/// <summary>The times of a timed game's solved days with one label. See docs/specs/games.md#timed-games.</summary>
+/// <param name="Label">What these days share, such as "7 × 7", or an empty text when the game doesn't split its times.</param>
+/// <param name="Days">Solved days with a time.</param>
+/// <param name="Best">The shortest time, in seconds.</param>
+/// <param name="Average">The mean time, in whole seconds.</param>
+public sealed record GameTime(string Label, int Days, int Best, int Average);
 
 /// <summary>A game's stats, for the stats panel and the game's card. See docs/specs/games.md.</summary>
 /// <param name="Played">Days with a result.</param>
@@ -28,10 +37,12 @@ public sealed record GameDay(DateOnly Date, bool Solved, int Tries);
 /// <param name="CurrentStreak">Solved days in a row that end today, or yesterday when today isn't played.</param>
 /// <param name="BestStreak">The longest run of solved days in a row.</param>
 /// <param name="Tries">For 1 try, 2 tries, and so on, how many solved days used that many.</param>
-public sealed record GameStats(int Played, int WinPercent, int CurrentStreak, int BestStreak, IReadOnlyList<int> Tries)
+/// <param name="Times">For a timed game, the best and average time of each label, in label order. Null for other games.</param>
+public sealed record GameStats(int Played, int WinPercent, int CurrentStreak, int BestStreak, IReadOnlyList<int> Tries, IReadOnlyList<GameTime>? Times = null)
 {
     /// <summary>Works out the stats from a game's played days.</summary>
-    public static GameStats From(IEnumerable<GameDay> days, DateOnly today, int maxTries)
+    /// <param name="timed">True for a game played against a clock, which adds <see cref="Times"/>.</param>
+    public static GameStats From(IEnumerable<GameDay> days, DateOnly today, int maxTries, bool timed = false)
     {
         ArgumentNullException.ThrowIfNull(days);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(maxTries);
@@ -65,6 +76,17 @@ public sealed record GameStats(int Played, int WinPercent, int CurrentStreak, in
         }
 
         var percent = played == 0 ? 0 : (int)Math.Round(100.0 * wins / played, MidpointRounding.AwayFromZero);
-        return new GameStats(played, percent, current, best, tries);
+        IReadOnlyList<GameTime>? times = timed
+            ? [.. byDate.Values
+                .Where(day => day.Solved && day.Seconds is not null)
+                .GroupBy(day => day.TimeLabel ?? string.Empty)
+                .OrderBy(group => group.Key, StringComparer.Ordinal)
+                .Select(group => new GameTime(
+                    group.Key,
+                    group.Count(),
+                    group.Min(day => day.Seconds!.Value),
+                    (int)Math.Round(group.Average(day => day.Seconds!.Value), MidpointRounding.AwayFromZero)))]
+            : null;
+        return new GameStats(played, percent, current, best, tries, times);
     }
 }

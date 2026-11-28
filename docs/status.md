@@ -26,6 +26,17 @@ of the accessibility checklist are also still unrecorded.
 
 ## Completed
 
+- [#191](https://github.com/bradreimer/fibotrail/issues/191) A **Stamps** game
+  ([spec](specs/stamps-game.md)), after 0.7.0: a daily logic puzzle where each region is one of
+  your trips. Place one stamp in each row, column, and trip, with no two touching. The board is
+  6 by 6 on Monday and Tuesday, 7 by 7 from Wednesday to Friday, and 8 by 8 on the weekend, or
+  smaller with fewer trips. A generator repairs random regions until there's one solution, then
+  keeps the board only when five written logic rules reach it, which also power the hints. Over
+  365 seeded days per size, every board passed, at most 200 attempts each. Tap, drag, Auto-✕,
+  undo, a clock that pauses in the background, and resume the same day. The end is a passport page
+  of the stamped photos. `game_result` gains a `seconds` column, and timed games show best and
+  average times ([games spec](specs/games.md#timed-games)). Checked in tests and in Chromium with
+  iPhone 13 emulation, not yet on a phone or the maintainer's library.
 - [#189](https://github.com/bradreimer/fibotrail/issues/189) A **Fetch** game
   ([spec](specs/fetch-game.md)), an experiment after 0.7.0. A schnauzer flies one of your trips:
   8 gates follow the trip's photo latitudes, north up, and 8 treats are its photos, in up to 3

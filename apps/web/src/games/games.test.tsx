@@ -57,6 +57,31 @@ describe('the Games screen', () => {
     expect(screen.queryByText('Ghost')).not.toBeInTheDocument();
   });
 
+  it('shows a timed game’s best time on its card, and no time on other cards', async () => {
+    fakeServer({
+      'GET /api/games': [
+        timeline,
+        {
+          ...timeline,
+          id: 'stamps',
+          name: 'Stamps',
+          stats: {
+            ...stats,
+            times: [
+              { label: '6 × 6', days: 2, best: 95, average: 120 },
+              { label: '7 × 7', days: 1, best: 161, average: 161 },
+            ],
+          },
+        },
+      ],
+    });
+    renderAt('/games');
+
+    const card = await screen.findByRole('link', { name: /Stamps/ });
+    expect(card).toHaveTextContent("Today's puzzle is ready · 3-day streak · best 1:35");
+    expect(screen.getByRole('link', { name: /Timeline/ })).not.toHaveTextContent('best');
+  });
+
   it('says when today is solved', async () => {
     fakeServer({ 'GET /api/games': [{ ...timeline, playedToday: true, solvedToday: true }] });
     renderAt('/games');

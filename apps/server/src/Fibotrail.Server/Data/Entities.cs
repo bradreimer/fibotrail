@@ -341,6 +341,12 @@ public sealed class GameResult
     /// <summary>The marks of each try, such as "CRWCR,RRRRR". See <c>Fibotrail.Games.Marks</c>.</summary>
     public required string Marks { get; set; }
 
+    /// <summary>
+    /// How long a timed game took, in seconds, as the browser reported it. Null for a game without a
+    /// clock. See docs/specs/games.md#timed-games.
+    /// </summary>
+    public int? Seconds { get; set; }
+
     /// <summary>When the result was stored, in UTC.</summary>
     public DateTime PlayedAt { get; set; }
 }

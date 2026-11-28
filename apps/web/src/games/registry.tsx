@@ -81,6 +81,17 @@ export const GAMES: readonly GameModule[] = [
     ),
     Component: lazy(() => import('./fetch/FetchGame')),
   },
+  {
+    id: 'stamps',
+    icon: (
+      <Icon>
+        <rect x="3" y="3" width="18" height="18" rx="2" />
+        <path d="M9 3v6H3M15 21v-6h6" />
+        <circle cx="15.5" cy="8.5" r="2.5" />
+      </Icon>
+    ),
+    Component: lazy(() => import('./stamps/StampsGame')),
+  },
 ];
 
 export function gameFor(id: string | undefined): GameModule | undefined {

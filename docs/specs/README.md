@@ -73,5 +73,6 @@ None.
 | [slide-game.md](slide-game.md) | The Slide game: slide the tiles of a trip photo back into place |
 | [pin-game.md](pin-game.md) | The Pin game: tap the map where you took one of your photos |
 | [fetch-game.md](fetch-game.md) | The Fetch game: fly a schnauzer along one of your trips and catch its photos |
+| [stamps-game.md](stamps-game.md) | The Stamps game: place one stamp in each row, column, and trip, with no two touching |
 | [mcp-server.md](mcp-server.md) | A read-only MCP server that answers questions about your travel with coarse data and a token |
 | [release.md](release.md) | The accessibility checks, README, and tagged image for version 0.1 |
