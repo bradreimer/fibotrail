@@ -6,8 +6,8 @@ Tracking issue: [#166](https://github.com/bradreimer/fibotrail/issues/166).
 
 This spec defines the Games tab: a hub of small daily games made from your own trips, the games API
 that every game reads, and the stats that each game remembers. Each game has its own spec:
-[Timeline](timeline-game.md), [Slide](slide-game.md), [Pin](pin-game.md), and
-[Fetch](fetch-game.md).
+[Timeline](timeline-game.md), [Slide](slide-game.md), [Pin](pin-game.md),
+[Fetch](fetch-game.md), and [Stamps](stamps-game.md).
 
 Think of the Games tab as a game shelf. The shelf (the hub), its labels (the registry), and the
 scorebook (game stats) stay put. A game is a box you put on the shelf or take off, without moving
@@ -98,6 +98,16 @@ with friends.
   yesterday to tomorrow of its own clock, which covers every time zone.
 - Removing a game leaves its rows in `game_result`. They're small and harmless, and come back if the
   game returns.
+
+### Timed games
+
+- A game that's played against a clock, such as [Stamps](stamps-game.md), stores the elapsed
+  seconds in a nullable `seconds` column of `game_result`. Other games leave it empty. The column is
+  added by a migration; existing rows keep an empty value.
+- The time is reported by the browser, because only the browser knows when the page was hidden. The
+  server accepts 1 to 86,400 seconds and can't check it further.
+- For a timed game, the stats add **Best time** and **Average time**, over solved days with a time,
+  rounded to whole seconds. A game may split them by a label, such as the board size.
 
 ### Sharing
 

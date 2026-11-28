@@ -464,6 +464,12 @@ Nothing is in progress.
 
 The plan is in [roadmap.md](roadmap.md). Specs are in [specs/](specs/README.md).
 
+- [#191](https://github.com/bradreimer/fibotrail/issues/191) A **Stamps** game
+  ([spec](specs/stamps-game.md)): a daily logic puzzle where each region is one of your trips. Place
+  one stamp in each row, column, and trip, with no two touching. The board grows from 6 by 6 on
+  Monday to 8 by 8 on the weekend, and is used only when it has one solution that logic alone
+  reaches. It adds a `seconds` column to `game_result` for timed games
+  ([games spec](specs/games.md#timed-games)). Specified, not built.
 - Record what hasn't been checked on devices: the Map, the top bar buttons, the sidebar, and **Hide**
   on a phone and an iPad, and the rest of the ADR-007 table for
   [#6](https://github.com/bradreimer/fibotrail/issues/6),
