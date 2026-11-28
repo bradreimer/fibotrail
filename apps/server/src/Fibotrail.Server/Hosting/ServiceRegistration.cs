@@ -8,6 +8,7 @@ using Fibotrail.Server.Data;
 using Fibotrail.Server.Immich;
 using Fibotrail.Server.Stats;
 using Fibotrail.Server.Mcp;
+using Fibotrail.Server.Trails;
 using Fibotrail.Server.Trips;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
@@ -77,6 +78,7 @@ public static class ServiceRegistration
         services.AddScoped<ThumbnailStore>();
         services.AddScoped<TripDecisions>();
         services.AddScoped<OnTheWayPhotos>();
+        services.AddScoped<TrailStore>();
 
         // The country outlines are read from an embedded resource the first time the map asks.
         services.AddSingleton(_ => CountryOutlines.Load());

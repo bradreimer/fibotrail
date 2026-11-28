@@ -147,6 +147,22 @@ The script writes PNG files to `public/icons` and `public/splash`. Commit them. 
 iPhone or iPad screen size, add it to `splash-screens.json` and run the script again. A test fails
 when the list and the files differ.
 
+## Sending a file to the server
+
+GPS trails are the first route that takes a file. The pattern, from
+[#193](https://github.com/bradreimer/fibotrail/issues/193):
+
+- **Send the raw file as the body**, with its name in a query parameter. `apiUpload` in
+  `src/api/client.ts` does this. A minimal API handler that takes `IFormFile` requires ASP.NET's
+  own anti-forgery middleware, which Fibotrail replaces with its own, so a form upload doesn't fit.
+- **Raise the size limit on the route only.** The server's default request limit is 30 MB. The
+  trail routes set `IHttpMaxRequestBodySizeFeature` to one byte past their own 50 MB limit before
+  they read, then answer 413 with a plain message when the body is larger.
+- **Never build a path from the file's name.** The stored file gets a random name, and the name
+  you picked is kept as text.
+- **Parse XML with no DTD.** `DtdProcessing.Prohibit` and no resolver, so a file can't make the
+  parser read another file.
+
 ## What a test can't check
 
 Vitest runs in jsdom, which has no layout and no Safari. The tests check the navigation mode for

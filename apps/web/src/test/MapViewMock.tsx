@@ -10,6 +10,7 @@ export default function MapViewMock({
   markers,
   route = [],
   routes,
+  trails,
   visited,
   onCountrySelect,
   detailCountries,
@@ -32,6 +33,7 @@ export default function MapViewMock({
       data-fit={String(fit)}
       data-route={JSON.stringify(route)}
       data-routes={routes ? JSON.stringify(routes) : undefined}
+      data-trails={trails ? JSON.stringify(trails) : undefined}
       data-visited={visited ? JSON.stringify(visited) : undefined}
       data-detail-countries={detailCountries ? JSON.stringify(detailCountries) : undefined}
       data-visited-regions={visitedRegions ? JSON.stringify(visitedRegions) : undefined}

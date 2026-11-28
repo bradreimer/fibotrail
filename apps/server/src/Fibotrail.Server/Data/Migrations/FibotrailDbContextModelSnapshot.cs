@@ -321,6 +321,52 @@ namespace Fibotrail.Server.Data.Migrations
                     b.ToTable("sign_in_failure", (string)null);
                 });
 
+            modelBuilder.Entity("Fibotrail.Server.Data.Trail", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("AddedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("DecisionId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<double>("DistanceKm")
+                        .HasColumnType("REAL");
+
+                    b.Property<DateTime>("EndUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("LineJson")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("MovingSeconds")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("OriginalName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("PointCount")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("StartUtc")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DecisionId");
+
+                    b.ToTable("trail", (string)null);
+                });
+
             modelBuilder.Entity("Fibotrail.Server.Data.Trip", b =>
                 {
                     b.Property<int>("Id")
@@ -427,6 +473,15 @@ namespace Fibotrail.Server.Data.Migrations
                     b.HasKey("TripId", "PhotoId");
 
                     b.ToTable("trip_photo", (string)null);
+                });
+
+            modelBuilder.Entity("Fibotrail.Server.Data.Trail", b =>
+                {
+                    b.HasOne("Fibotrail.Server.Data.Decision", null)
+                        .WithMany()
+                        .HasForeignKey("DecisionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Fibotrail.Server.Data.TripPhoto", b =>

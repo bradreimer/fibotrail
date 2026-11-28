@@ -7,6 +7,8 @@ export interface MapColors {
   border: string;
   route: string;
   routeOutline: string;
+  /** A GPS trail. It differs from the photo route, which is Trail Teal. */
+  trail: string;
   /** The fill of a country you've visited. */
   visited: string;
 }
@@ -22,12 +24,15 @@ export function readMapColors(element: Element, dark: boolean): MapColors {
     border: dark ? token('--fibo-mist') : token('--fibo-map-border'),
     route: token('--fibo-teal'),
     routeOutline: token('--fibo-paper'),
+    trail: dark ? token('--fibo-gold') : token('--fibo-ocean'),
     visited: token('--fibo-meadow'),
   };
 }
 
 export const LAND_SOURCE = 'land';
 export const ROUTE_SOURCE = 'route';
+export const TRAIL_SOURCE = 'trails';
+export const TRAIL_LAYER = 'trail';
 export const REGION_SOURCE = 'regions';
 export const VISITED_LAYER = 'visited';
 /** The visited detail countries, filled whole only until the regions are drawn. */
@@ -72,6 +77,7 @@ export function baseMapStyle(colors: MapColors): StyleSpecification {
     sources: {
       [LAND_SOURCE]: { type: 'geojson', data: { type: 'FeatureCollection', features: [] } },
       [ROUTE_SOURCE]: { type: 'geojson', data: { type: 'FeatureCollection', features: [] } },
+      [TRAIL_SOURCE]: { type: 'geojson', data: { type: 'FeatureCollection', features: [] } },
       [REGION_SOURCE]: { type: 'geojson', data: { type: 'FeatureCollection', features: [] } },
       [CITY_SOURCE]: { type: 'geojson', data: { type: 'FeatureCollection', features: [] } },
     },
@@ -140,6 +146,14 @@ export function baseMapStyle(colors: MapColors): StyleSpecification {
           'circle-stroke-color': colors.routeOutline,
           'circle-stroke-width': 2,
         },
+      },
+      // A GPS trail lies under the photo route and the pins.
+      {
+        id: TRAIL_LAYER,
+        type: 'line',
+        source: TRAIL_SOURCE,
+        layout: { 'line-cap': 'round', 'line-join': 'round' },
+        paint: { 'line-color': colors.trail, 'line-width': 3 },
       },
       {
         id: 'route-outline',

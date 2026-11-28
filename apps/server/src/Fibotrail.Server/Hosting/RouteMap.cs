@@ -5,6 +5,7 @@ using Fibotrail.Server.Immich;
 using Fibotrail.Server.Insights;
 using Fibotrail.Server.Map;
 using Fibotrail.Server.Mcp;
+using Fibotrail.Server.Trails;
 using Fibotrail.Server.Trips;
 using Fibotrail.Server.Web;
 
@@ -26,6 +27,7 @@ public static class RouteMap
         api.MapHomeRoutes();
         api.MapInboxRoutes();
         api.MapTripRoutes();
+        api.MapTrailRoutes();
         api.MapMapRoutes();
         api.MapInsightsRoutes();
         api.MapCollectionRoutes();

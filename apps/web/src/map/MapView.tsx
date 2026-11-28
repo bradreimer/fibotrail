@@ -18,6 +18,8 @@ import {
   REGION_SOURCE,
   REGION_VISITED_LAYER,
   ROUTE_SOURCE,
+  TRAIL_LAYER,
+  TRAIL_SOURCE,
   baseMapStyle,
   boundsOf,
   DETAIL_VISITED_LAYER,
@@ -52,6 +54,11 @@ export interface MapViewProps {
   route?: readonly Position[];
   /** Several routes at once, such as every trip on the life map. Used instead of `route` when given. */
   routes?: readonly (readonly Position[])[];
+  /**
+   * GPS trails, each a list of points in order. Each list is drawn as its own line, so a gap in a
+   * trail is never crossed. The view fits them with the markers and the route.
+   */
+  trails?: readonly (readonly Position[])[];
   /** The keys of the countries to fill as visited: the ISO code, or the name when a country has none. */
   visited?: readonly string[];
   /** Called with the key of a visited country when the person taps it. */
@@ -130,6 +137,7 @@ export default function MapView({
   markers,
   route = [],
   routes,
+  trails,
   visited,
   onCountrySelect,
   detailCountries,
@@ -256,6 +264,7 @@ export default function MapView({
       created.setPaintProperty(REGION_BORDERS_LAYER, 'line-color', colors.border);
       created.setPaintProperty('route-outline', 'line-color', colors.routeOutline);
       created.setPaintProperty('route', 'line-color', colors.route);
+      created.setPaintProperty(TRAIL_LAYER, 'line-color', colors.trail);
       created.setPaintProperty(CITY_LAYER, 'circle-color', colors.route);
       created.setPaintProperty(CITY_LAYER, 'circle-stroke-color', colors.routeOutline);
       created.setPaintProperty(PARK_LAYER, 'circle-color', colors.visited);
@@ -314,10 +323,14 @@ export default function MapView({
     const current = map.current;
     if (!current) return;
 
-    const drawRoute = () =>
+    const drawRoute = () => {
       (current.getSource(ROUTE_SOURCE) as GeoJSONSource | undefined)?.setData(
         routesGeoJson(routes ?? [route]),
       );
+      (current.getSource(TRAIL_SOURCE) as GeoJSONSource | undefined)?.setData(
+        routesGeoJson(trails ?? []),
+      );
+    };
     if (current.isStyleLoaded()) drawRoute();
     else current.once('load', drawRoute);
 
@@ -344,7 +357,7 @@ export default function MapView({
       return added;
     });
 
-    const bounds = fit ? boundsOf([...markers, ...route]) : null;
+    const bounds = fit ? boundsOf([...markers, ...route, ...(trails ?? []).flat()]) : null;
     if (bounds) {
       const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       // The outlines are drawn for a world map. One point is shown from far enough away that the
@@ -352,7 +365,7 @@ export default function MapView({
       const maxZoom = bounds[0] === bounds[2] && bounds[1] === bounds[3] ? SINGLE_POINT_ZOOM : 11;
       current.fitBounds(bounds, { padding: 48, maxZoom, animate: !reduceMotion, duration: 377 });
     }
-  }, [markers, route, routes, draggableId, onSelect, fit]);
+  }, [markers, route, routes, trails, draggableId, onSelect, fit]);
 
   return <div ref={container} className="map" role="application" aria-label={label} />;
 }

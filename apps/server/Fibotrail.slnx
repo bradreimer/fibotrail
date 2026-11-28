@@ -6,6 +6,7 @@
     <Project Path="src/Fibotrail.Mcp/Fibotrail.Mcp.csproj" />
     <Project Path="src/Fibotrail.Places/Fibotrail.Places.csproj" />
     <Project Path="src/Fibotrail.Stats/Fibotrail.Stats.csproj" />
+    <Project Path="src/Fibotrail.Trails/Fibotrail.Trails.csproj" />
     <Project Path="src/Fibotrail.Server/Fibotrail.Server.csproj" />
   </Folder>
   <Folder Name="/tests/">
@@ -15,6 +16,7 @@
     <Project Path="tests/Fibotrail.Mcp.Tests/Fibotrail.Mcp.Tests.csproj" />
     <Project Path="tests/Fibotrail.Places.Tests/Fibotrail.Places.Tests.csproj" />
     <Project Path="tests/Fibotrail.Stats.Tests/Fibotrail.Stats.Tests.csproj" />
+    <Project Path="tests/Fibotrail.Trails.Tests/Fibotrail.Trails.Tests.csproj" />
     <Project Path="tests/Fibotrail.Server.Tests/Fibotrail.Server.Tests.csproj" />
   </Folder>
 </Solution>

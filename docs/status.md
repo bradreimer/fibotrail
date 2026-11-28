@@ -26,6 +26,15 @@ of the accessibility checklist are also still unrecorded.
 
 ## Completed
 
+- [#193](https://github.com/bradreimer/fibotrail/issues/193) **GPS trails** on the trip page
+  ([spec](specs/gps-trails.md), [ADR-024](adr/ADR-024-a-gps-trail-is-a-kept-file-that-belongs-to-a-trips-decision.md)),
+  after 0.7.0. **Add GPS trail** takes a GPX file, shows its dates, distance, and point count, and
+  warns when its dates don't overlap the trip. The file is kept byte for byte in `trails/` in the
+  data folder, and the row belongs to the trip's decision, so a trail survives a rescan. The map
+  draws each trail under the photo route, split at gaps of 5 minutes or 1 km, with at most 5,000
+  points a trail. A new `Fibotrail.Trails` project holds the parser and the rules. Checked in tests
+  only, not yet with a real BL-1000ST file, on a phone, or in a real container. Photo alignment, a
+  watched folder, and trail analytics are later work items.
 - [#197](https://github.com/bradreimer/fibotrail/issues/197) A **shared end screen**
   ([spec](specs/daily-set.md#the-shared-end-screen)): every game ends with Share, the stats, and
   "Next game: Pin →", the first unplayed game in Games screen order, or "Back to Games". One shared

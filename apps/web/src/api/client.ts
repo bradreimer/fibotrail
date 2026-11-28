@@ -84,3 +84,16 @@ export async function apiSend<T = void>(
   });
   return (response.status === 204 ? undefined : await response.json()) as T;
 }
+
+/**
+ * Sends a file as the raw request body, with its name in the `name` query parameter. Used for GPS
+ * trails, which the server keeps byte for byte. See docs/specs/gps-trails.md.
+ */
+export async function apiUpload<T>(path: string, csrfToken: string, file: File): Promise<T> {
+  const response = await send(`${path}?name=${encodeURIComponent(file.name)}`, {
+    method: 'POST',
+    headers: { 'X-CSRF-Token': csrfToken, 'Content-Type': 'application/gpx+xml' },
+    body: file,
+  });
+  return (await response.json()) as T;
+}

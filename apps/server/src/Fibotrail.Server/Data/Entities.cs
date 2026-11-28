@@ -356,3 +356,39 @@ public sealed class GameResult
     /// <summary>When the result was stored, in UTC.</summary>
     public DateTime PlayedAt { get; set; }
 }
+
+/// <summary>
+/// A GPS trail you added to a trip. It belongs to the trip's decision, so it follows the trip when
+/// a rescan moves its fingerprint, and survives every rescan. The original file is kept unchanged in
+/// the data folder. See docs/specs/gps-trails.md and ADR-024.
+/// </summary>
+public sealed class Trail
+{
+    public int Id { get; set; }
+
+    /// <summary>The decision of the trip the trail belongs to.</summary>
+    public int DecisionId { get; set; }
+
+    /// <summary>The name of the stored file under <c>trails/</c> in the data folder, such as "3f2c….gpx".</summary>
+    public required string FileName { get; set; }
+
+    /// <summary>The name the file had when you picked it.</summary>
+    public required string OriginalName { get; set; }
+
+    /// <summary>The first point's time, in UTC.</summary>
+    public DateTime StartUtc { get; set; }
+
+    /// <summary>The last point's time, in UTC.</summary>
+    public DateTime EndUtc { get; set; }
+
+    public double DistanceKm { get; set; }
+
+    public int MovingSeconds { get; set; }
+
+    public int PointCount { get; set; }
+
+    /// <summary>The simplified line the map draws, as JSON: segments of [latitude, longitude] pairs.</summary>
+    public required string LineJson { get; set; }
+
+    public DateTime AddedAt { get; set; }
+}
