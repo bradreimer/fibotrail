@@ -14,14 +14,22 @@ public static class GameResultStore
     }
 
     /// <summary>A game's stats, as of the player's today.</summary>
-    public static async Task<GameStats> StatsAsync(FibotrailDbContext db, string game, int maxTries, DateOnly today, CancellationToken cancellationToken)
+    public static Task<GameStats> StatsAsync(FibotrailDbContext db, string game, int maxTries, DateOnly today, CancellationToken cancellationToken) =>
+        StatsAsync(db, game, maxTries, today, null, cancellationToken);
+
+    /// <summary>
+    /// A game's stats, as of the player's today. A timed game passes <paramref name="timeLabel"/>,
+    /// which reads the label its times are split by from a result's marks.
+    /// </summary>
+    public static async Task<GameStats> StatsAsync(FibotrailDbContext db, string game, int maxTries, DateOnly today, Func<string, string?>? timeLabel, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(db);
-        var days = await db.GameResults.AsNoTracking()
+        var rows = await db.GameResults.AsNoTracking()
             .Where(result => result.Game == game)
-            .Select(result => new GameDay(result.PuzzleDate, result.Solved, result.Tries))
+            .Select(result => new { result.PuzzleDate, result.Solved, result.Tries, result.Seconds, result.Marks })
             .ToListAsync(cancellationToken);
-        return GameStats.From(days, today, maxTries);
+        var days = rows.Select(row => new GameDay(row.PuzzleDate, row.Solved, row.Tries, row.Seconds, timeLabel?.Invoke(row.Marks)));
+        return GameStats.From(days, today, maxTries, timed: timeLabel is not null);
     }
 
     /// <summary>

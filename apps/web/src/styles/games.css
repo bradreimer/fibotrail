@@ -332,6 +332,28 @@
   font-variant-numeric: tabular-nums;
 }
 
+.game-stats__times {
+  display: grid;
+  gap: var(--fibo-space-2);
+  margin: 0;
+}
+
+.game-stats__time {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--fibo-space-4);
+  font-variant-numeric: tabular-nums;
+}
+
+.game-stats__time dt {
+  font-weight: 600;
+}
+
+.game-stats__time dd {
+  margin: 0;
+  color: var(--fibo-ink-muted);
+}
+
 .game-stats__bars {
   display: grid;
   gap: var(--fibo-space-2);

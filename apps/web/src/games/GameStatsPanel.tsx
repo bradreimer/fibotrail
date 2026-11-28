@@ -1,11 +1,13 @@
 import type { components } from '../api/schema';
+import { formatTime } from './time';
 
 type GameStats = components['schemas']['GameStats'];
 
 /**
  * A game's stats: played, win percentage, streaks, and how many tries each win took. The bar of
- * today's tries is highlighted. A game that is always one try, such as Slide, has no bars. See
- * docs/specs/games.md#results-and-stats.
+ * today's tries is highlighted. A game that is always one try, such as Slide, has no bars. A timed
+ * game, such as Stamps, always ends solved, so it shows its best and average times instead of a win
+ * percentage. See docs/specs/games.md#results-and-stats and docs/specs/games.md#timed-games.
  */
 export function GameStatsPanel({ stats, today }: { stats: GameStats; today?: number }) {
   const most = Math.max(1, ...stats.tries);
@@ -16,10 +18,25 @@ export function GameStatsPanel({ stats, today }: { stats: GameStats; today?: num
       </h2>
       <dl className="game-stats__tiles">
         <Tile label="Played" value={stats.played} />
-        <Tile label="Win %" value={stats.winPercent} />
+        {!stats.times && <Tile label="Win %" value={stats.winPercent} />}
         <Tile label="Current streak" value={stats.currentStreak} />
         <Tile label="Best streak" value={stats.bestStreak} />
       </dl>
+      {stats.times && stats.times.length > 0 && (
+        <>
+          <h3 className="game-stats__subtitle">Times</h3>
+          <dl className="game-stats__times">
+            {stats.times.map((time) => (
+              <div key={time.label} className="game-stats__time">
+                <dt>{time.label || 'All'}</dt>
+                <dd>
+                  best {formatTime(time.best)}, average {formatTime(time.average)}
+                </dd>
+              </div>
+            ))}
+          </dl>
+        </>
+      )}
       {stats.tries.length > 1 && (
         <>
           <h3 className="game-stats__subtitle">Tries to win</h3>

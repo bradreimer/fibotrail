@@ -1,0 +1,255 @@
+/*
+ * The Stamps game. Its styles live in its own folder, so removing the folder removes them. See
+ * docs/specs/stamps-game.md#playing.
+ *
+ * The 8 region colors are tokens with a light and a dark value. Photos sit over them at 25%,
+ * blended by brightness only, so a region keeps one color and the photo shows as texture. Region borders are 3 px and borders inside a region 1 px, so a
+ * region can be told apart by its outline, not only its color.
+ */
+.stamps {
+  --stamps-region-0: #f2c4b4;
+  --stamps-region-1: #b9dcc0;
+  --stamps-region-2: #f4dc9a;
+  --stamps-region-3: #b5d3e6;
+  --stamps-region-4: #d9c2e6;
+  --stamps-region-5: #f1b9cf;
+  --stamps-region-6: #c9d79b;
+  --stamps-region-7: #a9dfd8;
+  --stamps-line: var(--fibo-ink);
+  --stamps-thick: 3px;
+  --stamps-thin: 1px;
+  --stamps-conflict: var(--fibo-coral);
+  --stamps-ink: #1d2b2f;
+
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--fibo-space-4);
+  max-inline-size: calc(var(--fibo-space-7) * 9);
+}
+
+@media (prefers-color-scheme: dark) {
+  .stamps {
+    --stamps-region-0: #8a4b39;
+    --stamps-region-1: #3f6b49;
+    --stamps-region-2: #87692a;
+    --stamps-region-3: #35607a;
+    --stamps-region-4: #604a75;
+    --stamps-region-5: #7d3e58;
+    --stamps-region-6: #5b6a2c;
+    --stamps-region-7: #2d6c66;
+    --stamps-ink: #f7f3ea;
+  }
+}
+
+.stamps__day {
+  margin: 0;
+  font-weight: 600;
+}
+
+.stamps__bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-variant-numeric: tabular-nums;
+}
+
+.stamps__clock {
+  font-size: var(--fibo-text-h3);
+  font-weight: 600;
+}
+
+.stamps__hints,
+.stamps__hint-line {
+  margin: 0;
+  color: var(--fibo-ink-muted);
+}
+
+.stamps-board-wrap {
+  position: relative;
+}
+
+/* The board is square and takes every touch, so a drag never scrolls or zooms the page. */
+.stamps-board {
+  display: grid;
+  grid-template-columns: repeat(var(--stamps-size), minmax(0, 1fr));
+  aspect-ratio: 1;
+  border: var(--stamps-thick) solid var(--stamps-line);
+  border-radius: var(--fibo-space-2);
+  overflow: hidden;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.stamps-cell {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-inline-size: 0;
+  aspect-ratio: 1;
+  margin: 0;
+  padding: 0;
+  border: 0 solid var(--stamps-line);
+  background: var(--stamps-region);
+  color: var(--stamps-ink);
+  font: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.stamps-cell:focus-visible {
+  outline: 3px solid var(--fibo-teal);
+  outline-offset: -3px;
+  z-index: 1;
+}
+
+.stamps-cell__photo {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+  opacity: 0.25;
+  mix-blend-mode: luminosity;
+  pointer-events: none;
+}
+
+.stamps-cell__cross,
+.stamps-cell__stamp {
+  position: relative;
+  pointer-events: none;
+}
+
+.stamps-cell__cross {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.stamps-cell__cross--auto {
+  opacity: 0.35;
+}
+
+/* A stamp lands: it scales from 120% to 100% and tilts 3 degrees. */
+.stamps-cell__stamp {
+  display: grid;
+  place-items: center;
+  inline-size: 72%;
+  aspect-ratio: 1;
+  border: 2px solid currentcolor;
+  border-radius: 50%;
+  font-family: var(--fibo-font-display);
+  font-weight: 700;
+  font-size: 1.1rem;
+  transform: rotate(-3deg);
+  animation: stamps-land 180ms ease-out;
+}
+
+@keyframes stamps-land {
+  from {
+    transform: scale(1.2) rotate(0deg);
+  }
+
+  to {
+    transform: scale(1) rotate(-3deg);
+  }
+}
+
+.stamps-cell--conflict .stamps-cell__stamp {
+  color: var(--stamps-conflict);
+  animation: stamps-pulse 1s ease-in-out infinite;
+}
+
+@keyframes stamps-pulse {
+  50% {
+    opacity: 0.45;
+  }
+}
+
+.stamps-cell--hint {
+  box-shadow: inset 0 0 0 3px var(--fibo-gold);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stamps-cell__stamp,
+  .stamps-cell--conflict .stamps-cell__stamp {
+    animation: none;
+  }
+}
+
+/* A press held still shows the cell's photo over the board, until you let go. */
+.stamps-peek {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: var(--fibo-scrim-strong);
+  border-radius: var(--fibo-space-2);
+  pointer-events: none;
+}
+
+.stamps-peek__photo {
+  max-inline-size: 92%;
+  max-block-size: 92%;
+  border-radius: var(--fibo-space-2);
+  object-fit: contain;
+}
+
+.stamps__tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--fibo-space-3);
+}
+
+/* The passport page: the stamped photos, one per trip. */
+.passport {
+  padding: var(--fibo-space-4);
+  border: var(--fibo-border) solid var(--fibo-mist);
+  border-radius: var(--fibo-radius);
+}
+
+.passport__title {
+  margin: 0 0 var(--fibo-space-4);
+  font-family: var(--fibo-font-display);
+  font-size: var(--fibo-text-h3);
+}
+
+.passport__stamps {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(6.5rem, 1fr));
+  gap: var(--fibo-space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.passport__stamp {
+  display: grid;
+  gap: var(--fibo-space-1);
+  animation: passport-drop var(--fibo-dur-page) ease-out both;
+}
+
+.passport__photo {
+  display: block;
+  inline-size: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: var(--fibo-space-2);
+  transform: rotate(-2deg);
+}
+
+.passport__name {
+  font-weight: 600;
+}
+
+.passport__date {
+  color: var(--fibo-ink-muted);
+  font-size: var(--fibo-text-caption);
+}
+
+@keyframes passport-drop {
+  from {
+    opacity: 0;
+    transform: translateY(calc(var(--fibo-shift) * -1));
+  }
+}

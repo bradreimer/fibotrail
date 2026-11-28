@@ -82,10 +82,15 @@ of my trips, so that I have a quick brain teaser that ends with one photo from e
   2. Grow the regions. Each stamp seeds one region. Repeatedly, a random region takes a random
      empty cell next to it (up, down, left, or right), until every cell has a region. So every
      region is connected.
-  3. Keep the board only when the **uniqueness solver** finds exactly one solution, and the
-     **logic solver** solves it with no guessing. Otherwise, go back to step 1 with the next seed
-     step, for up to 2,000 attempts.
-  4. If every attempt fails, use the smaller size, down to 5. A day with no board at 5 shows "No
+  3. **Repair.** Random regions almost never have one solution: in a sample of 3,000 boards,
+     19 had one at 6 × 6, 1 at 7 × 7, and none at 8 × 8. So while the uniqueness solver finds
+     another solution, one of that solution's cells that isn't a planned stamp moves into a region
+     next to it, if its own region stays connected. The other solution then has two stamps in one
+     region, so it breaks, and the planned one still holds. A repair stops after 4 moves per cell.
+  4. Keep the board only when the repair ends with exactly one solution, and the **logic solver**
+     solves it with no guessing. Otherwise, go back to step 1 with the next seed step, for up to
+     2,000 attempts.
+  5. If every attempt fails, use the smaller size, down to 5. A day with no board at 5 shows "No
      board today. Try again tomorrow." The tests check that this doesn't happen for the sizes and
      seeds they cover.
 - **Uniqueness solver.** A backtracking search, row by row, that stops at 2 solutions.
@@ -100,7 +105,10 @@ of my trips, so that I have a quick brain teaser that ends with one photo from e
   5. A cell is ruled out when a stamp there would leave some row, column, or region with no open
      cell.
 - **Difficulty.** The weekday controls difficulty through size only. Larger boards need more steps
-  of the rules above. How long each size takes isn't measured yet.
+  of the rules above. How long each size takes a person isn't measured yet.
+- **Speed.** Over 200 seeded days per size, no size failed. An 8 × 8 board took 10 attempts on
+  average and 40 at most, and the slowest took 29 ms. The tests check 365 days per size, with at
+  most 200 attempts each.
 - **Photos.** Each cell shows a photo from its region's trip. The region's cells go through the
   trip's photos in time order, from a start picked by the seed, and repeat when the trip has fewer
   photos than cells. The stamp cell of each region shows a photo too, which becomes the passport
@@ -126,17 +134,21 @@ of my trips, so that I have a quick brain teaser that ends with one photo from e
   closes it. The peek shows no trip name, date, or place.
 - **Hints.** A hint button asks the server for the next step of the logic solver, from the current
   board. The board marks that one cell: a stamp it must have, or a ✕ it can't have, with the
-  rule's one-line reason, such as "Only one open cell is left in this row." A hint on a board with a
-  wrong stamp points to that stamp instead. The hint count shows next to the timer.
+  rule's one-line reason, such as "Stamp here: Only one open cell is left in this row." A hint on a
+  board with a wrong stamp, or a ✕ on a solution cell, points to that mistake instead, starting
+  with "Look again:". The hint count shows next to the timer. A hint starts the timer.
 - **Timer.** It starts on the first tap or drag, not when the screen opens. It pauses while the page
   is hidden (`visibilitychange`), and shows minutes and seconds.
 - **Feel.** A placed stamp scales from 120% to 100% and tilts 3° over 180 ms, and the stamp shows
-  the trip's initial. Where the browser has `navigator.vibrate`, a stamp gives a 10 ms pulse and a
-  ✕ gives none. With reduce motion on, the stamp appears with no motion.
-- **Looks.** The grid shows the region colors first. Photos sit under them at 25% opacity, so the
-  regions stay easy to read. Borders between regions are 3 px; borders inside a region are 1 px.
-  So the regions can be told apart by their borders, not only by color. The 8 region colors are
-  design tokens with a light and a dark value each.
+  the region's letter, not the trip's name or initial. Where the browser has `navigator.vibrate`, a
+  stamp gives a 10 ms pulse and a ✕ gives none. With reduce motion on, the stamp appears with no motion.
+- **Looks.** The grid shows the region colors first. Photos sit over them at 25% opacity, blended
+  by brightness only (`mix-blend-mode: luminosity`), so a region keeps one color and its photos
+  show as texture. Borders between regions are 3 px; borders inside a region are 1 px. Each cell
+  draws only its top and left line, in whole pixels, and the board draws its outer edge, because a
+  browser rounds half-pixel lines to the same width. So the regions can be told apart by their
+  borders, not only by color. The 8 region colors are custom properties in the game's own
+  stylesheet, with a light and a dark value each, so removing the game removes them.
 - **Keyboard and VoiceOver.** Each cell is a button named by its row, column, region letter, and
   state, such as "Row 2, column 3, region C, empty". Enter, Space, or a VoiceOver double tap moves
   it through the tap cycle. The arrow keys move focus between cells. A conflict adds "breaks a rule"
@@ -185,6 +197,8 @@ of my trips, so that I have a quick brain teaser that ends with one photo from e
   ends solved, it shows no Win % and no "Tries to win" bars.
 - It also shows **Best time** and **Average time**, each over days with a time. With the board
   size changing by weekday, both are split by size, such as "6 × 6: best 1:12, average 2:05".
+- The Stamps card on the Games screen adds the best time over every size, such as
+  "· best 1:12". An average over sizes would mix easy and hard days, so the card leaves it out.
 
 ## Acceptance criteria
 
@@ -199,6 +213,7 @@ of my trips, so that I have a quick brain teaser that ends with one photo from e
 - Undo takes back the last change, and Clear board asks first.
 - The timer starts on the first tap, and pauses while the page is hidden.
 - Leaving and opening Stamps again the same day restores the board, the time, and the hints.
+- The Stamps card shows the best time, and the stats show the best and average time by size.
 - A hint returns a step that follows from the board, and the hint count goes up.
 - While you play, no trip name, date, or place shows, and the puzzle route sends none.
 - A result with stamps that break a rule is refused with 400, and nothing is stored.
@@ -212,9 +227,8 @@ of my trips, so that I have a quick brain teaser that ends with one photo from e
 
 - How long does each size take a person? The size table is a guess. Revisit after a few weeks of
   play, and record solve times per size in [status.md](../status.md).
-- How fast is the generator? 2,000 attempts at 8 × 8 is a guess at an upper bound. The tests should
-  record the attempts used, and the puzzle route should take less than 100 ms.
 - Should a library with fewer than 5 trips get regions from countries or months instead? Not until
   it's asked for.
-- Do 25% photos keep the regions readable on a real iPhone in bright light? Checked only in a
-  desktop browser so far.
+- Do 25% photos keep the regions readable on a real iPhone in bright light? Checked only in
+  Chromium with iPhone 13 emulation, light and dark, with stand-in photos.
+- Do the drag (6 px) and peek (500 ms) feel right on a real iPhone? Checked only in tests.
