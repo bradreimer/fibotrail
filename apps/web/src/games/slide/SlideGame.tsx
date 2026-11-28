@@ -7,8 +7,7 @@ import { useSession } from '../../api/session';
 import { useApi } from '../../api/useApi';
 import { ErrorState } from '../../states/ErrorState';
 import { countOf, formatDateRange } from '../../trips/dates';
-import { GameStatsPanel } from '../GameStatsPanel';
-import { shareResult, type ShareOutcome } from '../share';
+import { GameEnd } from '../GameEnd';
 import { localDate } from '../today';
 import { isSolved, moveAll } from './board';
 import { SlideBoard } from './SlideBoard';
@@ -145,9 +144,6 @@ function SlidePlay({
 
 /** The end of the game: the whole photo, with its trip's name, dates, and place. */
 function SlideResult({ heading, result }: { heading: ReactNode; result: Result }) {
-  const [shared, setShared] = useState<ShareOutcome | null>(null);
-  const label =
-    shared === 'copied' ? 'Copied' : shared === 'failed' ? "Couldn't share. Try again." : 'Share';
   const { answer } = result;
   const image = (
     <img
@@ -185,15 +181,7 @@ function SlideResult({ heading, result }: { heading: ReactNode; result: Result }
         </figcaption>
       </figure>
       {answer.immichUrl && <p className="games-page__lead">Tap the photo to open it in Immich.</p>}
-      <button
-        type="button"
-        className="button timeline__check"
-        onClick={() => void shareResult(result.share).then(setShared)}
-      >
-        {label}
-      </button>
-      <GameStatsPanel stats={result.stats} />
-      <p className="games-page__lead">A new puzzle comes tomorrow.</p>
+      <GameEnd game="slide" share={result.share} stats={result.stats} />
     </section>
   );
 }

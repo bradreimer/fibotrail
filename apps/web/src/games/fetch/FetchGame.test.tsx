@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { expectNoAccessibilityProblems } from '../../accessibility/accessibility';
 import { App } from '../../App';
+import { gamesList } from '../../test/games';
 import { fakeServer } from '../../test/server';
 import { installMatchMedia } from '../../test/window';
 import { localDate } from '../today';
@@ -158,10 +159,18 @@ describe('the Fetch game', () => {
   });
 
   it('shows a played day: the runs, the caught photos, the trip, and the stats', async () => {
-    fakeServer({ 'GET /api/games/fetch/puzzle': puzzle(result()) });
+    fakeServer({
+      'GET /api/games/fetch/puzzle': puzzle(result()),
+      'GET /api/games': gamesList(['timeline', 'slide', 'fetch']),
+    });
     const { container } = renderGame();
 
     expect(await screen.findByText('Finished on run 2, with 2 of 8 treats.')).toBeInTheDocument();
+    // Pin comes before Fetch on the Games screen, so it's next though Stamps is unplayed too.
+    expect(await screen.findByRole('link', { name: 'Next game: Pin →' })).toHaveAttribute(
+      'href',
+      '/games/pin',
+    );
     const runs = screen.getByRole('list', { name: 'Your runs' });
     expect(within(runs).getByLabelText('Run 2: Finished, with 2 of 8 treats.')).toBeInTheDocument();
     expect(

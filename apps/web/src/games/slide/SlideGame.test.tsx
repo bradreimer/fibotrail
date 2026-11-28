@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { expectNoAccessibilityProblems } from '../../accessibility/accessibility';
 import { App } from '../../App';
+import { gamesList } from '../../test/games';
 import { fakeServer } from '../../test/server';
 import { installMatchMedia } from '../../test/window';
 import { localDate } from '../today';
@@ -189,10 +190,17 @@ describe('the Slide game', () => {
   });
 
   it('shows the whole photo with the trip name, dates, and place when played', async () => {
-    fakeServer({ 'GET /api/games/slide/puzzle': puzzle(result) });
+    fakeServer({
+      'GET /api/games/slide/puzzle': puzzle(result),
+      'GET /api/games': gamesList(['timeline', 'slide', 'pin', 'fetch', 'stamps']),
+    });
     const { container } = renderGame();
 
     const figure = (await screen.findByRole('figure')) as HTMLElement;
+    expect(await screen.findByRole('link', { name: 'Back to Games' })).toHaveAttribute(
+      'href',
+      '/games',
+    );
     expect(within(figure).getByRole('img')).toHaveAttribute('src', '/api/photos/photo-1/preview');
     expect(within(figure).getByRole('link', { name: 'Banff, July 2025' })).toHaveAttribute(
       'href',
