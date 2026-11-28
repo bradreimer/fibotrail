@@ -16,6 +16,40 @@ public sealed record TrailPreview(string OriginalName, DateTime StartUtc, DateTi
 /// <param name="Segments">The line, split at gaps. The map draws each segment on its own and never joins them.</param>
 public sealed record TrailInfo(int Id, string OriginalName, DateTime StartUtc, DateTime EndUtc, double DistanceKm, int MovingMinutes, int PointCount, IReadOnlyList<IReadOnlyList<TrailPosition>> Segments);
 
+/// <summary>Where a trail's offset came from.</summary>
+public enum OffsetSource
+{
+    /// <summary>You chose it with Adjust time. An estimate never replaces it.</summary>
+    You,
+
+    /// <summary>Fibotrail estimated it from the photos that have a position of their own.</summary>
+    Estimated,
+
+    /// <summary>There was nothing to estimate from, so the offset is 0.</summary>
+    None,
+
+    /// <summary>A trial offset from the Adjust time sheet. Nothing is saved.</summary>
+    Trial,
+}
+
+/// <summary>A trip photo that lands on a trail.</summary>
+/// <param name="Estimated">True when the photo has no position of its own, so the trail gives the only one.</param>
+public sealed record AlignedPhotoInfo(string Id, DateTime LocalTime, double Latitude, double Longitude, bool Estimated);
+
+/// <summary>How a trip's photos land on one trail.</summary>
+/// <param name="OffsetMinutes">The offset used: photo local time = trail UTC time + offset.</param>
+/// <param name="EstimatedOffsetMinutes">The estimate, or null when there is none. Shown by Use estimate.</param>
+/// <param name="Photos">The photos that land on the trail, in time order.</param>
+public sealed record TrailAlignment(int TrailId, int OffsetMinutes, OffsetSource Source, int? EstimatedOffsetMinutes, IReadOnlyList<AlignedPhotoInfo> Photos);
+
+/// <summary>How a trip's photos land on its trails.</summary>
+/// <param name="Outside">The photos that land on no trail, in time order.</param>
+/// <param name="PhotoCount">All the trip's photos.</param>
+public sealed record TripAlignment(IReadOnlyList<TrailAlignment> Trails, IReadOnlyList<string> Outside, int PhotoCount);
+
+/// <summary>An offset you chose for a trail, in minutes, or null to use the estimate.</summary>
+public sealed record OffsetChange(int? Minutes);
+
 public enum TrailOutcome
 {
     Done,
@@ -34,7 +68,7 @@ public sealed record TrailResult<T>(TrailOutcome Outcome, T? Value = default, st
 /// the row holds the numbers and the line for the map. Nothing here reads or writes Immich. See
 /// docs/specs/gps-trails.md and ADR-024.
 /// </summary>
-public sealed class TrailStore(FibotrailDbContext db, ServerSettings settings, TimeProvider time)
+public sealed class TrailStore(FibotrailDbContext db, ServerSettings settings, TimeProvider time, TrailFileCache files)
 {
     /// <summary>The largest file accepted: 50 MB, about a month of points every second.</summary>
     public const long MaxBytes = 50L * 1024 * 1024;
@@ -120,13 +154,15 @@ public sealed class TrailStore(FibotrailDbContext db, ServerSettings settings, T
             return null;
         }
 
-        var trails = await db.Trails.AsNoTracking()
+        return [.. (await TrailsOfAsync(trip, cancellationToken)).Select(ToInfo)];
+    }
+
+    private Task<List<Trail>> TrailsOfAsync(Trip trip, CancellationToken cancellationToken) =>
+        db.Trails.AsNoTracking()
             .Where(trail => db.Decisions.Any(decision => decision.Id == trail.DecisionId && decision.Fingerprint == trip.Fingerprint))
             .OrderBy(trail => trail.StartUtc)
             .ThenBy(trail => trail.Id)
             .ToListAsync(cancellationToken);
-        return [.. trails.Select(ToInfo)];
-    }
 
     /// <summary>Removes a trail of a trip: its row and its file.</summary>
     public async Task<TrailOutcome> RemoveAsync(int tripId, int trailId, CancellationToken cancellationToken)
@@ -149,6 +185,75 @@ public sealed class TrailStore(FibotrailDbContext db, ServerSettings settings, T
         }
 
         return TrailOutcome.Done;
+    }
+
+    /// <summary>
+    /// Places the trip's photos on each of its trails. A trial offset for one trail shows what Adjust
+    /// time would do, without saving. Null when there's no such trip. Positions from a trail are
+    /// shown only, never stored. See ADR-025.
+    /// </summary>
+    public async Task<TripAlignment?> AlignAsync(int tripId, int? trialTrailId, int? trialOffsetMinutes, CancellationToken cancellationToken)
+    {
+        var trip = await db.Trips.AsNoTracking().FirstOrDefaultAsync(candidate => candidate.Id == tripId, cancellationToken);
+        if (trip is null)
+        {
+            return null;
+        }
+
+        var trails = await TrailsOfAsync(trip, cancellationToken);
+        var photos = (await Trips.InboxRoutes.TripPhotosAsync(db, tripId, cancellationToken))
+            .Select(photo => new AlignPhoto(photo.Id, photo.LocalTime, photo.Latitude, photo.Longitude))
+            .ToList();
+
+        var onAnyTrail = new HashSet<string>(StringComparer.Ordinal);
+        var result = new List<TrailAlignment>();
+        foreach (var trail in trails)
+        {
+            var segments = files.Get(Path.Combine(settings.TrailDirectory, trail.FileName));
+            if (segments is null)
+            {
+                // The line is in the row, so the trail still draws. Without its file, no photo can be placed.
+                result.Add(new TrailAlignment(trail.Id, trail.OffsetMinutes ?? 0, trail.OffsetMinutes is null ? OffsetSource.None : OffsetSource.You, null, []));
+                continue;
+            }
+
+            var estimate = PhotoAlignment.EstimateOffset(photos, segments);
+            var (offset, source) = trail.Id == trialTrailId && trialOffsetMinutes is { } trial
+                ? (trial, OffsetSource.Trial)
+                : trail.OffsetMinutes is { } chosen ? (chosen, OffsetSource.You)
+                : estimate is { } estimated ? (estimated, OffsetSource.Estimated)
+                : (0, OffsetSource.None);
+            var aligned = PhotoAlignment.Align(photos, segments, offset)
+                .Where(photo => !photo.Outside)
+                .Select(photo => new AlignedPhotoInfo(photo.Photo.Id, photo.Photo.LocalTime, photo.Position!.Latitude, photo.Position.Longitude, !photo.Photo.HasPosition))
+                .ToList();
+            onAnyTrail.UnionWith(aligned.Select(photo => photo.Id));
+            result.Add(new TrailAlignment(trail.Id, offset, source, estimate, aligned));
+        }
+
+        return new TripAlignment(result, [.. photos.Where(photo => !onAnyTrail.Contains(photo.Id)).Select(photo => photo.Id)], photos.Count);
+    }
+
+    /// <summary>Saves the offset you chose for a trail, or removes it to use the estimate.</summary>
+    public async Task<TrailResult<int?>> SetOffsetAsync(int tripId, int trailId, int? minutes, CancellationToken cancellationToken)
+    {
+        if (minutes is < -PhotoAlignment.MaxOffsetMinutes or > PhotoAlignment.MaxOffsetMinutes)
+        {
+            return new(TrailOutcome.Refused, Problem: "Choose an offset from 14 hours behind to 14 hours ahead.");
+        }
+
+        var trip = await db.Trips.AsNoTracking().FirstOrDefaultAsync(candidate => candidate.Id == tripId, cancellationToken);
+        var trail = trip is null ? null : await db.Trails
+            .Where(candidate => candidate.Id == trailId && db.Decisions.Any(decision => decision.Id == candidate.DecisionId && decision.Fingerprint == trip.Fingerprint))
+            .FirstOrDefaultAsync(cancellationToken);
+        if (trail is null)
+        {
+            return new(TrailOutcome.NotFound);
+        }
+
+        trail.OffsetMinutes = minutes;
+        await db.SaveChangesAsync(cancellationToken);
+        return new(TrailOutcome.Done, minutes);
     }
 
     /// <summary>The full path of a trail's stored file. For tests and maintenance.</summary>

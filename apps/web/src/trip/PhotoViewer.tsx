@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState, type KeyboardEvent, type PointerE
 
 import { LazyMap } from '../map/LazyMap';
 import type { MapMarker } from '../map/MapView';
+import type { Position } from '../map/mapStyle';
 import { formatPhotoTime } from './format';
 import type { TripPhoto } from './PhotoTile';
 
@@ -15,6 +16,11 @@ interface PhotoViewerProps {
   onClose: () => void;
   /** Puts the photo on the way, or brings it back. It rejects when the change couldn't be saved. */
   onHideChange: (photoId: string, onTheWay: boolean) => Promise<void>;
+  /**
+   * Positions from a GPS trail, by photo ID, for photos with no position of their own. The small
+   * map shows one with a line that says where it came from. See docs/specs/gps-trails.md.
+   */
+  estimatedPositions?: ReadonlyMap<string, Position>;
 }
 
 /**
@@ -27,6 +33,7 @@ export function PhotoViewer({
   onIndexChange,
   onClose,
   onHideChange,
+  estimatedPositions,
 }: PhotoViewerProps) {
   const photo = photos[index]!;
   const close = useRef<HTMLButtonElement>(null);
@@ -102,21 +109,34 @@ export function PhotoViewer({
     else if (x >= VIEWER_SWIPE) go(-1);
   }
 
-  const markers = useMemo<MapMarker[]>(
-    () =>
-      photo.latitude !== null && photo.longitude !== null
-        ? [
-            {
-              id: photo.id,
-              kind: 'start',
-              label: `Taken here${photo.place ? `: ${photo.place}` : ''}`,
-              latitude: photo.latitude,
-              longitude: photo.longitude,
-            },
-          ]
-        : [],
-    [photo],
-  );
+  const estimated =
+    photo.latitude === null || photo.longitude === null
+      ? (estimatedPositions?.get(photo.id) ?? null)
+      : null;
+  const markers = useMemo<MapMarker[]>(() => {
+    if (photo.latitude !== null && photo.longitude !== null) {
+      return [
+        {
+          id: photo.id,
+          kind: 'start',
+          label: `Taken here${photo.place ? `: ${photo.place}` : ''}`,
+          latitude: photo.latitude,
+          longitude: photo.longitude,
+        },
+      ];
+    }
+    return estimated
+      ? [
+          {
+            id: photo.id,
+            kind: 'start',
+            label: 'Estimated from the GPS trail',
+            latitude: estimated.latitude,
+            longitude: estimated.longitude,
+          },
+        ]
+      : [];
+  }, [photo, estimated]);
 
   const moving = offset.x !== 0 || offset.y !== 0;
   return (
@@ -193,10 +213,11 @@ export function PhotoViewer({
           Keeps this photo in the trip but off the map.
         </p>
         {problem && <p role="alert">{problem}</p>}
+        {estimated && <p className="viewer__hint">Estimated from the GPS trail</p>}
         {markers.length > 0 && (
           <LazyMap
             className="viewer__map"
-            label={`Map of where this photo was taken${photo.place ? `, ${photo.place}` : ''}`}
+            label={`Map of where this photo was taken${photo.place ? `, ${photo.place}` : estimated ? ', estimated from the GPS trail' : ''}`}
             markers={markers}
             interactive={false}
             detail="fine"

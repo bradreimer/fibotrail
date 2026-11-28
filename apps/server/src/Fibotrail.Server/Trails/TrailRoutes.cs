@@ -54,6 +54,25 @@ public static class TrailRoutes
             };
         }).WithName("AddTrail").Produces<ProblemDetail>(StatusCodes.Status413PayloadTooLarge);
 
+        // Where the trip's photos land on each trail. trailId and offsetMinutes try an offset for one trail without saving it.
+        api.MapGet("/trips/{id:int}/trails/alignment", async Task<Results<Ok<TripAlignment>, NotFound>> (
+            int id, int? trailId, int? offsetMinutes, TrailStore trails, CancellationToken cancellationToken) =>
+            await trails.AlignAsync(id, trailId, offsetMinutes, cancellationToken) is { } alignment ? TypedResults.Ok(alignment) : TypedResults.NotFound())
+            .WithName("GetTrailAlignment");
+
+        // Adjust time: the offset you chose is a decision, and an estimate never replaces it.
+        api.MapPut("/trips/{id:int}/trails/{trailId:int}/offset", async Task<Results<NoContent, NotFound, BadRequest<ProblemDetail>>> (
+            int id, int trailId, OffsetChange change, TrailStore trails, CancellationToken cancellationToken) =>
+        {
+            var result = await trails.SetOffsetAsync(id, trailId, change.Minutes, cancellationToken);
+            return result.Outcome switch
+            {
+                TrailOutcome.Done => TypedResults.NoContent(),
+                TrailOutcome.NotFound => TypedResults.NotFound(),
+                _ => TypedResults.BadRequest(new ProblemDetail(result.Problem!)),
+            };
+        }).WithName("SetTrailOffset");
+
         api.MapDelete("/trips/{id:int}/trails/{trailId:int}", async Task<Results<NoContent, NotFound>> (int id, int trailId, TrailStore trails, CancellationToken cancellationToken) =>
             await trails.RemoveAsync(id, trailId, cancellationToken) == TrailOutcome.Done ? TypedResults.NoContent() : TypedResults.NotFound())
             .WithName("RemoveTrail");

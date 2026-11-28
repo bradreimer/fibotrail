@@ -9,6 +9,8 @@ export interface MapColors {
   routeOutline: string;
   /** A GPS trail. It differs from the photo route, which is Trail Teal. */
   trail: string;
+  /** A photo placed on a GPS trail by its time. */
+  photo: string;
   /** The fill of a country you've visited. */
   visited: string;
 }
@@ -25,6 +27,7 @@ export function readMapColors(element: Element, dark: boolean): MapColors {
     route: token('--fibo-teal'),
     routeOutline: token('--fibo-paper'),
     trail: dark ? token('--fibo-gold') : token('--fibo-ocean'),
+    photo: token('--fibo-coral'),
     visited: token('--fibo-meadow'),
   };
 }
@@ -33,6 +36,8 @@ export const LAND_SOURCE = 'land';
 export const ROUTE_SOURCE = 'route';
 export const TRAIL_SOURCE = 'trails';
 export const TRAIL_LAYER = 'trail';
+export const TRAIL_PHOTO_SOURCE = 'trail-photos';
+export const TRAIL_PHOTO_LAYER = 'trail-photos';
 export const REGION_SOURCE = 'regions';
 export const VISITED_LAYER = 'visited';
 /** The visited detail countries, filled whole only until the regions are drawn. */
@@ -78,6 +83,10 @@ export function baseMapStyle(colors: MapColors): StyleSpecification {
       [LAND_SOURCE]: { type: 'geojson', data: { type: 'FeatureCollection', features: [] } },
       [ROUTE_SOURCE]: { type: 'geojson', data: { type: 'FeatureCollection', features: [] } },
       [TRAIL_SOURCE]: { type: 'geojson', data: { type: 'FeatureCollection', features: [] } },
+      [TRAIL_PHOTO_SOURCE]: {
+        type: 'geojson',
+        data: { type: 'FeatureCollection', features: [] },
+      },
       [REGION_SOURCE]: { type: 'geojson', data: { type: 'FeatureCollection', features: [] } },
       [CITY_SOURCE]: { type: 'geojson', data: { type: 'FeatureCollection', features: [] } },
     },
@@ -169,7 +178,39 @@ export function baseMapStyle(colors: MapColors): StyleSpecification {
         layout: { 'line-cap': 'round', 'line-join': 'round' },
         paint: { 'line-color': colors.route, 'line-width': 4 },
       },
+      // Photos placed on a GPS trail by time. A photo with no position of its own is hollow.
+      {
+        id: TRAIL_PHOTO_LAYER,
+        type: 'circle',
+        source: TRAIL_PHOTO_SOURCE,
+        paint: {
+          'circle-radius': 5,
+          'circle-color': ['case', ['get', 'estimated'], colors.routeOutline, colors.photo],
+          'circle-stroke-color': colors.photo,
+          'circle-stroke-width': 2,
+        },
+      },
     ],
+  };
+}
+
+/** A photo placed on a GPS trail by its time. `estimated` is true when the trail gives its only position. */
+export interface PhotoDot extends Position {
+  id: string;
+  estimated: boolean;
+  /** What a screen reader and the test map say for the dot. */
+  label: string;
+}
+
+/** The photo dots as GeoJSON, with the ID and whether the position is estimated in each feature. */
+export function photoDotsGeoJson(dots: readonly PhotoDot[]): GeoJSON.FeatureCollection {
+  return {
+    type: 'FeatureCollection',
+    features: dots.map((dot) => ({
+      type: 'Feature',
+      properties: { id: dot.id, estimated: dot.estimated },
+      geometry: { type: 'Point', coordinates: [dot.longitude, dot.latitude] },
+    })),
   };
 }
 

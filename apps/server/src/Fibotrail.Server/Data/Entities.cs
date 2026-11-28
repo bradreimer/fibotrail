@@ -390,5 +390,12 @@ public sealed class Trail
     /// <summary>The simplified line the map draws, as JSON: segments of [latitude, longitude] pairs.</summary>
     public required string LineJson { get; set; }
 
+    /// <summary>
+    /// The offset you chose, in minutes: photo local time = trail UTC time + offset. Null uses the
+    /// estimate, which isn't stored. Your offset is a decision, so an estimate never replaces it.
+    /// See docs/specs/gps-trails.md#photo-alignment.
+    /// </summary>
+    public int? OffsetMinutes { get; set; }
+
     public DateTime AddedAt { get; set; }
 }

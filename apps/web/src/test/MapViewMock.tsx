@@ -11,6 +11,8 @@ export default function MapViewMock({
   route = [],
   routes,
   trails,
+  photoDots,
+  onPhotoDotSelect,
   visited,
   onCountrySelect,
   detailCountries,
@@ -34,6 +36,7 @@ export default function MapViewMock({
       data-route={JSON.stringify(route)}
       data-routes={routes ? JSON.stringify(routes) : undefined}
       data-trails={trails ? JSON.stringify(trails) : undefined}
+      data-photo-dots={photoDots ? JSON.stringify(photoDots) : undefined}
       data-visited={visited ? JSON.stringify(visited) : undefined}
       data-detail-countries={detailCountries ? JSON.stringify(detailCountries) : undefined}
       data-visited-regions={visitedRegions ? JSON.stringify(visitedRegions) : undefined}
@@ -57,6 +60,16 @@ export default function MapViewMock({
             {`Pin on the map: ${pin.key}`}
           </button>
         ))}
+      {photoDots?.map((dot) => (
+        <button
+          key={`dot-${dot.id}`}
+          type="button"
+          data-kind={dot.estimated ? 'estimated-photo' : 'trail-photo'}
+          onClick={() => onPhotoDotSelect?.(dot.id)}
+        >
+          {dot.label}
+        </button>
+      ))}
       {markers.map((marker) => (
         <button
           key={marker.id}

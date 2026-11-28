@@ -8,6 +8,8 @@ import { AddTripSheet } from '../inbox/AddTripSheet';
 import type { Suggestion } from '../inbox/SuggestionCard';
 import { LazyMap } from '../map/LazyMap';
 import type { MapMarker } from '../map/MapView';
+import type { PhotoDot } from '../map/mapStyle';
+import type { components } from '../api/schema';
 import { BackLink } from '../shell/BackLink';
 import { EmptyState } from '../states/EmptyState';
 import { ErrorState } from '../states/ErrorState';
@@ -26,6 +28,12 @@ export function TripScreen() {
   const trip = useApi('/api/trips/{id}', `/api/trips/${id}`, version);
   const [trailVersion, setTrailVersion] = useState(0);
   const trails = useApi('/api/trips/{id}/trails', `/api/trips/${id}/trails`, trailVersion);
+  const [alignVersion, setAlignVersion] = useState(0);
+  const alignment = useApi(
+    '/api/trips/{id}/trails/alignment',
+    `/api/trips/${id}/trails/alignment`,
+    `${trailVersion}-${alignVersion}`,
+  );
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [problem, setProblem] = useState<string | null>(null);
@@ -46,6 +54,36 @@ export function TripScreen() {
   const trailLines = useMemo(
     () => (trails.data ?? []).flatMap((trail) => trail.segments),
     [trails.data],
+  );
+  // Photos placed on the trails by time. A photo on two trails takes its place on the first.
+  const placed = useMemo(() => {
+    const seen = new Map<string, components['schemas']['AlignedPhotoInfo']>();
+    for (const trail of alignment.data?.trails ?? []) {
+      for (const item of trail.photos) if (!seen.has(item.id)) seen.set(item.id, item);
+    }
+    return [...seen.values()];
+  }, [alignment.data]);
+  const photoDots = useMemo<PhotoDot[]>(
+    () =>
+      placed.map((item) => ({
+        id: item.id,
+        latitude: item.latitude,
+        longitude: item.longitude,
+        estimated: item.estimated,
+        label: item.estimated
+          ? `Photo at ${item.localTime.slice(11, 16)}, estimated from the GPS trail`
+          : `Photo at ${item.localTime.slice(11, 16)}`,
+      })),
+    [placed],
+  );
+  const estimatedPositions = useMemo(
+    () =>
+      new Map(
+        placed
+          .filter((item) => item.estimated)
+          .map((item) => [item.id, { latitude: item.latitude, longitude: item.longitude }]),
+      ),
+    [placed],
   );
   const markers = useMemo<MapMarker[]>(() => {
     if (!data || data.stops.length === 0) return [];
@@ -166,6 +204,10 @@ export function TripScreen() {
                 markers={markers}
                 route={route}
                 trails={trailLines}
+                photoDots={photoDots}
+                onPhotoDotSelect={(photoId) =>
+                  setViewing(photos.findIndex((item) => item.id === photoId))
+                }
                 onSelect={(selected) => setStop(Number(selected))}
                 detail="fine"
               />
@@ -208,7 +250,9 @@ export function TripScreen() {
             trails={trails.data}
             error={trails.error}
             onRetry={trails.reload}
+            alignment={alignment.data}
             onChange={() => setTrailVersion((current) => current + 1)}
+            onAligned={() => setAlignVersion((current) => current + 1)}
           />
           <section className="trip-parks" aria-labelledby="trip-parks">
             <h3 className="trip-parks__heading" id="trip-parks">
@@ -304,6 +348,7 @@ export function TripScreen() {
           onIndexChange={setViewing}
           onClose={() => setViewing(null)}
           onHideChange={hide}
+          estimatedPositions={estimatedPositions}
         />
       )}
 
