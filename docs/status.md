@@ -35,7 +35,21 @@ of the accessibility checklist are also still unrecorded.
   points a trail. A new `Fibotrail.Trails` project holds the parser and the rules. Checked in tests
   only, not yet with a real BL-1000ST file, on a phone, or in a real container. Photo alignment, a
   watched folder, and trail analytics are later work items.
-
+- [#195](https://github.com/bradreimer/fibotrail/issues/195) A **progress ring** on the Games
+  screen ([spec](specs/daily-set.md#the-progress-ring)): "3 of 5 done today", then "All done for
+  today ✨". A lost game counts as played, and only games both registries list count. Web only.
+  Checked in tests and in Chromium with iPhone 13 emulation, light and dark.
+- [#191](https://github.com/bradreimer/fibotrail/issues/191) A **Stamps** game
+  ([spec](specs/stamps-game.md)), after 0.7.0: a daily logic puzzle where each region is one of
+  your trips. Place one stamp in each row, column, and trip, with no two touching. The board is
+  6 by 6 on Monday and Tuesday, 7 by 7 from Wednesday to Friday, and 8 by 8 on the weekend, or
+  smaller with fewer trips. A generator repairs random regions until there's one solution, then
+  keeps the board only when five written logic rules reach it, which also power the hints. Over
+  365 seeded days per size, every board passed, at most 200 attempts each. Tap, drag, Auto-✕,
+  undo, a clock that pauses in the background, and resume the same day. The end is a passport page
+  of the stamped photos. `game_result` gains a `seconds` column, and timed games show best and
+  average times ([games spec](specs/games.md#timed-games)). Checked in tests and in Chromium with
+  iPhone 13 emulation, not yet on a phone or the maintainer's library.
 - [#189](https://github.com/bradreimer/fibotrail/issues/189) A **Fetch** game
   ([spec](specs/fetch-game.md)), an experiment after 0.7.0. A schnauzer flies one of your trips:
   8 gates follow the trip's photo latitudes, north up, and 8 treats are its photos, in up to 3
@@ -474,6 +488,11 @@ Nothing is in progress.
 
 The plan is in [roadmap.md](roadmap.md). Specs are in [specs/](specs/README.md).
 
+- [#194](https://github.com/bradreimer/fibotrail/issues/194) The day's games as one set
+  ([spec](specs/daily-set.md)): one "Share today" message from a stored share text per result
+  ([#196](https://github.com/bradreimer/fibotrail/issues/196)), and a shared end screen with a
+  next-game link ([#197](https://github.com/bradreimer/fibotrail/issues/197)). The progress ring
+  is done.
 - Record what hasn't been checked on devices: the Map, the top bar buttons, the sidebar, and **Hide**
   on a phone and an iPad, and the rest of the ADR-007 table for
   [#6](https://github.com/bradreimer/fibotrail/issues/6),

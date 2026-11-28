@@ -50,7 +50,7 @@ public class GamesTests
 
         var games = await browser.GetJsonAsync($"/api/games?date={Today}");
 
-        Assert.Equal(["timeline", "slide", "pin", "fetch"], games.EnumerateArray().Select(game => game.GetProperty("id").GetString()));
+        Assert.Equal(["timeline", "slide", "pin", "fetch", "stamps"], games.EnumerateArray().Select(game => game.GetProperty("id").GetString()));
         var timeline = games[0];
         Assert.False(timeline.GetProperty("playedToday").GetBoolean());
         Assert.Equal(0, timeline.GetProperty("stats").GetProperty("played").GetInt32());

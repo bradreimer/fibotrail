@@ -13,6 +13,53 @@
   color: var(--fibo-ink-muted);
 }
 
+/*
+ * Today's progress ring. The fill is a circle's stroke, drawn as a dash as long as the share of
+ * games played. It fills from empty when the screen opens; with reduce motion, the duration token
+ * is 0, so it shows full at once. See docs/specs/daily-set.md#the-progress-ring.
+ */
+.daily-ring {
+  display: flex;
+  align-items: center;
+  gap: var(--fibo-space-4);
+}
+
+.daily-ring__ring {
+  flex: none;
+  inline-size: var(--fibo-tap);
+  block-size: var(--fibo-tap);
+  transform: rotate(-90deg);
+}
+
+.daily-ring__track,
+.daily-ring__fill {
+  fill: none;
+  stroke-width: 5;
+}
+
+.daily-ring__track {
+  stroke: var(--fibo-mist);
+}
+
+.daily-ring__fill {
+  stroke: var(--fibo-teal);
+  stroke-linecap: round;
+  stroke-dasharray: var(--daily-ring-circle);
+  stroke-dashoffset: var(--daily-ring-gap);
+  animation: daily-ring-fill var(--fibo-dur-signature) ease-out;
+}
+
+@keyframes daily-ring-fill {
+  from {
+    stroke-dashoffset: var(--daily-ring-circle);
+  }
+}
+
+.daily-ring__text {
+  margin: 0;
+  font-weight: 600;
+}
+
 .games-list {
   display: grid;
   gap: var(--fibo-space-3);
@@ -330,6 +377,28 @@
   font-family: var(--fibo-font-display);
   font-size: var(--fibo-text-h2);
   font-variant-numeric: tabular-nums;
+}
+
+.game-stats__times {
+  display: grid;
+  gap: var(--fibo-space-2);
+  margin: 0;
+}
+
+.game-stats__time {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--fibo-space-4);
+  font-variant-numeric: tabular-nums;
+}
+
+.game-stats__time dt {
+  font-weight: 600;
+}
+
+.game-stats__time dd {
+  margin: 0;
+  color: var(--fibo-ink-muted);
 }
 
 .game-stats__bars {

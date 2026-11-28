@@ -6,8 +6,9 @@ Tracking issue: [#166](https://github.com/bradreimer/fibotrail/issues/166).
 
 This spec defines the Games tab: a hub of small daily games made from your own trips, the games API
 that every game reads, and the stats that each game remembers. Each game has its own spec:
-[Timeline](timeline-game.md), [Slide](slide-game.md), [Pin](pin-game.md), and
-[Fetch](fetch-game.md).
+[Timeline](timeline-game.md), [Slide](slide-game.md), [Pin](pin-game.md),
+[Fetch](fetch-game.md), and [Stamps](stamps-game.md). How the games work together each day (the progress ring, Share today,
+and the shared end screen) is in [Daily set](daily-set.md).
 
 Think of the Games tab as a game shelf. The shelf (the hub), its labels (the registry), and the
 scorebook (game stats) stay put. A game is a box you put on the shelf or take off, without moving
@@ -99,6 +100,16 @@ with friends.
 - Removing a game leaves its rows in `game_result`. They're small and harmless, and come back if the
   game returns.
 
+### Timed games
+
+- A game that's played against a clock, such as [Stamps](stamps-game.md), stores the elapsed
+  seconds in a nullable `seconds` column of `game_result`. Other games leave it empty. The column is
+  added by a migration; existing rows keep an empty value.
+- The time is reported by the browser, because only the browser knows when the page was hidden. The
+  server accepts 1 to 86,400 seconds and can't check it further.
+- For a timed game, the stats add **Best time** and **Average time**, over solved days with a time,
+  rounded to whole seconds. A game may split them by a label, such as the board size.
+
 ### Sharing
 
 - A share text has the game name, the puzzle number, the tries, and one line of marks per try. It
@@ -106,6 +117,8 @@ with friends.
 - The puzzle number counts days from 2026-11-19, which is #1.
 - Share uses the system share sheet when the browser has one, and copies to the clipboard
   otherwise.
+- Each result also stores its share text, so the Games screen can share the whole day at once. See
+  [Daily set](daily-set.md#share-today).
 
 ### Screens
 

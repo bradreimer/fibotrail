@@ -564,6 +564,54 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/games/stamps/puzzle": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["GetStampsPuzzle"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/games/stamps/hint": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["PostStampsHint"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/games/stamps/results": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["PostStampsResult"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -747,6 +795,16 @@ export interface components {
             /** Format: int32 */
             bestStreak: number;
             tries: number[];
+            times?: null | components["schemas"]["GameTime"][];
+        };
+        GameTime: {
+            label: string;
+            /** Format: int32 */
+            days: number;
+            /** Format: int32 */
+            best: number;
+            /** Format: int32 */
+            average: number;
         };
         GeoPoint: {
             /** Format: double */
@@ -1055,6 +1113,71 @@ export interface components {
             moves: number;
             share: string;
             answer: components["schemas"]["SlideAnswerView"];
+            stats: components["schemas"]["GameStats"];
+        };
+        StampsHintRequest: {
+            /** Format: date */
+            date: string;
+            stamps: number[];
+            crosses: number[];
+        };
+        StampsHintView: {
+            /** Format: int32 */
+            cell: null | number;
+            stamp: boolean;
+            wrong: boolean;
+            reason: string;
+        };
+        StampsPassportView: {
+            /** Format: int32 */
+            cell: number;
+            region: string;
+            photoId: string;
+            /** Format: int32 */
+            tripId: number;
+            tripName: string;
+            /** Format: date */
+            startDate: string;
+            /** Format: date */
+            endDate: string;
+            immichUrl: null | string;
+        };
+        StampsPuzzleView: {
+            /** Format: int32 */
+            number: number;
+            /** Format: date */
+            date: string;
+            /** Format: int32 */
+            tripsNeeded: number;
+            /** Format: int32 */
+            size: number;
+            label: string;
+            weekday: string;
+            rule: string;
+            sizeNote: null | string;
+            regions: string[];
+            photos: string[];
+            result: null | components["schemas"]["StampsResultView"];
+        };
+        StampsResultRequest: {
+            /** Format: date */
+            date: string;
+            stamps: number[];
+            /** Format: int32 */
+            seconds: number;
+            /** Format: int32 */
+            hints: number;
+        };
+        StampsResultView: {
+            solved: boolean;
+            /** Format: int32 */
+            size: number;
+            /** Format: int32 */
+            seconds: number;
+            /** Format: int32 */
+            hints: number;
+            share: string;
+            passport: components["schemas"]["StampsPassportView"][];
             stats: components["schemas"]["GameStats"];
         };
         Suggestion: {
@@ -2368,6 +2491,103 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["FetchResultView"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+        };
+    };
+    GetStampsPuzzle: {
+        parameters: {
+            query: {
+                date: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StampsPuzzleView"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+        };
+    };
+    PostStampsHint: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StampsHintRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StampsHintView"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+        };
+    };
+    PostStampsResult: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StampsResultRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StampsResultView"];
                 };
             };
             /** @description Bad Request */

@@ -1321,6 +1321,127 @@
           }
         }
       }
+    },
+    "/api/games/stamps/puzzle": {
+      "get": {
+        "tags": [
+          "Fibotrail"
+        ],
+        "operationId": "GetStampsPuzzle",
+        "parameters": [
+          {
+            "name": "date",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StampsPuzzleView"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/games/stamps/hint": {
+      "post": {
+        "tags": [
+          "Fibotrail"
+        ],
+        "operationId": "PostStampsHint",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StampsHintRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StampsHintView"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/games/stamps/results": {
+      "post": {
+        "tags": [
+          "Fibotrail"
+        ],
+        "operationId": "PostStampsResult",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StampsResultRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StampsResultView"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1951,6 +2072,41 @@
               "type": "integer",
               "format": "int32"
             }
+          },
+          "times": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/GameTime"
+            }
+          }
+        }
+      },
+      "GameTime": {
+        "required": [
+          "label",
+          "days",
+          "best",
+          "average"
+        ],
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "days": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "best": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "average": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },
@@ -3051,6 +3207,249 @@
           },
           "answer": {
             "$ref": "#/components/schemas/SlideAnswerView"
+          },
+          "stats": {
+            "$ref": "#/components/schemas/GameStats"
+          }
+        }
+      },
+      "StampsHintRequest": {
+        "required": [
+          "date",
+          "stamps",
+          "crosses"
+        ],
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "stamps": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          "crosses": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        }
+      },
+      "StampsHintView": {
+        "required": [
+          "cell",
+          "stamp",
+          "wrong",
+          "reason"
+        ],
+        "type": "object",
+        "properties": {
+          "cell": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int32"
+          },
+          "stamp": {
+            "type": "boolean"
+          },
+          "wrong": {
+            "type": "boolean"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "StampsPassportView": {
+        "required": [
+          "cell",
+          "region",
+          "photoId",
+          "tripId",
+          "tripName",
+          "startDate",
+          "endDate",
+          "immichUrl"
+        ],
+        "type": "object",
+        "properties": {
+          "cell": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "region": {
+            "type": "string"
+          },
+          "photoId": {
+            "type": "string"
+          },
+          "tripId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "tripName": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "immichUrl": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "StampsPuzzleView": {
+        "required": [
+          "number",
+          "date",
+          "tripsNeeded",
+          "size",
+          "label",
+          "weekday",
+          "rule",
+          "sizeNote",
+          "regions",
+          "photos",
+          "result"
+        ],
+        "type": "object",
+        "properties": {
+          "number": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "tripsNeeded": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "label": {
+            "type": "string"
+          },
+          "weekday": {
+            "type": "string"
+          },
+          "rule": {
+            "type": "string"
+          },
+          "sizeNote": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "regions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "photos": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "result": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/StampsResultView"
+              }
+            ]
+          }
+        }
+      },
+      "StampsResultRequest": {
+        "required": [
+          "date",
+          "stamps",
+          "seconds",
+          "hints"
+        ],
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "stamps": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          "seconds": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "hints": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "StampsResultView": {
+        "required": [
+          "solved",
+          "size",
+          "seconds",
+          "hints",
+          "share",
+          "passport",
+          "stats"
+        ],
+        "type": "object",
+        "properties": {
+          "solved": {
+            "type": "boolean"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "seconds": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "hints": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "share": {
+            "type": "string"
+          },
+          "passport": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StampsPassportView"
+            }
           },
           "stats": {
             "$ref": "#/components/schemas/GameStats"

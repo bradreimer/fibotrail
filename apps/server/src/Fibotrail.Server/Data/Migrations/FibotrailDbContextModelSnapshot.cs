@@ -96,6 +96,9 @@ namespace Fibotrail.Server.Data.Migrations
                     b.Property<DateOnly>("PuzzleDate")
                         .HasColumnType("TEXT");
 
+                    b.Property<int?>("Seconds")
+                        .HasColumnType("INTEGER");
+
                     b.Property<bool>("Solved")
                         .HasColumnType("INTEGER");
 

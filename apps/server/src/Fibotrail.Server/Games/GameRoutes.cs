@@ -3,6 +3,7 @@ using Fibotrail.Server.Data;
 using Fibotrail.Server.Games.Fetch;
 using Fibotrail.Server.Games.Pin;
 using Fibotrail.Server.Games.Slide;
+using Fibotrail.Server.Games.Stamps;
 using Fibotrail.Server.Games.Timeline;
 using Fibotrail.Server.Immich;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -13,7 +14,8 @@ namespace Fibotrail.Server.Games;
 /// A game, as the hub knows it. <paramref name="MapRoutes"/> maps the game's own routes under
 /// <c>/api/games/{Id}/</c>.
 /// </summary>
-public sealed record GameDefinition(string Id, string Name, string Description, int MaxTries, Action<RouteGroupBuilder> MapRoutes);
+/// <param name="TimeLabel">For a timed game, reads the label its time stats are split by from a result's marks. Null for other games.</param>
+public sealed record GameDefinition(string Id, string Name, string Description, int MaxTries, Action<RouteGroupBuilder> MapRoutes, Func<string, string?>? TimeLabel = null);
 
 /// <summary>A card on the Games screen.</summary>
 /// <param name="SolvedToday">Null when today isn't played yet.</param>
@@ -31,6 +33,7 @@ public static class GameRegistry
         SlideRoutes.Definition,
         PinRoutes.Definition,
         FetchRoutes.Definition,
+        StampsRoutes.Definition,
     ];
 }
 
@@ -70,7 +73,7 @@ public static class GameRoutes
             foreach (var game in GameRegistry.Games)
             {
                 var today = await GameResultStore.FindAsync(db, game.Id, date, cancellationToken);
-                var stats = await GameResultStore.StatsAsync(db, game.Id, game.MaxTries, date, cancellationToken);
+                var stats = await GameResultStore.StatsAsync(db, game.Id, game.MaxTries, date, game.TimeLabel, cancellationToken);
                 entries.Add(new GameEntry(game.Id, game.Name, game.Description, today is not null, today?.Solved, stats));
             }
 
