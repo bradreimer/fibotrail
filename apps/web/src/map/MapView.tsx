@@ -19,7 +19,11 @@ import {
   REGION_VISITED_LAYER,
   ROUTE_SOURCE,
   TRAIL_LAYER,
+  TRAIL_PHOTO_LAYER,
+  TRAIL_PHOTO_SOURCE,
   TRAIL_SOURCE,
+  photoDotsGeoJson,
+  type PhotoDot,
   baseMapStyle,
   boundsOf,
   DETAIL_VISITED_LAYER,
@@ -59,6 +63,10 @@ export interface MapViewProps {
    * trail is never crossed. The view fits them with the markers and the route.
    */
   trails?: readonly (readonly Position[])[];
+  /** Photos placed on the trails by time. They're drawn as dots, not markers, because there can be hundreds. */
+  photoDots?: readonly PhotoDot[];
+  /** Called with a photo's ID when the person taps its dot. */
+  onPhotoDotSelect?: (id: string) => void;
   /** The keys of the countries to fill as visited: the ISO code, or the name when a country has none. */
   visited?: readonly string[];
   /** Called with the key of a visited country when the person taps it. */
@@ -138,6 +146,8 @@ export default function MapView({
   route = [],
   routes,
   trails,
+  photoDots,
+  onPhotoDotSelect,
   visited,
   onCountrySelect,
   detailCountries,
@@ -163,6 +173,7 @@ export default function MapView({
     onRegionSelect,
     onCitySelect,
     onMapTap,
+    onPhotoDotSelect,
   });
   const wantsRegions = detailCountries !== undefined;
   const wantsTaps = onMapTap !== undefined;
@@ -174,6 +185,7 @@ export default function MapView({
       onRegionSelect,
       onCitySelect,
       onMapTap,
+      onPhotoDotSelect,
     };
   });
 
@@ -229,6 +241,10 @@ export default function MapView({
         const key = event.features?.[0]?.properties?.key as string | undefined;
         if (key) handlers.current.onRegionSelect?.(key);
       });
+      created.on('click', TRAIL_PHOTO_LAYER, (event) => {
+        const id = event.features?.[0]?.properties?.id as string | undefined;
+        if (id) handlers.current.onPhotoDotSelect?.(id);
+      });
       for (const layer of [CITY_LAYER, PARK_LAYER]) {
         created.on('click', layer, (event) => {
           const key = event.features?.[0]?.properties?.key as string | undefined;
@@ -241,6 +257,7 @@ export default function MapView({
         REGION_VISITED_LAYER,
         CITY_LAYER,
         PARK_LAYER,
+        TRAIL_PHOTO_LAYER,
       ]) {
         created.on('mouseenter', layer, () => {
           created.getCanvas().style.cursor = 'pointer';
@@ -265,6 +282,13 @@ export default function MapView({
       created.setPaintProperty('route-outline', 'line-color', colors.routeOutline);
       created.setPaintProperty('route', 'line-color', colors.route);
       created.setPaintProperty(TRAIL_LAYER, 'line-color', colors.trail);
+      created.setPaintProperty(TRAIL_PHOTO_LAYER, 'circle-stroke-color', colors.photo);
+      created.setPaintProperty(TRAIL_PHOTO_LAYER, 'circle-color', [
+        'case',
+        ['get', 'estimated'],
+        colors.routeOutline,
+        colors.photo,
+      ]);
       created.setPaintProperty(CITY_LAYER, 'circle-color', colors.route);
       created.setPaintProperty(CITY_LAYER, 'circle-stroke-color', colors.routeOutline);
       created.setPaintProperty(PARK_LAYER, 'circle-color', colors.visited);
@@ -317,6 +341,18 @@ export default function MapView({
     if (current.isStyleLoaded()) apply();
     else current.once('load', apply);
   }, [cities]);
+
+  // Draw the photo dots. They don't move the view: they lie on the trails, which already do.
+  useEffect(() => {
+    const current = map.current;
+    if (!current) return;
+    const apply = () =>
+      (current.getSource(TRAIL_PHOTO_SOURCE) as GeoJSONSource | undefined)?.setData(
+        photoDotsGeoJson(photoDots ?? []),
+      );
+    if (current.isStyleLoaded()) apply();
+    else current.once('load', apply);
+  }, [photoDots]);
 
   // Draw the route and the markers, and move the view to hold them.
   useEffect(() => {

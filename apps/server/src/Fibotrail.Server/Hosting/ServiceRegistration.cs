@@ -79,6 +79,7 @@ public static class ServiceRegistration
         services.AddScoped<TripDecisions>();
         services.AddScoped<OnTheWayPhotos>();
         services.AddScoped<TrailStore>();
+        services.AddSingleton<TrailFileCache>();
 
         // The country outlines are read from an embedded resource the first time the map asks.
         services.AddSingleton(_ => CountryOutlines.Load());

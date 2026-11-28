@@ -17,6 +17,7 @@ const colors = {
   route: '#146560',
   routeOutline: '#f7f3ea',
   trail: '#0b3c49',
+  photo: '#e4684a',
   visited: '#7bae7f',
 };
 
@@ -51,6 +52,7 @@ describe('the base map style', () => {
       'trail',
       'route-outline',
       'route',
+      'trail-photos',
     ]);
     const route = style.layers.find((layer) => layer.id === 'route')!;
     expect(route.paint).toMatchObject({ 'line-color': '#146560', 'line-width': 4 });

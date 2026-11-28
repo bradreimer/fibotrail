@@ -1,7 +1,10 @@
 import { useState } from 'react';
 
 import { apiSend } from '../api/client';
+import type { components } from '../api/schema';
+import { countOf } from '../trips/dates';
 import { formatKm } from './format';
+import { formatOffset, OffsetSheet, offsetSourceLabel } from './OffsetSheet';
 import { trailDates, TrailSheet, type TrailInfo } from './TrailSheet';
 
 interface GpsTrailsProps {
@@ -13,8 +16,12 @@ interface GpsTrailsProps {
   /** Why the trails couldn't be read. */
   error: string | null;
   onRetry: () => void;
+  /** Where the trip's photos land on each trail, or null while it loads. */
+  alignment: components['schemas']['TripAlignment'] | null;
   /** Called after a trail is added or removed, so the page reads the trails again. */
   onChange: () => void;
+  /** Called after an offset is saved, so the page reads the alignment again. */
+  onAligned: () => void;
 }
 
 /** The GPS trails of a trip: a list with Remove, and Add GPS trail. See docs/specs/gps-trails.md. */
@@ -25,9 +32,16 @@ export function GpsTrails({
   trails,
   error,
   onRetry,
+  alignment,
   onChange,
+  onAligned,
 }: GpsTrailsProps) {
   const [adding, setAdding] = useState(false);
+  const [adjusting, setAdjusting] = useState<number | null>(null);
+  const alignmentOf = (trailId: number) =>
+    alignment?.trails.find((item) => item.trailId === trailId) ?? null;
+  const adjustingTrail = trails?.find((trail) => trail.id === adjusting) ?? null;
+  const adjustingAlignment = adjusting === null ? null : alignmentOf(adjusting);
   const [removing, setRemoving] = useState<number | null>(null);
   const [problem, setProblem] = useState<string | null>(null);
 
@@ -63,24 +77,48 @@ export function GpsTrails({
         </p>
       ) : (
         <ul className="trip-trails__list">
-          {(trails ?? []).map((trail) => (
-            <li key={trail.id}>
-              <span className="trip-trails__name">{trail.originalName}</span>
-              <span className="trip-trails__detail">
-                {trailDates(trail)} · {formatKm(trail.distanceKm)}
-              </span>
-              <button
-                type="button"
-                className="button button--secondary trip-trails__remove"
-                aria-label={`Remove ${trail.originalName}`}
-                disabled={removing === trail.id}
-                onClick={() => void remove(trail)}
-              >
-                Remove
-              </button>
-            </li>
-          ))}
+          {(trails ?? []).map((trail) => {
+            const aligned = alignmentOf(trail.id);
+            return (
+              <li key={trail.id}>
+                <span className="trip-trails__name">{trail.originalName}</span>
+                <span className="trip-trails__detail">
+                  {trailDates(trail)} · {formatKm(trail.distanceKm)}
+                </span>
+                {aligned && (
+                  <span className="trip-trails__detail">
+                    Camera time: {formatOffset(aligned.offsetMinutes)} (
+                    {offsetSourceLabel(aligned.source)}) ·{' '}
+                    <button
+                      type="button"
+                      className="button--link"
+                      aria-label={`Adjust time of ${trail.originalName}`}
+                      onClick={() => setAdjusting(trail.id)}
+                    >
+                      Adjust time
+                    </button>
+                  </span>
+                )}
+                <button
+                  type="button"
+                  className="button button--secondary trip-trails__remove"
+                  aria-label={`Remove ${trail.originalName}`}
+                  disabled={removing === trail.id}
+                  onClick={() => void remove(trail)}
+                >
+                  Remove
+                </button>
+              </li>
+            );
+          })}
         </ul>
+      )}
+      {alignment && alignment.trails.length > 0 && alignment.outside.length > 0 && (
+        <p className="trip-trails__empty">
+          {alignment.outside.length === 1
+            ? '1 photo is outside the trails’ times.'
+            : `${countOf(alignment.outside.length, 'photo')} are outside the trails’ times.`}
+        </p>
       )}
       {problem && <p role="alert">{problem}</p>}
       <button
@@ -91,6 +129,20 @@ export function GpsTrails({
       >
         Add GPS trail
       </button>
+      {adjustingTrail && adjustingAlignment && csrfToken && (
+        <OffsetSheet
+          tripId={tripId}
+          trailName={adjustingTrail.originalName}
+          alignment={adjustingAlignment}
+          photoCount={alignment?.photoCount ?? 0}
+          csrfToken={csrfToken}
+          onCancel={() => setAdjusting(null)}
+          onSaved={() => {
+            setAdjusting(null);
+            onAligned();
+          }}
+        />
+      )}
       {adding && csrfToken && (
         <TrailSheet
           tripId={tripId}

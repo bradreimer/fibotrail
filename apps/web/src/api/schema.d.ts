@@ -276,6 +276,38 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/trips/{id}/trails/alignment": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["GetTrailAlignment"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/trips/{id}/trails/{trailId}/offset": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["SetTrailOffset"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/trips/{id}/trails/{trailId}": {
         parameters: {
             query?: never;
@@ -616,6 +648,16 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        AlignedPhotoInfo: {
+            id: string;
+            /** Format: date-time */
+            localTime: string;
+            /** Format: double */
+            latitude: number;
+            /** Format: double */
+            longitude: number;
+            estimated: boolean;
+        };
         CollectionDetail: {
             summary: components["schemas"]["CollectionSummary"];
             resorts: components["schemas"]["ResortInfo"][];
@@ -938,6 +980,12 @@ export interface components {
             enabled: boolean;
             tools: string[];
         };
+        OffsetChange: {
+            /** Format: int32 */
+            minutes: null | number;
+        };
+        /** @enum {unknown} */
+        OffsetSource: "you" | "estimated" | "none" | "trial";
         OnTheWayChange: {
             onTheWay: boolean;
         };
@@ -1256,6 +1304,16 @@ export interface components {
             name: string;
             rule: string;
         };
+        TrailAlignment: {
+            /** Format: int32 */
+            trailId: number;
+            /** Format: int32 */
+            offsetMinutes: number;
+            source: components["schemas"]["OffsetSource"];
+            /** Format: int32 */
+            estimatedOffsetMinutes: null | number;
+            photos: components["schemas"]["AlignedPhotoInfo"][];
+        };
         TrailInfo: {
             /** Format: int32 */
             id: number;
@@ -1291,6 +1349,12 @@ export interface components {
             /** Format: int32 */
             pointCount: number;
             overlapsTrip: boolean;
+        };
+        TripAlignment: {
+            trails: components["schemas"]["TrailAlignment"][];
+            outside: string[];
+            /** Format: int32 */
+            photoCount: number;
         };
         TripChange: {
             name?: null | string;
@@ -1986,6 +2050,79 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ProblemDetail"];
                 };
+            };
+        };
+    };
+    GetTrailAlignment: {
+        parameters: {
+            query?: {
+                trailId?: number;
+                offsetMinutes?: number;
+            };
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TripAlignment"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    SetTrailOffset: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+                trailId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OffsetChange"];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

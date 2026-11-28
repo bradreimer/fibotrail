@@ -685,6 +685,112 @@
         }
       }
     },
+    "/api/trips/{id}/trails/alignment": {
+      "get": {
+        "tags": [
+          "Fibotrail"
+        ],
+        "operationId": "GetTrailAlignment",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "trailId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "offsetMinutes",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TripAlignment"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/api/trips/{id}/trails/{trailId}/offset": {
+      "put": {
+        "tags": [
+          "Fibotrail"
+        ],
+        "operationId": "SetTrailOffset",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "trailId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OffsetChange"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/trips/{id}/trails/{trailId}": {
       "delete": {
         "tags": [
@@ -1446,6 +1552,36 @@
   },
   "components": {
     "schemas": {
+      "AlignedPhotoInfo": {
+        "required": [
+          "id",
+          "localTime",
+          "latitude",
+          "longitude",
+          "estimated"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "localTime": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "latitude": {
+            "type": "number",
+            "format": "double"
+          },
+          "longitude": {
+            "type": "number",
+            "format": "double"
+          },
+          "estimated": {
+            "type": "boolean"
+          }
+        }
+      },
       "CollectionDetail": {
         "required": [
           "summary",
@@ -2592,6 +2728,29 @@
             }
           }
         }
+      },
+      "OffsetChange": {
+        "required": [
+          "minutes"
+        ],
+        "type": "object",
+        "properties": {
+          "minutes": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int32"
+          }
+        }
+      },
+      "OffsetSource": {
+        "enum": [
+          "you",
+          "estimated",
+          "none",
+          "trial"
+        ]
       },
       "OnTheWayChange": {
         "required": [
@@ -3760,6 +3919,42 @@
           }
         }
       },
+      "TrailAlignment": {
+        "required": [
+          "trailId",
+          "offsetMinutes",
+          "source",
+          "estimatedOffsetMinutes",
+          "photos"
+        ],
+        "type": "object",
+        "properties": {
+          "trailId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "offsetMinutes": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "source": {
+            "$ref": "#/components/schemas/OffsetSource"
+          },
+          "estimatedOffsetMinutes": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int32"
+          },
+          "photos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AlignedPhotoInfo"
+            }
+          }
+        }
+      },
       "TrailInfo": {
         "required": [
           "id",
@@ -3865,6 +4060,32 @@
           },
           "overlapsTrip": {
             "type": "boolean"
+          }
+        }
+      },
+      "TripAlignment": {
+        "required": [
+          "trails",
+          "outside",
+          "photoCount"
+        ],
+        "type": "object",
+        "properties": {
+          "trails": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TrailAlignment"
+            }
+          },
+          "outside": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "photoCount": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },

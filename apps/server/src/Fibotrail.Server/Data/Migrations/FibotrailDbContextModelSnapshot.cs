@@ -350,6 +350,9 @@ namespace Fibotrail.Server.Data.Migrations
                     b.Property<int>("MovingSeconds")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int?>("OffsetMinutes")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("OriginalName")
                         .IsRequired()
                         .HasColumnType("TEXT");
