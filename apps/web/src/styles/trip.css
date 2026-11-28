@@ -398,3 +398,85 @@
   font-size: var(--fibo-text-caption);
   color: var(--fibo-ink-muted);
 }
+
+/* The GPS trails of a trip, under the stat tiles. See docs/specs/gps-trails.md. */
+.trip-trails {
+  display: grid;
+  gap: var(--fibo-space-3);
+  justify-items: start;
+}
+
+.trip-trails__heading {
+  margin: 0;
+}
+
+.trip-trails__empty {
+  margin: 0;
+  color: var(--fibo-ink-muted);
+}
+
+.trip-trails__list {
+  display: grid;
+  gap: var(--fibo-space-3);
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.trip-trails__list li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: var(--fibo-space-3);
+}
+
+.trip-trails__name {
+  overflow-wrap: anywhere;
+}
+
+.trip-trails__detail {
+  grid-row: 2;
+  font-size: var(--fibo-text-caption);
+  color: var(--fibo-ink-muted);
+}
+
+.trip-trails__remove {
+  grid-row: 1 / span 2;
+  grid-column: 2;
+}
+
+.trail-sheet__file {
+  min-height: var(--fibo-tap);
+  font: inherit;
+}
+
+.trail-sheet__status {
+  margin: 0;
+  color: var(--fibo-ink-muted);
+}
+
+.trail-sheet__preview {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--fibo-space-3);
+  margin: 0;
+}
+
+.trail-sheet__preview dt {
+  font-size: var(--fibo-text-caption);
+  color: var(--fibo-ink-muted);
+}
+
+.trail-sheet__preview dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.trail-sheet__warning {
+  margin: 0;
+  padding: var(--fibo-space-3);
+  border-radius: var(--fibo-space-2);
+  background: color-mix(in srgb, var(--fibo-gold) 25%, var(--fibo-paper));
+  color: var(--fibo-ink);
+}

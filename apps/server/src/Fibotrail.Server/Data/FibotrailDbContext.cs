@@ -33,6 +33,8 @@ public sealed class FibotrailDbContext(DbContextOptions<FibotrailDbContext> opti
 
     public DbSet<GameResult> GameResults => Set<GameResult>();
 
+    public DbSet<Trail> Trails => Set<Trail>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Credential>(entity =>
@@ -109,6 +111,14 @@ public sealed class FibotrailDbContext(DbContextOptions<FibotrailDbContext> opti
         {
             entity.ToTable("game_result");
             entity.HasIndex(result => new { result.Game, result.PuzzleDate }).IsUnique();
+        });
+
+        // A trail belongs to a decision, which detection never deletes. See ADR-024.
+        modelBuilder.Entity<Trail>(entity =>
+        {
+            entity.ToTable("trail");
+            entity.HasIndex(trail => trail.DecisionId);
+            entity.HasOne<Decision>().WithMany().HasForeignKey(trail => trail.DecisionId).OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<ScanRun>(entity =>

@@ -32,7 +32,7 @@ public sealed class ServerSettings
         ImmichTimeout = TimeSpan.FromSeconds(immichTimeoutSeconds);
     }
 
-    /// <summary>The one writable folder. It holds the database and the cookie protection keys.</summary>
+    /// <summary>The one writable folder. It holds the database, the cookie protection keys, and the GPS trails.</summary>
     public string DataDirectory { get; }
 
     public Uri? ImmichUrl { get; }
@@ -57,6 +57,9 @@ public sealed class ServerSettings
 
     /// <summary>The cache of images fetched from Immich. It can be deleted at any time.</summary>
     public string ThumbnailDirectory => Path.Combine(DataDirectory, "thumbnails");
+
+    /// <summary>The GPX files you added to trips, kept byte for byte. See docs/specs/gps-trails.md.</summary>
+    public string TrailDirectory => Path.Combine(DataDirectory, "trails");
 
     public string DatabasePath => Path.Combine(DataDirectory, "fibotrail.db");
 

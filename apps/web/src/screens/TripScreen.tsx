@@ -12,6 +12,7 @@ import { BackLink } from '../shell/BackLink';
 import { EmptyState } from '../states/EmptyState';
 import { ErrorState } from '../states/ErrorState';
 import { dayHeading } from '../trip/format';
+import { GpsTrails } from '../trip/GpsTrails';
 import { PhotoTile, type TripPhoto } from '../trip/PhotoTile';
 import { PhotoViewer } from '../trip/PhotoViewer';
 import { StatTiles } from '../trip/StatTiles';
@@ -23,6 +24,8 @@ export function TripScreen() {
   const session = useSession();
   const [version, setVersion] = useState(0);
   const trip = useApi('/api/trips/{id}', `/api/trips/${id}`, version);
+  const [trailVersion, setTrailVersion] = useState(0);
+  const trails = useApi('/api/trips/{id}/trails', `/api/trips/${id}/trails`, trailVersion);
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [problem, setProblem] = useState<string | null>(null);
@@ -39,6 +42,11 @@ export function TripScreen() {
   const data = trip.data;
   const photos = useMemo<TripPhoto[]>(() => data?.days.flatMap((day) => day.photos) ?? [], [data]);
   const route = useMemo(() => data?.stops ?? [], [data]);
+  // Each segment of each trail is its own line, so the map never draws across a gap.
+  const trailLines = useMemo(
+    () => (trails.data ?? []).flatMap((trail) => trail.segments),
+    [trails.data],
+  );
   const markers = useMemo<MapMarker[]>(() => {
     if (!data || data.stops.length === 0) return [];
     const first = data.stops[0]!;
@@ -151,12 +159,13 @@ export function TripScreen() {
           <h3 className="visually-hidden" id="trip-route">
             Route
           </h3>
-          {route.length > 0 ? (
+          {route.length > 0 || trailLines.length > 0 ? (
             <div className={mapOpen ? 'trip-map trip-map--open' : 'trip-map'}>
               <LazyMap
                 label={`Map of the route of ${data.name}`}
                 markers={markers}
                 route={route}
+                trails={trailLines}
                 onSelect={(selected) => setStop(Number(selected))}
                 detail="fine"
               />
@@ -172,6 +181,9 @@ export function TripScreen() {
           <p className="map-caption">
             Photo route: lines connect the places where you took photos.
           </p>
+          {trailLines.length > 0 && (
+            <p className="map-caption">GPS trail: the path your logger recorded.</p>
+          )}
           <details className="trip-page__stops">
             <summary>Stops in order</summary>
             <ol>
@@ -189,6 +201,15 @@ export function TripScreen() {
             </ol>
           </details>
           <StatTiles stats={data.stats} />
+          <GpsTrails
+            tripId={data.id}
+            tripName={data.name}
+            csrfToken={session?.csrfToken ?? null}
+            trails={trails.data}
+            error={trails.error}
+            onRetry={trails.reload}
+            onChange={() => setTrailVersion((current) => current + 1)}
+          />
           <section className="trip-parks" aria-labelledby="trip-parks">
             <h3 className="trip-parks__heading" id="trip-parks">
               Parks

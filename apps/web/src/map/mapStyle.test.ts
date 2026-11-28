@@ -16,6 +16,7 @@ const colors = {
   border: '#c3cfcc',
   route: '#146560',
   routeOutline: '#f7f3ea',
+  trail: '#0b3c49',
   visited: '#7bae7f',
 };
 
@@ -47,11 +48,18 @@ describe('the base map style', () => {
       'region-borders',
       'city-pins',
       'park-pins',
+      'trail',
       'route-outline',
       'route',
     ]);
     const route = style.layers.find((layer) => layer.id === 'route')!;
     expect(route.paint).toMatchObject({ 'line-color': '#146560', 'line-width': 4 });
+  });
+
+  it('draws a GPS trail as a 3 px line in its own color, under the photo route', () => {
+    const trail = style.layers.find((layer) => layer.id === 'trail')!;
+    expect(trail.paint).toMatchObject({ 'line-color': '#0b3c49', 'line-width': 3 });
+    expect(trail.paint).not.toMatchObject({ 'line-color': colors.route });
   });
 });
 

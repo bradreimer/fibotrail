@@ -116,7 +116,7 @@ beforeEach(() => installMatchMedia(390));
 
 describe('the trip page', () => {
   it('shows the header, route map, stat tiles, and photo timeline, in that order', async () => {
-    fakeServer({ 'GET /api/trips/7': trip });
+    fakeServer({ 'GET /api/trips/7': trip, 'GET /api/trips/7/trails': [] });
     const { container } = renderTrip();
     const name = await screen.findByRole('heading', { name: 'Florida road trip' });
     const map = await screen.findByRole('application', {
@@ -140,7 +140,7 @@ describe('the trip page', () => {
   });
 
   it('has a back arrow to Trips at the top', async () => {
-    fakeServer({ 'GET /api/trips/7': trip });
+    fakeServer({ 'GET /api/trips/7': trip, 'GET /api/trips/7/trails': [] });
     const { container } = renderTrip();
     await screen.findByRole('heading', { name: 'Florida road trip' });
     const link = within(container.querySelector('.trip-page') as HTMLElement).getByRole('link', {
@@ -152,7 +152,7 @@ describe('the trip page', () => {
   });
 
   it('draws four pins and a gold start dot for four stops, with the route in order', async () => {
-    fakeServer({ 'GET /api/trips/7': trip });
+    fakeServer({ 'GET /api/trips/7': trip, 'GET /api/trips/7/trails': [] });
     renderTrip();
     const map = await screen.findByRole('application', { name: /Map of the route/ });
     // The trip page draws on the 1:10 million outline (ADR-020).
@@ -180,7 +180,7 @@ describe('the trip page', () => {
   });
 
   it('tapping a pin shows the photos of that stop', async () => {
-    fakeServer({ 'GET /api/trips/7': trip });
+    fakeServer({ 'GET /api/trips/7': trip, 'GET /api/trips/7/trails': [] });
     renderTrip();
     await userEvent.click(await screen.findByRole('button', { name: 'Stop 2: Sanford, 2 photos' }));
 
@@ -194,7 +194,7 @@ describe('the trip page', () => {
   });
 
   it('lists the stops in order as a text alternative to the map', async () => {
-    fakeServer({ 'GET /api/trips/7': trip });
+    fakeServer({ 'GET /api/trips/7': trip, 'GET /api/trips/7/trails': [] });
     renderTrip();
     const list = (await screen.findByText('Stops in order')).closest('details')!;
     expect(
@@ -205,7 +205,7 @@ describe('the trip page', () => {
   });
 
   it('shows the five stat tiles and how many photos have no location', async () => {
-    fakeServer({ 'GET /api/trips/7': trip });
+    fakeServer({ 'GET /api/trips/7': trip, 'GET /api/trips/7/trails': [] });
     renderTrip();
     const tiles = (await screen.findByRole('heading', { name: 'Trip numbers' })).closest(
       'section',
@@ -219,7 +219,7 @@ describe('the trip page', () => {
   });
 
   it('groups photos by local day, with a heading for each day', async () => {
-    fakeServer({ 'GET /api/trips/7': trip });
+    fakeServer({ 'GET /api/trips/7': trip, 'GET /api/trips/7/trails': [] });
     renderTrip();
     const headings = (await screen.findAllByRole('heading', { level: 4 })).map(
       (heading) => heading.textContent,
@@ -239,7 +239,7 @@ describe('the trip page', () => {
   });
 
   it('shows a video with a play mark and its length', async () => {
-    fakeServer({ 'GET /api/trips/7': trip });
+    fakeServer({ 'GET /api/trips/7': trip, 'GET /api/trips/7/trails': [] });
     renderTrip();
     const video = await screen.findByRole('button', {
       name: 'Video taken 2027-03-17 in Deltona, 0:09',
@@ -267,7 +267,7 @@ describe('the trip page', () => {
 
 describe('the photo viewer', () => {
   it('opens a photo full screen at the preview size, with its time, place, map, and Open in Immich', async () => {
-    fakeServer({ 'GET /api/trips/7': trip });
+    fakeServer({ 'GET /api/trips/7': trip, 'GET /api/trips/7/trails': [] });
     renderTrip();
     await userEvent.click(
       await screen.findByRole('button', { name: 'Photo taken 2027-03-16 in Sanford' }),
@@ -291,7 +291,7 @@ describe('the photo viewer', () => {
   });
 
   it('moves with the arrow keys and the buttons, and Escape returns to the page', async () => {
-    fakeServer({ 'GET /api/trips/7': trip });
+    fakeServer({ 'GET /api/trips/7': trip, 'GET /api/trips/7/trails': [] });
     renderTrip();
     const opened = await screen.findByRole('button', { name: 'Photo taken 2027-03-15 in Orlando' });
     await userEvent.click(opened);
@@ -309,7 +309,7 @@ describe('the photo viewer', () => {
   });
 
   it('a swipe left shows the next photo, and a swipe down closes the viewer', async () => {
-    fakeServer({ 'GET /api/trips/7': trip });
+    fakeServer({ 'GET /api/trips/7': trip, 'GET /api/trips/7/trails': [] });
     const { container } = renderTrip();
     await userEvent.click(
       await screen.findByRole('button', { name: 'Photo taken 2027-03-15 in Orlando' }),
@@ -330,7 +330,7 @@ describe('the photo viewer', () => {
   });
 
   it('shows no map for a photo with no location, and offers Play in Immich for a video', async () => {
-    fakeServer({ 'GET /api/trips/7': trip });
+    fakeServer({ 'GET /api/trips/7': trip, 'GET /api/trips/7/trails': [] });
     renderTrip();
     await userEvent.click(await screen.findByRole('button', { name: 'Photo taken 2027-03-15' }));
     expect(within(screen.getByRole('dialog')).queryByRole('application')).not.toBeInTheDocument();
@@ -363,6 +363,7 @@ describe('rename and change cover', () => {
   it('saves both as a decision and shows the new name', async () => {
     const server = fakeServer({
       'GET /api/trips/7': trip,
+      'GET /api/trips/7/trails': [],
       'GET /api/trips/7/photos': [
         { id: 'a1', alt: 'Photo taken Mar 15, 2027 in Orlando', isVideo: false },
         { id: 'd1', alt: 'Photo taken Mar 18, 2027 in DeLand', isVideo: false },
@@ -394,7 +395,7 @@ describe('rename and change cover', () => {
 
 describe('the parks of a trip', () => {
   it('says so when a trip has no park, and lists the parks it has with where each came from', async () => {
-    fakeServer({ 'GET /api/trips/7': trip });
+    fakeServer({ 'GET /api/trips/7': trip, 'GET /api/trips/7/trails': [] });
     const { unmount } = renderTrip();
     expect(
       await screen.findByText('No Disney or Universal parks on this trip yet.'),
@@ -422,7 +423,7 @@ describe('the parks of a trip', () => {
   });
 
   it('has no button to mark a park, because marking is a CLI task', async () => {
-    fakeServer({ 'GET /api/trips/7': trip });
+    fakeServer({ 'GET /api/trips/7': trip, 'GET /api/trips/7/trails': [] });
     renderTrip();
     await screen.findByRole('region', { name: 'Parks' });
     expect(screen.queryByRole('button', { name: /mark parks/i })).not.toBeInTheDocument();
@@ -461,7 +462,7 @@ describe('hiding a photo from the map', () => {
   }
 
   it('shows a Hide from map switch with its hint under the place, off for a photo that is on the map', async () => {
-    fakeServer({ 'GET /api/trips/7': trip });
+    fakeServer({ 'GET /api/trips/7': trip, 'GET /api/trips/7/trails': [] });
     const viewer = await openViewer();
 
     const box = within(viewer).getByRole('switch', { name: 'Hide from map' });
@@ -558,7 +559,11 @@ describe('hiding a photo from the map', () => {
   });
 
   it('puts the box back and says so when the save fails', async () => {
-    fakeServer({ 'GET /api/trips/7': trip, 'PUT /api/photos/b1/on-the-way': status(500) });
+    fakeServer({
+      'GET /api/trips/7': trip,
+      'GET /api/trips/7/trails': [],
+      'PUT /api/photos/b1/on-the-way': status(500),
+    });
     const viewer = await openViewer();
 
     await userEvent.click(within(viewer).getByRole('switch', { name: 'Hide from map' }));
