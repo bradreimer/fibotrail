@@ -279,6 +279,11 @@ describe('the Stamps game', () => {
 
     expect(await screen.findByText('Solved in 2:41 · no hints')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Trip 3' })).toBeInTheDocument();
+    // The games list isn't served here, so the link goes back to Games.
+    expect(await screen.findByRole('link', { name: 'Back to Games' })).toHaveAttribute(
+      'href',
+      '/games',
+    );
   });
 
   it('says how many trips are missing', async () => {

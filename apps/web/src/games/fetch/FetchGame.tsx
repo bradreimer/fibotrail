@@ -7,8 +7,7 @@ import { useSession } from '../../api/session';
 import { useApi } from '../../api/useApi';
 import { ErrorState } from '../../states/ErrorState';
 import { countOf, formatDateRange } from '../../trips/dates';
-import { GameStatsPanel } from '../GameStatsPanel';
-import { shareResult, type ShareOutcome } from '../share';
+import { GameEnd } from '../GameEnd';
 import { localDate } from '../today';
 import { drawFrame, type Scene } from './draw';
 import { Flight, type Course, type RunGrade } from './flight';
@@ -336,9 +335,6 @@ function RunList({ runs, treats }: { runs: readonly RunGrade[]; treats: number }
 
 /** The end of the day: the caught photos and the trip they come from. */
 function FetchResult({ heading, result }: { heading: ReactNode; result: Result }) {
-  const [shared, setShared] = useState<ShareOutcome | null>(null);
-  const label =
-    shared === 'copied' ? 'Copied' : shared === 'failed' ? "Couldn't share. Try again." : 'Share';
   const { trip } = result;
   const treats = TREATS;
 
@@ -373,15 +369,12 @@ function FetchResult({ heading, result }: { heading: ReactNode; result: Result }
           {trip.place && ` · ${trip.place}`}
         </span>
       </p>
-      <button
-        type="button"
-        className="button timeline__check"
-        onClick={() => void shareResult(result.share).then(setShared)}
-      >
-        {label}
-      </button>
-      <GameStatsPanel stats={result.stats} today={result.solved ? result.tries : undefined} />
-      <p className="games-page__lead">A new course comes tomorrow.</p>
+      <GameEnd
+        game="fetch"
+        share={result.share}
+        stats={result.stats}
+        today={result.solved ? result.tries : undefined}
+      />
     </section>
   );
 }

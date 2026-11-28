@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { expectNoAccessibilityProblems } from '../../accessibility/accessibility';
 import { App } from '../../App';
+import { gamesList } from '../../test/games';
 import { fakeServer, status } from '../../test/server';
 import { installMatchMedia } from '../../test/window';
 import { localDate } from '../today';
@@ -207,10 +208,17 @@ describe('the Timeline game', () => {
   });
 
   it('shows each trip with its date and a link at the end', async () => {
-    fakeServer({ 'GET /api/games/timeline/puzzle': puzzle(result) });
+    fakeServer({
+      'GET /api/games/timeline/puzzle': puzzle(result),
+      'GET /api/games': gamesList(['timeline']),
+    });
     const { container } = renderGame();
 
     expect(await screen.findByText('Solved in 2 tries.')).toBeInTheDocument();
+    expect(await screen.findByRole('link', { name: 'Next game: Slide →' })).toHaveAttribute(
+      'href',
+      '/games/slide',
+    );
     expect(screen.queryByRole('button', { name: 'Check' })).not.toBeInTheDocument();
     expect(screen.getByLabelText('Try 1: 3 right, 2 close, 0 wrong')).toBeInTheDocument();
     const orlando = screen.getByRole('link', { name: /^Orlando, March 2024/ });

@@ -55,6 +55,12 @@
   }
 }
 
+/* The link to the next game, at the end of every game. See docs/specs/daily-set.md. */
+.game-end__next {
+  justify-self: start;
+  text-decoration: none;
+}
+
 .share-today {
   justify-self: start;
 }

@@ -26,6 +26,11 @@ of the accessibility checklist are also still unrecorded.
 
 ## Completed
 
+- [#197](https://github.com/bradreimer/fibotrail/issues/197) A **shared end screen**
+  ([spec](specs/daily-set.md#the-shared-end-screen)): every game ends with Share, the stats, and
+  "Next game: Pin →", the first unplayed game in Games screen order, or "Back to Games". One shared
+  `GameEnd` component, so games still never import each other (ADR-022). This finishes the daily
+  set ([#194](https://github.com/bradreimer/fibotrail/issues/194)). Checked in tests only.
 - [#196](https://github.com/bradreimer/fibotrail/issues/196) **Share today** on the Games screen
   ([spec](specs/daily-set.md#share-today)): one message with a summary line, then each played
   game's share text in Games screen order. Each result now keeps the share text the game showed, in
@@ -484,10 +489,6 @@ Nothing is in progress.
 
 The plan is in [roadmap.md](roadmap.md). Specs are in [specs/](specs/README.md).
 
-- [#194](https://github.com/bradreimer/fibotrail/issues/194) The day's games as one set
-  ([spec](specs/daily-set.md)): a shared end screen with a next-game link
-  ([#197](https://github.com/bradreimer/fibotrail/issues/197)). The progress ring and Share today
-  are done.
 - Record what hasn't been checked on devices: the Map, the top bar buttons, the sidebar, and **Hide**
   on a phone and an iPad, and the rest of the ADR-007 table for
   [#6](https://github.com/bradreimer/fibotrail/issues/6),

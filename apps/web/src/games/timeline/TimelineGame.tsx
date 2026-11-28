@@ -7,8 +7,7 @@ import { useSession } from '../../api/session';
 import { useApi } from '../../api/useApi';
 import { ErrorState } from '../../states/ErrorState';
 import { countOf, formatDateRange } from '../../trips/dates';
-import { GameStatsPanel } from '../GameStatsPanel';
-import { shareResult, type ShareOutcome } from '../share';
+import { GameEnd } from '../GameEnd';
 import { localDate } from '../today';
 import { inPlace, summary } from './order';
 import { TimelineBoard } from './TimelineBoard';
@@ -212,9 +211,6 @@ function TimelineResult({
   result: Result;
   twist: Twist;
 }) {
-  const [shared, setShared] = useState<ShareOutcome | null>(null);
-  const label =
-    shared === 'copied' ? 'Copied' : shared === 'failed' ? "Couldn't share. Try again." : 'Share';
   return (
     <section className="timeline">
       {heading}
@@ -238,15 +234,12 @@ function TimelineResult({
           </li>
         ))}
       </ol>
-      <button
-        type="button"
-        className="button timeline__check"
-        onClick={() => void shareResult(result.share).then(setShared)}
-      >
-        {label}
-      </button>
-      <GameStatsPanel stats={result.stats} today={result.solved ? result.tries : undefined} />
-      <p className="games-page__lead">A new puzzle comes tomorrow.</p>
+      <GameEnd
+        game="timeline"
+        share={result.share}
+        stats={result.stats}
+        today={result.solved ? result.tries : undefined}
+      />
     </section>
   );
 }

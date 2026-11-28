@@ -10,8 +10,7 @@ import type { Position } from '../../map/mapStyle';
 import type { MapMarker } from '../../map/MapView';
 import { ErrorState } from '../../states/ErrorState';
 import { countOf, formatDateRange } from '../../trips/dates';
-import { GameStatsPanel } from '../GameStatsPanel';
-import { shareResult, type ShareOutcome } from '../share';
+import { GameEnd } from '../GameEnd';
 import { localDate } from '../today';
 import { ARROW, BAND_WORDS, describeMark, formatKm, SQUARE, type PinMark } from './marks';
 import { loadPlaces, type PickPlace } from './places';
@@ -281,9 +280,6 @@ function MarkList({ marks }: { marks: readonly PinMark[] }) {
 
 /** The end of the game: a line from your last pin to the answer, and the photo with its trip. */
 function PinResult({ heading, result }: { heading: ReactNode; result: Result }) {
-  const [shared, setShared] = useState<ShareOutcome | null>(null);
-  const label =
-    shared === 'copied' ? 'Copied' : shared === 'failed' ? "Couldn't share. Try again." : 'Share';
   const { answer, marks } = result;
   const last = marks[marks.length - 1];
   const markers = useMemo(
@@ -351,15 +347,12 @@ function PinResult({ heading, result }: { heading: ReactNode; result: Result }) 
         </figcaption>
       </figure>
       {answer.immichUrl && <p className="games-page__lead">Tap the photo to open it in Immich.</p>}
-      <button
-        type="button"
-        className="button timeline__check"
-        onClick={() => void shareResult(result.share).then(setShared)}
-      >
-        {label}
-      </button>
-      <GameStatsPanel stats={result.stats} today={result.solved ? result.tries : undefined} />
-      <p className="games-page__lead">A new puzzle comes tomorrow.</p>
+      <GameEnd
+        game="pin"
+        share={result.share}
+        stats={result.stats}
+        today={result.solved ? result.tries : undefined}
+      />
     </section>
   );
 }
