@@ -736,6 +736,7 @@ export interface components {
             playedToday: boolean;
             solvedToday: null | boolean;
             stats: components["schemas"]["GameStats"];
+            share: null | string;
         };
         GameStats: {
             /** Format: int32 */

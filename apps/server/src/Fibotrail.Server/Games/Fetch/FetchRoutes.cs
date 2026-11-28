@@ -118,7 +118,11 @@ public static class FetchRoutes
                 }, cancellationToken);
             }
 
-            return TypedResults.Ok(await ViewAsync(db, puzzle, stored, cancellationToken));
+            var view = await ViewAsync(db, puzzle, stored, cancellationToken);
+
+            // The share text is kept with the result, for Share today on the Games screen.
+            await GameResultStore.KeepShareAsync(db, stored, view.Share, cancellationToken);
+            return TypedResults.Ok(view);
         }).WithName("PostFetchResult");
     }
 

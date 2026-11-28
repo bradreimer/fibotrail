@@ -347,6 +347,12 @@ public sealed class GameResult
     /// </summary>
     public int? Seconds { get; set; }
 
+    /// <summary>
+    /// The share text the game showed for this result, for Share today on the Games screen. Null
+    /// for results stored before it was kept. See docs/specs/daily-set.md#share-today.
+    /// </summary>
+    public string? Share { get; set; }
+
     /// <summary>When the result was stored, in UTC.</summary>
     public DateTime PlayedAt { get; set; }
 }

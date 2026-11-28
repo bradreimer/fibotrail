@@ -2,15 +2,17 @@ import { useApi } from '../api/useApi';
 import { DailyRing } from '../games/DailyRing';
 import { GameCard } from '../games/GameCard';
 import { GAMES } from '../games/registry';
-import { localDate } from '../games/today';
+import { ShareToday } from '../games/ShareToday';
+import { localDate, puzzleNumber } from '../games/today';
 import { ErrorState } from '../states/ErrorState';
 
 /**
- * The Games screen: today's progress ring, then one card for each game that both the server and
- * the web registry list. See docs/specs/games.md and docs/specs/daily-set.md.
+ * The Games screen: today's progress ring and Share today, then one card for each game that both
+ * the server and the web registry list. See docs/specs/games.md and docs/specs/daily-set.md.
  */
 export function GamesScreen() {
-  const games = useApi('/api/games', `/api/games?date=${localDate()}`);
+  const date = localDate();
+  const games = useApi('/api/games', `/api/games?date=${date}`);
 
   if (games.loading) {
     return (
@@ -33,6 +35,7 @@ export function GamesScreen() {
         played={cards.filter(({ entry }) => entry.playedToday).length}
         total={cards.length}
       />
+      <ShareToday number={puzzleNumber(date)} shares={cards.map(({ entry }) => entry.share)} />
       <p className="games-page__lead">A new puzzle each day, made from your trips.</p>
       <ul className="games-list">
         {cards.map(({ game, entry }) => (

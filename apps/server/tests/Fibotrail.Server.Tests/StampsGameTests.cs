@@ -145,6 +145,7 @@ public class StampsGameTests
         var card = games.EnumerateArray().Single(game => game.GetProperty("id").GetString() == "stamps");
         Assert.True(card.GetProperty("solvedToday").GetBoolean());
         Assert.Equal(161, card.GetProperty("stats").GetProperty("times")[0].GetProperty("best").GetInt32());
+        Assert.Equal(result.GetProperty("share").GetString(), card.GetProperty("share").GetString());
         Assert.Equal(JsonValueKind.Null, games[0].GetProperty("stats").GetProperty("times").ValueKind);
     }
 
