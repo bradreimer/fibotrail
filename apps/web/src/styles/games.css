@@ -55,6 +55,10 @@
   }
 }
 
+.share-today {
+  justify-self: start;
+}
+
 .daily-ring__text {
   margin: 0;
   font-weight: 600;

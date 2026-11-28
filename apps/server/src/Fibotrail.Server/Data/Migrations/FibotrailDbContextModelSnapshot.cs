@@ -99,6 +99,9 @@ namespace Fibotrail.Server.Data.Migrations
                     b.Property<int?>("Seconds")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("Share")
+                        .HasColumnType("TEXT");
+
                     b.Property<bool>("Solved")
                         .HasColumnType("INTEGER");
 

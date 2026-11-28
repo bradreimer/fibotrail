@@ -180,6 +180,7 @@ public class GamesTests
         var games = await browser.GetJsonAsync($"/api/games?date={Today}");
         Assert.True(games[0].GetProperty("playedToday").GetBoolean());
         Assert.False(games[1].GetProperty("playedToday").GetBoolean());
+        Assert.Equal("Fibotrail Timeline #2 2/4\n🟨🟨🟩🟩🟩\n🟩🟩🟩🟩🟩", games[0].GetProperty("share").GetString());
     }
 
     [Fact]
@@ -301,6 +302,11 @@ public class GamesTests
         Assert.Equal(moves.Count, again.GetProperty("result").GetProperty("moves").GetInt32());
         var games = await browser.GetJsonAsync($"/api/games?date={Today}");
         Assert.True(games[1].GetProperty("solvedToday").GetBoolean());
+
+        // The share text is kept with the result, for Share today.
+        Assert.Equal($"Fibotrail Slide #2 {moves.Count} moves", stored.Share);
+        Assert.Equal($"Fibotrail Slide #2 {moves.Count} moves", games[1].GetProperty("share").GetString());
+        Assert.Equal(JsonValueKind.Null, games[0].GetProperty("share").ValueKind);
     }
 
     [Fact]

@@ -4,15 +4,16 @@ import path from 'node:path';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { expectNoAccessibilityProblems } from '../accessibility/accessibility';
 import { App } from '../App';
 import { fakeServer } from '../test/server';
 import { installMatchMedia } from '../test/window';
 import { dailyLine } from './DailyRing';
+import { shareTodayText } from './ShareToday';
 import { GAMES } from './registry';
-import { localDate } from './today';
+import { localDate, puzzleNumber } from './today';
 
 const stats = { played: 6, winPercent: 83, currentStreak: 3, bestStreak: 4, tries: [1, 2, 2, 0] };
 
@@ -110,6 +111,40 @@ describe('the Games screen', () => {
     expect(await screen.findByText('All done for today ✨')).toBeInTheDocument();
   });
 
+  it('shares every game played today in one message, in Games screen order', async () => {
+    const writeText = vi.fn(async () => {});
+    Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText } });
+    fakeServer({
+      'GET /api/games': [
+        { ...timeline, playedToday: true, solvedToday: true, share: 'Fibotrail Timeline #9 2/4' },
+        { ...timeline, id: 'slide', name: 'Slide', share: null },
+        {
+          ...timeline,
+          id: 'stamps',
+          name: 'Stamps',
+          playedToday: true,
+          share: 'Fibotrail Stamps #9',
+        },
+      ],
+    });
+    renderAt('/games');
+
+    await userEvent.click(await screen.findByRole('button', { name: 'Share today' }));
+
+    expect(writeText).toHaveBeenCalledWith(
+      `Fibotrail #${puzzleNumber(localDate())} · 2 of 3 games\n\nFibotrail Timeline #9 2/4\n\nFibotrail Stamps #9`,
+    );
+    expect(await screen.findByRole('button', { name: 'Copied' })).toBeInTheDocument();
+  });
+
+  it('has no Share today until a game is played', async () => {
+    fakeServer({ 'GET /api/games': [timeline] });
+    renderAt('/games');
+
+    await screen.findByText('0 of 1 done today');
+    expect(screen.queryByRole('button', { name: 'Share today' })).not.toBeInTheDocument();
+  });
+
   it('says when today is solved', async () => {
     fakeServer({ 'GET /api/games': [{ ...timeline, playedToday: true, solvedToday: true }] });
     renderAt('/games');
@@ -145,6 +180,20 @@ describe('the Games screen', () => {
     renderAt('/games/nothing-here');
 
     expect(await screen.findByRole('link', { name: /Timeline/ })).toBeInTheDocument();
+  });
+});
+
+describe('Share today', () => {
+  it('starts with a summary line and puts a blank line between games', () => {
+    expect(shareTodayText(10, ['A\n🟩', null, 'B'])).toBe(
+      'Fibotrail #10 · 2 of 3 games\n\nA\n🟩\n\nB',
+    );
+  });
+
+  it('numbers puzzles from 2026-11-19, as the server does', () => {
+    expect(puzzleNumber('2026-11-19')).toBe(1);
+    expect(puzzleNumber('2026-11-28')).toBe(10);
+    expect(puzzleNumber('2027-03-14')).toBe(116);
   });
 });
 
