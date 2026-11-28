@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { expectNoAccessibilityProblems } from '../../accessibility/accessibility';
 import { App } from '../../App';
+import { gamesList } from '../../test/games';
 import { fakeServer } from '../../test/server';
 import { installMatchMedia } from '../../test/window';
 import { localDate } from '../today';
@@ -121,10 +122,17 @@ describe('the Pin game', () => {
   });
 
   it('ends with the answer on the map, a line to it, and the trip', async () => {
-    fakeServer({ 'GET /api/games/pin/puzzle': puzzle(result()) });
+    fakeServer({
+      'GET /api/games/pin/puzzle': puzzle(result()),
+      'GET /api/games': gamesList(['timeline', 'slide', 'pin']),
+    });
     const { container } = renderGame();
 
     expect(await screen.findByText('Solved in 2 tries.')).toBeInTheDocument();
+    expect(await screen.findByRole('link', { name: 'Next game: Fetch →' })).toHaveAttribute(
+      'href',
+      '/games/fetch',
+    );
     const shown = await map();
     expect(within(shown).getByRole('button', { name: /^Where you took it/ })).toHaveAttribute(
       'data-position',

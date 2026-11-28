@@ -11,6 +11,7 @@ import { App } from '../App';
 import { fakeServer } from '../test/server';
 import { installMatchMedia } from '../test/window';
 import { dailyLine } from './DailyRing';
+import { nextGame } from './GameEnd';
 import { shareTodayText } from './ShareToday';
 import { GAMES } from './registry';
 import { localDate, puzzleNumber } from './today';
@@ -180,6 +181,29 @@ describe('the Games screen', () => {
     renderAt('/games/nothing-here');
 
     expect(await screen.findByRole('link', { name: /Timeline/ })).toBeInTheDocument();
+  });
+});
+
+describe('the next game', () => {
+  const entry = (id: string, playedToday: boolean) => ({
+    id,
+    name: id,
+    description: '',
+    playedToday,
+    solvedToday: null,
+    stats,
+    share: null,
+  });
+
+  it('is the first unplayed game in Games screen order, skipping the current one', () => {
+    const entries = [entry('stamps', false), entry('timeline', false), entry('slide', true)];
+    expect(nextGame('timeline', entries)?.id).toBe('stamps');
+    expect(nextGame('stamps', entries)?.id).toBe('timeline');
+  });
+
+  it('skips games the web registry doesn’t list, and is null when none is left', () => {
+    expect(nextGame('timeline', [entry('timeline', false), entry('ghost', false)])).toBeNull();
+    expect(nextGame('timeline', [entry('slide', true)])).toBeNull();
   });
 });
 
