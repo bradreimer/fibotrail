@@ -71,3 +71,4 @@ What becomes easier, what becomes harder, and what must stay true?
 | [ADR-022](ADR-022-games-are-plug-in-modules-behind-a-games-api.md) | Games are plug-in modules behind a games API | Accepted |
 | [ADR-023](ADR-023-the-mcp-server-may-return-a-trips-main-city.md) | The MCP server may return a trip's main city | Accepted |
 | [ADR-024](ADR-024-a-gps-trail-is-a-kept-file-that-belongs-to-a-trips-decision.md) | A GPS trail is a kept file that belongs to a trip's decision | Accepted |
+| [ADR-025](ADR-025-a-position-from-a-trail-is-shown-and-never-stored.md) | A position from a trail is shown, and never stored | Accepted |

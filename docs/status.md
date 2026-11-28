@@ -26,6 +26,17 @@ of the accessibility checklist are also still unrecorded.
 
 ## Completed
 
+- [#201](https://github.com/bradreimer/fibotrail/issues/201) **Photo alignment** on GPS trails
+  ([spec](specs/gps-trails.md#photo-alignment),
+  [ADR-025](adr/ADR-025-a-position-from-a-trail-is-shown-and-never-stored.md)). Each trip photo is
+  placed on a trail by its time, with one offset per trail for the time zone and the camera clock.
+  The offset is estimated from photos that have a position of their own: the most photos within
+  200 m, then the smallest median. **Adjust time** tries offsets live and saves yours, which an
+  estimate never replaces. Photos show as dots on the trail, hollow when the trail gives their
+  only position, and the viewer says "Estimated from the GPS trail". A trail position is never
+  stored and never changes stops, distance, or parks. Checked in tests only, not yet with real
+  logger files or on a phone.
+
 - [#193](https://github.com/bradreimer/fibotrail/issues/193) **GPS trails** on the trip page
   ([spec](specs/gps-trails.md), [ADR-024](adr/ADR-024-a-gps-trail-is-a-kept-file-that-belongs-to-a-trips-decision.md)),
   after 0.7.0. **Add GPS trail** takes a GPX file, shows its dates, distance, and point count, and
